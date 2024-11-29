@@ -1,0 +1,6 @@
+digraph {
+	rankdir=LR
+	1 [label=supercategory]
+	2 [label=k1]
+	1 -> 2
+}

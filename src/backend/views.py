@@ -1,0 +1,114 @@
+from flask import redirect, url_for, abort
+from flask_admin import AdminIndexView, expose
+from flask_admin.contrib.sqla import ModelView
+from wtforms_sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
+from flask_dance.contrib.github import github
+from .models import *
+
+
+class PolymorphicModelView(ModelView):
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.user_type = model.__mapper_args__['polymorphic_identity']
+        super().on_model_change(form, model, is_created)
+
+    form_excluded_columns = ['user_type']
+
+
+class QuestionVersionView(ModelView):
+    form_columns = ['title', 'author', 'questions']
+    column_list = ['title', 'author', 'questions', 'question_id']
+
+    form_extra_fields = {
+        'author': QuerySelectField(
+            'Author',
+            query_factory=lambda: User.query.filter_by(user_type='teacher'),
+            get_label='name',
+            allow_blank=True
+        ),
+        'questions': QuerySelectField(
+            'Question',
+            query_factory=lambda: Question.query.all(),
+            get_label='title',
+            allow_blank=True
+        )
+    }
+
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.type = model.__mapper_args__['polymorphic_identity']
+
+        if form.questions.data:
+            model.question_id = form.questions.data.id
+        super().on_model_change(form, model, is_created)
+
+    form_excluded_columns = ['type']
+
+
+class CategoryView(ModelView):
+    form_columns = ['title', 'supercategory_id']
+    column_list = ['id', 'title', 'supercategory_id']
+
+    form_extra_fields = {
+        'supercategory_id': QuerySelectField(
+            'Nadradená kategória',
+            query_factory=lambda: Category.query.all(),
+            get_label='title',
+            allow_blank=True
+        )
+    }
+
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.supercategory_id = form.supercategory_id.data.id
+
+        super().on_model_change(form, model, is_created)
+
+    def get_query(self):
+        return self.session.query(self.model).filter(self.model.title != "supercategory")
+
+
+class QuestionView(ModelView):
+    form_columns = ['title', 'category']
+    column_list = ['id', 'title', 'category']
+
+    form_extra_fields = {
+        'category': QuerySelectField(
+            'Kategoria',
+            query_factory=lambda: Category.query.all(),
+            get_label='title'
+        )
+    }
+
+    # form_extra_fields = {
+    #     'category': QuerySelectMultipleField(
+    #         'Kategórie',
+    #         query_factory=lambda: Category.query.all(),
+    #         get_label='title'
+    #     )
+    # }
+
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.categories = form.category.data
+
+        super().on_model_change(form, model, is_created)
+
+
+class MyAdminIndexView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        if not github.authorized:
+            return redirect(url_for('github.login'))
+
+        resp = github.get('/user')
+        if not resp.ok:
+            abort(403)
+
+        user_info = resp.json()
+        github_username = user_info.get('login')
+        teachers = Teacher.query.filter_by(github_name=github_username).all()
+        if len(teachers) == 0:
+            abort(403)
+
+        return super().index()
