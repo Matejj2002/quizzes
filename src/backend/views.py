@@ -1,6 +1,7 @@
 from flask import redirect, url_for, abort
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.form import Select2Widget
 from wtforms_sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from flask_dance.contrib.github import github
 from .models import *
@@ -69,29 +70,33 @@ class CategoryView(ModelView):
 
 
 class QuestionView(ModelView):
-    form_columns = ['title', 'category']
-    column_list = ['id', 'title', 'category']
+    form_columns = ['title', 'categories']
+    column_list = ['id', 'title', 'categories']
 
-    form_extra_fields = {
-        'category': QuerySelectField(
-            'Kategoria',
-            query_factory=lambda: Category.query.all(),
-            get_label='title'
-        )
+    column_formatters = {
+        'categories': lambda v, c, m, p: ', '.join([category.title for category in m.categories])
     }
 
     # form_extra_fields = {
-    #     'category': QuerySelectMultipleField(
-    #         'Kategórie',
+    #     'category': QuerySelectField(
+    #         'Kategoria',
     #         query_factory=lambda: Category.query.all(),
     #         get_label='title'
     #     )
     # }
 
-    def on_model_change(self, form, model, is_created):
-        if is_created:
-            model.categories = form.category.data
+    form_extra_fields = {
+        'category': QuerySelectMultipleField(
+            'Kategórie',
+            query_factory=lambda: Category.query.all(),
+            get_label='title',
+            widget=Select2Widget()
+        )
+    }
 
+    def on_model_change(self, form, model, is_created):
+        if 'categories' in form.data:
+            model.categories = form.categories.data
         super().on_model_change(form, model, is_created)
 
 

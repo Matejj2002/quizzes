@@ -2,6 +2,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+question_category = db.Table('question_category',
+    db.Column('question_id', db.Integer, db.ForeignKey('questions.id'), primary_key=True),
+    db.Column('category_id', db.Integer, db.ForeignKey('categories.id'), primary_key=True)
+)
 
 class Question(db.Model):
     __tablename__ = 'questions'
@@ -9,7 +13,9 @@ class Question(db.Model):
     title = db.Column(db.String)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
-    category = db.relationship("Category", backref='category')
+    #category = db.relationship("Category", backref='category')
+    categories = db.relationship('Category', secondary=question_category,
+                                 backref=db.backref('questions', lazy='dynamic'))
 
     question_version = db.relationship('QuestionVersion', back_populates='questions', cascade='all, delete-orphan')
 
@@ -31,7 +37,6 @@ class Category(db.Model):
         lazy="dynamic",
         cascade='all, delete-orphan',
     )
-
     # subcategories vztah, optional 0..1 - kompozicia OK
 
     def __str__(self):

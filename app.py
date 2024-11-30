@@ -87,7 +87,7 @@ def draw_category_graph(categories, graph=None, parent=None):
 
 if __name__ == '__main__':
     with app.app_context():
-        pass
+        print('AA')
         # db.drop_all()
         # db.create_all()
         # print('Database created and tables initialized!')
