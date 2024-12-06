@@ -32,3 +32,58 @@ body {
     flex-grow: 1;
     margin-left: 10px;
 }
+
+.container {
+  font-family: Arial, sans-serif;
+  /*background-color: #121212;*/
+  color: white;
+  padding: 20px;
+  max-width: 400px;
+  margin: auto;
+}
+
+.collapsible {
+  width: 100%;
+  color: white;
+  cursor: pointer;
+  padding: 10px 15px;
+  text-align: left;
+  font-size: 1.2rem;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  background-color: #1e1e1e;
+  transition: background-color 0.3s ease;
+}
+
+.collapsible.active {
+  background-color: #333333;
+}
+
+.content-menu {
+  padding: 0 15px;
+  background-color: #1e1e1e;
+  margin-top: 5px;
+  border-radius: 5px;
+}
+
+.task-list-menu {
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+    max-height: 200px;
+  overflow-y: auto;
+}
+
+.task-list-menu li {
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.task-list-menu li:hover {
+  background-color: #333333;
+  color: #ffffff;
+  border-radius: 5px;
+}

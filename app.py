@@ -85,15 +85,15 @@ def get_questions():
                     "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
                     "author_id": version.author_id,
                     'author_name': version.author.name,
-                    "text" : version.text,
-                    "type" : version.type
+                    "text": version.text,
+                    "type": version.type
                 }
                 all_versions.append(version_dict)
 
             if len(versions) > 0:
                 newest_version = max(
-                        all_versions,
-                        key=lambda x: datetime.datetime.strptime(x['dateCreated'], '%Y-%m-%d %H:%M:%S')
+                    all_versions,
+                    key=lambda x: datetime.datetime.strptime(x['dateCreated'], '%Y-%m-%d %H:%M:%S')
                 )
             else:
                 newest_version = None
@@ -111,8 +111,8 @@ def get_questions():
     except Exception as e:
         jsonify(' '), 404
 
-@app.route('/api/questions/<int:question_id>', methods=['GET'])
-def get_question(question_id):
+
+def fetch_question_data(question_id):
     question = Question.query.get_or_404(question_id)
 
     versions = question.question_version
@@ -143,7 +143,67 @@ def get_question(question_id):
         "versions": newest_version
     }
 
-    return jsonify(question_dict)
+    return question_dict
+
+@app.route('/api/questions/<int:question_id>', methods=['GET'])
+def get_question(question_id):
+    question_data = fetch_question_data(question_id)
+    return jsonify(question_data)
+
+
+@app.route('/api/categories_show/<int:category_id>')
+def categories_show(category_id):
+    category = Category.query.get_or_404(category_id)
+
+    visited = set()
+    visited.add(category)
+
+    visited_id = set()
+    visited_id.add(category.id)
+
+    category_set = set()
+    category_set.add(category)
+
+    while len(category_set) != 0:
+        category_set_pom = set()
+        for category in category_set:
+
+            for cat1 in category.subcategories.all():
+                if not cat1 in visited:
+                    category_set_pom.add(cat1)
+                    visited.add(cat1)
+                    visited_id.add(cat1.id)
+        category_set = category_set_pom
+
+    questions = Question.query.all()
+
+
+    result = []
+
+    for question in questions:
+        if question.category_id in visited_id:
+
+            result.append(
+                fetch_question_data(question.id)
+            )
+
+    return jsonify(result), 200
+
+
+@app.route('/api/categories', methods=['GET'])
+def get_categories():
+    categories = Category.query.all()
+
+    dict_categories = [
+        {
+            "id": category.id,
+            "title": category.title
+        }
+
+        for category in categories
+    ]
+
+    return jsonify(dict_categories), 200
 
 
 @app.route('/api/questions/<int:question_id>/versions', methods=['GET'])
@@ -168,6 +228,7 @@ def get_question_versions(question_id):
         "question_title": question.title,
         "versions": versions_list
     }), 200
+
 
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
 def add_question_version(id):
@@ -196,10 +257,10 @@ def add_question_version(id):
 
     question_version = QuestionVersion(question_id=id,
                                        title=data['title'],
-                                       text = data['text'],
-                                       dateCreated = datetime.datetime.now(),
-                                       author_id = newest_version['author_id'],
-                                       type = newest_version['type']
+                                       text=data['text'],
+                                       dateCreated=datetime.datetime.now(),
+                                       author_id=newest_version['author_id'],
+                                       type=newest_version['type']
                                        )
 
     db.session.add(question_version)
@@ -214,7 +275,7 @@ def add_question_version(id):
         "type": question_version.type
     }
 
-    return jsonify(question_version_dict),  200
+    return jsonify(question_version_dict), 200
 
 
 def draw_category_graph(categories, graph=None, parent=None):
