@@ -1,0 +1,34 @@
+body {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+}
+
+.scroll-box {
+    width: 50vw;
+    height: 30vh;
+    border: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+.question {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.index {
+    width: 40px;
+    text-align: center;
+}
+
+.content {
+    flex-grow: 1;
+    margin-left: 10px;
+}

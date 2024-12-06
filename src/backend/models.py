@@ -2,24 +2,16 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-question_category = db.Table('question_category',
-    db.Column('question_id', db.Integer, db.ForeignKey('questions.id'), primary_key=True),
-    db.Column('category_id', db.Integer, db.ForeignKey('categories.id'), primary_key=True)
-)
 
 class Question(db.Model):
     __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
+    title = db.Column(db.String)  # odstranit
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
-    #category = db.relationship("Category", backref='category')
-    categories = db.relationship('Category', secondary=question_category,
-                                 backref=db.backref('questions', lazy='dynamic'))
+    category = db.relationship("Category", backref='category')
 
     question_version = db.relationship('QuestionVersion', back_populates='questions', cascade='all, delete-orphan')
-
-    # vytvorit category_id - OK
 
     def __str__(self):
         return self.title
@@ -28,7 +20,6 @@ class Question(db.Model):
 class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
-    # zmenit na questions
     title = db.Column(db.String)
     supercategory_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
 
@@ -37,6 +28,7 @@ class Category(db.Model):
         lazy="dynamic",
         cascade='all, delete-orphan',
     )
+
     # subcategories vztah, optional 0..1 - kompozicia OK
 
     def __str__(self):
@@ -49,9 +41,9 @@ class QuestionVersion(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
     title = db.Column(db.String)
     dateCreated = db.Column(db.DateTime)
-    text = db.Column(db.Text)  # db.Text
+    text = db.Column(db.Text)
     type = db.Column(db.String)
-    author_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), default=1)  # author
+    author_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), default=1)
 
     author = db.relationship('Teacher', back_populates='question_version')
     questions = db.relationship('Question', back_populates='question_version')

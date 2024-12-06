@@ -1,19 +1,36 @@
+import datetime
+
 from flask import redirect, url_for, abort
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
-from flask_admin.form import Select2Widget
-from wtforms_sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
+from wtforms_sqlalchemy.fields import QuerySelectField
+from wtforms.fields import SelectField
 from flask_dance.contrib.github import github
 from .models import *
 
 
 class PolymorphicModelView(ModelView):
+    form_columns = ['name', 'github_name', 'user_type']
+    column_list = ['name', 'github_name', 'user_type']
+
+    form_extra_fields = {
+        'user_type': SelectField(
+            'User Type',
+            choices=[
+                ('teacher', 'Teacher'),
+                ('student', 'Student'),
+            ],
+            coerce=str
+        )
+    }
+
     def on_model_change(self, form, model, is_created):
         if is_created:
-            model.user_type = model.__mapper_args__['polymorphic_identity']
+            if model.user_type == 'teacher':
+                model.__class__ = Teacher
+            elif model.user_type == 'student':
+                model.__class__ = Student
         super().on_model_change(form, model, is_created)
-
-    form_excluded_columns = ['user_type']
 
 
 class QuestionVersionView(ModelView):
@@ -38,6 +55,7 @@ class QuestionVersionView(ModelView):
     def on_model_change(self, form, model, is_created):
         if is_created:
             model.type = model.__mapper_args__['polymorphic_identity']
+            model.dateCreated = datetime.datetime.now()
 
         if form.questions.data:
             model.question_id = form.questions.data.id
@@ -70,27 +88,15 @@ class CategoryView(ModelView):
 
 
 class QuestionView(ModelView):
-    form_columns = ['title', 'categories']
-    column_list = ['id', 'title', 'categories']
-
-    column_formatters = {
-        'categories': lambda v, c, m, p: ', '.join([category.title for category in m.categories])
-    }
-
-    # form_extra_fields = {
-    #     'category': QuerySelectField(
-    #         'Kategoria',
-    #         query_factory=lambda: Category.query.all(),
-    #         get_label='title'
-    #     )
-    # }
+    # nema title
+    form_columns = ['title', 'category']
+    column_list = ['id', 'title', 'category']
 
     form_extra_fields = {
-        'category': QuerySelectMultipleField(
-            'Kategórie',
+        'category': QuerySelectField(
+            'Kategoria',
             query_factory=lambda: Category.query.all(),
-            get_label='title',
-            widget=Select2Widget()
+            get_label='title'
         )
     }
 

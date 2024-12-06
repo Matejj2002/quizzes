@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
+import './Questions.css'
 
 const Questions = () => {
   const [questions, setQuestions] = useState([]);
@@ -8,45 +10,53 @@ const Questions = () => {
 
   useEffect(() => {
     axios
-      .get('http://127.0.0.1:5000/api/questions')
-      .then(response => {
-        setQuestions(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        setError('Error loading data');
-        setLoading(false);
-      });
+        .get('http://127.0.0.1:5000/api/questions')
+        .then(response => {
+          setQuestions(response.data);
+          setLoading(false);
+        })
+        .catch(error => {
+          setError('Error loading data');
+          setLoading(false);
+        });
   }, []);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
-      <h1>Questions</h1>
-      {questions.length > 0 ? (
-        questions.map((question) => (
-          <div key={question.id} style={{ border: '1px solid #ccc', margin: '10px', padding: '10px' }}>
-            <h2>Category: {question.category}</h2>
-
-            {question.versions ? (
-              <div>
-                <h3>Version: {question.versions.title}</h3>
-                <p><strong>Created on:</strong> {question.versions.dateCreated}</p>
-                <p><strong>Text:</strong> {question.versions.text ? question.versions.text : 'No text provided'}</p>
-                <p><strong>Author name:</strong> {question.versions.author_name}</p>
-              </div>
+      <div>
+        <div>
+          <h1>Questions</h1>
+        </div>
+          <div className="scroll-box">
+            {questions.length > 0 ? (
+                questions.map((question, index) => (
+                    <div key={question.id} className="question">
+                        {question.versions && (
+                            <div>
+                                <div className="index">
+                                <p>{index+1}</p>
+                                </div>
+                                <div className="content">
+                                    <Link to={`/question/${question.id}`}>
+                                <h2>{question.versions.title}</h2>
+                                    </Link>
+                                <p>Author: {question.versions.author_name}</p>
+                                <p>{question.versions.text}</p>
+                                </div>
+                            </div>
+                        )
+                        }
+                    </div>
+                ))
             ) : (
-              <p>No versions available for this question.</p>
+                <p>Načítavam otázky...</p>
             )}
+
           </div>
-        ))
-      ) : (
-        <div>No questions available</div>
-      )}
-    </div>
+      </div>
   );
-};
+}
 
 export default Questions;
