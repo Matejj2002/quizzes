@@ -9,7 +9,6 @@ const QuestionDetail = () => {
     const [question, setQuestion] = useState(null);
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
-    const [statusMessage, setStatusMessage] = useState('');
 
     useEffect(() => {
         axios.get(`http://127.0.0.1:5000/api/questions/${id}`)
@@ -33,11 +32,10 @@ const QuestionDetail = () => {
 
         axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
             .then(response => {
-                setStatusMessage('Zmeny boli úspešne uložené!');
+                window.location.href = '/questions';
             })
             .catch(error => {
                 console.error('Error saving changes:', error);
-                setStatusMessage('Chyba pri ukladaní zmien.');
             });
     };
 

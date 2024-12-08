@@ -230,6 +230,34 @@ def get_question_versions(question_id):
     }), 200
 
 
+@app.route('/api/questions/new-question', methods = ['PUT'])
+def add_new_question():
+    data = request.get_json()
+
+    category_id = data['category_id']
+    title = data['title']
+    text = data['text']
+
+    question = Question(title='', category_id = category_id)
+    db.session.add(question)
+    db.session.commit()
+
+    question_id = question.id
+
+    question_version = QuestionVersion(question_id=question_id,
+                                       title=title,
+                                       text=text,
+                                       dateCreated=datetime.datetime.now(),
+                                       author_id=1, #potom upravit
+                                       type='question_version' #potom upravit
+                                       )
+
+    db.session.add(question_version)
+    db.session.commit()
+
+
+    return jsonify({}), 200
+
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
 def add_question_version(id):
     data = request.get_json()

@@ -22,7 +22,7 @@ const Questions = () => {
         const categoriesResponse = await axios.get('http://127.0.0.1:5000/api/categories');
         setCategories(categoriesResponse.data);
 
-        setLoading(false); // Úspešne načítané
+        setLoading(false);
       } catch (error) {
         setError('Error loading data');
         setLoading(false);
@@ -47,7 +47,12 @@ const Questions = () => {
 
     const handleCategoryClick = async (categoryId, categoryTitle) => {
       fetchQuestionsByCategory(categoryId, categoryTitle);
+      setIsOpen(false);
     }
+
+    const openNewQuestionWindow = () => {
+        window.location.href = '/question/new-question';
+    };
 
 
   if (loading) return <div>Loading...</div>;
@@ -57,6 +62,7 @@ const Questions = () => {
       <div>
           <div>
               <h1>Questions</h1>
+              <button onClick={openNewQuestionWindow}>New Question</button>
               <div className="container">
               <button
                   onClick={toggleOpen}
