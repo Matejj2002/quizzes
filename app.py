@@ -32,7 +32,6 @@ admin.add_view(PolymorphicModelView(User, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(QuestionVersionView(QuestionVersion, db.session))
 admin.add_view(CategoryView(Category, db.session))
-
 @app.route('/')
 def index():
     if not github.authorized:
@@ -236,8 +235,7 @@ def add_new_question():
     category_id = data['category_id']
     title = data['title']
     text = data['text']
-
-    print(data['questionType'])
+    answers = data['answers']
 
     question = Question(category_id = category_id)
     db.session.add(question)
@@ -266,6 +264,17 @@ def add_new_question():
     db.session.add(question_version)
     db.session.commit()
 
+    question_version_id = question_version.id
+
+    for i in answers['MultipleChoiceQuestion']:
+        choice = Choice(choice_question_id = question_version_id,
+                        text = i,
+                        positive_feedback = '',
+                        negative_feedback = '',
+                        type = 'choice_answer')
+        db.session.add(choice)
+
+    db.session.commit()
 
     return jsonify({}), 200
 

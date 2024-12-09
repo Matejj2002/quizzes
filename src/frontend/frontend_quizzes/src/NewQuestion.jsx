@@ -54,6 +54,7 @@ const NewQuestion = () => {
             text: text,
             category_id: selectedCategory,
             questionType: selectedType,
+            answers: answers,
         };
 
         axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
@@ -82,6 +83,7 @@ const NewQuestion = () => {
     },
     [selectedType]
   );
+
 
     const questionsTypes = ['MatchingQuestion', 'ShortAnswerQuestion', 'MultipleChoiceQuestion'];
 

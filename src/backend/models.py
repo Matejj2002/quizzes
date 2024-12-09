@@ -54,7 +54,7 @@ class QuestionVersion(db.Model):
 
 class MatchingQuestion(QuestionVersion):
     __tablename__ = "matching_questions"
-    id = db.Column(db.Integer, db.ForeignKey('question_versions.id'), primary_key=True)
+    version_id = db.Column(db.Integer, db.ForeignKey('question_versions.id'), primary_key=True)
 
     matching_question = db.relationship('MatchingPair', backref='matching_question_pair', cascade='all, delete-orphan')
 
@@ -92,7 +92,7 @@ class MatchingPair(db.Model):
     rightSide = db.Column(db.Text)
     # leftSide, rightSide #db.Text
 
-    matching_question_id = db.Column(db.Integer, db.ForeignKey('matching_questions.id'))
+    matching_question_id = db.Column(db.Integer, db.ForeignKey('matching_questions.version_id'))
 
     __mapper_args__ = {
         'polymorphic_identity': 'matching_pair'
