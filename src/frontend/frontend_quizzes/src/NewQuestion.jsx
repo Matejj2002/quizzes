@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import SelectedTypeDisplay from "./SelectedTypeDisplay";
 import axios from 'axios';
 
 const NewQuestion = () => {
@@ -11,6 +12,7 @@ const NewQuestion = () => {
     const [selectedCategoryTitle, setSelectedCategoryTitle] = useState('supercategory');
     const [selectedType, setSelectedType] = useState('Type');
     const [loading, setLoading] = useState(true);
+    const [answers, setAnswers] = useState({});
 
      useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +44,7 @@ const NewQuestion = () => {
     const handleTypeClick = async (index, item) => {
         console.log(item);
         setSelectedType(item);
+        setAnswers({});
         setIsOpenQT(false);
     }
 
@@ -70,7 +73,17 @@ const NewQuestion = () => {
         setIsOpenQT(!isOpenQT);
     }
 
-    const questionsTypes = ['MatchingQuestion', 'ShortAnswerQuestion', 'MultipleChoiceQuestion']
+    const handleAnswersChange = useCallback(
+    (newAnswers) => {
+      setAnswers((prev) => ({
+        ...prev,
+        [selectedType]: newAnswers,
+      }));
+    },
+    [selectedType]
+  );
+
+    const questionsTypes = ['MatchingQuestion', 'ShortAnswerQuestion', 'MultipleChoiceQuestion'];
 
         return (
             <div>
@@ -140,6 +153,9 @@ const NewQuestion = () => {
                     )}
                 </div>
 
+                <div>
+                    <SelectedTypeDisplay selectedType={selectedType} onAnswersChange={handleAnswersChange} />
+                </div>
                 <button onClick={saveChanges}>Uloz zmeny</button>
             </div>
         );

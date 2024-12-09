@@ -12,9 +12,6 @@ class Question(db.Model):
 
     question_version = db.relationship('QuestionVersion', back_populates='questions', cascade='all, delete-orphan')
 
-    def __str__(self):
-        return self.title
-
 
 class Category(db.Model):
     __tablename__ = 'categories'

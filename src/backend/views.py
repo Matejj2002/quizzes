@@ -34,8 +34,8 @@ class PolymorphicModelView(ModelView):
 
 
 class QuestionVersionView(ModelView):
-    form_columns = ['title', 'author', 'questions']
-    column_list = ['title', 'author', 'questions', 'question_id']
+    form_columns = ['author', 'questions', 'type']
+    column_list = ['author', 'questions', 'question_id', 'type']
 
     form_extra_fields = {
         'author': QuerySelectField(
@@ -47,7 +47,6 @@ class QuestionVersionView(ModelView):
         'questions': QuerySelectField(
             'Question',
             query_factory=lambda: Question.query.all(),
-            get_label='title',
             allow_blank=True
         )
     }
