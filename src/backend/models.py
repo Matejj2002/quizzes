@@ -6,7 +6,6 @@ db = SQLAlchemy()
 class Question(db.Model):
     __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)  # odstranit
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
     category = db.relationship("Category", backref='category')

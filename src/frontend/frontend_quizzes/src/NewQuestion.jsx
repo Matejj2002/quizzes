@@ -1,5 +1,3 @@
-import { useParams } from 'react-router-dom';
-import {useNavigate} from 'react-router-dom'
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -7,9 +5,11 @@ const NewQuestion = () => {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isOpenQT, setIsOpenQT] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(1);
     const [categories, setCategories] = useState([]);
     const [selectedCategoryTitle, setSelectedCategoryTitle] = useState('supercategory');
+    const [selectedType, setSelectedType] = useState('Type');
     const [loading, setLoading] = useState(true);
 
      useEffect(() => {
@@ -39,11 +39,18 @@ const NewQuestion = () => {
       setIsOpen(false);
     }
 
+    const handleTypeClick = async (index, item) => {
+        console.log(item);
+        setSelectedType(item);
+        setIsOpenQT(false);
+    }
+
     const saveChanges = () => {
         const updatedData = {
             title: title,
             text: text,
-            category_id: selectedCategory
+            category_id: selectedCategory,
+            questionType: selectedType,
         };
 
         axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
@@ -57,7 +64,13 @@ const NewQuestion = () => {
 
     const toggleOpen = () => {
       setIsOpen(!isOpen);
-  }
+    }
+
+    const toggleOpenQuestionType = () => {
+        setIsOpenQT(!isOpenQT);
+    }
+
+    const questionsTypes = ['MatchingQuestion', 'ShortAnswerQuestion', 'MultipleChoiceQuestion']
 
         return (
             <div>
@@ -102,6 +115,27 @@ const NewQuestion = () => {
                                 )
                                 }
                             </ul>
+                        </div>
+                    )}
+                </div>
+
+                <div className="container">
+                    <button
+                        onClick={toggleOpenQuestionType}
+                        className={`collapsible ${isOpenQT ? "active" : ""}`}
+                    >
+                        {selectedType}
+                    </button>
+                    {isOpenQT && (
+                        <div className="content-menu">
+                            <ul className="task-list-menu">
+                                    {questionsTypes.map((item, index) => (
+                                    <li key={index}
+                                        onClick={() => handleTypeClick(index, item)}>
+                                        {item}
+                                    </li>
+                                  ))}
+                                </ul>
                         </div>
                     )}
                 </div>

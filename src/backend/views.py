@@ -89,8 +89,8 @@ class CategoryView(ModelView):
 
 class QuestionView(ModelView):
     # nema title
-    form_columns = ['title', 'category']
-    column_list = ['id', 'title', 'category']
+    form_columns = ['category']
+    column_list = ['id', 'category']
 
     form_extra_fields = {
         'category': QuerySelectField(

@@ -33,7 +33,6 @@ admin.add_view(QuestionView(Question, db.session))
 admin.add_view(QuestionVersionView(QuestionVersion, db.session))
 admin.add_view(CategoryView(Category, db.session))
 
-
 @app.route('/')
 def index():
     if not github.authorized:
@@ -238,18 +237,30 @@ def add_new_question():
     title = data['title']
     text = data['text']
 
-    question = Question(title='', category_id = category_id)
+    print(data['questionType'])
+
+    question = Question(category_id = category_id)
     db.session.add(question)
     db.session.commit()
 
     question_id = question.id
+    if data['questionType'] == 'MatchingQuestion':
+        question_type = MatchingQuestion
+        type_q = 'matching_answer_question'
+    elif data['questionType'] == 'ShortAnswerQuestion':
+        question_type = ShortAnswerQuestion
+        type_q = 'short_answer_question'
+    else:
+        question_type = MultipleChoiceQuestion
+        type_q = 'multiple_answer_question'
 
-    question_version = QuestionVersion(question_id=question_id,
+
+    question_version = question_type(question_id=question_id,
                                        title=title,
                                        text=text,
                                        dateCreated=datetime.datetime.now(),
                                        author_id=1, #potom upravit
-                                       type='question_version' #potom upravit
+                                       type= type_q
                                        )
 
     db.session.add(question_version)
@@ -282,8 +293,16 @@ def add_question_version(id):
         versions_list,
         key=lambda x: datetime.datetime.strptime(x['dateCreated'], '%Y-%m-%d %H:%M:%S')
     )
+    print(newest_version['type'])
+    if newest_version['type'] == 'multiple_answer_question':
+        question_type = MultipleChoiceQuestion
+    elif newest_version['type'] == 'matching_answer_question':
+        question_type = MatchingQuestion
+    else:
+        question_type = ShortAnswerQuestion
 
-    question_version = QuestionVersion(question_id=id,
+    print(question_type)
+    question_version = question_type(question_id=id,
                                        title=data['title'],
                                        text=data['text'],
                                        dateCreated=datetime.datetime.now(),
