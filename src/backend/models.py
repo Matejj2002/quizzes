@@ -120,6 +120,7 @@ class Choice(Answer):
     __tablename__ = "choices"
     id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
     text = db.Column(db.Text)
+    #is_single = db.Column(db.Boolean)
 
     choice_question_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.id'))
 

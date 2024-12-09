@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import './MultipleChoiceQuestion.css'
 
-const MultipleChoiceQuestion = ({onAnswersChange}) => {
+const MultipleChoiceQuestion = ({onAnswersChange, answersBe}) => {
     const [questions, setQuestions] = useState([""]);
     const [isChecked, setIsChecked] = useState(false);
 
+    useEffect(() => {
+        if (answersBe && answersBe.length > 0) {
+            setQuestions([...answersBe, ""]);
+        }
+    }, [answersBe]);
     const handleInputChange = (index, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index] = value;
@@ -25,7 +30,6 @@ const MultipleChoiceQuestion = ({onAnswersChange}) => {
         onAnswersChange(questions.filter((q) => q.trim() !== ""));
       }, [questions, onAnswersChange]);
 
-    console.log(questions);
     const renderContent = () => {
         if (isChecked){
             return <div>

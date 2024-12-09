@@ -32,6 +32,13 @@ admin.add_view(PolymorphicModelView(User, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(QuestionVersionView(QuestionVersion, db.session))
 admin.add_view(CategoryView(Category, db.session))
+class ChoiceView(ModelView):
+    column_list = ('id', 'text', 'choice_question_id')
+    form_columns = ('text', 'choice_question_id')
+    column_searchable_list = ['text']
+
+admin.add_view(ChoiceView(Choice, db.session))
+
 @app.route('/')
 def index():
     if not github.authorized:
@@ -121,6 +128,7 @@ def fetch_question_data(question_id):
             "title": version.title,
             "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
             "author_id": version.author_id,
+            "author_name": version.author.name,
             "text": version.text
         }
         for version in versions
@@ -138,10 +146,13 @@ def fetch_question_data(question_id):
         'id': question.id,
         "category_id": question.category_id,
         "category": question.category.title if question.category else None,
-        "versions": newest_version
+        "versions": newest_version,
+        "author_id": newest_version['author_id'],
+        "author_name": newest_version['author_name']
     }
 
     return question_dict
+
 
 @app.route('/api/questions/<int:question_id>', methods=['GET'])
 def get_question(question_id):
@@ -175,12 +186,10 @@ def categories_show(category_id):
 
     questions = Question.query.all()
 
-
     result = []
 
     for question in questions:
         if question.category_id in visited_id:
-
             result.append(
                 fetch_question_data(question.id)
             )
@@ -228,7 +237,7 @@ def get_question_versions(question_id):
     }), 200
 
 
-@app.route('/api/questions/new-question', methods = ['PUT'])
+@app.route('/api/questions/new-question', methods=['PUT'])
 def add_new_question():
     data = request.get_json()
 
@@ -237,7 +246,7 @@ def add_new_question():
     text = data['text']
     answers = data['answers']
 
-    question = Question(category_id = category_id)
+    question = Question(category_id=category_id)
     db.session.add(question)
     db.session.commit()
 
@@ -252,74 +261,117 @@ def add_new_question():
         question_type = MultipleChoiceQuestion
         type_q = 'multiple_answer_question'
 
-
     question_version = question_type(question_id=question_id,
-                                       title=title,
-                                       text=text,
-                                       dateCreated=datetime.datetime.now(),
-                                       author_id=1, #potom upravit
-                                       type= type_q
-                                       )
+                                     title=title,
+                                     text=text,
+                                     dateCreated=datetime.datetime.now(),
+                                     author_id=1,  # potom upravit
+                                     type=type_q
+                                     )
 
     db.session.add(question_version)
     db.session.commit()
 
     question_version_id = question_version.id
 
-    for i in answers['MultipleChoiceQuestion']:
-        choice = Choice(choice_question_id = question_version_id,
-                        text = i,
-                        positive_feedback = '',
-                        negative_feedback = '',
-                        type = 'choice_answer')
-        db.session.add(choice)
+    if type_q == 'multiple_answer_question':
+        if len(answers['MultipleChoiceQuestion']) == 1:
+            is_single = True
+        else:
+            is_single = False
+
+        for i in answers['MultipleChoiceQuestion']:
+            choice = Choice(choice_question_id=question_version_id,
+                            text=i,
+                            positive_feedback='',
+                            negative_feedback='',
+                            #is_single=is_single,
+                            type='choice_answer')
+            db.session.add(choice)
 
     db.session.commit()
 
     return jsonify({}), 200
 
+
+@app.route('/api/question-version-choice/<int:question_id>', methods = ['GET'])
+def get_question_version_choice(question_id):
+    question = Question.query.get_or_404(question_id)
+    print(question.id)
+    print(question.question_version)
+
+    newest_version = None
+    for i in question.question_version:
+        if newest_version is None:
+            newest_version = i
+        elif i.dateCreated > newest_version.dateCreated:
+            newest_version = i
+
+
+    #dorobit
+
+    texts = []
+    if newest_version.type == 'multiple_answer_question':
+        print(newest_version.multiple_answers)
+        for i in newest_version.multiple_answers:
+            texts.append(i.text)
+
+    ret_dict = {
+        "type": newest_version.type,
+        "texts": texts
+    }
+
+    #print(question_version.multiple_answers)
+
+    return jsonify(ret_dict), 200
+
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
 def add_question_version(id):
     data = request.get_json()
     print(f"Ukladám otázku s ID {id}, nový text: {data['text']}")
+    answers = data['answers']
 
     question = Question.query.get_or_404(id)
-    versions = question.question_version
 
-    versions_list = [
-        {
-            "id": version.id,
-            "title": version.title,
-            "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
-            "author_id": version.author_id,
-            "text": version.text,
-            "type": version.type
-        }
-        for version in versions
-    ]
-
-    newest_version = max(
-        versions_list,
-        key=lambda x: datetime.datetime.strptime(x['dateCreated'], '%Y-%m-%d %H:%M:%S')
-    )
-    print(newest_version['type'])
-    if newest_version['type'] == 'multiple_answer_question':
-        question_type = MultipleChoiceQuestion
-    elif newest_version['type'] == 'matching_answer_question':
+    if data['questionType'] == 'MatchingQuestion':
         question_type = MatchingQuestion
-    else:
+        type_q = 'matching_answer_question'
+    elif data['questionType'] == 'ShortAnswerQuestion':
         question_type = ShortAnswerQuestion
+        type_q = 'short_answer_question'
+    else:
+        question_type = MultipleChoiceQuestion
+        type_q = 'multiple_answer_question'
 
     print(question_type)
     question_version = question_type(question_id=id,
-                                       title=data['title'],
-                                       text=data['text'],
-                                       dateCreated=datetime.datetime.now(),
-                                       author_id=newest_version['author_id'],
-                                       type=newest_version['type']
-                                       )
+                                     title=data['title'],
+                                     text=data['text'],
+                                     dateCreated=datetime.datetime.now(),
+                                     author_id=1,
+                                     type=type_q
+                                     )
 
     db.session.add(question_version)
+    db.session.commit()
+
+    question_version_id = question_version.id
+
+    if type_q == 'multiple_answer_question':
+        if len(answers['MultipleChoiceQuestion']) == 1:
+            is_single = True
+        else:
+            is_single = False
+
+        for i in answers['MultipleChoiceQuestion']:
+            choice = Choice(choice_question_id=question_version_id,
+                            text=i,
+                            positive_feedback='',
+                            negative_feedback='',
+                            #is_single=is_single,
+                            type='choice_answer')
+            db.session.add(choice)
+
     db.session.commit()
 
     question_version_dict = {

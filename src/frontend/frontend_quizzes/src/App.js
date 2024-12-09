@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import './App.css';
+import './Styles/App.css';
 import Questions from './Questions';
 import QuestionDetail from './QuestionDetail'
 import NewQuestion from './NewQuestion'

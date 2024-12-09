@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import './Questions.css'
+import './Styles/Questions.css'
 
 const Questions = () => {
   const [questions, setQuestions] = useState([]);
@@ -35,7 +35,6 @@ const Questions = () => {
   const toggleOpen = () => {
       setIsOpen(!isOpen);
   }
-
     const fetchQuestionsByCategory = async (categoryId, categoryTitle) => {
       setLoading(true);
       const response = await axios.get(`http://127.0.0.1:5000/api/categories_show/${categoryId}`);
@@ -46,7 +45,7 @@ const Questions = () => {
     }
 
     const handleCategoryClick = async (categoryId, categoryTitle) => {
-      fetchQuestionsByCategory(categoryId, categoryTitle);
+      await fetchQuestionsByCategory(categoryId, categoryTitle);
       setIsOpen(false);
     }
 
@@ -55,7 +54,7 @@ const Questions = () => {
     };
 
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>AAALoading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
