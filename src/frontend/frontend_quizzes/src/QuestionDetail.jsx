@@ -17,7 +17,7 @@ const QuestionDetail = () => {
         axios.get(`http://127.0.0.1:5000/api/questions/${id}`)
             .then(response => {
                 setQuestion(response.data);
-                console.log(response.data);
+                //console.log(response.data);
                 setTitle(response.data.versions.title);
                 setText(response.data.versions.text || '');
             })
@@ -27,12 +27,21 @@ const QuestionDetail = () => {
 
         axios.get(`http://127.0.0.1:5000/api/question-version-choice/${id}`).then(response => {
             console.log(response.data);
-            if (response.data.type === 'multiple_answer_question'){
+            if (response.data.type === 'multiple_answer_question') {
                 //console.log("AAAAA");
                 setSelectedType("MultipleChoiceQuestion");
                 setAnswers(response.data.texts);
-
+            }
+            if (response.data.type === 'short_answer_question'){
+                setSelectedType("ShortAnswerQuestion");
+                setAnswers(response.data.texts);
                 //console.log("QuDetail Type: " + selectedType);
+            }
+
+            if (response.data.type === "matching_answer_question"){
+                setSelectedType("MatchingQuestion");
+                console.log(response.data);
+                setAnswers(response.data.texts);
             }
 
         })
@@ -62,7 +71,7 @@ const QuestionDetail = () => {
             answers: answers
         };
 
-        console.log(answers);
+        console.log(updatedData);
 
         axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
             .then(response => {
@@ -92,6 +101,7 @@ const QuestionDetail = () => {
     if (selectedType === 'Type') {
         return <div>Loading...</div>;
     }
+
 
     return (
     <div>

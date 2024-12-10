@@ -54,7 +54,7 @@ class QuestionVersion(db.Model):
 
 class MatchingQuestion(QuestionVersion):
     __tablename__ = "matching_questions"
-    version_id = db.Column(db.Integer, db.ForeignKey('question_versions.id'), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('question_versions.id'), primary_key=True)
 
     matching_question = db.relationship('MatchingPair', backref='matching_question_pair', cascade='all, delete-orphan')
 
@@ -85,20 +85,6 @@ class MultipleChoiceQuestion(QuestionVersion):
     }
 
 
-class MatchingPair(db.Model):
-    __tablename__ = "matching_pairs"
-    id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
-    leftSide = db.Column(db.Text)
-    rightSide = db.Column(db.Text)
-    # leftSide, rightSide #db.Text
-
-    matching_question_id = db.Column(db.Integer, db.ForeignKey('matching_questions.version_id'))
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'matching_pair'
-    }
-
-
 # Trieda answer, feedbacks db.Text
 # simpleanswer, matchingpair podtriedy
 
@@ -116,11 +102,25 @@ class Answer(db.Model):
     }
 
 
+class MatchingPair(Answer):
+    __tablename__ = "matching_pairs"
+    id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
+    leftSide = db.Column(db.Text)
+    rightSide = db.Column(db.Text)
+    # leftSide, rightSide #db.Text
+
+    matching_question_id = db.Column(db.Integer, db.ForeignKey('matching_questions.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'matching_pair'
+    }
+
+
 class Choice(Answer):
     __tablename__ = "choices"
     id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
     text = db.Column(db.Text)
-    #is_single = db.Column(db.Boolean)
+    # is_single = db.Column(db.Boolean)
 
     choice_question_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.id'))
 

@@ -54,7 +54,7 @@ const Questions = () => {
     };
 
 
-  if (loading) return <div>AAALoading...</div>;
+  if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (

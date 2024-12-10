@@ -32,12 +32,16 @@ admin.add_view(PolymorphicModelView(User, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(QuestionVersionView(QuestionVersion, db.session))
 admin.add_view(CategoryView(Category, db.session))
+
+
 class ChoiceView(ModelView):
     column_list = ('id', 'text', 'choice_question_id')
     form_columns = ('text', 'choice_question_id')
     column_searchable_list = ['text']
 
+
 admin.add_view(ChoiceView(Choice, db.session))
+
 
 @app.route('/')
 def index():
@@ -285,16 +289,42 @@ def add_new_question():
                             text=i,
                             positive_feedback='',
                             negative_feedback='',
-                            #is_single=is_single,
+                            # is_single=is_single,
                             type='choice_answer')
             db.session.add(choice)
+
+    if type_q == 'short_answer_question':
+        answer = answers['ShortAnswerQuestion']
+        short_answer = ShortAnswer(
+            short_answer_question_id=question_version_id,
+            text=answer['text'],
+            is_regex=answer['is_regex'],
+            is_correct=answer['is_correct'],
+            positive_feedback='',
+            negative_feedback='',
+            type='simple_answer'
+        )
+        db.session.add(short_answer)
+
+    if type_q == 'matching_answer_question':
+        for i in answers['MatchingQuestion']:
+            matching_pair = MatchingPair(
+                matching_question_id=question_version_id,
+                leftSide=i['left'],
+                rightSide=i['right'],
+                positive_feedback='',
+                negative_feedback='',
+                type='matching_pair'
+            )
+
+            db.session.add(matching_pair)
 
     db.session.commit()
 
     return jsonify({}), 200
 
 
-@app.route('/api/question-version-choice/<int:question_id>', methods = ['GET'])
+@app.route('/api/question-version-choice/<int:question_id>', methods=['GET'])
 def get_question_version_choice(question_id):
     question = Question.query.get_or_404(question_id)
     print(question.id)
@@ -307,8 +337,7 @@ def get_question_version_choice(question_id):
         elif i.dateCreated > newest_version.dateCreated:
             newest_version = i
 
-
-    #dorobit
+    # dorobit
 
     texts = []
     if newest_version.type == 'multiple_answer_question':
@@ -316,22 +345,27 @@ def get_question_version_choice(question_id):
         for i in newest_version.multiple_answers:
             texts.append(i.text)
 
+    if newest_version.type == 'short_answer_question':
+        for i in newest_version.short_answers:
+            texts.append([i.text, i.is_regex, i.is_correct])
+
+    if newest_version.type == 'matching_answer_question':
+        for i in newest_version.matching_question:
+            texts.append([i.leftSide, i.rightSide])
+
     ret_dict = {
         "type": newest_version.type,
         "texts": texts
     }
 
-    #print(question_version.multiple_answers)
-
     return jsonify(ret_dict), 200
+
 
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
 def add_question_version(id):
     data = request.get_json()
     print(f"Ukladám otázku s ID {id}, nový text: {data['text']}")
     answers = data['answers']
-
-    question = Question.query.get_or_404(id)
 
     if data['questionType'] == 'MatchingQuestion':
         question_type = MatchingQuestion
@@ -343,7 +377,6 @@ def add_question_version(id):
         question_type = MultipleChoiceQuestion
         type_q = 'multiple_answer_question'
 
-    print(question_type)
     question_version = question_type(question_id=id,
                                      title=data['title'],
                                      text=data['text'],
@@ -368,9 +401,35 @@ def add_question_version(id):
                             text=i,
                             positive_feedback='',
                             negative_feedback='',
-                            #is_single=is_single,
+                            # is_single=is_single,
                             type='choice_answer')
             db.session.add(choice)
+
+    if type_q == 'short_answer_question':
+        answer = answers['ShortAnswerQuestion']
+        short_answer = ShortAnswer(
+            short_answer_question_id=question_version_id,
+            text=answer['text'],
+            is_regex=answer['is_regex'],
+            is_correct=answer['is_correct'],
+            positive_feedback='',
+            negative_feedback='',
+            type='simple_answer'
+        )
+        db.session.add(short_answer)
+
+    if type_q == 'matching_answer_question':
+        for i in answers['MatchingQuestion']:
+            matching_pair = MatchingPair(
+                matching_question_id=question_version_id,
+                leftSide=i['left'],
+                rightSide=i['right'],
+                positive_feedback='',
+                negative_feedback='',
+                type='matching_pair'
+            )
+
+            db.session.add(matching_pair)
 
     db.session.commit()
 

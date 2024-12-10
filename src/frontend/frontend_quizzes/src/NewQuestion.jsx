@@ -57,14 +57,16 @@ const NewQuestion = () => {
             questionType: selectedType,
             answers: answers,
         };
-        console.log(updatedData);
-        axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
-            .then(response => {
-                window.location.href = '/questions';
-            })
-            .catch(error => {
-                console.error('Error saving changes:', error);
-            });
+        //console.log(updatedData);
+        if (selectedType !== 'Type') {
+            axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
+                .then(response => {
+                    window.location.href = '/questions';
+                })
+                .catch(error => {
+                    console.error('Error saving changes:', error);
+                });
+        }
     }
 
     const toggleOpen = () => {
@@ -80,6 +82,9 @@ const NewQuestion = () => {
     },
     [selectedType]
   );
+
+
+    console.log(answers);
 
         return (
             <div>
