@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import {useParams, useNavigate, useSearchParams, useLocation} from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navigation from "./Navigation";
+import NewCategory from "./NewCategory";
 
 const Questions2 = () => {
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+
   const { page } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -13,13 +17,13 @@ const Questions2 = () => {
   const [loading, setLoading] = useState(true);
   const [questions , setQuestions] = useState([]);
 
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState(searchParams.get("sort") || "");
 
   const limit = parseInt(searchParams.get("limit") || "10", 10);
   const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-  const [actualCategory, setActualCategory] = useState(1);
-  const [actualCategoryString, setActualCategoryString] = useState("supercategory");
+  const [actualCategory, setActualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
+  const [actualCategoryString, setActualCategoryString] = useState(searchParams.get("category")||"supercategory");
 
   const [categoryPath , setCategoryPath] = useState([]);
   const [lastCategory, setLastCategory] = useState("");
@@ -134,7 +138,7 @@ const Questions2 = () => {
                   </button>
 
                   <button type="button" className="btn btn-primary" onClick={(e) => {
-                      navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}`);
+                      navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}`);
                   }}>Add category</button>
               </div>
               <select className="form-select mb-3" size="3" aria-label="Size 3 select example">

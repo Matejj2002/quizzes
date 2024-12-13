@@ -3,11 +3,19 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useNavigate, useParams} from "react-router-dom";
 import { useLocation } from 'react-router-dom';
+
 const NewCategory = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const id = queryParams.get('id');
     const selectedCategory1 = queryParams.get('selected_category');
+
+    const page = queryParams.get("page");
+    const limit = queryParams.get("limit");
+    const offset = queryParams.get("offset");
+    const sort = queryParams.get("sort");
+    const categoryS = queryParams.get("selected_category");
+    const categorySId = queryParams.get("id");
 
     const navigate = useNavigate();
 
@@ -117,13 +125,23 @@ const NewCategory = () => {
                      aria-describedby="inputGroup-sizing-default" value={slug} onChange={handleSlugChange}/>
           </div>
 
-          <button type="button" className="btn btn-primary mb-3"
-                  onClick={() => {
-                      saveCategory();
-                  }
-                  }
-          >Submit
-          </button>
+          <div className='mb-3 d-flex justify-content-between '>
+              <button type="button" className="btn btn-primary mb-3"
+                      onClick={() => {
+                          saveCategory();
+                      }
+                      }
+              >Submit
+              </button>
+
+              <button type="button" className="btn btn-primary mb-3"
+                      onClick={() => {
+                           navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}`);
+                      }
+                      }
+              >Back
+              </button>
+          </div>
       </div>
   )
 }
