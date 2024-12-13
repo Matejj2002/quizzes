@@ -7,6 +7,7 @@ class Question(db.Model):
     __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    is_deleted = db.Column(db.Boolean, default=False)
     # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
     category = db.relationship("Category", backref='category')
 
@@ -17,6 +18,7 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
+    stug = db.Column(db.String, default='')
     supercategory_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
 
     subcategories = db.relationship(

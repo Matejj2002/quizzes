@@ -1,4 +1,5 @@
 from flask import Flask, session, jsonify, request
+from flask_migrate import Migrate
 from flask_admin import Admin
 from flask_dance.contrib.github import make_github_blueprint
 from flask_cors import CORS
@@ -10,6 +11,7 @@ import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
+migrate = Migrate(app, db)
 CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
@@ -78,47 +80,68 @@ def logout():
     return redirect("https://github.com/logout?return_to=" + url_for('index', _external=True))
 
 
-@app.route('/api/questions', methods=['GET'])
+@app.route('/api/questions/', methods=['GET'])
 def get_questions():
+    limit = request.args.get('limit', default=10, type=int)
+    offset = request.args.get('offset', default=10, type=int)
+    sort = request.args.get('sort', default="", type=str)
+    act_cat = request.args.get('actualCategory', default=1, type=int)
+
     try:
-        questions = Question.query.all()
-        all_questions = []
-        ind = 0
+        questions = category_show_helper(act_cat)
+        all_questions = [{"number_of_questions": len(questions)}]
+        questions_write = []
+
         for question in questions:
-            versions = question.question_version
-            all_versions = []
-            for version in versions:
-                version_dict = {
-                    "id": version.id,
-                    "title": version.title,
-                    "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
-                    "author_id": version.author_id,
-                    'author_name': version.author.name,
-                    "text": version.text,
-                    "type": version.type
+            if not question['is_deleted']:
+                if question['versions']['text'] is not None:
+                    if len(question['versions']['text']) > 15:
+                        question['versions']['text'] = question['versions']['text'][:15] + '...'
+                else:
+                    question['versions']['text'] = ""
+                versions = question['versions']
+                question_dict = {
+                    'id': question['id'],
+                    "category_id": question['category_id'],
+                    "category": question['category'],
+                    "versions": versions
                 }
-                all_versions.append(version_dict)
 
-            if len(versions) > 0:
-                newest_version = max(
-                    all_versions,
-                    key=lambda x: datetime.datetime.strptime(x['dateCreated'], '%Y-%m-%d %H:%M:%S')
-                )
-            else:
-                newest_version = None
+                questions_write.append(question_dict)
 
-            question_dict = {
-                'id': question.id,
-                "category_id": question.category_id,
-                "category": question.category.title if question.category else None,
-                "versions": newest_version
-            }
+        if sort == 'date-desc':
+            questions_write = sorted(
+                questions_write,
+                key=lambda q: datetime.datetime.strptime(q['versions']['dateCreated'], '%Y-%m-%d %H:%M:%S'),
 
-            all_questions.append(question_dict)
+            )
+            questions_write = questions_write[::-1]
 
+        if sort == 'date-asc':
+            questions_write = sorted(
+                questions_write,
+                key=lambda q: datetime.datetime.strptime(q['versions']['dateCreated'], '%Y-%m-%d %H:%M:%S'),
+            )
+
+        if sort == 'alphabetic':
+            questions_write = sorted(
+                questions_write,
+                key=lambda q: q['versions']['title'].lower(),
+            )
+
+        if sort == 'alphabetic-rev':
+            questions_write = sorted(
+                questions_write,
+                key=lambda q: q['versions']['title'].lower(),
+                reverse=True
+            )
+
+        questions_write = questions_write[offset:offset + limit]
+        all_questions.append(questions_write)
         return jsonify(all_questions), 200
+
     except Exception as e:
-        jsonify(' '), 404
+        return jsonify({}), 404
 
 
 def fetch_question_data(question_id):
@@ -133,7 +156,8 @@ def fetch_question_data(question_id):
             "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
             "author_id": version.author_id,
             "author_name": version.author.name,
-            "text": version.text
+            "text": version.text,
+            "type": version.type
         }
         for version in versions
     ]
@@ -149,16 +173,18 @@ def fetch_question_data(question_id):
     question_dict = {
         'id': question.id,
         "category_id": question.category_id,
+        "is_deleted": question.is_deleted,
         "category": question.category.title if question.category else None,
         "versions": newest_version,
         "author_id": newest_version['author_id'],
-        "author_name": newest_version['author_name']
+        "author_name": newest_version['author_name'],
+        "type": newest_version['type'],
     }
 
     return question_dict
 
 
-@app.route('/api/questions/<int:question_id>', methods=['GET'])
+@app.route('/api/questions-update/<int:question_id>', methods=['GET'])
 def get_question(question_id):
     question_data = fetch_question_data(question_id)
     return jsonify(question_data)
@@ -166,6 +192,12 @@ def get_question(question_id):
 
 @app.route('/api/categories_show/<int:category_id>')
 def categories_show(category_id):
+    result = category_show_helper(category_id)
+
+    return jsonify(result), 200
+
+
+def category_show_helper(category_id):
     category = Category.query.get_or_404(category_id)
 
     visited = set()
@@ -198,7 +230,23 @@ def categories_show(category_id):
                 fetch_question_data(question.id)
             )
 
-    return jsonify(result), 200
+    return result
+
+
+@app.route('/api/categories/new-category', methods=["PUT"])
+def new_category():
+    data = request.get_json()
+
+    new_categor = Category(
+        supercategory_id=data['supercategory'],
+        title=data['title'],
+        stug = data['slug']
+    )
+
+    db.session.add(new_categor)
+    db.session.commit()
+
+    return jsonify({}), 200
 
 
 @app.route('/api/categories', methods=['GET'])
@@ -327,8 +375,6 @@ def add_new_question():
 @app.route('/api/question-version-choice/<int:question_id>', methods=['GET'])
 def get_question_version_choice(question_id):
     question = Question.query.get_or_404(question_id)
-    print(question.id)
-    print(question.question_version)
 
     newest_version = None
     for i in question.question_version:
@@ -359,6 +405,19 @@ def get_question_version_choice(question_id):
     }
 
     return jsonify(ret_dict), 200
+
+
+@app.route('/api/questions/categories/get-path-to-supercategory/<int:index>', methods=['GET'])
+def get_path_to_supercategory(index):
+    category = Category.query.get_or_404(index)
+
+    super_cat = Category.query.get(category.supercategory_id)
+    path = [[category.title, category.id]]
+    while super_cat is not None:
+        path.append([super_cat.title, super_cat.id])
+        super_cat = Category.query.get(super_cat.supercategory_id)
+
+    return jsonify(path), 200
 
 
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
@@ -462,6 +521,10 @@ def draw_category_graph(categories, graph=None, parent=None):
 
 if __name__ == '__main__':
     with app.app_context():
+        import sys
+
+        # sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.venv/Lib//site-packages'))
+
         # print('AA')
         # db.drop_all()
         # db.create_all()

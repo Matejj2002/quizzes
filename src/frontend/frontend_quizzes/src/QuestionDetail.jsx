@@ -14,7 +14,7 @@ const QuestionDetail = () => {
     const [selectedType, setSelectedType] = useState('Type');
 
     useEffect(() => {
-        axios.get(`http://127.0.0.1:5000/api/questions/${id}`)
+        axios.get(`http://127.0.0.1:5000/api/questions-update/${id}`)
             .then(response => {
                 setQuestion(response.data);
                 //console.log(response.data);
