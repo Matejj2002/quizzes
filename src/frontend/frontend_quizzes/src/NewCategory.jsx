@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 
 const NewCategory = () => {
@@ -16,6 +16,8 @@ const NewCategory = () => {
     const sort = queryParams.get("sort");
     const categoryS = queryParams.get("selected_category");
     const categorySId = queryParams.get("id");
+    const filters = queryParams.get("filter-type");
+    const authorFilter = queryParams.get("author-filter")
 
     const navigate = useNavigate();
 
@@ -136,7 +138,7 @@ const NewCategory = () => {
 
               <button type="button" className="btn btn-primary mb-3"
                       onClick={() => {
-                           navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}`);
+                           navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}`);
                       }
                       }
               >Back

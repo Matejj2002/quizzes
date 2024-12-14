@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
-const Navigation = ({page, limit, offset, actualCategory, setSort}) =>{
+const Navigation = ({page, limit, offset, actualCategory, filterType, setSort}) =>{
     const navigate = useNavigate();
 
     return (
@@ -47,7 +46,7 @@ const Navigation = ({page, limit, offset, actualCategory, setSort}) =>{
                                         onClick={(e) => {
                                                 e.preventDefault();
                                                 setSort("date-asc");
-                                                 navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=date-asc`);
+                                                 navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=date-asc&filter-type=${filterType}`);
                                                 }
                                              }
                                     >Date Ascending</a></li>
@@ -55,7 +54,7 @@ const Navigation = ({page, limit, offset, actualCategory, setSort}) =>{
                                     onClick={(e) => {
                                     e.preventDefault();
                                     setSort("date-desc")
-                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=date-desc`);
+                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=date-desc&filter-type=${filterType}`);
                                     }
                                  }
 
@@ -65,7 +64,7 @@ const Navigation = ({page, limit, offset, actualCategory, setSort}) =>{
                                     onClick={(e) => {
                                         e.preventDefault();
                                     setSort("alphabetic");
-                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=alphabetic`);
+                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=alphabetic&filter-type=${filterType}`);
                                     }
                                  }
                                     >Alphabetic</a></li>
@@ -73,7 +72,7 @@ const Navigation = ({page, limit, offset, actualCategory, setSort}) =>{
                                     onClick={(e) => {
                                         e.preventDefault();
                                         setSort("alphabetic-rev");
-                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=alphabetic-rev`);
+                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategory}&sort=alphabetic-rev&filter-type=${filterType}`);
                                     }
                                  }
                                     >Alphabetic reverse</a></li>
