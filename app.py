@@ -86,17 +86,36 @@ def get_questions():
     offset = request.args.get('offset', default=10, type=int)
     sort = request.args.get('sort', default="", type=str)
     act_cat = request.args.get('actualCategory', default=1, type=int)
+    filters = request.args.get("filterType", default="", type=str)
+    author_filter = request.args.get("authorFilterDec", default="", type=str)
 
+    if filters == "Matching Question":
+        filters = "matching_answer_question"
+
+    if filters == "Short Question":
+        filters = "short_answer_question"
+
+    if filters == "Multiple Choice Question":
+
+        filters = "multiple_answer_question"
+    if filters == ['']:
+        change_fil = True
+    else:
+        change_fil = False
     try:
         questions = category_show_helper(act_cat)
-        all_questions = [{"number_of_questions": len(questions)}]
+        all_questions = [{"number_of_questions": len(questions)}, {'filters': change_fil}]
         questions_write = []
 
+        counter = 0
         for question in questions:
-            if not question['is_deleted']:
+            if not question['is_deleted'] and (question['versions']['type'] in filters or filters == '') and (
+                    author_filter == 'All' or author_filter == "Author filter" or question['versions'][
+                'author_name'] == author_filter):
+                counter += 1
+
                 if question['versions']['text'] is not None:
-                    if len(question['versions']['text']) > 15:
-                        question['versions']['text'] = question['versions']['text'][:15] + '...'
+                    pass
                 else:
                     question['versions']['text'] = ""
                 versions = question['versions']
@@ -109,7 +128,7 @@ def get_questions():
 
                 questions_write.append(question_dict)
 
-        if sort == 'date-desc':
+        if sort == 'Newest':
             questions_write = sorted(
                 questions_write,
                 key=lambda q: datetime.datetime.strptime(q['versions']['dateCreated'], '%Y-%m-%d %H:%M:%S'),
@@ -117,19 +136,19 @@ def get_questions():
             )
             questions_write = questions_write[::-1]
 
-        if sort == 'date-asc':
+        if sort == 'Oldest':
             questions_write = sorted(
                 questions_write,
                 key=lambda q: datetime.datetime.strptime(q['versions']['dateCreated'], '%Y-%m-%d %H:%M:%S'),
             )
 
-        if sort == 'alphabetic':
+        if sort == 'Alphabetic':
             questions_write = sorted(
                 questions_write,
                 key=lambda q: q['versions']['title'].lower(),
             )
 
-        if sort == 'alphabetic-rev':
+        if sort == 'Reverse Alphabetic':
             questions_write = sorted(
                 questions_write,
                 key=lambda q: q['versions']['title'].lower(),
@@ -137,11 +156,29 @@ def get_questions():
             )
 
         questions_write = questions_write[offset:offset + limit]
+        all_questions[0]['number_of_questions'] = counter
         all_questions.append(questions_write)
+
         return jsonify(all_questions), 200
 
     except Exception as e:
         return jsonify({}), 404
+
+
+@app.route('/api/teachers', methods=['GET'])
+def get_teachers():
+    teachers = Teacher.query.all()
+
+    all_teachers = []
+    for i in teachers:
+        teacher_dict = {
+            "name": i.name,
+            "id": i.id
+        }
+
+        all_teachers.append(teacher_dict)
+
+    return jsonify(all_teachers), 200
 
 
 def fetch_question_data(question_id):
@@ -240,7 +277,7 @@ def new_category():
     new_categor = Category(
         supercategory_id=data['supercategory'],
         title=data['title'],
-        stug = data['slug']
+        stug=data['slug']
     )
 
     db.session.add(new_categor)
@@ -502,6 +539,20 @@ def add_question_version(id):
     }
 
     return jsonify(question_version_dict), 200
+
+
+@app.route("/api/get-category-tree", methods=["GET"])
+def get_tree_categories():
+    return tree_categories(Category.query.get_or_404(1))
+
+
+def tree_categories(node):
+    result = {
+        "title": node.title,
+        "id" : node.id,
+        "children": [tree_categories(child) for child in node.subcategories]
+    }
+    return result
 
 
 def draw_category_graph(categories, graph=None, parent=None):

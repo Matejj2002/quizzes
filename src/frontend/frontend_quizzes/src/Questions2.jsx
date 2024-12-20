@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navigation from "./Navigation";
+import Tree from "./Tree"
 
 const Questions2 = () => {
       const { page } = useParams();
@@ -14,12 +16,11 @@ const Questions2 = () => {
       const [questions , setQuestions] = useState([]);
 
       const [teachers, setTeachers] = useState([]);
-      const [authorFilter, setAuthorFilter] = useState("Author filter");
+      const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "All");
 
       const [sort, setSort] = useState(searchParams.get("sort") || "");
 
-      const [filterIsChecked, setFilterIsChecked] = useState([false, false, false]);
-      const [filterType, setFilterType] = useState("");
+      const [filterType, setFilterType] = useState(searchParams.get("filter-type") || "");
 
       const limit = parseInt(searchParams.get("limit") || "10", 10);
       const offset = parseInt(searchParams.get("offset") || "0", 10);
@@ -28,7 +29,6 @@ const Questions2 = () => {
       const [actualCategoryString, setActualCategoryString] = useState(searchParams.get("category")||"supercategory");
 
       const [categoryPath , setCategoryPath] = useState([]);
-      const [lastCategory, setLastCategory] = useState("");
 
       const [allCategories, setAllCategories] = useState([]);
 
@@ -38,7 +38,6 @@ const Questions2 = () => {
   const fetchCategory = async (index) => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/questions/categories/get-path-to-supercategory/${index}`)
-            setLastCategory(response.data.shift());
             setCategoryPath(response.data);
 
       }catch (error){
@@ -125,267 +124,241 @@ const Questions2 = () => {
 
   }
 
-  const getFilterType = () =>{
-      let result = [];
-      if(filterIsChecked[0]){
-          result.push("matching_answer_question")
-      }
-      if(filterIsChecked[1]){
-          result.push("short_answer_question")
-      }
-      if (filterIsChecked[2]){
-          result.push("multiple_answer_question")
-      }
-      setFilterType(result.join(","));
-
-      return result.join(",");
-    }
-
-  const handleCheckboxChange = (index) =>{
-        const newFilterIsChecked = [...filterIsChecked];
-        newFilterIsChecked[index] = !newFilterIsChecked[index];
-        setFilterIsChecked(newFilterIsChecked);
-  }
-
-
+  const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
+    const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]
   return (
       <div>
-          <Navigation page={page} limit={limit} offset={offset} actualCategory={actualCategoryString}
-                      filterType={filterType}
-                      setSort={setSort}></Navigation>
-          <div>
-              <nav aria-label="breadcrumb">
-                  <ol className="breadcrumb">
-                      {categoryPath.slice().reverse().map((cat) => (
-                          <li className="breadcrumb-item" key={cat[1]}><a href=""
-                                                                          onClick={(e) => {
-                                                                              e.preventDefault();
-                                                                              setActualCategory(cat[1]);
-                                                                              setActualCategoryString(cat[0]);
-                                                                              navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${cat[0]}&sort=${sort}$filter-type=${filterType}&author-filter=${authorFilter}`);
-                                                                          }
-                                                                          }>{cat[0]}</a></li>
-                      ))
-                      }
-                      <li className="breadcrumb-item active" aria-current="page">{lastCategory[0]}</li>
-                  </ol>
-              </nav>
-          </div>
+          <header className="navbar navbar-expand-lg bd-navbar sticky-top justify-content-center">
+              <Navigation></Navigation>
+          </header>
+          <div className="container-fluid text-center">
+              <div className="row">
+                  <div className="col-2 sticky-top" style={{ position: "sticky", textAlign: "left", top: "0", height: "100vh", overflowY: "auto" }}>
+                      <Tree catPath = {categoryPath} />
+                  </div>
+                  <div className="col-8">
+                      <h2 className="mb-4">{actualCategoryString}</h2>
 
-          <div className='mb-3 d-flex'>
-              <div className="btn-group dropend mb-3">
-                  <button type="button" className="btn btn-secondary" onClick={(e) => {
-                      navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${getFilterType()}$author-filter=${authorFilter}`);
-                  }}>
-                      Filter Question Type
-                  </button>
-                  <button type="button" className="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                          data-bs-toggle="dropdown" aria-expanded="false">
-                      <span className="visually-hidden">Toggle Dropend</span>
-                  </button>
+                      <div>
 
+                          <div className='mb-3 d-flex justify-content-end'>
+                              <div className="dropdown">
+                                  <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                          type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Author
+                                  </button>
+                                  <ul className="dropdown-menu dropdown-menu-end">
+                                      <span className="d-flex justify-content-center fw-bold mb-2">Author</span>
+                                      {
+                                          teachers.map((teacher, index) => (
+                                              <li>
+                                                  <a className="dropdown-item fs-6" href=""
+                                                     onClick={(e) => {
+                                                         e.preventDefault();
+                                                         setAuthorFilter(teacher.name);
+                                                         navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher.name}`);
+                                                     }
+                                                     }
 
-                  <ul className="dropdown-menu">
-                      <li>
-                          <div className="mb-3 ms-1">
-                              <div className="form-check">
-                                  <input type="checkbox" className="form-check-input" id="dropdownCheck2"
-                                         checked={filterIsChecked[0]} onChange={(e) => handleCheckboxChange(0)}/>
-                                  <label className="form-check-label" htmlFor="dropdownCheck2">
-                                      MatchingQuestion
-                                  </label>
+                                                  >
+                                                      {authorFilter === teacher.name && (
+                                                          <i className="bi bi-check"></i>)} {teacher.name}
+                                                  </a>
+                                              </li>
+
+                                          ))
+                                      }
+                                  </ul>
                               </div>
-                          </div>
-                      </li>
 
-                      <li>
-                          <div className="mb-3 ms-1">
-                              <div className="form-check">
-                                  <input type="checkbox" className="form-check-input" id="dropdownCheck2"
-                                         checked={filterIsChecked[1]} onChange={(e) => handleCheckboxChange(1)}/>
-                                  <label className="form-check-label" htmlFor="dropdownCheck2">
-                                      ShortQuestion
-                                  </label>
+
+                              <div className="dropdown">
+                                  <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                          type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Type
+                                  </button>
+                                  <ul className="dropdown-menu dropdown-menu-end">
+                                      <span className="d-flex justify-content-center fw-bold mb-2">Type</span>
+                                      {
+                                          filterTypes.map((name) => (
+                                              <li>
+                                                  <a className="dropdown-item fs-6" href=""
+                                                     onClick={(e) => {
+                                                         e.preventDefault();
+
+                                                         if (filterType === name) {
+                                                             name = "";
+                                                         }
+                                                         setFilterType(name);
+                                                         navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                     }
+                                                     }
+
+                                                  >
+                                                      {filterType === name && (
+                                                          <i className="bi bi-check"></i>)} {name}
+                                                  </a>
+                                              </li>
+
+                                          ))
+                                      }
+                                  </ul>
                               </div>
-                          </div>
-                      </li>
-                      <li>
-                          <div className="mb-3 ms-1">
-                              <div className="form-check">
-                                  <input type="checkbox" className="form-check-input" id="dropdownCheck2"
-                                         checked={filterIsChecked[2]} onChange={(e) => handleCheckboxChange(2)}/>
-                                  <label className="form-check-label" htmlFor="dropdownCheck2">
-                                      MultipleChoiceQuestion
-                                  </label>
+
+                              <div className="dropdown">
+                                  <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                          type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Sort
+                                  </button>
+                                  <ul className="dropdown-menu dropdown-menu-end">
+                                      <span className="d-flex justify-content-center fw-bold mb-2">Sort by</span>
+                                      {
+                                          sortTable.map((name) => (
+                                              <li>
+                                                  <a className="dropdown-item fs-6" href=""
+                                                     onClick={(e) => {
+                                                         e.preventDefault();
+
+                                                         if (sort === name) {
+                                                             name = "";
+                                                         }
+                                                         setSort(name)
+                                                         navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                     }
+                                                     }
+
+                                                  >
+                                                      {sort === name && (
+                                                          <i className="bi bi-check"></i>)} {name}
+                                                  </a>
+                                              </li>
+
+                                          ))
+                                      }
+                                  </ul>
                               </div>
-                          </div>
-                      </li>
-                  </ul>
 
-              </div>
-              <div className="dropdown ms-3">
-                  <a className="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                     aria-expanded="false">
-                      {authorFilter}
-                  </a>
+                              <button type="button" className="btn btn-success me-1" onClick={(e) => {
+                                  navigate('/question/new-question');
+                              }
+                              }
+                              >Add question
+                              </button>
 
-                  <ul className="dropdown-menu">
-                      <li className="dropdown-item" href="" onClick={(e) => {
-                                     e.preventDefault();
-                                     setAuthorFilter("All");
-                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&author-filter="All"`);
-                                 }}
-                      >All</li>
-
-                      {teachers.map((teacher, index) => (
-                        <li key={index}><a className="dropdown-item" href="" onClick={(e) => {
-                                     e.preventDefault();
-                                     setAuthorFilter(teacher.name);
-                                     navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&author-filter=${teacher.name}`);
-
-
-                                 }
-                                 }>{teacher.name}</a></li>
-                    ))}
-
-                  </ul>
-              </div>
-          </div>
-
-          <div>
-              <div className='mb-3 d-flex justify-content-between '>
-                  <button type="button" className="btn btn-primary" onClick={(e) => {
-                      navigate('/question/new-question');
-                  }
-                  }
-                  >Add question
-                  </button>
-
-                  <button type="button" className="btn btn-primary" onClick={(e) => {
-                      navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}$author-filter=${authorFilter}`);
-                  }}>Add category
-                  </button>
-              </div>
-              <select className="form-select mb-3" size="3" aria-label="Size 3 select example">
-                  <option selected>{actualCategoryString}</option>
-                  {
-                      allCategories.map((cat, index) => (
-                              <option value={index} key={index}
-                                      onClick={() => {
-                                          setActualCategory(cat.id);
-                                          setActualCategoryString(cat.title);
-                                          navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${cat.title}&sort=${sort}&filter-type=${filterType}$author-filter=${authorFilter}`);
-                                      }}
-                              >{cat.title}</option>
-                          )
-                      )
-                  }
-              </select>
-          </div>
-
-          <div>
-              {
-                  questions.map((question, index) => (
-                      <div className="card w-100 mb-3 " key={index}>
-                          <div className="card-body ">
-                              <h5 className="card-title">
-                                  <label>Title:</label> {question.versions.title || "No title available"}
-                              </h5>
-                              <p className="card-text"><label>Text:</label> {question.versions.text || " "}</p>
-
-                              <ul className="list-group list-group-flush">
-                                  <li className="list-group-item"><label>Category:</label> {question.category}</li>
-                                  <li className="list-group-item">
-                                      <label>Author:</label> {question.versions.author_name || " "}
-                                  </li>
-                                  <li className="list-group-item"><label>Type:</label> {question.versions.type || " "}
-                                  </li>
-                              </ul>
-                              <a href=""
-                                 className="btn btn-primary"
-                                 onClick={(e) => {
-                                     e.preventDefault();
-                                     navigate(`/question/${question.id}`);
-                                 }
-                                 }
-                              >Update</a>
+                              <button type="button" className="btn btn-success" onClick={(e) => {
+                                  navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}$author-filter=${authorFilter}`);
+                              }}>Add category
+                              </button>
                           </div>
                       </div>
-                  ))
-              }
-          </div>
 
-          <div className='col-4 mx-auto'>
-              <div className="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                  {
-                      page === "1" ? (
-                          <div className="btn-group me-2" role="group" aria-label="First group">
-                              <button type="button" className="btn btn-danger" onClick={() => {
-                                  const new_offset = (1 - 1) * limit;
-                                  navigate(`/questions/${1}?limit=${limit}&offset=${new_offset}`)
+                      <div>
+                          <ol className="list-group">
+                              {
+                                  questions.map((question, index) => (
+                                      <li className="list-group-item d-flex justify-content-between align-items-start">
+                                          <div className="ms-2 me-auto text-truncate text-start w-100">
+                                              <div className="d-flex justify-content-between align-items-center w-100">
+                                                  <h2 className="h5 text-start text-truncate">
+                                                      <a href="" onClick={(e) => {
+                                                          e.preventDefault();
+                                                          navigate(`/question/${question.id}`);
+                                                      }
+                                                      } className="text-decoration-none">
+                                                          {question.versions.title || "No title available"}
+                                                      </a>
+                                                  </h2>
+                                                  <span
+                                                      className="badge text-bg-primary rounded-pill flex-shrink-0">{question.versions.type}</span>
+                                              </div>
+                                              <p className="m-0 text-truncate">{question.versions.text}</p>
+                                              <span
+                                                  className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
+                                          </div>
+                                      </li>
+                                  ))
                               }
-                              }>1
-                              </button>
-                          </div>
-                      ) : (
-                          <div className="btn-group me-2" role="group" aria-label="First group">
-                              <button type="button" className="btn btn-primary" onClick={() => {
-                                  const new_offset = (1 - 1) * limit;
-                                  navigate(`/questions/${1}?limit=${limit}&offset=${new_offset}`)
-                              }
-                              }>1
-                              </button>
-                          </div>
-                      )
-                  }
+                          </ol>
+                      </div>
 
-                  <div className="btn-group me-2" role="group" aria-label="First group">
-                      {
-                          pageNumbers.sort().map((index) => {
-                                  if (parseInt(page) === index) {
-                                      return (
-                                          <button type="button" className="btn btn-danger" key={index}
-                                                  onClick={() => {
-                                                      const new_offset = (index - 1) * limit;
-                                                      navigate(`/questions/${index}?limit=${limit}&offset=${new_offset}`)
-                                                  }
-                                                  }>{index}</button>
-                                      )
-                                  } else {
-                                      return (
-                                          <button type="button" className="btn btn-primary" key={index}
-                                                  onClick={() => {
-                                                      const new_offset = (index - 1) * limit;
-                                                      navigate(`/questions/${index}?limit=${limit}&offset=${new_offset}`)
-                                                  }
-                                                  }>{index}</button>
+                      <div className='col-4 mx-auto'>
+                          <div className="btn-toolbar justify-content-center mt-2" role="toolbar" aria-label="Toolbar with button groups">
+                              {
+                                  page === "1" ? (
+                                      <div className="btn-group me-2" role="group" aria-label="First group">
+                                          <button type="button" className="btn btn-danger" onClick={() => {
+                                              const new_offset = (1 - 1) * limit;
+                                              navigate(`/questions/${1}?limit=${limit}&offset=${new_offset}`)
+                                          }
+                                          }>1
+                                          </button>
+                                      </div>
+                                  ) : (
+                                      <div className="btn-group me-2" role="group" aria-label="First group">
+                                          <button type="button" className="btn btn-primary" onClick={() => {
+                                              const new_offset = (1 - 1) * limit;
+                                              navigate(`/questions/${1}?limit=${limit}&offset=${new_offset}`)
+                                          }
+                                          }>1
+                                          </button>
+                                      </div>
+                                  )
+                              }
+
+                              <div className="btn-group me-2" role="group" aria-label="First group">
+                                  {
+                                      pageNumbers.sort().map((index) => {
+                                              if (parseInt(page) === index) {
+                                                  return (
+                                                      <button type="button" className="btn btn-danger" key={index}
+                                                              onClick={() => {
+                                                                  const new_offset = (index - 1) * limit;
+                                                                  navigate(`/questions/${index}?limit=${limit}&offset=${new_offset}`)
+                                                              }
+                                                              }>{index}</button>
+                                                  )
+                                              } else {
+                                                  return (
+                                                      <button type="button" className="btn btn-primary" key={index}
+                                                              onClick={() => {
+                                                                  const new_offset = (index - 1) * limit;
+                                                                  navigate(`/questions/${index}?limit=${limit}&offset=${new_offset}`)
+                                                              }
+                                                              }>{index}</button>
+                                                  )
+                                              }
+                                          }
                                       )
                                   }
+                              </div>
+                              {numberOfPages > 1 &&
+                                  (parseInt(page) === numberOfPages ? (
+                                          <div className="btn-group me-2" role="group" aria-label="First group">
+                                              <button type="button" className="btn btn-danger" onClick={() => {
+                                                  const new_offset = (numberOfPages - 1) * limit;
+                                                  navigate(`/questions/${numberOfPages}?limit=${limit}&offset=${new_offset}`)
+                                              }
+                                              }>{numberOfPages}</button>
+                                          </div>
+                                      ) : (
+                                          <div className="btn-group me-2" role="group" aria-label="First group">
+                                              <button type="button" className="btn btn-primary" onClick={() => {
+                                                  const new_offset = (numberOfPages - 1) * limit;
+                                                  navigate(`/questions/${numberOfPages}?limit=${limit}&offset=${new_offset}`)
+                                              }
+                                              }>{numberOfPages}</button>
+                                          </div>
+                                      )
+                                  )
                               }
-                          )
-                      }
+                          </div>
+                      </div>
                   </div>
-                  {numberOfPages > 1 &&
-                      (parseInt(page) === numberOfPages ? (
-                              <div className="btn-group me-2" role="group" aria-label="First group">
-                                  <button type="button" className="btn btn-danger" onClick={() => {
-                                      const new_offset = (numberOfPages - 1) * limit;
-                                      navigate(`/questions/${numberOfPages}?limit=${limit}&offset=${new_offset}`)
-                                  }
-                                  }>{numberOfPages}</button>
-                              </div>
-                          ) : (
-                              <div className="btn-group me-2" role="group" aria-label="First group">
-                                  <button type="button" className="btn btn-primary" onClick={() => {
-                                      const new_offset = (numberOfPages - 1) * limit;
-                                      navigate(`/questions/${numberOfPages}?limit=${limit}&offset=${new_offset}`)
-                                  }
-                                  }>{numberOfPages}</button>
-                              </div>
-                          )
-                      )
-                  }
+                  <div className="col-2">
+
+                  </div>
               </div>
+
           </div>
       </div>
   );

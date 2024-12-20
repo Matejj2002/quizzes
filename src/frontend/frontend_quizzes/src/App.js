@@ -6,6 +6,7 @@ import QuestionDetail from './QuestionDetail'
 import NewQuestion from './NewQuestion'
 import Questions2 from "./Questions2";
 import NewCategory from "./NewCategory";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const Home = () => <h1>Domovska stranka</h1>;
 
