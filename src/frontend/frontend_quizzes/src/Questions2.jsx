@@ -4,7 +4,7 @@ import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navigation from "./Navigation";
-import Tree from "./Tree"
+import Categories from "./CategoriesTree/Categories";
 
 const Questions2 = () => {
       const { page } = useParams();
@@ -134,7 +134,7 @@ const Questions2 = () => {
           <div className="container-fluid text-center">
               <div className="row">
                   <div className="col-2 sticky-top" style={{ position: "sticky", textAlign: "left", top: "0", height: "100vh", overflowY: "auto" }}>
-                      <Tree catPath = {categoryPath} />
+                      <Categories catPath = {categoryPath} />
                   </div>
                   <div className="col-8">
                       <h2 className="mb-4">{actualCategoryString}</h2>

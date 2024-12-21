@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import TreeNode from "./TreeNode";
+import SubCategories from "./SubCategories";
 
-const Tree = ({catPath}) => {
-  const [treeData, setTreeData] = useState('');
+const Categories = ({catPath}) => {
+  const [categories, setCategories] = useState('');
 
   useEffect(() => {const fetchTreeData = async () => {
       const response = await fetch("http://127.0.0.1:5000/api/get-category-tree");
       const data = await response.json();
-      setTreeData(data);
+      setCategories(data);
     };
 
     fetchTreeData();
@@ -15,9 +15,9 @@ const Tree = ({catPath}) => {
 
   return (
     <div>
-      <TreeNode node={treeData} catPath = {catPath} ></TreeNode>
+      <SubCategories category={categories} catPath = {catPath} ></SubCategories>
     </div>
   );
 };
 
-export default Tree;
+export default Categories;
