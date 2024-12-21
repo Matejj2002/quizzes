@@ -128,12 +128,12 @@ const Questions2 = () => {
     const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]
   return (
       <div>
-          <header className="navbar navbar-expand-lg bd-navbar sticky-top justify-content-center">
+          <header className="navbar navbar-expand-lg bd-navbar sticky-top">
               <Navigation></Navigation>
           </header>
-          <div className="container-fluid text-center">
+          <div className="container-fluid text-center" style ={{marginTop: "50px"}}>
               <div className="row">
-                  <div className="col-2 sticky-top" style={{ position: "sticky", textAlign: "left", top: "0", height: "100vh", overflowY: "auto" }}>
+                  <div className="col-2 sidebar" style={{position: "sticky",textAlign: "left", top: "50px", height: "calc(100vh - 60px)" }}>
                       <Categories catPath = {categoryPath} />
                   </div>
                   <div className="col-8">
@@ -155,8 +155,12 @@ const Questions2 = () => {
                                                   <a className="dropdown-item fs-6" href=""
                                                      onClick={(e) => {
                                                          e.preventDefault();
-                                                         setAuthorFilter(teacher.name);
-                                                         navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher.name}`);
+                                                         let teacher_name = teacher.name;
+                                                         if (teacher_name === authorFilter) {
+                                                             teacher_name = "";
+                                                         }
+                                                         setAuthorFilter(teacher_name);
+                                                         navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
                                                      }
                                                      }
 
@@ -246,7 +250,7 @@ const Questions2 = () => {
                               </button>
 
                               <button type="button" className="btn btn-success" onClick={(e) => {
-                                  navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}$author-filter=${authorFilter}`);
+                                  navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
                               }}>Add category
                               </button>
                           </div>

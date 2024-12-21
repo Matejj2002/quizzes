@@ -138,7 +138,7 @@ const NewCategory = () => {
 
               <button type="button" className="btn btn-primary mb-3"
                       onClick={() => {
-                           navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}`);
+                           navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                       }
                       }
               >Back
