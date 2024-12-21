@@ -9,7 +9,7 @@ const Navigation = () =>{
     return (
         <nav className="navbar fixed-top bg-body-tertiary">
             <div className="container-fluid">
-                <a className="navbar-brand" href="/questions">Questions</a>
+                <a className="navbar-brand" href="/src/frontend/frontend_quizzes/src/Questions">Questions</a>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
                         aria-label="Toggle navigation">
