@@ -16,7 +16,7 @@ const Questions2 = () => {
       const [questions , setQuestions] = useState([]);
 
       const [teachers, setTeachers] = useState([]);
-      const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "All");
+      const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "");
 
       const [sort, setSort] = useState(searchParams.get("sort") || "");
 
@@ -123,6 +123,8 @@ const Questions2 = () => {
       }
 
   }
+
+  console.log(teachers);
 
   const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
     const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 import {useNavigate} from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 
@@ -26,7 +29,7 @@ const NewCategory = () => {
     const [title, setTitle] = useState('');
     const [slug, setSlug] = useState("");
     const [generateSlugAut, setGenerateSlugAut] = useState(true);
-    const [emptyTitle, setEmptyTitle] = useState(false);
+    let [emptyTitle, setEmptyTitle] = useState("");
 
     const [selectedCategoryId, setSelectedCategoryId] = useState(id);
     const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
@@ -40,19 +43,34 @@ const NewCategory = () => {
           setLoading(false);
       }
   }
-
   const saveCategory = () => {
         const data = {
             "supercategory" : selectedCategoryId,
             "title" : title,
             "slug" : slug
         }
+
+        let canSave = true;
+        const categoryFound = category.find(categoryA => categoryA.title === title);
+        const slugFound = category.find(categoryA => categoryA.slug === slug);
+
         if (title.length === 0){
-            setEmptyTitle(true);
-        }else {
+            emptyTitle+="Title is empty, fill title\n";
+            canSave = false;
+        }
+        if(categoryFound){
+            setEmptyTitle("Category with this title already exists, please rename\n");
+            canSave = false;
+        }
+        if(slugFound){
+            setEmptyTitle("Slug with this name already exists, please rename\n");
+            canSave = false;
+        }
+
+        if (canSave) {
             axios.put(`http://127.0.0.1:5000/api/categories/new-category`, data)
                 .then(response => {
-                        window.location.href = '/questions';
+                        navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                     }
                 )
         }
@@ -88,61 +106,67 @@ const NewCategory = () => {
 
   return (
       <div>
-          <h1>New Category</h1>
-          {emptyTitle && (
-              <div className="alert alert-danger" role="alert">
-                  Title musi byt vyplnene !
+          <div className="containter-fluid text-center">
+              <h1>New Category</h1>
+              <div className="row">
+                  <div className="col-2"></div>
+                  <div className="col-8 justify-content-center">
+                      {emptyTitle !=="" && (
+                          <div className="alert alert-danger" role="alert">
+                              {emptyTitle}
+                          </div>
+                      )}
+                      <div className="input-group mb-3 ">
+                          <label className="input-group-text">Supercategory</label>
+                          <select className="form-select">
+                              <option value={id} key={id} selected>{selectedCategory}</option>
+                              {
+                                  category.map((cat, index) => (parseInt(id) !== cat.id && (
+                                              <option value={index} key={index} onClick={() => {
+                                                  setSelectedCategory(cat.title);
+                                                  setSelectedCategoryId(cat.id);
+
+                                              }
+                                              }
+                                              >{cat.title}</option>
+                                          )
+                                      )
+                                  )
+                              }
+                          </select>
+                      </div>
+
+                      <div className="input-group mb-3 ">
+                          <span className="input-group-text">Title</span>
+                          <input type="text" className="form-control" onChange={handleChange}/>
+                      </div>
+
+                      <div className="input-group mb-3 ">
+                          <span className="input-group-text">Slug</span>
+                          <input type="text" className="form-control" value={slug} onChange={handleSlugChange}/>
+                      </div>
+
+                      <div className='mb-3 d-flex justify-content-center'>
+                          <button type="button" className="btn btn-success mb-3 me-3"
+                                  onClick={() => {
+                                      saveCategory();
+                                  }
+                                  }
+                          >Submit
+                          </button>
+
+                          <button type="button" className="btn btn-primary mb-3"
+                                  onClick={() => {
+                                      navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                  }
+                                  }
+                          >Back
+                          </button>
+
+                      </div>
+                  </div>
+                  <div className="col-2"></div>
               </div>
-          )}
-          <div className="input-group mb-3">
-              <label className="input-group-text" htmlFor="inputGroupSelect01">Supercategory</label>
-              <select className="form-select" id="inputGroupSelect01">
-                  <option value={id} key={id} selected>{selectedCategory}</option>
-                  {
-                      category.map((cat, index) => (parseInt(id) !== cat.id && (
-                                  <option value={index} key={index} onClick={() => {
-                                      setSelectedCategory(cat.title);
-                                      setSelectedCategoryId(cat.id);
-
-                                  }
-                                  }
-                                  >{cat.title}</option>
-                              )
-                          )
-                      )
-                  }
-              </select>
-          </div>
-
-
-          <div className="input-group mb-3 ">
-              <span className="input-group-text" id="inputGroup-sizing-default">Title</span>
-              <input type="text" className="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-default" onChange={handleChange}/>
-          </div>
-
-          <div className="input-group mb-3 ">
-              <span className="input-group-text" id="inputGroup-sizing-default">Slug</span>
-              <input type="text" className="form-control" aria-label="Sizing example input"
-                     aria-describedby="inputGroup-sizing-default" value={slug} onChange={handleSlugChange}/>
-          </div>
-
-          <div className='mb-3 d-flex justify-content-between '>
-              <button type="button" className="btn btn-primary mb-3"
-                      onClick={() => {
-                          saveCategory();
-                      }
-                      }
-              >Submit
-              </button>
-
-              <button type="button" className="btn btn-primary mb-3"
-                      onClick={() => {
-                           navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
-                      }
-                      }
-              >Back
-              </button>
           </div>
       </div>
   )

@@ -31,6 +31,7 @@ app.register_blueprint(blueprint, url_prefix="/login")
 
 admin = Admin(app, name='Admin - Quizzes', template_mode='bootstrap3', index_view=MyAdminIndexView())
 admin.add_view(PolymorphicModelView(User, db.session))
+admin.add_view(PolymorphicModelView(Teacher, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(QuestionVersionView(QuestionVersion, db.session))
 admin.add_view(CategoryView(Category, db.session))
@@ -110,7 +111,7 @@ def get_questions():
         counter = 0
         for question in questions:
             if not question['is_deleted'] and (question['versions']['type'] in filters or filters == '') and (
-                    author_filter == 'All' or author_filter == "Author filter" or question['versions'][
+                    author_filter == 'All' or author_filter == "" or question['versions'][
                 'author_name'] == author_filter):
                 counter += 1
 
@@ -293,7 +294,8 @@ def get_categories():
     dict_categories = [
         {
             "id": category.id,
-            "title": category.title
+            "title": category.title,
+            "slug": category.stug
         }
 
         for category in categories
