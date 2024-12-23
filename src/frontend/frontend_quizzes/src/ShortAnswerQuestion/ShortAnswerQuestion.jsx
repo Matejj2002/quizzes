@@ -1,53 +1,47 @@
 import React, { useState, useEffect } from "react";
 
-const ShortAnswerQuestion = ({onAnswersChange, answersBe}) => {
-    const [questions, setQuestions] = useState([""]);
-  const [newAnswer, setNewAnswer] = useState({
-    text: "",
-    is_regex: false,
-    is_correct: false,
+const ShortAnswerQuestion = ({setAnswers, answers}) => {
+    const [newAnswer, setNewAnswer] = useState({
+        text: "",
+        is_regex: false,
+        is_correct: false,
     });
 
     useEffect(() => {
-    onAnswersChange(newAnswer);
-  }, [newAnswer, onAnswersChange]);
+        setAnswers(newAnswer);
+      }, [newAnswer]);
 
     useEffect(() => {
-        if(answersBe && answersBe.length > 0) {
-            const [text, is_regex, is_correct] = answersBe[0];
+        if(answers && answers.length > 0) {
+            const [text, is_regex, is_correct] = answers[0];
             setNewAnswer({text, is_regex, is_correct});
         }
-  }, [answersBe]);
+  }, [answers]);
 
-    return <div>
-        <h1>Short Answer Question</h1>
-        <input
-            type="text"
-            placeholder="Answer text"
-            value={newAnswer.text}
-            onChange={(e) => setNewAnswer({...newAnswer, text: e.target.value})}
-        />
-        <label>
-            Is Regex:
-            <input
-                type="checkbox"
-                checked={newAnswer.is_regex}
-                onChange={(e) =>
+    return (
+        <div>
+            <div className="input-group mb-3">
+                <span className="input-group-text" id="inputGroup-sizing-default">Answer</span>
+                <input type="text" className="form-control" value={answers["text"]} aria-label="Sizing example input"
+                       aria-describedby="inputGroup-sizing-default" onChange={(e) => setNewAnswer({...newAnswer, text: e.target.value})}/>
+            </div>
+
+            <div className="form-check form-check-inline mb-3">
+                <input className="form-check-input" checked={answers["is_regex"]} type="checkbox" id="inlineCheckbox1" value="option1" onChange={(e) =>
                     setNewAnswer({...newAnswer, is_regex: e.target.checked})
-                }
-            />
-        </label>
-        <label>
-            Is Correct:
-            <input
-                type="checkbox"
-                checked={newAnswer.is_correct}
-                onChange={(e) =>
+                }/>
+                <label className="form-check-label" htmlFor="inlineCheckbox1">Is regex</label>
+            </div>
+            <br></br>
+            <div className="form-check form-check-inline mb-3">
+                <input className="form-check-input" type="checkbox" checked={answers["is_correct"]} id="inlineCheckbox1" value="option1" onChange={(e) =>
                     setNewAnswer({...newAnswer, is_correct: e.target.checked})
-                }
-            />
-        </label>
-    </div>
+                }/>
+                <label className="form-check-label" htmlFor="inlineCheckbox1">Is correct</label>
+            </div>
+
+        </div>
+    )
 }
 
-export default ShortAnswerQuestion;
+export default ShortAnswerQuestion

@@ -1,141 +1,254 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import SelectedTypeDisplay from "./SelectedTypeDisplay";
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import QuestionTypeView from "./QuestionTypeView";
+import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
-const NewQuestion = () => {
-    const [title, setTitle] = useState('');
-    const [text, setText] = useState('');
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(1);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategoryTitle, setSelectedCategoryTitle] = useState('supercategory');
-    const [selectedType, setSelectedType] = useState('Type');
-    const [loading, setLoading] = useState(true);
+import { useLocation } from 'react-router-dom';
+import MatchingQuestion from "./MatchingAnswerQuestions/MatchingQuestion";
+import ShortAnswerQuestion from "./ShortAnswerQuestion/ShortAnswerQuestion";
+import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQuestion";
+
+const NewQuestion = ({questionDetail = false}) => {
+    const {id} = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const idQ = queryParams.get('id');
+    const selectedCategory1 = queryParams.get('selected_category');
+    const [category, setCategory] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const page = queryParams.get("page");
+    const limit = queryParams.get("limit");
+    const offset = queryParams.get("offset");
+    const sort = queryParams.get("sort");
+    const categoryS = queryParams.get("selected_category");
+    const categorySId = queryParams.get("id");
+    const filters = queryParams.get("filter-type");
+    const authorFilter = queryParams.get("author-filter")
+
+    const [questionType, setQuestionType ] = useState("Question Type");
     const [answers, setAnswers] = useState({});
 
-     useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const categoriesResponse = await axios.get('http://127.0.0.1:5000/api/categories');
-        setCategories(categoriesResponse.data);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
+    const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
 
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
+    const [title, setTitle] = useState('');
+    const [text, setText] = useState('');
+
+
+    const saveChanges = () => {
+        let answersSel = []
+        if (questionType === "Matching Question"){
+            answersSel = {"MatchingQuestion":answers};
+        }
+        if (questionType === "Short Question"){
+            answersSel = {"ShortAnswerQuestion": answers};
+        }
+        if (questionType === "Multiple Choice Question"){
+            answersSel = {"MultipleChoiceQuestion": answers};
+        }
+
+
+        const updatedData = {
+            title: title,
+            text: text,
+            category_id: selectedCategoryId,
+            questionType: questionType,
+            answers: answersSel,
+        };
+        if (!questionDetail) {
+            if (questionType !== 'Question Type') {
+                axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
+                    .then(response => {
+                        window.location.href = '/questions';
+                    })
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+            }
+        }else{
+            axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
+            .then(response => {
+                window.location.href = '/questions';
+            })
+            .catch(error => {
+                console.error('Error saving changes:', error);
+            });
+        }
+
+    }
+
+    const fetchCategory = async () => {
+      try{
+            const response = await axios.get(`http://127.0.0.1:5000/api/categories`)
+            setCategory(response.data);
+      }catch (error){
+      }finally {
+          setLoading(false);
       }
-    };
+      }
 
-    fetchData();
-  }, []);
-    const fetchQuestionsByCategory = async (categoryId, categoryTitle) => {
-      setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:5000/api/categories_show/${categoryId}`);
-      setSelectedCategory(categoryId);
-      setSelectedCategoryTitle(categoryTitle);
-      setLoading(false);
+    const fetchData = async () => {
+        try{
+            const response = await axios.get(`http://127.0.0.1:5000/api/question-version-choice/${id}`)
+            setSelectedCategory(response.data["category_name"]);
+            setTitle(response.data["title"]);
+            setText(response.data["text"]);
+
+            if (response.data["type"] === "matching_answer_question"){
+                setQuestionType("Matching Question")
+                setAnswers(response.data["answers"]);
+            }
+
+            if (response.data["type"] === "multiple_answer_question"){
+                setQuestionType("Multiple Choice Question")
+                setAnswers(response.data["answers"]);
+            }
+
+            if (response.data["type"] === "short_answer_question"){
+                setQuestionType("Short Question")
+                setAnswers(response.data["answers"]);
+            }
+
+        }catch(error){
+
+        }finally {
+            setLoading(false);
+        }
     }
 
-    const handleCategoryClick = async (categoryId, categoryTitle) => {
-      fetchQuestionsByCategory(categoryId, categoryTitle);
-      setIsOpen(false);
-    }
+    useEffect(() => {
+        setLoading(true);
+        fetchCategory();
+        if (questionDetail) {
+            fetchData();
+        }
+        }, []);
 
     const AnswerSetter = (newAnswers) => {
         setAnswers(newAnswers);
     };
 
-    const SelectedTypeSetter = (newType) => {
-        setSelectedType(newType);
-    };
+    return (
+        <div className="container-fluid text-center">
+            <div className="row">
+                <div className="col-3"></div>
+                <div className="col-6">
+                    {questionDetail && (
+                        <h1>Question Detail</h1>
+                    )}
+                    {!questionDetail && (
+                        <h1>New Question</h1>
+                    )}
 
-    console.log(answers);
-    const saveChanges = () => {
-        const updatedData = {
-            title: title,
-            text: text,
-            category_id: selectedCategory,
-            questionType: selectedType,
-            answers: answers,
-        };
-        //console.log(updatedData);
-        if (selectedType !== 'Type') {
-            axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
-                .then(response => {
-                    window.location.href = '/questions';
-                })
-                .catch(error => {
-                    console.error('Error saving changes:', error);
-                });
-        }
-    }
+                    <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
+                        <span className="input-group-text">Supercategory</span>
+                        <div className="dropdown">
+                            <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {selectedCategory}
+                            </button>
+                            <ul className="dropdown-menu dropdown-menu-end"
+                                style={{maxHeight: "200px", overflowY: "scroll"}}>
+                                {
+                                    category.map((cat, index) => (
+                                            <li key={index}>
+                                                <a className="dropdown-item fs-6" key={index} onClick={() => {
+                                                    setSelectedCategory(cat.title);
+                                                    setSelectedCategoryId(cat.id);
 
-    const toggleOpen = () => {
-      setIsOpen(!isOpen);
-    }
-
-    const handleAnswersChange = useCallback(
-    (newAnswers) => {
-      setAnswers((prev) => ({
-        ...prev,
-        [selectedType]: newAnswers,
-      }));
-    },
-    [selectedType]
-  );
-
-
-        return (
-            <div>
-                <h1>New Question</h1>
-
-                <div>
-                    <h2>Title</h2>
-                    <textarea
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    > </textarea>
-                </div>
-                <div>
-                    <h2>Text Otazky</h2>
-                    <textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                    > </textarea>
-                </div>
-
-                <div className="container">
-                    <button
-                        onClick={toggleOpen}
-                        className={`collapsible ${isOpen ? "active" : ""}`}
-                    >
-                        {selectedCategoryTitle}
-                    </button>
-                    {isOpen && (
-                        <div className="content-menu">
-                            <ul className="task-list-menu">
-                                <li onClick={() => handleCategoryClick(1, 'supercategory')}>supercategory</li>
-                                {categories.length > 0 ? (
-                                    categories.map((category, index) => category.id !== 1 && (
-                                            <li
-                                                key={category.id}
-                                                onClick={() => handleCategoryClick(category.id, category.title)}
-
-                                            >{category.title}</li>
+                                                }
+                                                }
+                                                >{cat.title}</a></li>
                                         )
-                                    )) : (
-                                    <p>Načítavam otázky...</p>
-                                )
+                                    )
                                 }
+
                             </ul>
                         </div>
+                    </div>
+
+                    <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
+                        <span className="input-group-text">Question Type</span>
+                        <div className="dropdown">
+                            <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {questionType}
+                            </button>
+                            <ul className="dropdown-menu dropdown-menu-end">
+                                <li><a className="dropdown-item" onClick={() => {
+                                    setQuestionType("Matching Question")
+                                }
+                                }>
+                                    Matching Question</a></li>
+                                <li><a className="dropdown-item" onClick={() => {
+                                    setQuestionType("Multiple Choice Question")
+                                }
+                                }>Multiple Choice Question</a></li>
+                                <li><a className="dropdown-item" onClick={() => {
+                                    setQuestionType("Short Question")
+                                }
+                                }>Short Question</a></li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="inputGroup-sizing-default">Title</span>
+                        <input type="text" className="form-control" value={title} placeholder="Question title" onChange={(e) => setTitle(e.target.value)}/>
+                    </div>
+
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="inputGroup-sizing-default">Question Text</span>
+                        <input type="text" className="form-control" value={text} placeholder="Question text" onChange={(e) => setText(e.target.value)}/>
+                    </div>
+
+                    {questionType === "Matching Question" && (
+                        <MatchingQuestion setAnswers={AnswerSetter} answers = {answers}></MatchingQuestion>
                     )}
+
+                    {questionType === "Short Question" && (
+                        <div>
+                            <h2>{questionType}</h2>
+                            <ShortAnswerQuestion setAnswers={AnswerSetter} answers = {answers}></ShortAnswerQuestion>
+                        </div>
+
+                    )}
+
+                    {questionType === "Multiple Choice Question" && (
+                        <div>
+                            <h2>{questionType}</h2>
+                            <MultipleChoiceQuestion setAnswers={AnswerSetter} answers={answers}></MultipleChoiceQuestion>
+                        </div>
+                    )}
+
+                    <div className='mb-3 d-flex justify-content-center'>
+                        <button type="button" className="btn btn-success mb-3 me-3"
+                                onClick={() => {
+                                    saveChanges();
+                                }
+                                }
+                        >Submit
+                        </button>
+
+                        <button type="button" className="btn btn-primary mb-3"
+                                onClick={() => {
+                                    navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                }
+                                }
+                        >Back
+                        </button>
+
+                    </div>
+
                 </div>
-
-                <QuestionTypeView setAnswers={AnswerSetter} setType={SelectedTypeSetter} handleAnswersChange={handleAnswersChange} startType={"Type"} answersBe={answers} />
-
-                <button onClick={saveChanges}>Uloz zmeny</button>
+                <div className="col-3"></div>
             </div>
-        );
+        </div>
+    )
 }
-export default NewQuestion;
+
+export default NewQuestion

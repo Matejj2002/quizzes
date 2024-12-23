@@ -1,77 +1,51 @@
 import React, { useState, useEffect } from "react";
-import './MultipleChoiceQuestion.css'
 
-const MultipleChoiceQuestion = ({onAnswersChange, answersBe}) => {
+const MultipleChoiceQuestion = ({setAnswers, answers}) => {
     const [questions, setQuestions] = useState([""]);
     const [isChecked, setIsChecked] = useState(false);
 
+
     useEffect(() => {
-        if (answersBe && answersBe.length > 0) {
-            setQuestions([...answersBe, ""]);
+        if (answers && answers.length > 0) {
+            setQuestions([...answers, ""]);
         }
-    }, [answersBe]);
+    }, []);
+
     const handleInputChange = (index, value) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[index] = value;
-    setQuestions(updatedQuestions);
+        const updatedQuestions = [...questions];
+        updatedQuestions[index] = value;
+        setQuestions(updatedQuestions);
 
-    if (value !== "" && index === questions.length - 1) {
-      setQuestions([...updatedQuestions, ""]);
-    }
-  };
+        if (value !== "" && index === questions.length - 1) {
+          setQuestions([...updatedQuestions, ""]);
+            }
+      };
 
-    const handleCheckboxChange = (e) => {
-        setIsChecked(e.target.checked);
-        setQuestions([""]);
-        console.log(e.target.checked);
-    }
 
     useEffect(() => {
-        onAnswersChange(questions.filter((q) => q.trim() !== ""));
-      }, [questions, onAnswersChange]);
+        setAnswers(questions.filter((q) => q.trim() !== ""));
+      }, [questions]);
 
-    const renderContent = () => {
-        if (isChecked){
-            return <div>
-                <input className='input-box'
-                       type="text"
-                       placeholder={`Single Answer`}
-                       onChange={(e) => handleInputChange(0, e.target.value)}
-                       />
+    return (
+        <div>
+            <div className="form-check form-check-inline mb-3">
+                <input className="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1"
+                       onChange={(e) =>
+                           setIsChecked(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="inlineCheckbox1">Is single answer</label>
             </div>
-        }else{
-            return <div>
-                {questions.map((question, index) => (
-                <input className='input-box'
+            {questions.map((question, index) => (
+                <input className='form-control'
                        key={index}
                        type="text"
                        value={question}
                        onChange={(e) => handleInputChange(index, e.target.value)}
-                       placeholder={`Option ${index + 1}`}
+                       placeholder={`Option`}
                 />
-            ))
-            }
-            </div>
-        }
-    }
-
-    return (
-        <div className="multiple-choice-question">
-            <h3>Multiple Choice Question</h3>
-            <div className="checkbox-container">
-                <input
-                    type="checkbox"
-                    name="single-answer"
-                    checked={isChecked}
-                    onChange={handleCheckboxChange}
-                />
-                <p>Is single answer</p>
-            </div>
-            <div>
-                {renderContent()}
-            </div>
+            ))}
         </div>
     )
 }
 
-export default MultipleChoiceQuestion;
+export default MultipleChoiceQuestion

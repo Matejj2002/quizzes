@@ -244,7 +244,7 @@ const Questions = () => {
                               </div>
 
                               <button type="button" className="btn btn-success me-1" onClick={(e) => {
-                                  navigate(`/question/new-question2?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+                                  navigate(`/question/new-question?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
                               }
                               }
                               >Add question
@@ -267,7 +267,7 @@ const Questions = () => {
                                                   <h2 className="h5 text-start text-truncate">
                                                       <a href="" onClick={(e) => {
                                                           e.preventDefault();
-                                                          navigate(`/question2/${question.id}?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+                                                          navigate(`/question/${question.id}?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
                                                       }
                                                       } className="text-decoration-none">
                                                           {question.versions.title || "No title available"}
