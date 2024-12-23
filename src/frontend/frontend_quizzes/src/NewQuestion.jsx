@@ -49,6 +49,7 @@ const NewQuestion = () => {
         setSelectedType(newType);
     };
 
+    console.log(answers);
     const saveChanges = () => {
         const updatedData = {
             title: title,
@@ -83,8 +84,6 @@ const NewQuestion = () => {
     [selectedType]
   );
 
-
-    console.log(answers);
 
         return (
             <div>

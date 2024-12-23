@@ -97,7 +97,6 @@ def get_questions():
         filters = "short_answer_question"
 
     if filters == "Multiple Choice Question":
-
         filters = "multiple_answer_question"
     if filters == ['']:
         change_fil = True
@@ -331,6 +330,7 @@ def get_question_versions(question_id):
 @app.route('/api/questions/new-question', methods=['PUT'])
 def add_new_question():
     data = request.get_json()
+    print(data)
 
     category_id = data['category_id']
     title = data['title']
@@ -342,10 +342,10 @@ def add_new_question():
     db.session.commit()
 
     question_id = question.id
-    if data['questionType'] == 'MatchingQuestion':
+    if data['questionType'] == 'Matching Question':
         question_type = MatchingQuestion
         type_q = 'matching_answer_question'
-    elif data['questionType'] == 'ShortAnswerQuestion':
+    elif data['questionType'] == 'Short Question':
         question_type = ShortAnswerQuestion
         type_q = 'short_answer_question'
     else:
@@ -422,28 +422,45 @@ def get_question_version_choice(question_id):
         elif i.dateCreated > newest_version.dateCreated:
             newest_version = i
 
-    # dorobit
+    dict_ret = {
+        "question_id": question.id,
+        "category_id": question.category.id,
+        "category_name": question.category.title,
+        "title": newest_version.title,
+        "dateCreted": newest_version.dateCreated,
+        "text": newest_version.text,
+        "type": newest_version.type,
+        "answers": [
 
-    texts = []
-    if newest_version.type == 'multiple_answer_question':
-        print(newest_version.multiple_answers)
-        for i in newest_version.multiple_answers:
-            texts.append(i.text)
+        ]
 
-    if newest_version.type == 'short_answer_question':
-        for i in newest_version.short_answers:
-            texts.append([i.text, i.is_regex, i.is_correct])
+    }
 
     if newest_version.type == 'matching_answer_question':
         for i in newest_version.matching_question:
-            texts.append([i.leftSide, i.rightSide])
+            dict_ret['answers'].append(
+                {"left": i.leftSide,
+                 "right": i.rightSide
+                 }
+            )
 
-    ret_dict = {
-        "type": newest_version.type,
-        "texts": texts
-    }
+    if newest_version.type == 'multiple_answer_question':
+        for i in newest_version.multiple_answers:
+            dict_ret['answers'].append(
+                i.text
+            )
 
-    return jsonify(ret_dict), 200
+    if newest_version.type == 'short_answer_question':
+        for i in newest_version.short_answers:
+            dict_ret["answers"].append(
+                [
+                    i.text,
+                    i.is_regex,
+                    i.is_correct
+                ]
+            )
+
+    return jsonify(dict_ret), 200
 
 
 @app.route('/api/questions/categories/get-path-to-supercategory/<int:index>', methods=['GET'])
@@ -462,13 +479,13 @@ def get_path_to_supercategory(index):
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
 def add_question_version(id):
     data = request.get_json()
-    print(f"Ukladám otázku s ID {id}, nový text: {data['text']}")
+    # print(f"Ukladám otázku s ID {id}, nový text: {data['text']}")
     answers = data['answers']
 
-    if data['questionType'] == 'MatchingQuestion':
+    if data['questionType'] == 'Matching Question':
         question_type = MatchingQuestion
         type_q = 'matching_answer_question'
-    elif data['questionType'] == 'ShortAnswerQuestion':
+    elif data['questionType'] == 'Short Question':
         question_type = ShortAnswerQuestion
         type_q = 'short_answer_question'
     else:
@@ -551,7 +568,7 @@ def get_tree_categories():
 def tree_categories(node):
     result = {
         "title": node.title,
-        "id" : node.id,
+        "id": node.id,
         "children": [tree_categories(child) for child in node.subcategories]
     }
     return result

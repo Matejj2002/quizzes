@@ -116,25 +116,31 @@ const NewCategory = () => {
                               {emptyTitle}
                           </div>
                       )}
-                      <div className="input-group mb-3 ">
-                          <label className="input-group-text">Supercategory</label>
-                          <select className="form-select">
-                              <option value={id} key={id} selected>{selectedCategory}</option>
+                      <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
+                          <span className="input-group-text">Supercategory</span>
+                          <div className="dropdown">
+                          <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                  type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              {selectedCategory}
+                          </button>
+                          <ul className="dropdown-menu dropdown-menu-end" style = {{maxHeight:"200px" , overflowY: "scroll"}}>
                               {
-                                  category.map((cat, index) => (parseInt(id) !== cat.id && (
-                                              <option value={index} key={index} onClick={() => {
+                                  category.map((cat, index) => (
+                                      <li key={index}>
+                                              <a className="dropdown-item fs-6" key={index} onClick={() => {
                                                   setSelectedCategory(cat.title);
                                                   setSelectedCategoryId(cat.id);
 
                                               }
                                               }
-                                              >{cat.title}</option>
+                                              >{cat.title}</a></li>
                                           )
-                                      )
                                   )
                               }
-                          </select>
+
+                          </ul>
                       </div>
+                          </div>
 
                       <div className="input-group mb-3 ">
                           <span className="input-group-text">Title</span>

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 const MatchingQuestion = ({onAnswersChange, answersBe}) => {
+    const [title, setTitle] = useState('');
+    const [text, setText] = useState('');
+
     const [questions, setQuestions] = useState([{ left: "", right: "" }]);
 
     useEffect(() => {

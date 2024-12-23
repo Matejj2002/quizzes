@@ -124,10 +124,10 @@ const Questions = () => {
 
   }
 
-  console.log(teachers);
 
-  const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
+    const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
     const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]
+
   return (
       <div>
           <header className="navbar navbar-expand-lg bd-navbar sticky-top">
@@ -153,7 +153,7 @@ const Questions = () => {
                                       <span className="d-flex justify-content-center fw-bold mb-2">Author</span>
                                       {
                                           teachers.map((teacher, index) => (
-                                              <li>
+                                              <li key = {index}>
                                                   <a className="dropdown-item fs-6" href=""
                                                      onClick={(e) => {
                                                          e.preventDefault();
@@ -186,8 +186,8 @@ const Questions = () => {
                                   <ul className="dropdown-menu dropdown-menu-end">
                                       <span className="d-flex justify-content-center fw-bold mb-2">Type</span>
                                       {
-                                          filterTypes.map((name) => (
-                                              <li>
+                                          filterTypes.map((name, index) => (
+                                              <li key = {index}>
                                                   <a className="dropdown-item fs-6" href=""
                                                      onClick={(e) => {
                                                          e.preventDefault();
@@ -217,10 +217,9 @@ const Questions = () => {
                                       Sort
                                   </button>
                                   <ul className="dropdown-menu dropdown-menu-end">
-                                      <span className="d-flex justify-content-center fw-bold mb-2">Sort by</span>
                                       {
-                                          sortTable.map((name) => (
-                                              <li>
+                                          sortTable.map((name, index) => (
+                                              <li key={index}>
                                                   <a className="dropdown-item fs-6" href=""
                                                      onClick={(e) => {
                                                          e.preventDefault();
@@ -245,7 +244,7 @@ const Questions = () => {
                               </div>
 
                               <button type="button" className="btn btn-success me-1" onClick={(e) => {
-                                  navigate('/question/new-question');
+                                  navigate(`/question/new-question2?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
                               }
                               }
                               >Add question
@@ -262,20 +261,21 @@ const Questions = () => {
                           <ol className="list-group">
                               {
                                   questions.map((question, index) => (
-                                      <li className="list-group-item d-flex justify-content-between align-items-start">
+                                      <li key = {index} className="list-group-item d-flex justify-content-between align-items-start">
                                           <div className="ms-2 me-auto text-truncate text-start w-100">
                                               <div className="d-flex justify-content-between align-items-center w-100">
                                                   <h2 className="h5 text-start text-truncate">
                                                       <a href="" onClick={(e) => {
                                                           e.preventDefault();
-                                                          navigate(`/question/${question.id}`);
+                                                          navigate(`/question2/${question.id}?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
                                                       }
                                                       } className="text-decoration-none">
                                                           {question.versions.title || "No title available"}
                                                       </a>
                                                   </h2>
                                                   <span
-                                                      className="badge text-bg-primary rounded-pill flex-shrink-0">{question.versions.type}</span>
+                                                      className="badge text-bg-primary rounded-pill flex-shrink-0">{question.versions.type}
+                                                  </span>
                                               </div>
                                               <p className="m-0 text-truncate">{question.versions.text}</p>
                                               <span

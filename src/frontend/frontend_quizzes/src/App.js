@@ -5,6 +5,8 @@ import NewQuestion from './NewQuestion'
 import Questions from "./Questions";
 import NewCategory from "./NewCategory";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import NewQuestion2 from "./NewQuestion2";
+import QuestionDetail2 from "./QuestionDetail2";
 
 const Home = () => <h1>Domovska stranka</h1>;
 
@@ -15,7 +17,9 @@ function App() {
                   <Route path="/" element={<Home/>}/>
                   <Route path="/questions" element={<Navigate to="/questions/1?limit=10&offset=0" />} />
                   <Route path="/question/:id" element={<QuestionDetail />} />
+                  <Route path="/question2/:id" element={<QuestionDetail2 />} />
                   <Route path="/question/new-question" element={<NewQuestion />} />
+                  <Route path="/question/new-question2" element={<NewQuestion2 />} />
                   <Route path="/questions/:page" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
               </Routes>
