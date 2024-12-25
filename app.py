@@ -330,7 +330,6 @@ def get_question_versions(question_id):
 @app.route('/api/questions/new-question', methods=['PUT'])
 def add_new_question():
     data = request.get_json()
-    print(data)
 
     category_id = data['category_id']
     title = data['title']
@@ -366,17 +365,17 @@ def add_new_question():
     question_version_id = question_version.id
 
     if type_q == 'multiple_answer_question':
-        if len(answers['MultipleChoiceQuestion']) == 1:
-            is_single = True
-        else:
-            is_single = False
-
-        for i in answers['MultipleChoiceQuestion']:
+        texts = answers['MultipleChoiceQuestion']['text']
+        correct_answers = answers['MultipleChoiceQuestion']['correct_answers']
+        is_single = answers['MultipleChoiceQuestion']['is_single']
+        feedback = answers['MultipleChoiceQuestion']['feedback']
+        for i in range(len(texts)):
             choice = Choice(choice_question_id=question_version_id,
-                            text=i,
-                            positive_feedback='',
-                            negative_feedback='',
-                            # is_single=is_single,
+                            text=texts[i],
+                            positive_feedback=feedback[i]["positive"],
+                            negative_feedback=feedback[i]["negative"],
+                            is_correct=correct_answers[i],
+                            is_single=is_single,
                             type='choice_answer')
             db.session.add(choice)
 
@@ -386,9 +385,9 @@ def add_new_question():
             short_answer_question_id=question_version_id,
             text=answer['text'],
             is_regex=answer['is_regex'],
-            is_correct=answer['is_correct'],
-            positive_feedback='',
-            negative_feedback='',
+            is_correct=True,
+            positive_feedback=answer["positive_feedback"],
+            negative_feedback=answer["negative_feedback"],
             type='simple_answer'
         )
         db.session.add(short_answer)
@@ -430,6 +429,9 @@ def get_question_version_choice(question_id):
         "dateCreted": newest_version.dateCreated,
         "text": newest_version.text,
         "type": newest_version.type,
+        "feedback": [
+
+        ],
         "answers": [
 
         ]
@@ -445,10 +447,21 @@ def get_question_version_choice(question_id):
             )
 
     if newest_version.type == 'multiple_answer_question':
+        texts = []
+        correct_ans = []
+        feedback = []
         for i in newest_version.multiple_answers:
-            dict_ret['answers'].append(
-                i.text
+            texts.append(i.text)
+            correct_ans.append(i.is_correct)
+            feedback.append(
+                {"positive":i.positive_feedback, "negative":i.negative_feedback}
             )
+
+        dict_ret['answers'] = {
+            "texts": texts,
+            "correct_ans": correct_ans,
+            "feedback": feedback
+        }
 
     if newest_version.type == 'short_answer_question':
         for i in newest_version.short_answers:
@@ -456,7 +469,8 @@ def get_question_version_choice(question_id):
                 [
                     i.text,
                     i.is_regex,
-                    i.is_correct
+                    i.positive_feedback,
+                    i.negative_feedback
                 ]
             )
 
@@ -479,8 +493,9 @@ def get_path_to_supercategory(index):
 @app.route('/api/questions/versions/<int:id>', methods=['PUT'])
 def add_question_version(id):
     data = request.get_json()
-    # print(f"Ukladám otázku s ID {id}, nový text: {data['text']}")
     answers = data['answers']
+
+    print(answers)
 
     if data['questionType'] == 'Matching Question':
         question_type = MatchingQuestion
@@ -506,17 +521,17 @@ def add_question_version(id):
     question_version_id = question_version.id
 
     if type_q == 'multiple_answer_question':
-        if len(answers['MultipleChoiceQuestion']) == 1:
-            is_single = True
-        else:
-            is_single = False
-
-        for i in answers['MultipleChoiceQuestion']:
+        texts = answers['MultipleChoiceQuestion']['text']
+        correct_answers = answers['MultipleChoiceQuestion']['correct_answers']
+        is_single = answers['MultipleChoiceQuestion']['is_single']
+        feedback = answers['MultipleChoiceQuestion']['feedback']
+        for i in range(len(texts)):
             choice = Choice(choice_question_id=question_version_id,
-                            text=i,
-                            positive_feedback='',
-                            negative_feedback='',
-                            # is_single=is_single,
+                            text=texts[i],
+                            positive_feedback=feedback[i]["positive"],
+                            negative_feedback=feedback[i]["negative"],
+                            is_single=is_single,
+                            is_correct = correct_answers[i],
                             type='choice_answer')
             db.session.add(choice)
 
@@ -526,9 +541,9 @@ def add_question_version(id):
             short_answer_question_id=question_version_id,
             text=answer['text'],
             is_regex=answer['is_regex'],
-            is_correct=answer['is_correct'],
-            positive_feedback='',
-            negative_feedback='',
+            is_correct=True,
+            positive_feedback=answer["positive_feedback"],
+            negative_feedback=answer["negative_feedback"],
             type='simple_answer'
         )
         db.session.add(short_answer)

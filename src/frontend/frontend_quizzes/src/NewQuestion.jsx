@@ -19,6 +19,13 @@ const NewQuestion = ({questionDetail = false}) => {
     const [category, setCategory] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    let subButton = "";
+    if (questionDetail){
+        subButton = "Update";
+    }else{
+        subButton = "Submit";
+    }
+
     const page = queryParams.get("page");
     const limit = queryParams.get("limit");
     const offset = queryParams.get("offset");
@@ -37,6 +44,8 @@ const NewQuestion = ({questionDetail = false}) => {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
 
+    const [checkSubmit, setCheckSubmit] = useState("");
+
 
     const saveChanges = () => {
         let answersSel = []
@@ -50,7 +59,6 @@ const NewQuestion = ({questionDetail = false}) => {
             answersSel = {"MultipleChoiceQuestion": answers};
         }
 
-
         const updatedData = {
             title: title,
             text: text,
@@ -58,8 +66,8 @@ const NewQuestion = ({questionDetail = false}) => {
             questionType: questionType,
             answers: answersSel,
         };
-        if (!questionDetail) {
-            if (questionType !== 'Question Type') {
+        if (!questionDetail ) {
+            if (questionType !== 'Question Type' && title !=="" && text !=="") {
                 axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
                     .then(response => {
                         window.location.href = '/questions';
@@ -67,6 +75,14 @@ const NewQuestion = ({questionDetail = false}) => {
                     .catch(error => {
                         console.error('Error saving changes:', error);
                     });
+            }else{
+                if (title === ""){
+                    setCheckSubmit("Title must be provided")
+                }else if (questionType === 'Question Type') {
+                    setCheckSubmit("No type of question provided")
+                }else if (text === ""){
+                    setCheckSubmit("Text must be provided")
+                }
             }
         }else{
             axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
@@ -143,6 +159,14 @@ const NewQuestion = ({questionDetail = false}) => {
                         <h1>New Question</h1>
                     )}
 
+                    {
+                        checkSubmit !== "" && (
+                            <div className="alert alert-danger" role="alert">
+                                {checkSubmit}
+                            </div>
+                        )
+                    }
+
                     <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
                         <span className="input-group-text">Supercategory</span>
                         <div className="dropdown">
@@ -198,22 +222,27 @@ const NewQuestion = ({questionDetail = false}) => {
 
                     <div className="input-group mb-3">
                         <span className="input-group-text" id="inputGroup-sizing-default">Title</span>
-                        <input type="text" className="form-control" value={title} placeholder="Question title" onChange={(e) => setTitle(e.target.value)}/>
+                        <input type="text" className="form-control" value={title} placeholder="Question title"
+                               onChange={(e) => setTitle(e.target.value)}/>
                     </div>
 
                     <div className="input-group mb-3">
                         <span className="input-group-text" id="inputGroup-sizing-default">Question Text</span>
-                        <input type="text" className="form-control" value={text} placeholder="Question text" onChange={(e) => setText(e.target.value)}/>
+                        <input type="text" className="form-control" value={text} placeholder="Question text"
+                               onChange={(e) => setText(e.target.value)}/>
                     </div>
 
                     {questionType === "Matching Question" && (
-                        <MatchingQuestion setAnswers={AnswerSetter} answers = {answers}></MatchingQuestion>
+                        <div>
+                        <h2>{questionType}</h2>
+                        <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
+                        </div>
                     )}
 
                     {questionType === "Short Question" && (
                         <div>
                             <h2>{questionType}</h2>
-                            <ShortAnswerQuestion setAnswers={AnswerSetter} answers = {answers}></ShortAnswerQuestion>
+                            <ShortAnswerQuestion setAnswers={AnswerSetter} answers={answers} ></ShortAnswerQuestion>
                         </div>
 
                     )}
@@ -221,17 +250,18 @@ const NewQuestion = ({questionDetail = false}) => {
                     {questionType === "Multiple Choice Question" && (
                         <div>
                             <h2>{questionType}</h2>
-                            <MultipleChoiceQuestion setAnswers={AnswerSetter} answers={answers}></MultipleChoiceQuestion>
+                            <MultipleChoiceQuestion setAnswers={AnswerSetter}
+                                                    answers={answers}></MultipleChoiceQuestion>
                         </div>
                     )}
 
-                    <div className='mb-3 d-flex justify-content-center'>
+                    <div className='mb-3 d-flex justify-content-center mt-3'>
                         <button type="button" className="btn btn-success mb-3 me-3"
                                 onClick={() => {
                                     saveChanges();
                                 }
                                 }
-                        >Submit
+                        >{subButton}
                         </button>
 
                         <button type="button" className="btn btn-primary mb-3"

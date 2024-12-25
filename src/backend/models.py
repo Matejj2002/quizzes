@@ -97,6 +97,7 @@ class Answer(db.Model):
     positive_feedback = db.Column(db.Text)
     negative_feedback = db.Column(db.Text)
     type = db.Column(db.String)
+    is_correct = db.Column(db.Boolean)
 
     __mapper_args__ = {
         'polymorphic_identity': 'question_version',
@@ -122,7 +123,7 @@ class Choice(Answer):
     __tablename__ = "choices"
     id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
     text = db.Column(db.Text)
-    # is_single = db.Column(db.Boolean)
+    is_single = db.Column(db.Boolean)
 
     choice_question_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.id'))
 
@@ -136,7 +137,6 @@ class ShortAnswer(Answer):
     id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
     text = db.Column(db.Text)
     is_regex = db.Column(db.Boolean)
-    is_correct = db.Column(db.Boolean)
 
     short_answer_question_id = db.Column(db.Integer, db.ForeignKey('short_answer_questions.id'), nullable=True)
 
