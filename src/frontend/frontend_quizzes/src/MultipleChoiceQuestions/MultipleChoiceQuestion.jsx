@@ -42,7 +42,7 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
         setAnswers({"text" : questions.filter((q) => q.trim() !== ""), "is_single": isChecked, "correct_answers": correctAnswers, "feedback": feedback});
       }, [questions, correctAnswers, feedback]);
 
-    console.log(feedback);
+
     return (
         <div>
             <div className="form-check form-check-inline mb-3">
