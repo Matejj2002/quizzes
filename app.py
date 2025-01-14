@@ -398,8 +398,8 @@ def add_new_question():
                 matching_question_id=question_version_id,
                 leftSide=i['left'],
                 rightSide=i['right'],
-                positive_feedback='',
-                negative_feedback='',
+                positive_feedback=i['positive'],
+                negative_feedback=i['negative'],
                 type='matching_pair'
             )
 
@@ -442,7 +442,9 @@ def get_question_version_choice(question_id):
         for i in newest_version.matching_question:
             dict_ret['answers'].append(
                 {"left": i.leftSide,
-                 "right": i.rightSide
+                 "right": i.rightSide,
+                 "positive": i.positive_feedback,
+                 "negative": i.negative_feedback
                  }
             )
 
@@ -494,8 +496,6 @@ def get_path_to_supercategory(index):
 def add_question_version(id):
     data = request.get_json()
     answers = data['answers']
-
-    print(answers)
 
     if data['questionType'] == 'Matching Question':
         question_type = MatchingQuestion
@@ -554,8 +554,8 @@ def add_question_version(id):
                 matching_question_id=question_version_id,
                 leftSide=i['left'],
                 rightSide=i['right'],
-                positive_feedback='',
-                negative_feedback='',
+                positive_feedback=i['positive'],
+                negative_feedback=i['negative'],
                 type='matching_pair'
             )
 

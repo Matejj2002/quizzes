@@ -47,33 +47,42 @@ const MatchingQuestion = ({setAnswers , answers}) => {
     return (
         <div>
             {questions.map((question, index) => (
-                    <div className="input-group mb-3" key={index}>
+                    <div>
+                    <div className="input-group mt-3" key={index}>
                         <input type="text" className="form-control" value={question.left} placeholder="Left Side"
                                onChange={(e) => handleInputChange(index, 'left', e.target.value)}/>
                         <input type="text" className="form-control me-3" value={question.right} placeholder="Right Side"
                                onChange={(e) => handleInputChange(index, 'right', e.target.value)}/>
+                    </div>
 
-                        <div className="dropdown">
-                            <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-                                    aria-expanded="false" data-bs-auto-close="outside">
-                                Feedback
-                            </button>
-                            <form className="dropdown-menu p-4 w-auto">
-                                <div className="mb-3">
-                                    <label className="form-label">Positive</label>
-                                    <input type="email" className="form-control" value={question["positive"]}
-                                           placeholder="Feedback"
-                                           onChange={(e) => handleFeedbackChange(index, e.target.value, "positive")}/>
+                <details className="mt-1">
+                    <summary className="btn btn-primary">
+                        Feedback
+                    </summary>
+                    <form className="w-auto">
+                    <div className="d-flex align-items-center">
+                                    <label className="form-label">Positive&nbsp;&nbsp;</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={question["positive"]}
+                                        placeholder="Feedback"
+                                        onChange={(e) => handleFeedbackChange(index, e.target.value, "positive")}
+                                    />
                                 </div>
-                                <div className="mb-3">
+                                <div className="d-flex align-items-center">
                                     <label className="form-label">Negative</label>
-                                    <input type="Feedback" className="form-control" value={question["negative"]}
-                                           placeholder="Feedback"
-                                           onChange={(e) => handleFeedbackChange(index, e.target.value, "negative")}/>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={question["negative"]}
+                                        placeholder="Feedback"
+                                        onChange={(e) => handleFeedbackChange(index, e.target.value, "negative")}
+                                    />
                                 </div>
                             </form>
+                        </details>
                         </div>
-                    </div>
                 )
             )
 

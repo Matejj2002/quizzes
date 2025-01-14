@@ -21,37 +21,46 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
 
     return (
         <div>
-            <div className="input-group mb-3">
+            <div className="input-group">
                 <span className="input-group-text" id="inputGroup-sizing-default">Answer</span>
                 <input type="text" className="form-control" value={answers["text"]} aria-label="Sizing example input"
                        aria-describedby="inputGroup-sizing-default"
                        onChange={(e) => setNewAnswer({...newAnswer, text: e.target.value})}/>
+            </div>
 
-                <div className="dropdown">
-                    <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-                            aria-expanded="false" data-bs-auto-close="outside">
-                        Feedback
-                    </button>
-                    <form className="dropdown-menu p-4 w-auto">
-                        <div className="mb-3">
-                            <label className="form-label">Positive</label>
-                            <input type="email" className="form-control" value={answers["positive_feedback"]}
-                                   placeholder="Feedback"
-                                   onChange={(e) =>
-                    setNewAnswer({...newAnswer, positive_feedback: e.target.value})
-                }/>
+            <details className="mt-3 mb-3">
+                <summary className="btn btn-primary">
+                    Feedback
+                </summary>
+                <div className="p-4 w-auto">
+                    <form>
+                        <div className="d-flex align-items-center">
+                            <label className="form-label">Positive&nbsp;&nbsp;</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={answers["positive_feedback"]}
+                                placeholder="Feedback"
+                                onChange={(e) =>
+                                    setNewAnswer({...newAnswer, positive_feedback: e.target.value})
+                                }
+                            />
                         </div>
-                        <div className="mb-3">
+                        <div className="d-flex align-items-center">
                             <label className="form-label">Negative</label>
-                            <input type="Feedback" className="form-control" value={answers["negative_feedback"]}
-                                   placeholder="Feedback"
-                                   onChange={(e) =>
-                    setNewAnswer({...newAnswer, negative_feedback: e.target.value})
-                }/>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={answers["negative_feedback"]}
+                                placeholder="Feedback"
+                                onChange={(e) =>
+                                    setNewAnswer({...newAnswer, negative_feedback: e.target.value})
+                                }
+                            />
                         </div>
                     </form>
                 </div>
-            </div>
+            </details>
 
             <div className="form-check form-check-inline mb-3">
                 <input className="form-check-input" checked={answers["is_regex"]} type="checkbox" id="inlineCheckbox1"
