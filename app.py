@@ -157,6 +157,7 @@ def get_questions():
 
         questions_write = questions_write[offset:offset + limit]
         all_questions[0]['number_of_questions'] = counter
+        all_questions[0]['number_of_all_questions'] = len(questions)
         all_questions.append(questions_write)
 
         return jsonify(all_questions), 200
@@ -456,7 +457,7 @@ def get_question_version_choice(question_id):
             texts.append(i.text)
             correct_ans.append(i.is_correct)
             feedback.append(
-                {"positive":i.positive_feedback, "negative":i.negative_feedback}
+                {"positive": i.positive_feedback, "negative": i.negative_feedback}
             )
 
         dict_ret['answers'] = {
@@ -531,7 +532,7 @@ def add_question_version(id):
                             positive_feedback=feedback[i]["positive"],
                             negative_feedback=feedback[i]["negative"],
                             is_single=is_single,
-                            is_correct = correct_answers[i],
+                            is_correct=correct_answers[i],
                             type='choice_answer')
             db.session.add(choice)
 

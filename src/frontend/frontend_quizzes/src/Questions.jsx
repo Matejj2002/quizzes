@@ -15,6 +15,7 @@ const Questions = () => {
       const [numberOfQuestions, setNumberOfQuestions ] = useState(0);
       const [loading, setLoading] = useState(true);
       const [questions , setQuestions] = useState([]);
+      const [numberOfQuestionsFilter,setNumberOfQuestionsFilter] = useState(0);
 
       const [teachers, setTeachers] = useState([]);
       const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "");
@@ -77,7 +78,8 @@ const Questions = () => {
             const response = await axios.get('http://127.0.0.1:5000/api/questions/' , {
             params: { limit, offset, sort, actualCategory, filterType, authorFilterDec },
             });
-            setNumberOfQuestions(response.data[0].number_of_questions);
+            setNumberOfQuestions(response.data[0].number_of_all_questions);
+            setNumberOfQuestionsFilter(response.data[0].number_of_questions)
             setQuestions(response.data[2]);
       }catch (error){
       }finally {
@@ -130,6 +132,47 @@ const Questions = () => {
         navigate(`/questions/${selectedPage.selected + 1}?limit=${limit}&offset=${newOffset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
     };
 
+  const authorFilterShow = () =>{
+      if (authorFilter === ""){
+          return "Author"
+      }
+
+      return "Author:" + authorFilter
+  }
+
+  const typeFilterShow = () =>{
+      if (filterType === ""){
+          return "Type"
+      }
+
+      return "Type:" + filterType;
+  }
+
+  const sortFilterShow = () =>{
+      if (sort === ""){
+          return "Sort"
+      }
+
+      return "Sort:" + sort;
+  }
+
+  const showQuestionsErr = () =>{
+        if (numberOfQuestions === 0){
+            return (
+                <div className="alert alert-danger" role="alert">
+                    No questions in this category
+                </div>
+            )
+        }
+
+        if (numberOfQuestionsFilter === 0){
+             return (
+                <div className="alert alert-danger" role="alert">
+                    No questions with those filters
+                </div>
+            )
+        }
+  }
 
     const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
     const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]
@@ -151,9 +194,9 @@ const Questions = () => {
 
                           <div className='mb-3 d-flex justify-content-end'>
                               <div className="dropdown">
-                                  <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                  <button className="btn btn-secondary text-decoration-none me-2"
                                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                      Author
+                                      {authorFilterShow()}
                                   </button>
                                   <ul className="dropdown-menu dropdown-menu-end">
                                       <span className="d-flex justify-content-center fw-bold mb-2">Author</span>
@@ -185,9 +228,9 @@ const Questions = () => {
 
 
                               <div className="dropdown">
-                                  <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                  <button className="btn btn-secondary text-decoration-none me-2"
                                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                      Type
+                                      {typeFilterShow()}
                                   </button>
                                   <ul className="dropdown-menu dropdown-menu-end">
                                       <span className="d-flex justify-content-center fw-bold mb-2">Type</span>
@@ -218,9 +261,9 @@ const Questions = () => {
                               </div>
 
                               <div className="dropdown">
-                                  <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                  <button className="btn btn-secondary text-decoration-none me-2"
                                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                      Sort
+                                      {sortFilterShow()}
                                   </button>
                                   <ul className="dropdown-menu dropdown-menu-end">
                                       {
@@ -291,6 +334,7 @@ const Questions = () => {
                                   ))
                               }
                           </ol>
+                          {showQuestionsErr()}
                       </div>
 
                       <div className='col-4 mx-auto'>
