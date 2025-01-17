@@ -177,10 +177,12 @@ const NewQuestion = ({questionDetail = false}) => {
                     }
 
                     <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                        <span className="input-group-text">Supercategory</span>
+                        <label htmlFor="categoryDropdownButton">
+                            Supercategory:
+                        </label>
                         <div className="dropdown">
                             <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false" id="categoryDropdownButton">
                                 {selectedCategory}
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end"
@@ -204,9 +206,11 @@ const NewQuestion = ({questionDetail = false}) => {
                     </div>
 
                     <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                        <span className="input-group-text">Question Type</span>
+                        <label htmlFor="questionTypeDropdownButton">
+                            Question Type:
+                        </label>
                         <div className="dropdown">
-                            <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                            <button className="btn btn-link dropdown-toggle text-dark text-decoration-none" id="questionTypeDropdownButton"
                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {questionType}
                             </button>

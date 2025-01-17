@@ -126,17 +126,26 @@ const NewCategory = () => {
                           </div>
                       )}
                       <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                          <span className="input-group-text">Supercategory</span>
-                          <div className="dropdown">
-                              <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
-                                      type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                  {selectedCategory}
+                          <label htmlFor="categoryDropdownButton">
+                              Supercategory:
+                          </label>
+
+                          <div className="dropdown" id="categorySelect">
+                              <button
+                                  id="categoryDropdownButton"
+                                  className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                  type="button"
+                                  data-bs-toggle="dropdown"
+                                  aria-expanded="false"
+                              >
+                                  {selectedCategory || "Vyberte kategóriu"}
                               </button>
+
                               <ul className="dropdown-menu dropdown-menu-end"
                                   style={{maxHeight: "200px", overflowY: "scroll"}}>
                                   {
                                       category.map((cat, index) => (
-                                              <li key={index}>
+                                          <li key={index}>
                                                   <a className="dropdown-item fs-6" key={index} onClick={() => {
                                                       setSelectedCategory(cat.title);
                                                       setSelectedCategoryId(cat.id);
