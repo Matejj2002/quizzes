@@ -73,8 +73,8 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
                     />
                 </div>
 
-                <details className="mb-2 mt-1">
-                    <summary className="btn btn-primary">
+                <details className="mb-2 mt-1" style={{textAlign:"left"}}>
+                    <summary>
                         Feedback
                     </summary>
                     <div className="p-4 w-auto">

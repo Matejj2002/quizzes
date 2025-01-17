@@ -8,6 +8,8 @@ import { useLocation } from 'react-router-dom';
 import MatchingQuestion from "./MatchingAnswerQuestions/MatchingQuestion";
 import ShortAnswerQuestion from "./ShortAnswerQuestion/ShortAnswerQuestion";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQuestion";
+import Categories from "./CategoriesTree/Categories";
+import Navigation from "./Navigation";
 
 const NewQuestion = ({questionDetail = false}) => {
     const {id} = useParams();
@@ -148,10 +150,17 @@ const NewQuestion = ({questionDetail = false}) => {
     };
 
     return (
-        <div className="container-fluid text-center">
-            <div className="row">
-                <div className="col-3"></div>
-                <div className="col-6">
+        <div>
+            <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+                <Navigation></Navigation>
+            </header>
+    <div className="container-fluid text-center" style ={{marginTop: "50px"}}>
+        <div className="row">
+            <div className="col-2 sidebar"
+                     style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
+                    <Categories catPath={""}/>
+                </div>
+                <div className="col-8">
                     {questionDetail && (
                         <h1>Question Detail</h1>
                     )}
@@ -228,21 +237,26 @@ const NewQuestion = ({questionDetail = false}) => {
 
                     <div className="input-group mb-3">
                         <span className="input-group-text" id="inputGroup-sizing-default">Question Text</span>
-                        <input type="text" className="form-control" value={text} placeholder="Question text"
-                               onChange={(e) => setText(e.target.value)}/>
+                        <textarea
+                            className="form-control"
+                            value={text}
+                            placeholder="Question text"
+                            onChange={(e) => setText(e.target.value)}
+                            rows={4}
+                        />
                     </div>
 
                     {questionType === "Matching Question" && (
                         <div>
-                        <h2>{questionType}</h2>
-                        <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
+                            <h2>{questionType}</h2>
+                            <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
                         </div>
                     )}
 
                     {questionType === "Short Question" && (
                         <div>
                             <h2>{questionType}</h2>
-                            <ShortAnswerQuestion setAnswers={AnswerSetter} answers={answers} ></ShortAnswerQuestion>
+                            <ShortAnswerQuestion setAnswers={AnswerSetter} answers={answers}></ShortAnswerQuestion>
                         </div>
 
                     )}
@@ -275,9 +289,10 @@ const NewQuestion = ({questionDetail = false}) => {
                     </div>
 
                 </div>
-                <div className="col-3"></div>
+                <div className="col-2"></div>
             </div>
         </div>
+            </div>
     )
 }
 

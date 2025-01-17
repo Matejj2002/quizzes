@@ -55,8 +55,8 @@ const MatchingQuestion = ({setAnswers , answers}) => {
                                onChange={(e) => handleInputChange(index, 'right', e.target.value)}/>
                     </div>
 
-                <details className="mt-1">
-                    <summary className="btn btn-primary">
+                <details className="mt-1"  style={{textAlign:"left"}}>
+                    <summary>
                         Feedback
                     </summary>
                     <form className="w-auto">

@@ -5,6 +5,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navigation from "./Navigation";
 import Categories from "./CategoriesTree/Categories";
+import ReactPaginate from "react-paginate";
 
 const Questions = () => {
       const { page } = useParams();
@@ -123,6 +124,11 @@ const Questions = () => {
       }
 
   }
+
+  const handlePageChange = (selectedPage) => {
+        const newOffset = selectedPage.selected * limit;
+        navigate(`/questions/${selectedPage.selected + 1}?limit=${limit}&offset=${newOffset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+    };
 
 
     const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
@@ -288,76 +294,25 @@ const Questions = () => {
                       </div>
 
                       <div className='col-4 mx-auto'>
-                          <div className="btn-toolbar justify-content-center mt-2" role="toolbar" aria-label="Toolbar with button groups">
-                              {
-                                  page === "1" ? (
-                                      <div className="btn-group me-2" role="group" aria-label="First group">
-                                          <button type="button" className="btn btn-danger" onClick={() => {
-                                              const new_offset = (1 - 1) * limit;
-                                              navigate(`/questions/${1}?limit=${limit}&offset=${new_offset}`)
-                                          }
-                                          }>1
-                                          </button>
-                                      </div>
-                                  ) : (
-                                      <div className="btn-group me-2" role="group" aria-label="First group">
-                                          <button type="button" className="btn btn-primary" onClick={() => {
-                                              const new_offset = (1 - 1) * limit;
-                                              navigate(`/questions/${1}?limit=${limit}&offset=${new_offset}`)
-                                          }
-                                          }>1
-                                          </button>
-                                      </div>
-                                  )
-                              }
+                          <ReactPaginate
+                                pageCount={Math.ceil(numberOfQuestions / limit)}
+                                 pageRangeDisplayed={2}
+                                marginPagesDisplayed={2}
+                                onPageChange={handlePageChange}
+                                containerClassName="pagination justify-content-center mt-4"
+                                activeClassName="active"
+                                pageClassName="page-item"
+                                pageLinkClassName="page-link"
+                                previousClassName="page-item"
+                                previousLinkClassName="page-link"
+                                nextClassName="page-item"
+                                nextLinkClassName="page-link"
+                                breakClassName="page-item"
+                                breakLinkClassName="page-link"
+                                previousLabel="Previous"
+                                nextLabel="Next"
+                                ></ReactPaginate>
 
-                              <div className="btn-group me-2" role="group" aria-label="First group">
-                                  {
-                                      pageNumbers.sort().map((index) => {
-                                              if (parseInt(page) === index) {
-                                                  return (
-                                                      <button type="button" className="btn btn-danger" key={index}
-                                                              onClick={() => {
-                                                                  const new_offset = (index - 1) * limit;
-                                                                  navigate(`/questions/${index}?limit=${limit}&offset=${new_offset}`)
-                                                              }
-                                                              }>{index}</button>
-                                                  )
-                                              } else {
-                                                  return (
-                                                      <button type="button" className="btn btn-primary" key={index}
-                                                              onClick={() => {
-                                                                  const new_offset = (index - 1) * limit;
-                                                                  navigate(`/questions/${index}?limit=${limit}&offset=${new_offset}`)
-                                                              }
-                                                              }>{index}</button>
-                                                  )
-                                              }
-                                          }
-                                      )
-                                  }
-                              </div>
-                              {numberOfPages > 1 &&
-                                  (parseInt(page) === numberOfPages ? (
-                                          <div className="btn-group me-2" role="group" aria-label="First group">
-                                              <button type="button" className="btn btn-danger" onClick={() => {
-                                                  const new_offset = (numberOfPages - 1) * limit;
-                                                  navigate(`/questions/${numberOfPages}?limit=${limit}&offset=${new_offset}`)
-                                              }
-                                              }>{numberOfPages}</button>
-                                          </div>
-                                      ) : (
-                                          <div className="btn-group me-2" role="group" aria-label="First group">
-                                              <button type="button" className="btn btn-primary" onClick={() => {
-                                                  const new_offset = (numberOfPages - 1) * limit;
-                                                  navigate(`/questions/${numberOfPages}?limit=${limit}&offset=${new_offset}`)
-                                              }
-                                              }>{numberOfPages}</button>
-                                          </div>
-                                      )
-                                  )
-                              }
-                          </div>
                       </div>
                   </div>
                   <div className="col-2">

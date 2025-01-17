@@ -14,18 +14,21 @@ const SubCategories = ({ category, catPath,  level = 1 }) => {
     <div style={{ marginLeft: `${level * 10}px` }}>
       <a href = "" className="text-decoration-none"
          style={{
-              color: includesP() ? 'red' : 'black',
+             color : "black",
               cursor: "pointer",
             }}
          key={category.title} onClick={(e) => {
           const url = new URL(window.location);
+          url.pathname = "/questions/1";
           url.searchParams.set("category_id", category.id);
           url.searchParams.set("category", category.title);
+          url.searchParams.set("limit", 10);
+          url.searchParams.set("offset", 0);
           window.history.pushState({}, "", url);
       }
       }
 
-      >{category.title}</a>
+      >{includesP() ? <strong>{category.title}</strong> : category.title}</a>
       {category.children && category.children.length > 0 && (
         <div>
           {category.children.map((subCat, index) => (

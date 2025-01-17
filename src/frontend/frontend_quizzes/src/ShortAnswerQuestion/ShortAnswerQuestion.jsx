@@ -28,8 +28,8 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                        onChange={(e) => setNewAnswer({...newAnswer, text: e.target.value})}/>
             </div>
 
-            <details className="mt-3 mb-3">
-                <summary className="btn btn-primary">
+            <details className="mt-3 mb-3"  style={{textAlign:"left"}}>
+                <summary>
                     Feedback
                 </summary>
                 <div className="p-4 w-auto">

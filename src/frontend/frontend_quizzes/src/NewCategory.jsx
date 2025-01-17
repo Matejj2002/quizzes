@@ -6,6 +6,8 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import {useNavigate} from "react-router-dom";
 import { useLocation } from 'react-router-dom';
+import Navigation from "./Navigation";
+import Categories from "./CategoriesTree/Categories";
 
 const NewCategory = () => {
     const location = useLocation();
@@ -106,12 +108,19 @@ const NewCategory = () => {
 
   return (
       <div>
-          <div className="containter-fluid text-center">
-              <h1>New Category</h1>
+          <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+              <Navigation></Navigation>
+          </header>
+
+          <div className="containter-fluid text-center" style ={{marginTop: "50px"}}>
               <div className="row">
-                  <div className="col-2"></div>
+                  <div className="col-2 sidebar"
+                       style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
+                      <Categories catPath={""}/>
+                  </div>
                   <div className="col-8 justify-content-center">
-                      {emptyTitle !=="" && (
+                      <h1>New Category</h1>
+                      {emptyTitle !== "" && (
                           <div className="alert alert-danger" role="alert">
                               {emptyTitle}
                           </div>
@@ -119,28 +128,29 @@ const NewCategory = () => {
                       <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
                           <span className="input-group-text">Supercategory</span>
                           <div className="dropdown">
-                          <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
-                                  type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                              {selectedCategory}
-                          </button>
-                          <ul className="dropdown-menu dropdown-menu-end" style = {{maxHeight:"200px" , overflowY: "scroll"}}>
-                              {
-                                  category.map((cat, index) => (
-                                      <li key={index}>
-                                              <a className="dropdown-item fs-6" key={index} onClick={() => {
-                                                  setSelectedCategory(cat.title);
-                                                  setSelectedCategoryId(cat.id);
+                              <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
+                                      type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                  {selectedCategory}
+                              </button>
+                              <ul className="dropdown-menu dropdown-menu-end"
+                                  style={{maxHeight: "200px", overflowY: "scroll"}}>
+                                  {
+                                      category.map((cat, index) => (
+                                              <li key={index}>
+                                                  <a className="dropdown-item fs-6" key={index} onClick={() => {
+                                                      setSelectedCategory(cat.title);
+                                                      setSelectedCategoryId(cat.id);
 
-                                              }
-                                              }
-                                              >{cat.title}</a></li>
+                                                  }
+                                                  }
+                                                  >{cat.title}</a></li>
                                           )
-                                  )
-                              }
+                                      )
+                                  }
 
-                          </ul>
-                      </div>
+                              </ul>
                           </div>
+                      </div>
 
                       <div className="input-group mb-3 ">
                           <span className="input-group-text">Title</span>
