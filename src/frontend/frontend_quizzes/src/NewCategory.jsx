@@ -126,19 +126,10 @@ const NewCategory = () => {
                           </div>
                       )}
                       <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                          <label htmlFor="categoryDropdownButton">
-                              Supercategory:
-                          </label>
-
                           <div className="dropdown" id="categorySelect">
-                              <button
-                                  id="categoryDropdownButton"
-                                  className="btn btn-link dropdown-toggle text-dark text-decoration-none"
-                                  type="button"
-                                  data-bs-toggle="dropdown"
-                                  aria-expanded="false"
-                              >
-                                  {selectedCategory || "Vyberte kategóriu"}
+                              <button className="btn btn-secondary text-decoration-none me-2"
+                                      type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                  Supercategory: {selectedCategory || "Vyberte kategóriu"}
                               </button>
 
                               <ul className="dropdown-menu dropdown-menu-end"

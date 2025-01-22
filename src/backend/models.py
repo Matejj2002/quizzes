@@ -97,7 +97,7 @@ class Answer(db.Model):
     positive_feedback = db.Column(db.Text)
     negative_feedback = db.Column(db.Text)
     type = db.Column(db.String)
-    is_correct = db.Column(db.Boolean)
+    is_correct = db.Column(db.Boolean, default = False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'question_version',

@@ -177,17 +177,14 @@ const NewQuestion = ({questionDetail = false}) => {
                     }
 
                     <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                        <label htmlFor="categoryDropdownButton">
-                            Supercategory:
-                        </label>
                         <div className="dropdown">
-                            <button className="btn btn-link dropdown-toggle text-dark text-decoration-none"
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false" id="categoryDropdownButton">
-                                {selectedCategory}
+                            <button className="btn btn-secondary text-decoration-none me-2"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Supercategory: {selectedCategory}
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end"
                                 style={{maxHeight: "200px", overflowY: "scroll"}}>
-                                {
+                            {
                                     category.map((cat, index) => (
                                             <li key={index}>
                                                 <a className="dropdown-item fs-6" key={index} onClick={() => {
@@ -206,13 +203,10 @@ const NewQuestion = ({questionDetail = false}) => {
                     </div>
 
                     <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                        <label htmlFor="questionTypeDropdownButton">
-                            Question Type:
-                        </label>
                         <div className="dropdown">
-                            <button className="btn btn-link dropdown-toggle text-dark text-decoration-none" id="questionTypeDropdownButton"
+                            <button className="btn btn-secondary text-decoration-none me-2"
                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {questionType}
+                                Question Type: {questionType}
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end">
                                 <li><a className="dropdown-item" onClick={() => {

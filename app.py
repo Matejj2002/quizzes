@@ -15,7 +15,8 @@ migrate = Migrate(app, db)
 CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizzes.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/quizzes"
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizzes.db'
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = not app.debug
@@ -526,6 +527,7 @@ def add_question_version(id):
         correct_answers = answers['MultipleChoiceQuestion']['correct_answers']
         is_single = answers['MultipleChoiceQuestion']['is_single']
         feedback = answers['MultipleChoiceQuestion']['feedback']
+
         for i in range(len(texts)):
             choice = Choice(choice_question_id=question_version_id,
                             text=texts[i],
@@ -557,7 +559,7 @@ def add_question_version(id):
                 rightSide=i['right'],
                 positive_feedback=i['positive'],
                 negative_feedback=i['negative'],
-                type='matching_pair'
+                type='matching_pair',
             )
 
             db.session.add(matching_pair)
