@@ -592,6 +592,26 @@ def tree_categories(node):
     return result
 
 
+def generate_category_tree(category, level=1):
+    result = []
+
+    result.append({
+            "id": category["id"],
+            "title": f"{'– ' * (level - 1)}{category['title']}"
+        })
+
+    if category.get("children"):
+        for i in category['children']:
+            result.extend(generate_category_tree(i, level + 1))
+
+    return result
+
+@app.route("/api/get-category-tree-array", methods=["GET"])
+def get_category_to_select():
+    cat = tree_categories(Category.query.get_or_404(1))
+    result = generate_category_tree(cat)
+    return result
+
 def draw_category_graph(categories, graph=None, parent=None):
     if graph is None:
         graph = Digraph(format='png', engine='dot')
@@ -614,8 +634,7 @@ if __name__ == '__main__':
         # sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.venv/Lib//site-packages'))
 
         # print('AA')
-        # db.drop_all()
-        # db.create_all()
+        #db.create_all()
         # print('Database created and tables initialized!')
         # supercategory = Category(title="supercategory")
         # db.session.add(supercategory)

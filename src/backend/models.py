@@ -27,6 +27,8 @@ class Category(db.Model):
         cascade='all, delete-orphan',
     )
 
+    quiz_template_items = db.relationship('QuizTemplateItem', back_populates='category')
+
     # subcategories vztah, optional 0..1 - kompozicia OK
 
     def __str__(self):
@@ -97,7 +99,7 @@ class Answer(db.Model):
     positive_feedback = db.Column(db.Text)
     negative_feedback = db.Column(db.Text)
     type = db.Column(db.String)
-    is_correct = db.Column(db.Boolean, default = False)
+    is_correct = db.Column(db.Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'question_version',
@@ -190,3 +192,63 @@ class Student(User):
     __mapper_args__ = {
         'polymorphic_identity': 'student',
     }
+
+
+# -------
+# Quizy
+
+
+class QuizTemplate(db.Model):
+    __tablename__ = 'quiz_templates'
+    id = db.Column(db.Integer, primary_key=True)
+    random_order = db.Column(db.Boolean, default=False)
+    ordered = db.Column(db.Boolean, default=True)
+    filter_on_question = db.Column(db.Boolean, default=False)
+    number_of_attempts = db.Column(db.Integer, default=0)
+    correctable_attempts = db.Column(db.Integer, default=0)
+    order = db.Column(db.ARRAY(db.Integer))  # Array of question IDs or similar
+    date_time_open = db.Column(db.DateTime)
+    date_time_close = db.Column(db.DateTime)
+    time_to_finish = db.Column(db.Integer)
+
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
+    teacher = db.relationship('Teacher')
+    quiz_template_items = db.relationship('QuizTemplateItem', back_populates='quiz_template')
+
+
+class QuizTemplateItem(db.Model):
+    __tablename__ = 'quiz_template_items'
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
+    question_count = db.Column(db.Integer)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    include_sub_categories = db.Column(db.Boolean, default=False)
+
+    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
+    quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_items')
+    category = db.relationship('Category', back_populates='quiz_template_items')
+
+
+class Quiz(db.Model):
+    __tablename__ = 'quizzes'
+    id = db.Column(db.Integer, primary_key=True)
+    date_time_started = db.Column(db.DateTime)
+    date_time_finished = db.Column(db.DateTime)
+    date_time_correction_started = db.Column(db.DateTime)
+    date_time_correction_finished = db.Column(db.DateTime)
+
+    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
+    quiz_template = db.relationship('QuizTemplate')
+    quiz_items = db.relationship('QuizItem', back_populates='quiz')
+
+
+class QuizItem(db.Model):
+    __tablename__ = 'quiz_items'
+    id = db.Column(db.Integer, primary_key=True)
+    answer = db.Column(db.String(255))
+    score = db.Column(db.Float)
+
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
+    quiz = db.relationship('Quiz', back_populates='quiz_items')
+    question_version_id = db.Column(db.Integer, db.ForeignKey('question_versions.id'))
+    question_version = db.relationship('QuestionVersion')

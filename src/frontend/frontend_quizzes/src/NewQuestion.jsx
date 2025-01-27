@@ -10,6 +10,7 @@ import ShortAnswerQuestion from "./ShortAnswerQuestion/ShortAnswerQuestion";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQuestion";
 import Categories from "./CategoriesTree/Categories";
 import Navigation from "./Navigation";
+import CategorySelect from "./CategoriesTree/CategorySelect"
 
 const NewQuestion = ({questionDetail = false}) => {
     const {id} = useParams();
@@ -43,10 +44,12 @@ const NewQuestion = ({questionDetail = false}) => {
     const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
     const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
 
+    const [categorySelect, setCategorySelect] = useState("");
+
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
 
-    const [checkSubmit, setCheckSubmit] = useState("");
+    const [checkSubmit, setCheckSubmit] = useState([]);
 
 
     const saveChanges = () => {
@@ -108,6 +111,16 @@ const NewQuestion = ({questionDetail = false}) => {
       }
       }
 
+      const fetchCategorySelect = async () => {
+      try{
+            const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
+            setCategorySelect(response.data);
+      }catch (error){
+      }finally {
+          setLoading(false);
+      }
+      }
+
     const fetchData = async () => {
         try{
             const response = await axios.get(`http://127.0.0.1:5000/api/question-version-choice/${id}`)
@@ -140,6 +153,7 @@ const NewQuestion = ({questionDetail = false}) => {
     useEffect(() => {
         setLoading(true);
         fetchCategory();
+        fetchCategorySelect();
         if (questionDetail) {
             fetchData();
         }
@@ -154,143 +168,145 @@ const NewQuestion = ({questionDetail = false}) => {
             <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                 <Navigation></Navigation>
             </header>
-    <div className="container-fluid text-center" style ={{marginTop: "50px"}}>
+    <div className="container-fluid" style ={{marginTop: "50px"}}>
         <div className="row">
             <div className="col-2 sidebar"
                      style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
                     <Categories catPath={""}/>
                 </div>
-                <div className="col-8">
-                    {questionDetail && (
-                        <h1>Question Detail</h1>
-                    )}
-                    {!questionDetail && (
-                        <h1>New Question</h1>
-                    )}
+            <div className="col-8">
+                {questionDetail && (
+                    <h1>Question Detail</h1>
+                )}
+                {!questionDetail && (
+                    <h1>New Question</h1>
+                )}
 
-                    {
-                        checkSubmit !== "" && (
-                            <div className="alert alert-danger" role="alert">
-                                {checkSubmit}
-                            </div>
-                        )
-                    }
-
-                    <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                        <div className="dropdown">
-                            <button className="btn btn-secondary text-decoration-none me-2"
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Supercategory: {selectedCategory}
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end"
-                                style={{maxHeight: "200px", overflowY: "scroll"}}>
-                            {
-                                    category.map((cat, index) => (
-                                            <li key={index}>
-                                                <a className="dropdown-item fs-6" key={index} onClick={() => {
-                                                    setSelectedCategory(cat.title);
-                                                    setSelectedCategoryId(cat.id);
-
-                                                }
-                                                }
-                                                >{cat.title}</a></li>
-                                        )
-                                    )
-                                }
-
-                            </ul>
+                {
+                    checkSubmit.length !==0 && (
+                        <div className="alert alert-danger" role="alert">
+                            {checkSubmit}
                         </div>
+                    )
+                }
+
+                <div>
+                    <label htmlFor="select-category">Category</label>
+                    <select
+                        id = "select-category"
+                        className="form-select"
+                        value={selectedCategoryId || ""}
+                        onChange={(e) => {
+                            const selectedOption = categorySelect.find(
+                                (cat) => cat.id === parseInt(e.target.value)
+                            );
+                            setSelectedCategory(selectedOption.title);
+                            setSelectedCategoryId(selectedOption.id);
+                        }}
+                    >
+                        <option value="" disabled>
+                            Select a category
+                        </option>
+                        {Array.isArray(categorySelect) &&
+                            categorySelect.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.title}
+                                </option>
+                            ))}
+                    </select>
+                </div>
+
+                <div className="mb-3 mt-3">
+                    <label htmlFor="questionType" className="form-label">
+                        Question Type
+                    </label>
+                    <select
+                        id="questionType"
+                        className="form-select"
+                        value={questionType}
+                        onChange={(e) => setQuestionType(e.target.value)}
+                    >
+                        <option value="Matching Question">Matching Question</option>
+                        <option value="Multiple Choice Question">Multiple Choice Question</option>
+                        <option value="Short Question">Short Question</option>
+                    </select>
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="questionTitle" className="form-label">
+                        Title
+                    </label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="questionTitle"
+                        value={title}
+                        placeholder="Question title"
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="questionText" className="form-label">
+                        Question Text
+                    </label>
+                    <textarea
+                        className="form-control"
+                        id="questionText"
+                        value={text}
+                        placeholder="Question text"
+                        onChange={(e) => setText(e.target.value)}
+                        rows={4}
+                    />
+                </div>
+
+                {questionType === "Matching Question" && (
+                    <div>
+                        <h2>{questionType}</h2>
+                        <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
+                    </div>
+                )}
+
+                {questionType === "Short Question" && (
+                    <div>
+                        <h2>{questionType}</h2>
+                        <ShortAnswerQuestion setAnswers={AnswerSetter} answers={answers}></ShortAnswerQuestion>
                     </div>
 
-                    <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                        <div className="dropdown">
-                            <button className="btn btn-secondary text-decoration-none me-2"
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Question Type: {questionType}
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end">
-                                <li><a className="dropdown-item" onClick={() => {
-                                    setQuestionType("Matching Question")
-                                }
-                                }>
-                                    Matching Question</a></li>
-                                <li><a className="dropdown-item" onClick={() => {
-                                    setQuestionType("Multiple Choice Question")
-                                }
-                                }>Multiple Choice Question</a></li>
-                                <li><a className="dropdown-item" onClick={() => {
-                                    setQuestionType("Short Question")
-                                }
-                                }>Short Question</a></li>
-                            </ul>
+                )}
 
-                        </div>
+                {questionType === "Multiple Choice Question" && (
+                    <div>
+                        <h2>{questionType}</h2>
+                        <MultipleChoiceQuestion setAnswers={AnswerSetter}
+                                                answers={answers}></MultipleChoiceQuestion>
                     </div>
+                )}
 
-                    <div className="input-group mb-3">
-                        <span className="input-group-text" id="inputGroup-sizing-default">Title</span>
-                        <input type="text" className="form-control" value={title} placeholder="Question title"
-                               onChange={(e) => setTitle(e.target.value)}/>
-                    </div>
+                <div className='mb-3 d-flex mt-3'>
+                    <button type="button" className="btn btn-success mb-3 me-3"
+                            onClick={() => {
+                                saveChanges();
+                            }
+                            }
+                    >{subButton}
+                    </button>
 
-                    <div className="input-group mb-3">
-                        <span className="input-group-text" id="inputGroup-sizing-default">Question Text</span>
-                        <textarea
-                            className="form-control"
-                            value={text}
-                            placeholder="Question text"
-                            onChange={(e) => setText(e.target.value)}
-                            rows={4}
-                        />
-                    </div>
-
-                    {questionType === "Matching Question" && (
-                        <div>
-                            <h2>{questionType}</h2>
-                            <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
-                        </div>
-                    )}
-
-                    {questionType === "Short Question" && (
-                        <div>
-                            <h2>{questionType}</h2>
-                            <ShortAnswerQuestion setAnswers={AnswerSetter} answers={answers}></ShortAnswerQuestion>
-                        </div>
-
-                    )}
-
-                    {questionType === "Multiple Choice Question" && (
-                        <div>
-                            <h2>{questionType}</h2>
-                            <MultipleChoiceQuestion setAnswers={AnswerSetter}
-                                                    answers={answers}></MultipleChoiceQuestion>
-                        </div>
-                    )}
-
-                    <div className='mb-3 d-flex justify-content-center mt-3'>
-                        <button type="button" className="btn btn-success mb-3 me-3"
-                                onClick={() => {
-                                    saveChanges();
-                                }
-                                }
-                        >{subButton}
-                        </button>
-
-                        <button type="button" className="btn btn-primary mb-3"
-                                onClick={() => {
-                                    navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
-                                }
-                                }
-                        >Back
-                        </button>
-
-                    </div>
+                    <button type="button" className="btn btn-primary mb-3"
+                            onClick={() => {
+                                navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                            }
+                            }
+                    >Back
+                    </button>
 
                 </div>
-                <div className="col-2"></div>
+
             </div>
+            <div className="col-2"></div>
         </div>
-            </div>
+    </div>
+        </div>
     )
 }
 

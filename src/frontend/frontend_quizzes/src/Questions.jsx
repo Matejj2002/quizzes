@@ -79,6 +79,7 @@ const Questions = () => {
             params: { limit, offset, sort, actualCategory, filterType, authorFilterDec },
             });
             setNumberOfQuestions(response.data[0].number_of_all_questions);
+            console.log(response.data[0].number_of_all_questions);
             setNumberOfQuestionsFilter(response.data[0].number_of_questions)
             setQuestions(response.data[2]);
       }catch (error){
@@ -137,7 +138,7 @@ const Questions = () => {
           return "Author"
       }
 
-      return "Author:" + authorFilter
+      return "Author: " + authorFilter
   }
 
   const typeFilterShow = () =>{
@@ -145,7 +146,7 @@ const Questions = () => {
           return "Type"
       }
 
-      return "Type:" + filterType;
+      return "Type: " + filterType;
   }
 
   const sortFilterShow = () =>{
@@ -153,7 +154,7 @@ const Questions = () => {
           return "Sort"
       }
 
-      return "Sort:" + sort;
+      return "Sort: " + sort;
   }
 
   const showQuestionsErr = () =>{
@@ -194,7 +195,7 @@ const Questions = () => {
 
                           <div className='mb-3 d-flex justify-content-end'>
                               <div className="dropdown">
-                                  <button className="btn btn-secondary text-decoration-none me-2"
+                                  <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                       {authorFilterShow()}
                                   </button>
@@ -228,7 +229,7 @@ const Questions = () => {
 
 
                               <div className="dropdown">
-                                  <button className="btn btn-secondary text-decoration-none me-2"
+                                  <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                       {typeFilterShow()}
                                   </button>
@@ -261,7 +262,7 @@ const Questions = () => {
                               </div>
 
                               <div className="dropdown">
-                                  <button className="btn btn-secondary text-decoration-none me-2"
+                                  <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                       {sortFilterShow()}
                                   </button>
@@ -339,7 +340,7 @@ const Questions = () => {
 
                       <div className='col-4 mx-auto'>
                           <ReactPaginate
-                                pageCount={Math.ceil(numberOfQuestions / limit)}
+                                pageCount={Math.ceil(numberOfQuestionsFilter / limit)}
                                  pageRangeDisplayed={2}
                                 marginPagesDisplayed={2}
                                 onPageChange={handlePageChange}

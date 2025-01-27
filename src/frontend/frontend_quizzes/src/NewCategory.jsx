@@ -26,6 +26,8 @@ const NewCategory = () => {
 
     const navigate = useNavigate();
 
+    const [categorySelect, setCategorySelect] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [category, setCategory] = useState([]);
     const [title, setTitle] = useState('');
@@ -45,6 +47,17 @@ const NewCategory = () => {
           setLoading(false);
       }
   }
+
+  const fetchCategorySelect = async () => {
+      try{
+            const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
+            setCategorySelect(response.data);
+      }catch (error){
+      }finally {
+          setLoading(false);
+      }
+      }
+
   const saveCategory = () => {
         const data = {
             "supercategory" : selectedCategoryId,
@@ -104,6 +117,7 @@ const NewCategory = () => {
   useEffect(() => {
         setLoading(true);
         fetchCategory();
+        fetchCategorySelect();
     }, []);
 
   return (
@@ -112,44 +126,44 @@ const NewCategory = () => {
               <Navigation></Navigation>
           </header>
 
-          <div className="containter-fluid text-center" style ={{marginTop: "50px"}}>
+          <div className="containter-fluid" style ={{marginTop: "50px"}}>
               <div className="row">
                   <div className="col-2 sidebar"
                        style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
                       <Categories catPath={""}/>
                   </div>
-                  <div className="col-8 justify-content-center">
+                  <div className="col-8">
                       <h1>New Category</h1>
                       {emptyTitle !== "" && (
                           <div className="alert alert-danger" role="alert">
                               {emptyTitle}
                           </div>
                       )}
-                      <div className="flex-row d-flex align-items-center justify-content-center mb-3 mt-3">
-                          <div className="dropdown" id="categorySelect">
-                              <button className="btn btn-secondary text-decoration-none me-2"
-                                      type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Supercategory: {selectedCategory || "Vyberte kategóriu"}
-                              </button>
 
-                              <ul className="dropdown-menu dropdown-menu-end"
-                                  style={{maxHeight: "200px", overflowY: "scroll"}}>
-                                  {
-                                      category.map((cat, index) => (
-                                          <li key={index}>
-                                                  <a className="dropdown-item fs-6" key={index} onClick={() => {
-                                                      setSelectedCategory(cat.title);
-                                                      setSelectedCategoryId(cat.id);
-
-                                                  }
-                                                  }
-                                                  >{cat.title}</a></li>
-                                          )
-                                      )
-                                  }
-
-                              </ul>
-                          </div>
+                      <div className="mb-3">
+                          <label htmlFor="select-category">Category</label>
+                          <select
+                              id="select-category"
+                              className="form-select"
+                              value={selectedCategoryId || ""}
+                              onChange={(e) => {
+                                  const selectedOption = categorySelect.find(
+                                      (cat) => cat.id === parseInt(e.target.value)
+                                  );
+                                  setSelectedCategory(selectedOption.title);
+                                  setSelectedCategoryId(selectedOption.id);
+                              }}
+                          >
+                              <option value="" disabled>
+                                  Select a category
+                              </option>
+                              {Array.isArray(categorySelect) &&
+                                  categorySelect.map((cat) => (
+                                      <option key={cat.id} value={cat.id}>
+                                          {cat.title}
+                                      </option>
+                                  ))}
+                          </select>
                       </div>
 
                       <div className="input-group mb-3 ">

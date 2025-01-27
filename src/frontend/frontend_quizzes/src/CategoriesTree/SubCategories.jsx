@@ -1,4 +1,5 @@
 import React from "react";
+import "./CategoryLink.css"
 
 const SubCategories = ({ category, catPath,  level = 1 }) => {
     const includesP = () => {
@@ -12,11 +13,7 @@ const SubCategories = ({ category, catPath,  level = 1 }) => {
 
   return (
     <div style={{ marginLeft: `${level * 10}px` }}>
-      <a href = "" className="text-decoration-none"
-         style={{
-             color : "black",
-              cursor: "pointer",
-            }}
+      <a href = "" className="text-decoration-none category-link"
          key={category.title} onClick={(e) => {
           const url = new URL(window.location);
           url.pathname = "/questions/1";
