@@ -1,10 +1,10 @@
 .category-link {
-  text-decoration: none; /* Odstránenie podčiarknutia */
-  color: black; /* Štandardná farba textu */
-  cursor: pointer; /* Ukazovateľ myši pri hover */
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
 }
 
 .category-link:hover {
-  color: blue; /* Zmena farby textu na modrú pri hover */
-  text-decoration: underline; /* Pridanie podčiarknutia pri hover (voliteľné) */
+  color: blue;
+  text-decoration: underline;
 }
