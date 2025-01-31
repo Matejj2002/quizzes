@@ -6,6 +6,8 @@ from flask_cors import CORS
 from src.backend.views import *
 from src.backend.models import *
 from graphviz import Digraph
+from flask_session import Session
+import requests
 import os
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -16,10 +18,12 @@ CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/quizzes"
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizzes.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizzes.db'
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = not app.debug
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
 
 db.init_app(app)
 
@@ -63,6 +67,60 @@ def index():
                 <button type="submit">Logout</button>
             </form>
             """
+
+
+@app.route('/check-logged')
+def logged_in():
+    if not github.authorized:
+        return {"logged": False}
+
+    return {"logged": True}
+
+
+@app.route('/getAccessToken', methods=['GET'])
+def get_access_token():
+    CLIENT_ID = "Ov23likPzKaEmFtQM7kn"
+    CLIENT_SECRET = "a75b4914df0b956f87bf79d9dfaba76d5b64a96b"
+    code = request.args.get('code')
+    print("Received code:", code)
+
+    params = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'code': code
+    }
+
+    url = "https://github.com/login/oauth/access_token"
+    headers = {'Accept': 'application/json'}
+    response = requests.post(url, params=params, headers=headers)
+
+    print(response.json())
+    if response.ok:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": "Failed to retrieve access token"}), response.status_code
+
+
+@app.route('/getUserData', methods=['GET'])
+def get_user_data():
+    authorization_header = request.headers.get('Authorization')
+
+    if not authorization_header:
+        return jsonify({"error": "Authorization header missing"}), 401
+
+    url = "https://api.github.com/user"
+    headers = {
+        "Authorization": authorization_header
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.ok:
+        data = response.json()
+        print("User data:", data)
+        return jsonify(data)
+    else:
+        return jsonify({"error": "Failed to retrieve user data"}), response.status_code
 
 
 @app.route('/categories')
@@ -337,6 +395,9 @@ def add_new_question():
     title = data['title']
     text = data['text']
     answers = data['answers']
+    author = data['author']
+
+    author_id = Teacher.query.filter_by(github_name=author).first()
 
     question = Question(category_id=category_id)
     db.session.add(question)
@@ -357,7 +418,7 @@ def add_new_question():
                                      title=title,
                                      text=text,
                                      dateCreated=datetime.datetime.now(),
-                                     author_id=1,  # potom upravit
+                                     author_id= author_id.id,  # potom upravit
                                      type=type_q
                                      )
 
@@ -596,9 +657,9 @@ def generate_category_tree(category, level=1):
     result = []
 
     result.append({
-            "id": category["id"],
-            "title": f"{'– ' * (level - 1)}{category['title']}"
-        })
+        "id": category["id"],
+        "title": f"{'– ' * (level - 1)}{category['title']}"
+    })
 
     if category.get("children"):
         for i in category['children']:
@@ -606,11 +667,13 @@ def generate_category_tree(category, level=1):
 
     return result
 
+
 @app.route("/api/get-category-tree-array", methods=["GET"])
 def get_category_to_select():
     cat = tree_categories(Category.query.get_or_404(1))
     result = generate_category_tree(cat)
     return result
+
 
 def draw_category_graph(categories, graph=None, parent=None):
     if graph is None:
@@ -634,7 +697,7 @@ if __name__ == '__main__':
         # sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.venv/Lib//site-packages'))
 
         # print('AA')
-        #db.create_all()
+        # db.create_all()
         # print('Database created and tables initialized!')
         # supercategory = Category(title="supercategory")
         # db.session.add(supercategory)

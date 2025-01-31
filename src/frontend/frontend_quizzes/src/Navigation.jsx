@@ -5,6 +5,30 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const Navigation = () =>{
     const navigate = useNavigate();
+    const [userData, setUserData] = useState({});
+    async function getUserData() {
+        await fetch("http://127.0.0.1:5000/getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization" : "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            setUserData(data);
+        })
+    }
+
+    const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    navigate("/login");
+  };
+
+    useEffect(() => {
+    getUserData();
+  }, []);
 
     return (
         <nav className="navbar fixed-top bg-body-tertiary">
@@ -21,7 +45,23 @@ const Navigation = () =>{
                             <a className="nav-link active" aria-current="page" href="http://127.0.0.1:5000/admin/">Admin</a>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="#">Quizzes</a>
+                            <a className="nav-link" href="http://localhost:3000/quizzes">Quizzes</a>
+                        </li>
+                    </ul>
+                </div>
+                <div className="d-flex">
+                    <p className="me-3">{userData.login}</p>
+
+                    <img
+                        src={userData.avatar_url}
+                        alt={`${userData.name}'s profile`}
+                        style={{width: "30px", height: "30px", borderRadius: "50%", cursor:"pointer"}}
+                        data-bs-toggle="dropdown"
+                    />
+
+                    <ul className="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <button className="dropdown-item" onClick={handleLogout}>Logout</button>
                         </li>
                     </ul>
                 </div>

@@ -38,7 +38,7 @@ const NewQuestion = ({questionDetail = false}) => {
     const filters = queryParams.get("filter-type");
     const authorFilter = queryParams.get("author-filter")
 
-    const [questionType, setQuestionType ] = useState("Question Type");
+    const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
 
     const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
@@ -50,6 +50,8 @@ const NewQuestion = ({questionDetail = false}) => {
     const [text, setText] = useState('');
 
     const [checkSubmit, setCheckSubmit] = useState([]);
+
+    const [author, setAuthor] = useState("");
 
 
     const saveChanges = () => {
@@ -70,6 +72,7 @@ const NewQuestion = ({questionDetail = false}) => {
             category_id: selectedCategoryId,
             questionType: questionType,
             answers: answersSel,
+            author: author
         };
         if (!questionDetail ) {
             if (questionType !== 'Question Type' && title !=="" && text !=="") {
@@ -99,6 +102,21 @@ const NewQuestion = ({questionDetail = false}) => {
             });
         }
 
+    }
+
+    async function getUSerData() {
+        await fetch("http://127.0.0.1:5000/getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization" : "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            setAuthor(data.login);
+        })
     }
 
     const fetchCategory = async () => {
@@ -154,6 +172,7 @@ const NewQuestion = ({questionDetail = false}) => {
         setLoading(true);
         fetchCategory();
         fetchCategorySelect();
+        getUSerData();
         if (questionDetail) {
             fetchData();
         }
