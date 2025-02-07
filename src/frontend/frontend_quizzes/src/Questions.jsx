@@ -176,6 +176,21 @@ const Questions = () => {
         }
   }
 
+  const handleQuestionDelete = async (questionId) =>{
+      const data = {
+          "id" : questionId
+      }
+        await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
+            .then(response => {
+                    window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+
+    alert("The question has been marked as deleted.");
+    }
+
     const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
     const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]
 
@@ -330,9 +345,22 @@ const Questions = () => {
                                                         </h2>
                                                         <span
                                                             className="badge text-bg-primary rounded-pill flex-shrink-0">{question.versions.type}
-                                                  </span>
+                                                        </span>
                                                     </div>
-                                                    <p className="m-0 text-truncate">{question.versions.text}</p>
+                                                    <div
+                                                        className="d-flex justify-content-between align-items-center w-100">
+                                                        <p className="m-0 text-truncate">{question.versions.text}</p>
+                                                        <button className="btn btn-danger btn-xs p-0 px-1 ms-1"
+                                                                style={{fontSize: "0.75rem"}}
+                                                                onClick={() => {
+                                                                if (window.confirm("Are you sure you want to delete this question?")) {
+                                                                    handleQuestionDelete(question.id);
+                                                                }
+                                                              }}>
+                                                            Delete
+                                                        </button>
+
+                                                    </div>
                                                     <span
                                                         className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
                                                 </div>

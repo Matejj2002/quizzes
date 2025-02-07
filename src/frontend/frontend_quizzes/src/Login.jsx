@@ -1,28 +1,25 @@
 import React from "react";
 import {useEffect, useState} from "react";
-const Login = () =>{
+const Login = ({path = "/questions/1"}) =>{
     const [rerender, setReRender] = useState(false);
     const [userData, setUserData] = useState({});
 
     const CLIENT_ID = "Ov23likPzKaEmFtQM7kn";
 
-
     useEffect(() => {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const codeParam = urlParams.get("code");
-        console.log(codeParam);
 
         if (codeParam && (localStorage.getItem("accessToken") === null)) {
             async function getAccessToken() {
                 await fetch("http://127.0.0.1:5000/getAccessToken?code=" + codeParam)
                     .then((response) => {return response.json()})
                     .then((data) => {
-                        console.log(data);
                         if (data.access_token){
                             localStorage.setItem("accessToken", data.access_token);
                             setReRender(!rerender);
-                            window.location.assign("/questions/1");
+                            window.location.assign(path);
                         }
                     });
             }

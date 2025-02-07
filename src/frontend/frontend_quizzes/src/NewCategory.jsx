@@ -8,6 +8,7 @@ import {useNavigate} from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 import Navigation from "./Navigation";
 import Categories from "./CategoriesTree/Categories";
+import Login from "./Login";
 
 const NewCategory = () => {
     const location = useLocation();
@@ -120,86 +121,94 @@ const NewCategory = () => {
         fetchCategorySelect();
     }, []);
 
-  return (
-      <div>
-          <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-              <Navigation></Navigation>
-          </header>
+  if (localStorage.getItem("accessToken")) {
+      return (
+          <div>
+              <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+                  <Navigation></Navigation>
+              </header>
 
-          <div className="containter-fluid" style ={{marginTop: "50px"}}>
-              <div className="row">
-                  <div className="col-2 sidebar"
-                       style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
-                      <Categories catPath={""}/>
-                  </div>
-                  <div className="col-8">
-                      <h1>New Category</h1>
-                      {emptyTitle !== "" && (
-                          <div className="alert alert-danger" role="alert">
-                              {emptyTitle}
+              <div className="containter-fluid" style={{marginTop: "50px"}}>
+                  <div className="row">
+                      <div className="col-2 sidebar"
+                           style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
+                          <Categories catPath={""}/>
+                      </div>
+                      <div className="col-8">
+                          <h1>New Category</h1>
+                          {emptyTitle !== "" && (
+                              <div className="alert alert-danger" role="alert">
+                                  {emptyTitle}
+                              </div>
+                          )}
+
+                          <div className="mb-3">
+                              <label htmlFor="select-category">Category</label>
+                              <select
+                                  id="select-category"
+                                  className="form-select"
+                                  value={selectedCategoryId || ""}
+                                  onChange={(e) => {
+                                      const selectedOption = categorySelect.find(
+                                          (cat) => cat.id === parseInt(e.target.value)
+                                      );
+                                      setSelectedCategory(selectedOption.title);
+                                      setSelectedCategoryId(selectedOption.id);
+                                  }}
+                              >
+                                  <option value="" disabled>
+                                      Select a category
+                                  </option>
+                                  {Array.isArray(categorySelect) &&
+                                      categorySelect.map((cat) => (
+                                          <option key={cat.id} value={cat.id}>
+                                              {cat.title}
+                                          </option>
+                                      ))}
+                              </select>
                           </div>
-                      )}
 
-                      <div className="mb-3">
-                          <label htmlFor="select-category">Category</label>
-                          <select
-                              id="select-category"
-                              className="form-select"
-                              value={selectedCategoryId || ""}
-                              onChange={(e) => {
-                                  const selectedOption = categorySelect.find(
-                                      (cat) => cat.id === parseInt(e.target.value)
-                                  );
-                                  setSelectedCategory(selectedOption.title);
-                                  setSelectedCategoryId(selectedOption.id);
-                              }}
-                          >
-                              <option value="" disabled>
-                                  Select a category
-                              </option>
-                              {Array.isArray(categorySelect) &&
-                                  categorySelect.map((cat) => (
-                                      <option key={cat.id} value={cat.id}>
-                                          {cat.title}
-                                      </option>
-                                  ))}
-                          </select>
+                          <div className="input-group mb-3 ">
+                              <span className="input-group-text">Title</span>
+                              <input type="text" className="form-control" onChange={handleChange}/>
+                          </div>
+
+                          <div className="input-group mb-3 ">
+                              <span className="input-group-text">Slug</span>
+                              <input type="text" className="form-control" value={slug} onChange={handleSlugChange}/>
+                          </div>
+
+                          <div className='mb-3 d-flex justify-content-center'>
+                              <button type="button" className="btn btn-success mb-3 me-3"
+                                      onClick={() => {
+                                          saveCategory();
+                                      }
+                                      }
+                              >Submit
+                              </button>
+
+                              <button type="button" className="btn btn-primary mb-3"
+                                      onClick={() => {
+                                          navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                      }
+                                      }
+                              >Back
+                              </button>
+
+                          </div>
                       </div>
-
-                      <div className="input-group mb-3 ">
-                          <span className="input-group-text">Title</span>
-                          <input type="text" className="form-control" onChange={handleChange}/>
-                      </div>
-
-                      <div className="input-group mb-3 ">
-                          <span className="input-group-text">Slug</span>
-                          <input type="text" className="form-control" value={slug} onChange={handleSlugChange}/>
-                      </div>
-
-                      <div className='mb-3 d-flex justify-content-center'>
-                          <button type="button" className="btn btn-success mb-3 me-3"
-                                  onClick={() => {
-                                      saveCategory();
-                                  }
-                                  }
-                          >Submit
-                          </button>
-
-                          <button type="button" className="btn btn-primary mb-3"
-                                  onClick={() => {
-                                      navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
-                                  }
-                                  }
-                          >Back
-                          </button>
-
-                      </div>
+                      <div className="col-2"></div>
                   </div>
-                  <div className="col-2"></div>
               </div>
           </div>
-      </div>
-  )
+      )
+  }else{
+        return (
+            <div>
+                <Login></Login>
+            </div>
+        )
+    }
 }
 
 export default NewCategory;

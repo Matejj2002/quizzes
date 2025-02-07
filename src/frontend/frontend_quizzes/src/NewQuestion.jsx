@@ -11,6 +11,7 @@ import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQues
 import Categories from "./CategoriesTree/Categories";
 import Navigation from "./Navigation";
 import CategorySelect from "./CategoriesTree/CategorySelect"
+import Login from "./Login";
 
 const NewQuestion = ({questionDetail = false}) => {
     const {id} = useParams();
@@ -182,151 +183,161 @@ const NewQuestion = ({questionDetail = false}) => {
         setAnswers(newAnswers);
     };
 
-    return (
-        <div>
-            <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                <Navigation></Navigation>
-            </header>
-    <div className="container-fluid" style ={{marginTop: "50px"}}>
-        <div className="row">
-            <div className="col-2 sidebar"
-                     style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
-                    <Categories catPath={""}/>
-                </div>
-            <div className="col-8">
-                {questionDetail && (
-                    <h1>Question Detail</h1>
-                )}
-                {!questionDetail && (
-                    <h1>New Question</h1>
-                )}
-
-                {
-                    checkSubmit.length !==0 && (
-                        <div className="alert alert-danger" role="alert">
-                            {checkSubmit}
+    if (localStorage.getItem("accessToken")) {
+        return (
+            <div>
+                <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+                    <Navigation></Navigation>
+                </header>
+                <div className="container-fluid" style={{marginTop: "50px"}}>
+                    <div className="row">
+                        <div className="col-2 sidebar"
+                             style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
+                            <Categories catPath={""}/>
                         </div>
-                    )
-                }
+                        <div className="col-8">
+                            {questionDetail && (
+                                <h1>Question Detail</h1>
+                            )}
+                            {!questionDetail && (
+                                <h1>New Question</h1>
+                            )}
 
-                <div>
-                    <label htmlFor="select-category">Category</label>
-                    <select
-                        id = "select-category"
-                        className="form-select"
-                        value={selectedCategoryId || ""}
-                        onChange={(e) => {
-                            const selectedOption = categorySelect.find(
-                                (cat) => cat.id === parseInt(e.target.value)
-                            );
-                            setSelectedCategory(selectedOption.title);
-                            setSelectedCategoryId(selectedOption.id);
-                        }}
-                    >
-                        <option value="" disabled>
-                            Select a category
-                        </option>
-                        {Array.isArray(categorySelect) &&
-                            categorySelect.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.title}
-                                </option>
-                            ))}
-                    </select>
-                </div>
+                            {
+                                checkSubmit.length !== 0 && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {checkSubmit}
+                                    </div>
+                                )
+                            }
 
-                <div className="mb-3 mt-3">
-                    <label htmlFor="questionType" className="form-label">
-                        Question Type
-                    </label>
-                    <select
-                        id="questionType"
-                        className="form-select"
-                        value={questionType}
-                        onChange={(e) => setQuestionType(e.target.value)}
-                    >
-                        <option value="Matching Question">Matching Question</option>
-                        <option value="Multiple Choice Question">Multiple Choice Question</option>
-                        <option value="Short Question">Short Question</option>
-                    </select>
-                </div>
+                            <div>
+                                <label htmlFor="select-category">Category</label>
+                                <select
+                                    id="select-category"
+                                    className="form-select"
+                                    value={selectedCategoryId || ""}
+                                    onChange={(e) => {
+                                        const selectedOption = categorySelect.find(
+                                            (cat) => cat.id === parseInt(e.target.value)
+                                        );
+                                        setSelectedCategory(selectedOption.title);
+                                        setSelectedCategoryId(selectedOption.id);
+                                    }}
+                                >
+                                    <option value="" disabled>
+                                        Select a category
+                                    </option>
+                                    {Array.isArray(categorySelect) &&
+                                        categorySelect.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>
+                                                {cat.title}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
 
-                <div className="mb-3">
-                    <label htmlFor="questionTitle" className="form-label">
-                        Title
-                    </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="questionTitle"
-                        value={title}
-                        placeholder="Question title"
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-                </div>
+                            <div className="mb-3 mt-3">
+                                <label htmlFor="questionType" className="form-label">
+                                    Question Type
+                                </label>
+                                <select
+                                    id="questionType"
+                                    className="form-select"
+                                    value={questionType}
+                                    onChange={(e) => setQuestionType(e.target.value)}
+                                >
+                                    <option value="Matching Question">Matching Question</option>
+                                    <option value="Multiple Choice Question">Multiple Choice Question</option>
+                                    <option value="Short Question">Short Question</option>
+                                </select>
+                            </div>
 
-                <div className="mb-3">
-                    <label htmlFor="questionText" className="form-label">
-                        Question Text
-                    </label>
-                    <textarea
-                        className="form-control"
-                        id="questionText"
-                        value={text}
-                        placeholder="Question text"
-                        onChange={(e) => setText(e.target.value)}
-                        rows={4}
-                    />
-                </div>
+                            <div className="mb-3">
+                                <label htmlFor="questionTitle" className="form-label">
+                                    Title
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="questionTitle"
+                                    value={title}
+                                    placeholder="Question title"
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
+                            </div>
 
-                {questionType === "Matching Question" && (
-                    <div>
-                        <h2>{questionType}</h2>
-                        <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
+                            <div className="mb-3">
+                                <label htmlFor="questionText" className="form-label">
+                                    Question Text
+                                </label>
+                                <textarea
+                                    className="form-control"
+                                    id="questionText"
+                                    value={text}
+                                    placeholder="Question text"
+                                    onChange={(e) => setText(e.target.value)}
+                                    rows={4}
+                                />
+                            </div>
+
+                            {questionType === "Matching Question" && (
+                                <div>
+                                    <h2>{questionType}</h2>
+                                    <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
+                                </div>
+                            )}
+
+                            {questionType === "Short Question" && (
+                                <div>
+                                    <h2>{questionType}</h2>
+                                    <ShortAnswerQuestion setAnswers={AnswerSetter}
+                                                         answers={answers}></ShortAnswerQuestion>
+                                </div>
+
+                            )}
+
+                            {questionType === "Multiple Choice Question" && (
+                                <div>
+                                    <h2>{questionType}</h2>
+                                    <MultipleChoiceQuestion setAnswers={AnswerSetter}
+                                                            answers={answers}></MultipleChoiceQuestion>
+                                </div>
+                            )}
+
+                            <div className='mb-3 d-flex mt-3'>
+                                <button type="button" className="btn btn-success mb-3 me-3"
+                                        onClick={() => {
+                                            saveChanges();
+                                        }
+                                        }
+                                >{subButton}
+                                </button>
+
+                                <button type="button" className="btn btn-primary mb-3"
+                                        onClick={() => {
+                                            navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                        }
+                                        }
+                                >Back
+                                </button>
+
+                            </div>
+
+                        </div>
+                        <div className="col-2"></div>
                     </div>
-                )}
-
-                {questionType === "Short Question" && (
-                    <div>
-                        <h2>{questionType}</h2>
-                        <ShortAnswerQuestion setAnswers={AnswerSetter} answers={answers}></ShortAnswerQuestion>
-                    </div>
-
-                )}
-
-                {questionType === "Multiple Choice Question" && (
-                    <div>
-                        <h2>{questionType}</h2>
-                        <MultipleChoiceQuestion setAnswers={AnswerSetter}
-                                                answers={answers}></MultipleChoiceQuestion>
-                    </div>
-                )}
-
-                <div className='mb-3 d-flex mt-3'>
-                    <button type="button" className="btn btn-success mb-3 me-3"
-                            onClick={() => {
-                                saveChanges();
-                            }
-                            }
-                    >{subButton}
-                    </button>
-
-                    <button type="button" className="btn btn-primary mb-3"
-                            onClick={() => {
-                                navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
-                            }
-                            }
-                    >Back
-                    </button>
-
                 </div>
-
             </div>
-            <div className="col-2"></div>
-        </div>
-    </div>
-        </div>
-    )
+        )
+
+    }else{
+        return (
+            <div>
+                <Login></Login>
+            </div>
+        )
+    }
 }
 
 export default NewQuestion
