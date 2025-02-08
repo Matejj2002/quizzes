@@ -13,7 +13,7 @@ import Navigation from "./Navigation";
 import CategorySelect from "./CategoriesTree/CategorySelect"
 import Login from "./Login";
 
-const NewQuestion = ({questionDetail = false}) => {
+const NewQuestion = ({questionDetail = false, copy = false}) => {
     const {id} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
@@ -75,7 +75,7 @@ const NewQuestion = ({questionDetail = false}) => {
             answers: answersSel,
             author: author
         };
-        if (!questionDetail ) {
+        if (!questionDetail || copy) {
             if (questionType !== 'Question Type' && title !=="" && text !=="") {
                 axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
                     .then(response => {
@@ -166,21 +166,34 @@ const NewQuestion = ({questionDetail = false}) => {
 
         }finally {
             setLoading(false);
+
         }
     }
 
     useEffect(() => {
-        setLoading(true);
-        fetchCategory();
-        fetchCategorySelect();
-        getUSerData();
-        if (questionDetail) {
-            fetchData();
-        }
-        }, []);
+    const fetchAllData = async () => {
+      setLoading(true);
 
-    const AnswerSetter = (newAnswers) => {
-        setAnswers(newAnswers);
+      try {
+        await fetchCategory();
+        await fetchCategorySelect();
+        await getUSerData();
+
+        if (questionDetail) {
+          await fetchData();
+        }
+      } catch (error) {
+        console.error("Error during fetch:", error);
+      }
+    };
+
+    fetchAllData();
+
+  }, []);
+
+    const AnswerSetter = async (newAnswers) => {
+        //console.log(newAnswers);
+        setAnswers(newAnswers)
     };
 
     if (localStorage.getItem("accessToken")) {

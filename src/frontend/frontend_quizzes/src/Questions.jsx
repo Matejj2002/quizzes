@@ -361,8 +361,19 @@ const Questions = () => {
                                                         </button>
 
                                                     </div>
-                                                    <span
-                                                        className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
+                                                    <div
+                                                        className="d-flex justify-content-between align-items-center w-100">
+                                                        <span
+                                                            className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
+                                                        <button className="btn btn-success btn-xs p-0 px-1 ms-1"
+                                                                style={{fontSize: "0.75rem"}}
+                                                                onClick={() => {
+                                                                    navigate(`/question/copy-question/${question.id}?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+
+                                                                }}>
+                                                            Copy
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </li>
                                         ))

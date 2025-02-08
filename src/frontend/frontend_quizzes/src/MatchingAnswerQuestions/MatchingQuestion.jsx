@@ -11,10 +11,10 @@ const MatchingQuestion = ({setAnswers , answers}) => {
           positive : answerPair["positive"],
           negative : answerPair["negative"]
       }));
+
       setQuestions([...updatedQuestions, {left: "", right: "", positive: "", negative:""}]);
     }
-  }, []);
-
+  }, [answers]);
     const handleInputChange = (index, side, value) => {
         const updatedQuestions = [...questions];
         if (side ==="left"){
@@ -40,8 +40,16 @@ const MatchingQuestion = ({setAnswers , answers}) => {
     }
 
     useEffect(() => {
-        setAnswers(questions.filter((q) => q.left.trim() !== "" && q.right!==""));
-      }, [questions]);
+        const filteredAnswers = questions.filter(
+            (q) => q.left.trim() !== "" && q.right.trim() !== ""
+        );
+        setAnswers((prevAnswers) => {
+            if (JSON.stringify(prevAnswers) !== JSON.stringify(filteredAnswers)) {
+                return filteredAnswers;
+            }
+            return prevAnswers;
+        });
+    }, [questions, setAnswers]);
 
 
     return (

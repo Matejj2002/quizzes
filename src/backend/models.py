@@ -205,17 +205,20 @@ class QuizTemplate(db.Model):
     ordered = db.Column(db.Boolean, default=True)
     filter_on_question = db.Column(db.Boolean, default=False)
     number_of_attempts = db.Column(db.Integer, default=0)
-    correctable_attempts = db.Column(db.Integer, default=0)
-    order = db.Column(db.ARRAY(db.Integer))  # Array of question IDs or similar
+    number_of_corrections = db.Column(db.Integer, default=0) # number_of_corrections - nazov zmenit  # pocet moznych oprav jedneho pokusu
+    order = db.Column(db.ARRAY(db.Integer))
     date_time_open = db.Column(db.DateTime)
     date_time_close = db.Column(db.DateTime)
     time_to_finish = db.Column(db.Integer)
+    datetime_check = db.Column(db.DateTime)
+    #datetime_check - od kedy sa da skontrolovat
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')
     quiz_template_items = db.relationship('QuizTemplateItem', back_populates='quiz_template')
 
 
+# bud otazka alebo kategoria+pocet alebo -> QuizTemplateSection (title, description, quizTemplateItem - viacej, hodnotenie)
 class QuizTemplateItem(db.Model):
     __tablename__ = 'quiz_template_items'
     id = db.Column(db.Integer, primary_key=True)
@@ -223,6 +226,7 @@ class QuizTemplateItem(db.Model):
     question_count = db.Column(db.Integer)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     include_sub_categories = db.Column(db.Boolean, default=False)
+    #vaha hodnotenia - evaluate
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_items')

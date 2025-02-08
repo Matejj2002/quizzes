@@ -280,6 +280,15 @@ def fetch_question_data(question_id):
 
     return question_dict
 
+@app.route('/api/questions/delete', methods=['PUT'])
+def delete_question():
+    data = request.get_json()
+    question_id = data['id']
+    question = Question.query.get_or_404(question_id)
+    question.is_deleted = True
+    db.session.commit()
+
+    return jsonify({'deleted':True})
 
 @app.route('/api/questions-update/<int:question_id>', methods=['GET'])
 def get_question(question_id):
@@ -390,6 +399,7 @@ def get_question_versions(question_id):
 @app.route('/api/questions/new-question', methods=['PUT'])
 def add_new_question():
     data = request.get_json()
+    print(data)
 
     category_id = data['category_id']
     title = data['title']

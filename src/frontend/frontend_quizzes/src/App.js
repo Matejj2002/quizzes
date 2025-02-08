@@ -7,6 +7,7 @@ import NewQuestion from "./NewQuestion";
 import QuestionDetail from "./QuestionDetail";
 import Quizzes from "./Quizzes";
 import Login from "./Login";
+import QuestionCopy from "./QuestionCopy";
 
 const Home = () => <h1>Domovska stranka</h1>;
 
@@ -19,6 +20,7 @@ function App() {
                   <Route path="/questions" element={<Navigate to="/questions/1?limit=10&offset=0" />} />
                   <Route path="/question/:id" element={<QuestionDetail />} />
                   <Route path="/question/new-question" element={<NewQuestion />} />
+                  <Route path="/question/copy-question/:id" element={<QuestionCopy />} />
                   <Route path="/questions/:page" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
                   <Route path="/quizzes" element={<Quizzes />} />
