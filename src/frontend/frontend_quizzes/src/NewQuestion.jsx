@@ -175,12 +175,12 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
       setLoading(true);
 
       try {
-        await fetchCategory();
-        await fetchCategorySelect();
-        await getUSerData();
+        fetchCategory();
+        fetchCategorySelect();
+        getUSerData();
 
         if (questionDetail) {
-          await fetchData();
+          fetchData();
         }
       } catch (error) {
         console.error("Error during fetch:", error);
