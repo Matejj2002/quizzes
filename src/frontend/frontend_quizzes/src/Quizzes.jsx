@@ -20,14 +20,8 @@ const Quizzes = () => {
 
     const [showModal, setShowModal] = useState(false);
 
-    const [loading, setLoading] = useState(false);
-    const [categorySelect, setCategorySelect] = useState("");
-    const [selectedCategoryId, setSelectedCategoryId] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState("supercategory");
     const [selectedSectionId, setSelectedSectionId] = useState(null);
 
-    const [questions, setQuestions] = useState([]);
-    const [selectedQuestions, setSelectedQuestions] = useState([]);
     const [section, setSection] = useState([]);
 
 
@@ -42,13 +36,17 @@ const Quizzes = () => {
           };
 
       const deleteSection = (sectionId) => {
-          setSection((prevSections) =>
-            prevSections.filter((section) => section.id !== sectionId)
-          );
-        };
+    setSection((prevSections) => {
+        const updatedSections = prevSections.filter((section) => section.id !== sectionId);
+
+        return updatedSections.map((sect, index) => ({
+            ...sect,
+            id: index + 1,
+        }));
+    });
+};
 
       const handleAddQuestionsToSection = (sectionId, newQuestions) => {
-          console.log(sectionId);
         setSection((prevSections) =>
             prevSections.map((sect) =>
                 sect.id === sectionId
@@ -58,10 +56,7 @@ const Quizzes = () => {
         );
     };
 
-      const handleAddQuestions = (newQuestions) => {
-    setSelectedQuestions(newQuestions);
-    };
-
+    console.log(section);
      const handleShowModal = (sectionId) => {
     setSelectedSectionId(sectionId);
     setShowModal(true);
@@ -220,6 +215,7 @@ const Quizzes = () => {
                                             handleAddQuestions={(quests) => handleAddQuestionsToSection(sect.id, quests)}
                                             questionsAll = {questionsAll}
                                         />
+
                                         <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
                                                 data-bs-target="#staticBackdrop"
                                                 onClick={() => handleShowModal(sect.id)}

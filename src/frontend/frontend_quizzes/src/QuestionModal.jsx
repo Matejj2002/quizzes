@@ -12,7 +12,9 @@ const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId,
     const [questionsAll, setQuestionsAll] = useState([]);
 
     useEffect(() => {
+    if (JSON.stringify(questionsInSection) !== JSON.stringify(selectedQuestions)) {
         setSelectedQuestions(questionsInSection);
+    }
 }, [questionsInSection]);
 
     const fetchCategorySelect = async () => {

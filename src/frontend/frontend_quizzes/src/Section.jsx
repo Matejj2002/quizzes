@@ -5,8 +5,9 @@ import QuestionModal from "./QuestionModal";
 const Section = ({ section, selectedQuestions2, questionsAll }) => {
      const [selectedQuestions, setSelectedQuestions] = useState(() => selectedQuestions2 || []);
 
-     const filteredQuestions = questionsAll.filter(q => selectedQuestions2.includes(q.id));
-
+     const filteredQuestions = selectedQuestions2
+  .map(id => questionsAll.find(q => q.id === id))
+  .filter((value, index, self) => self.findIndex(q => q.id === value.id) === index);
     useEffect(() => {
     setSelectedQuestions(selectedQuestions2 || []);
 }, [selectedQuestions2]);
