@@ -1,18 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 
-const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId}) => {
+const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId, section}) => {
+    const questionsInSection = section.find(s => s.id === sectionId)?.questions || [];
     const [questions, setQuestions] = useState([]);
-   const [selectedQuestions, setSelectedQuestions] = useState(() => selectedQuestionsSection || []);
+   const [selectedQuestions, setSelectedQuestions] = useState(questionsInSection);
     const [selectedCategoryId, setSelectedCategoryId] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState("supercategory");
     const [categorySelect, setCategorySelect] = useState("");
     const [subCategories, setSubCategories] = useState(false);
 
-    console.log(selectedQuestionsSection, selectedQuestions);
     useEffect(() => {
-    setSelectedQuestions(selectedQuestionsSection);
-}, [selectedQuestionsSection]);
+        setSelectedQuestions(questionsInSection);
+}, [questionsInSection]);
+
     const fetchCategorySelect = async () => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
@@ -49,7 +50,7 @@ const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId}
         };
 
     const handleSubmit = () => {
-        handleAddQuestions(selectedQuestions);
+        handleAddQuestions(sectionId, selectedQuestions);
         setSelectedQuestions([]);
     };
 
@@ -73,7 +74,7 @@ const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId}
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                        <h1 className="modal-title fs-5" id="staticBackdropLabel">{sectionId}</h1>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">

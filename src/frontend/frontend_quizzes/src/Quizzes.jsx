@@ -18,10 +18,13 @@ const Quizzes = () => {
     const [dateClose, setDateClose] = useState("");
     const [dateCheck, setDateCheck] = useState("");
 
+    const [showModal, setShowModal] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [categorySelect, setCategorySelect] = useState("");
     const [selectedCategoryId, setSelectedCategoryId] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState("supercategory");
+    const [selectedSectionId, setSelectedSectionId] = useState(null);
 
     const [questions, setQuestions] = useState([]);
     const [selectedQuestions, setSelectedQuestions] = useState([]);
@@ -103,12 +106,21 @@ const Quizzes = () => {
         setSection((prevSections) =>
             prevSections.map((sect) =>
                 sect.id === sectionId
-                    ? { ...sect, questions: [...sect.questions, ...newQuestions] }
+                    ? { ...sect, questions: [...newQuestions] }
                     : sect
             )
         );
     };
 
+      const handleAddQuestions = (newQuestions) => {
+    setSelectedQuestions(newQuestions);
+    };
+
+     const handleShowModal = (sectionId) => {
+    setSelectedSectionId(sectionId);
+    setShowModal(true);
+};
+    console.log(section);
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -255,16 +267,29 @@ const Quizzes = () => {
                             <div>
                                 {section.map((sect) => (
                                     <div>
-                                    <Section
-                                        section={sect}
-                                        handleAddQuestions={(quests) => handleAddQuestionsToSection(sect.id, quests)}
-                                    />
-
-                                    <button type="button" className="btn btn-danger mb-3"
-                                            onClick={() => deleteSection(sect.id)}
-                                    >Delete
-                                    </button>
-                                        </div>
+                                        <h2>Section {sect.id}</h2>
+                                        <Section
+                                            section={sect}
+                                            selectedQuestions2={sect.questions}
+                                            handleAddQuestions={(quests) => handleAddQuestionsToSection(sect.id, quests)}
+                                        />
+                                        <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
+                                                data-bs-target="#staticBackdrop"
+                                                onClick={() => handleShowModal(sect.id)}
+                                        >Add Question
+                                        </button>
+                                            <QuestionModal
+                                                handleAddQuestions={handleAddQuestionsToSection}
+                                                selectedQuestionsSection={sect.questions}
+                                                sectionId={selectedSectionId}
+                                                section = {section}
+                                            />
+                                        <br></br>
+                                        <button type="button" className="btn btn-danger mb-3"
+                                                onClick={() => deleteSection(sect.id)}
+                                        >Delete
+                                        </button>
+                                    </div>
                                 ))}
 
 

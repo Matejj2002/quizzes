@@ -2,15 +2,19 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import QuestionModal from "./QuestionModal";
 
-const Section = ({ section }) => {
+const Section = ({ section, selectedQuestions2 }) => {
     const [questions, setQuestions] = useState([]);
-    const [selectedQuestions, setSelectedQuestions] = useState([]);
+     const [selectedQuestions, setSelectedQuestions] = useState(() => selectedQuestions2 || []);
     const [selectedCategoryId, setSelectedCategoryId] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState("supercategory");
     const [categorySelect, setCategorySelect] = useState("");
     const [subCategories, setSubCategories] = useState(false);
 
     const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+    setSelectedQuestions(selectedQuestions2 || []);
+}, [selectedQuestions2]);
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
@@ -70,14 +74,7 @@ const Section = ({ section }) => {
 
     return (
         <div className="mb-3">
-            <h2>Section</h2>
             <div>
-                <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop"
-                    onClick={handleShowModal}
-                    >Add Question
-                </button>
-                <QuestionModal handleAddQuestions={handleAddQuestions} selectedQuestionsSection={selectedQuestions}></QuestionModal>
             </div>
             {
                 selectedQuestions.map((question) => (
