@@ -6,7 +6,6 @@ import Section from "./Section";
 import QuestionModal from "./QuestionModal";
 
 const Quizzes = () => {
-    // State hooks for form inputs
     const [quizTitle, setQuizTitle] = useState("");
     const [randomOrder, setRandomOrder] = useState(false);
     const [orderedRevision, setOrderedRevision] = useState(false);
@@ -17,6 +16,7 @@ const Quizzes = () => {
     const [dateOpen, setDateOpen] = useState("");
     const [dateClose, setDateClose] = useState("");
     const [dateCheck, setDateCheck] = useState("");
+    const [questionsAll, setQuestionsAll] = useState([]);
 
     const [showModal, setShowModal] = useState(false);
 
@@ -28,62 +28,8 @@ const Quizzes = () => {
 
     const [questions, setQuestions] = useState([]);
     const [selectedQuestions, setSelectedQuestions] = useState([]);
-
     const [section, setSection] = useState([]);
 
-    const fetchCategorySelect = async () => {
-      try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
-            setCategorySelect(response.data);
-      }catch (error){
-      }finally {
-          setLoading(false);
-      }
-      }
-
-      const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/api/get_questions_category/${selectedCategoryId}`, {
-            params: {
-                includeSubCat: subCategories
-            }
-        });
-        setQuestions(response.data.questions);
-      } catch (error) {
-        console.error("Error fetching data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
-      useEffect(() => {
-    const fetchAllData = async () => {
-      setLoading(true);
-
-      try {
-        fetchCategorySelect();
-        fetchData();
-      } catch (error) {
-        console.error("Error during fetch:", error);
-      }
-    };
-
-    fetchAllData();
-
-  }, [selectedCategoryId, subCategories]);
-
-      const handleCheckBoxQuestions = (event) => {
-          const { value, checked } = event.target;
-            const valueInt = parseInt(value);
-          setSelectedQuestions((prevSelected) => {
-            if (checked) {
-              return [...prevSelected, valueInt];
-            } else {
-              return prevSelected.filter((id) => id !== valueInt);
-            }
-          });
-        };
 
       const handleNewSection = () => {
             setSection((prevSections) => [
@@ -120,7 +66,7 @@ const Quizzes = () => {
     setSelectedSectionId(sectionId);
     setShowModal(true);
 };
-    console.log(section);
+
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -272,6 +218,7 @@ const Quizzes = () => {
                                             section={sect}
                                             selectedQuestions2={sect.questions}
                                             handleAddQuestions={(quests) => handleAddQuestionsToSection(sect.id, quests)}
+                                            questionsAll = {questionsAll}
                                         />
                                         <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
                                                 data-bs-target="#staticBackdrop"
@@ -283,6 +230,7 @@ const Quizzes = () => {
                                                 selectedQuestionsSection={sect.questions}
                                                 sectionId={selectedSectionId}
                                                 section = {section}
+                                                setQuestionsAllData = {setQuestionsAll}
                                             />
                                         <br></br>
                                         <button type="button" className="btn btn-danger mb-3"

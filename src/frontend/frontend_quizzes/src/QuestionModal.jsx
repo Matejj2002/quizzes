@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 
-const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId, section}) => {
+const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId, section, setQuestionsAllData}) => {
     const questionsInSection = section.find(s => s.id === sectionId)?.questions || [];
     const [questions, setQuestions] = useState([]);
    const [selectedQuestions, setSelectedQuestions] = useState(questionsInSection);
@@ -9,6 +9,7 @@ const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId,
     const [selectedCategory, setSelectedCategory] = useState("supercategory");
     const [categorySelect, setCategorySelect] = useState("");
     const [subCategories, setSubCategories] = useState(false);
+    const [questionsAll, setQuestionsAll] = useState([]);
 
     useEffect(() => {
         setSelectedQuestions(questionsInSection);
@@ -49,8 +50,16 @@ const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId,
           });
         };
 
+
+
     const handleSubmit = () => {
+        const selectedQuestionObjects = questions.filter(q =>
+        selectedQuestions.includes(q.id)
+        );
+        setQuestionsAllData(prevQuestionsAll => [...prevQuestionsAll, ...selectedQuestionObjects]);
+
         handleAddQuestions(sectionId, selectedQuestions);
+
         setSelectedQuestions([]);
     };
 
