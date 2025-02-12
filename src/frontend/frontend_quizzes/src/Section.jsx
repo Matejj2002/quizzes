@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import QuestionModal from "./QuestionModal";
 
-const Section = () => {
+const Section = ({ section }) => {
     const [questions, setQuestions] = useState([]);
     const [selectedQuestions, setSelectedQuestions] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState(1);
@@ -50,6 +50,10 @@ const Section = () => {
           });
         };
 
+    const handleAddQuestions = (newQuestions) => {
+    setSelectedQuestions(newQuestions);
+    };
+
     useEffect(() => {
     const fetchAllData = async () => {
       try {
@@ -73,73 +77,17 @@ const Section = () => {
                     onClick={handleShowModal}
                     >Add Question
                 </button>
-                <QuestionModal></QuestionModal>
-                <br></br>
-                <label htmlFor="select-category">Category</label>
-                <select
-                    id="select-category"
-                    className="form-select"
-                    value={selectedCategoryId || ""}
-                    onChange={(e) => {
-                        const selectedOption = categorySelect.find(
-                            (cat) => cat.id === parseInt(e.target.value)
-                        );
-                        setSelectedCategory(selectedOption.title);
-                        setSelectedCategoryId(selectedOption.id);
-                    }}
-                >
-                    <option value="" disabled>
-                        Select a category
-                    </option>
-                    {Array.isArray(categorySelect) &&
-                        categorySelect.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.title}
-                            </option>
-                        ))}
-                </select>
+                <QuestionModal handleAddQuestions={handleAddQuestions} selectedQuestionsSection={selectedQuestions}></QuestionModal>
             </div>
+            {
+                selectedQuestions.map((question) => (
+                    <div>
+                        {question}
+                    </div>
+                    )
+                )
+            }
 
-            <div className="form-check">
-                <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="includeSubcategories"
-                    checked={subCategories}
-                    onChange={(e) => setSubCategories(e.target.checked)}
-                />
-                <label className="form-check-label" htmlFor="includeSubcategories">
-                    Include subcategories
-                </label>
-            </div>
-
-            <details>
-                <summary>Questions</summary>
-                <div>
-                    <label>Questions</label>
-                    {Array.isArray(questions) && questions.length > 0 ? (
-                        <div>
-                            {questions.map((question) => (
-                                <div key={question.id} className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        id={`question-${question.id}`}
-                                        value={question.id}
-                                        className="form-checkbox"
-                                        onChange={handleCheckBoxQuestions}
-                                        checked={selectedQuestions.includes(question.id)}
-                                    />
-                                    <label htmlFor={`question-${question.id}`}>
-                                        {question.title || "No title"}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p>No questions available</p>
-                    )}
-                </div>
-            </details>
         </div>
     )
 }

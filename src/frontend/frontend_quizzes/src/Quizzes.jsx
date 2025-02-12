@@ -3,6 +3,7 @@ import Navigation from "./Navigation";
 import Login from "./Login";
 import axios from "axios";
 import Section from "./Section";
+import QuestionModal from "./QuestionModal";
 
 const Quizzes = () => {
     // State hooks for form inputs
@@ -84,7 +85,10 @@ const Quizzes = () => {
       const handleNewSection = () => {
             setSection((prevSections) => [
               ...prevSections,
-              { id: prevSections.length + 1, title: `Section ${prevSections.length + 1}` },
+              {   id: prevSections.length + 1,
+                  title: `Section ${prevSections.length + 1}`,
+                  questions : []
+                },
             ]);
           };
 
@@ -93,6 +97,17 @@ const Quizzes = () => {
             prevSections.filter((section) => section.id !== sectionId)
           );
         };
+
+      const handleAddQuestionsToSection = (sectionId, newQuestions) => {
+          console.log(sectionId);
+        setSection((prevSections) =>
+            prevSections.map((sect) =>
+                sect.id === sectionId
+                    ? { ...sect, questions: [...sect.questions, ...newQuestions] }
+                    : sect
+            )
+        );
+    };
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -147,7 +162,6 @@ const Quizzes = () => {
                                 </label>
                             </div>
 
-                            {/* Number of Attempts Input */}
                             <div className="mb-3">
                                 <label htmlFor="exampleNumber" className="form-label">
                                     Number of Attempts
@@ -242,7 +256,10 @@ const Quizzes = () => {
                                 {section.map((sect) => (
                                     <div>
                                     <Section
+                                        section={sect}
+                                        handleAddQuestions={(quests) => handleAddQuestionsToSection(sect.id, quests)}
                                     />
+
                                     <button type="button" className="btn btn-danger mb-3"
                                             onClick={() => deleteSection(sect.id)}
                                     >Delete

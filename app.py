@@ -399,7 +399,6 @@ def get_question_versions(question_id):
 @app.route('/api/questions/new-question', methods=['PUT'])
 def add_new_question():
     data = request.get_json()
-    print(data)
 
     category_id = data['category_id']
     title = data['title']
@@ -662,6 +661,17 @@ def tree_categories(node):
     }
     return result
 
+def list_subcategories(node):
+    subcategories = []
+
+    # Helper function to traverse and collect subcategories
+    def traverse(node):
+        for child in node.subcategories:
+            subcategories.append({"title": child.title, "id": child.id})
+            traverse(child)
+
+    traverse(node)
+    return subcategories
 
 def generate_category_tree(category, level=1):
     result = []
@@ -683,6 +693,31 @@ def get_category_to_select():
     cat = tree_categories(Category.query.get_or_404(1))
     result = generate_category_tree(cat)
     return result
+
+@app.route("/api/get_questions_category/<int:index>", methods=["GET"])
+def get_questions_from_category(index):
+    subcat = request.args.get('includeSubCat')
+    questions = []
+    if subcat == 'true':
+        cats = list_subcategories(Category.query.get_or_404(index))
+        for i in cats:
+            pom_questions = Question.query.filter_by(category_id=i['id']).all()
+            questions.extend(pom_questions)
+
+    questions.extend(Question.query.filter_by(category_id=index).all())
+
+    questions_versions = []
+    for i in questions:
+        latest_version = max(i.question_version, key=lambda v: v.dateCreated)
+        if not i.is_deleted or i.is_deleted == None:
+            version = {
+                "id" : latest_version.id,
+                "title" : latest_version.title,
+                "text": latest_version.text
+            }
+            questions_versions.append(version)
+
+    return {"questions": questions_versions}
 
 
 def draw_category_graph(categories, graph=None, parent=None):

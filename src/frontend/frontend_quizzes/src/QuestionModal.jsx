@@ -1,14 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 
-const QuestionModal = () => {
+const QuestionModal = ({handleAddQuestions, selectedQuestionsSection, sectionId}) => {
     const [questions, setQuestions] = useState([]);
-    const [selectedQuestions, setSelectedQuestions] = useState([]);
+   const [selectedQuestions, setSelectedQuestions] = useState(() => selectedQuestionsSection || []);
     const [selectedCategoryId, setSelectedCategoryId] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState("supercategory");
     const [categorySelect, setCategorySelect] = useState("");
     const [subCategories, setSubCategories] = useState(false);
 
+    console.log(selectedQuestionsSection, selectedQuestions);
+    useEffect(() => {
+    setSelectedQuestions(selectedQuestionsSection);
+}, [selectedQuestionsSection]);
     const fetchCategorySelect = async () => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
@@ -43,6 +47,11 @@ const QuestionModal = () => {
             }
           });
         };
+
+    const handleSubmit = () => {
+        handleAddQuestions(selectedQuestions);
+        setSelectedQuestions([]);
+    };
 
     useEffect(() => {
     const fetchAllData = async () => {
@@ -92,6 +101,19 @@ const QuestionModal = () => {
                                 ))}
                         </select>
 
+                        <div className="form-check">
+                            <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id="includeSubcategories"
+                                checked={subCategories}
+                                onChange={(e) => setSubCategories(e.target.checked)}
+                            />
+                            <label className="form-check-label" htmlFor="includeSubcategories">
+                                Include subcategories
+                            </label>
+                        </div>
+
                         <details>
                             <summary>Questions</summary>
                             <div>
@@ -122,7 +144,9 @@ const QuestionModal = () => {
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" className="btn btn-primary">Understood</button>
+                        <button type="button" className="btn btn-primary" data-bs-dismiss="modal"
+                            onClick={handleSubmit}
+                        >Add</button>
                     </div>
                 </div>
             </div>

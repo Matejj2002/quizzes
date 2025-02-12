@@ -205,13 +205,14 @@ class QuizTemplate(db.Model):
     ordered = db.Column(db.Boolean, default=True)
     filter_on_question = db.Column(db.Boolean, default=False)
     number_of_attempts = db.Column(db.Integer, default=0)
-    number_of_corrections = db.Column(db.Integer, default=0) # number_of_corrections - nazov zmenit  # pocet moznych oprav jedneho pokusu
+    number_of_corrections = db.Column(db.Integer,
+                                      default=0)  # number_of_corrections - nazov zmenit  # pocet moznych oprav jedneho pokusu
     order = db.Column(db.ARRAY(db.Integer))
     date_time_open = db.Column(db.DateTime)
     date_time_close = db.Column(db.DateTime)
     time_to_finish = db.Column(db.Integer)
     datetime_check = db.Column(db.DateTime)
-    #datetime_check - od kedy sa da skontrolovat
+    # datetime_check - od kedy sa da skontrolovat
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')
@@ -226,11 +227,20 @@ class QuizTemplateItem(db.Model):
     question_count = db.Column(db.Integer)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     include_sub_categories = db.Column(db.Boolean, default=False)
-    #vaha hodnotenia - evaluate
+    # vaha hodnotenia - evaluate
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_items')
     category = db.relationship('Category', back_populates='quiz_template_items')
+
+
+class QuizTemplateSection(db.Model):
+    __tablename__ = 'quiz_template_section'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    description = db.Column(db.Text)
+
+    quiz_template_item_id = db.Column(db.Integer, db.ForeignKey('quiz_template_items'))
 
 
 class Quiz(db.Model):
