@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./CategoryLink.css"
+import { useNavigate,useLocation  } from "react-router-dom";
 
 const SubCategories = ({ category, catPath,  level = 1 }) => {
+    const navigate = useNavigate();
+
     const includesP = () => {
         for (let i =0; i < catPath.length; i++){
             if (catPath[i][1] === category.id){
@@ -15,8 +18,11 @@ const SubCategories = ({ category, catPath,  level = 1 }) => {
     <div style={{ marginLeft: `${level * 10}px` }}>
       <a href = "" className="text-decoration-none category-link"
          key={category.title} onClick={(e) => {
+          const catPathFull = catPath.slice(0, -1).map(item => item[0]).reverse().join('/') + "/" + category['title'];
+
+
           const url = new URL(window.location);
-          url.pathname = "/questions/1";
+          url.pathname = `/questions/${catPathFull}`;
           url.searchParams.set("category_id", category.id);
           url.searchParams.set("category", category.title);
           url.searchParams.set("limit", 10);

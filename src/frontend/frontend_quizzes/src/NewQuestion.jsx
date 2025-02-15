@@ -30,14 +30,15 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
         subButton = "Submit";
     }
 
-    const page = queryParams.get("page");
-    const limit = queryParams.get("limit");
-    const offset = queryParams.get("offset");
-    const sort = queryParams.get("sort");
-    const categoryS = queryParams.get("selected_category");
-    const categorySId = queryParams.get("id");
-    const filters = queryParams.get("filter-type");
-    const authorFilter = queryParams.get("author-filter")
+    const catPath = location.state['catPath'];
+    const page = location.state['page'];
+    const limit = location.state['limit'];
+    const offset = location.state['offset'];
+    const sort = location.state['sort'];
+    const categoryS = location.state['selectedCategory'];
+    const categorySId = location.state['id'];
+    const filters = location.state['filterType'];
+    const authorFilter = location.state['authorFilter']
 
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
@@ -192,7 +193,6 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
   }, []);
 
     const AnswerSetter = async (newAnswers) => {
-        //console.log(newAnswers);
         setAnswers(newAnswers)
     };
 
@@ -329,7 +329,7 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
 
                                 <button type="button" className="btn btn-primary mb-3"
                                         onClick={() => {
-                                            navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                         }
                                         }
                                 >Back

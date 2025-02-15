@@ -9,7 +9,10 @@ import ReactPaginate from "react-paginate";
 import Login from "./Login";
 
 const Questions = () => {
-      const { page } = useParams();
+    const { "*": category } = useParams();
+
+      const categoryList = category ? category.split("/") : [];
+
       const [searchParams, setSearchParams] = useSearchParams();
       const navigate = useNavigate();
 
@@ -20,6 +23,8 @@ const Questions = () => {
 
       const [teachers, setTeachers] = useState([]);
       const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "");
+
+      const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
 
       const [sort, setSort] = useState(searchParams.get("sort") || "");
 
@@ -35,7 +40,23 @@ const Questions = () => {
 
       const [allCategories, setAllCategories] = useState([]);
 
+      console.log("CP", categoryPath);
       const currentPage = parseInt(page || "1", 10);
+
+      useEffect(() => {
+    setPage(parseInt(searchParams.get("page") || "1", 10));
+}, [searchParams]);
+
+      useEffect(() => {
+    if (categoryPath.length > 0) {
+      const catPathFull = categoryPath.map(item => item[0]).reverse().join('/');
+
+      const newUrl = `/questions/${catPathFull}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`;
+
+
+      navigate(newUrl, { replace: true });
+    }
+  }, [categoryPath, navigate]);
 
 
   const fetchCategory = async (index) => {
@@ -131,7 +152,8 @@ const Questions = () => {
 
   const handlePageChange = (selectedPage) => {
         const newOffset = selectedPage.selected * limit;
-        navigate(`/questions/${selectedPage.selected + 1}?limit=${limit}&offset=${newOffset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+
+        navigate(`/questions/${category}?page=${selectedPage.selected + 1}&limit=${limit}&offset=${newOffset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
     };
 
   const authorFilterShow = () =>{
@@ -230,7 +252,7 @@ const Questions = () => {
                                                                    teacher_name = "";
                                                                }
                                                                setAuthorFilter(teacher_name);
-                                                               navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
                                                            }
                                                            }
 
@@ -264,7 +286,7 @@ const Questions = () => {
                                                                    name = "";
                                                                }
                                                                setFilterType(name);
-                                                               navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
                                                            }
                                                            }
 
@@ -296,7 +318,7 @@ const Questions = () => {
                                                                    name = "";
                                                                }
                                                                setSort(name)
-                                                               navigate(`/questions/${page}?limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
                                                            }
                                                            }
 
@@ -312,14 +334,38 @@ const Questions = () => {
                                     </div>
 
                                     <button type="button" className="btn btn-success me-1" onClick={(e) => {
-                                        navigate(`/question/new-question?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+                                        navigate(`/question/new-question`, {
+                                            state: {
+                                                catPath: category,
+                                                id: actualCategory,
+                                                selectedCategory: actualCategoryString,
+                                                limit: limit,
+                                                offset: offset,
+                                                sort: sort,
+                                                page: page,
+                                                filterType: filterType,
+                                                authorFilter: authorFilter,
+                                            }
+                                        });
                                     }
                                     }
                                     >Add question
                                     </button>
 
                                     <button type="button" className="btn btn-success" onClick={(e) => {
-                                        navigate(`/category/new-category?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+                                        navigate(`/category/new-category`, {
+                                            state: {
+                                                catPath : category,
+                                                id : actualCategory,
+                                                selectedCategory : actualCategoryString,
+                                                limit : limit,
+                                                offset: offset,
+                                                sort : sort,
+                                                page : page,
+                                                filterType : filterType,
+                                                authorFilter : authorFilter,
+                                            }
+                                        });
                                     }}>Add category
                                     </button>
                                 </div>

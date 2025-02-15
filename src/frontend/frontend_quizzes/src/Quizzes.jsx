@@ -56,7 +56,7 @@ const Quizzes = () => {
         );
     };
 
-    console.log(section);
+
      const handleShowModal = (sectionId) => {
     setSelectedSectionId(sectionId);
     setShowModal(true);

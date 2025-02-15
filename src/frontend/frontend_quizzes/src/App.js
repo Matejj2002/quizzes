@@ -17,11 +17,12 @@ function App() {
               <Routes>
                   <Route path="/" element={<Home/>}/>
                   <Route path="/login" element={<Login/>}></Route>
-                  <Route path="/questions" element={<Navigate to="/questions/1?limit=10&offset=0" />} />
+                  <Route path="/questions" element={<Navigate to="/questions/supercategory?limit=10&offset=0" />} />
                   <Route path="/question/:id" element={<QuestionDetail />} />
                   <Route path="/question/new-question" element={<NewQuestion />} />
                   <Route path="/question/copy-question/:id" element={<QuestionCopy />} />
-                  <Route path="/questions/:page" element={<Questions />} />
+
+                  <Route path="/:questions*" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
                   <Route path="/quizzes" element={<Quizzes />} />
               </Routes>
