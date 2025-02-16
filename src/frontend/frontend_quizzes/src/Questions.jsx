@@ -34,13 +34,11 @@ const Questions = () => {
       const offset = parseInt(searchParams.get("offset") || "0", 10);
 
       const [actualCategory, setActualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
-      const [actualCategoryString, setActualCategoryString] = useState(searchParams.get("category")||"supercategory");
-
+      const [actualCategoryString, setActualCategoryString] = useState(categoryList.at(categoryList.length-1) ||"supercategory");
       const [categoryPath , setCategoryPath] = useState([]);
 
       const [allCategories, setAllCategories] = useState([]);
 
-      console.log("CP", categoryPath);
       const currentPage = parseInt(page || "1", 10);
 
       useEffect(() => {
@@ -252,7 +250,7 @@ const Questions = () => {
                                                                    teacher_name = "";
                                                                }
                                                                setAuthorFilter(teacher_name);
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
                                                            }
                                                            }
 
@@ -286,7 +284,7 @@ const Questions = () => {
                                                                    name = "";
                                                                }
                                                                setFilterType(name);
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
                                                            }
                                                            }
 
@@ -318,7 +316,7 @@ const Questions = () => {
                                                                    name = "";
                                                                }
                                                                setSort(name)
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
                                                            }
                                                            }
 
@@ -383,7 +381,19 @@ const Questions = () => {
                                                         <h2 className="h5 text-start text-truncate">
                                                             <a href="" onClick={(e) => {
                                                                 e.preventDefault();
-                                                                navigate(`/question/${question.id}?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+                                                                navigate(`/question/${question.id}`, {
+                                                                    state: {
+                                                                        catPath : category,
+                                                                        id : actualCategory,
+                                                                        selectedCategory : actualCategoryString,
+                                                                        limit : limit,
+                                                                        offset: offset,
+                                                                        sort : sort,
+                                                                        page : page,
+                                                                        filterType : filterType,
+                                                                        authorFilter : authorFilter,
+                                                                    }
+                                                                });
                                                             }
                                                             } className="text-decoration-none">
                                                                 {question.versions.title || "No title available"}
@@ -403,7 +413,7 @@ const Questions = () => {
                                                                     handleQuestionDelete(question.id);
                                                                 }
                                                               }}>
-                                                            Delete
+                                                            Archive
                                                         </button>
 
                                                     </div>
@@ -414,7 +424,19 @@ const Questions = () => {
                                                         <button className="btn btn-success btn-xs p-0 px-1 ms-1"
                                                                 style={{fontSize: "0.75rem"}}
                                                                 onClick={() => {
-                                                                    navigate(`/question/copy-question/${question.id}?id=${actualCategory}&selected_category=${actualCategoryString}&limit=${limit}&offset=${offset}&sort=${sort}&page=${page}&filter-type=${filterType}&author-filter=${authorFilter}`);
+                                                                    navigate(`/question/copy-question/${question.id}`, {
+                                                                    state: {
+                                                                        catPath : category,
+                                                                        id : actualCategory,
+                                                                        selectedCategory : actualCategoryString,
+                                                                        limit : limit,
+                                                                        offset: offset,
+                                                                        sort : sort,
+                                                                        page : page,
+                                                                        filterType : filterType,
+                                                                        authorFilter : authorFilter,
+                                                                    }
+                                                                });
 
                                                                 }}>
                                                             Copy

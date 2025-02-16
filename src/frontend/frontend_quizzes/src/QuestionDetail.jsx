@@ -2,7 +2,7 @@ import NewQuestion from "./NewQuestion";
 
 const QuestionDetail = () => {
     return (
-    <NewQuestion questionDetail={true}></NewQuestion>
+    <NewQuestion questionDetail={true} subButText={"Update"}></NewQuestion>
     )
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -10,33 +10,34 @@ import ShortAnswerQuestion from "./ShortAnswerQuestion/ShortAnswerQuestion";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQuestion";
 import Categories from "./CategoriesTree/Categories";
 import Navigation from "./Navigation";
-import CategorySelect from "./CategoriesTree/CategorySelect"
 import Login from "./Login";
 
-const NewQuestion = ({questionDetail = false, copy = false}) => {
+const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}) => {
     const {id} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const queryParams = new URLSearchParams(location.search);
-    const idQ = queryParams.get('id');
-    const selectedCategory1 = queryParams.get('selected_category');
+
+    let titleText = "";
+    if (subButText === "Submit"){
+        titleText = "New Question";
+    }
+    if (subButText === "Copy"){
+        titleText = "Copy Question";
+    }
+    if (subButText === "Update"){
+        titleText = "Update Question";
+    }
+
     const [category, setCategory] = useState([]);
     const [loading, setLoading] = useState(false);
-
-    let subButton = "";
-    if (questionDetail){
-        subButton = "Update";
-    }else{
-        subButton = "Submit";
-    }
 
     const catPath = location.state['catPath'];
     const page = location.state['page'];
     const limit = location.state['limit'];
     const offset = location.state['offset'];
     const sort = location.state['sort'];
-    const categoryS = location.state['selectedCategory'];
-    const categorySId = location.state['id'];
+    const selectedCategory1 = location.state['selectedCategory'];
+    const idQ = location.state['id'];
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter']
 
@@ -145,6 +146,7 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
         try{
             const response = await axios.get(`http://127.0.0.1:5000/api/question-version-choice/${id}`)
             setSelectedCategory(response.data["category_name"]);
+            setSelectedCategoryId(response.data["category_id"]);
             setTitle(response.data["title"]);
             setText(response.data["text"]);
 
@@ -209,12 +211,7 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
                             <Categories catPath={""}/>
                         </div>
                         <div className="col-8">
-                            {questionDetail && (
-                                <h1>Question Detail</h1>
-                            )}
-                            {!questionDetail && (
-                                <h1>New Question</h1>
-                            )}
+                            <h1>{titleText}</h1>
 
                             {
                                 checkSubmit.length !== 0 && (
@@ -324,12 +321,12 @@ const NewQuestion = ({questionDetail = false, copy = false}) => {
                                             saveChanges();
                                         }
                                         }
-                                >{subButton}
+                                >{subButText}
                                 </button>
 
                                 <button type="button" className="btn btn-primary mb-3"
                                         onClick={() => {
-                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                         }
                                         }
                                 >Back

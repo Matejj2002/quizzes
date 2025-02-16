@@ -12,20 +12,16 @@ import Login from "./Login";
 
 const NewCategory = () => {
     const location = useLocation();
-    const catPath = location.state['catPath'];
-    const queryParams = new URLSearchParams(location.search);
-    const id = queryParams.get('id');
-    const selectedCategory1 = queryParams.get('selected_category');
 
+    const catPath = location.state['catPath'];
     const page = location.state['page'];
     const limit = location.state['limit'];
     const offset = location.state['offset'];
     const sort = location.state['sort'];
-    const categoryS = location.state['selectedCategory'];
-    const categorySId = location.state['id'];
+    const selectedCategory1 = location.state['selectedCategory'];
+    const id = location.state['id'];
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter']
-
     const navigate = useNavigate();
 
     const [categorySelect, setCategorySelect] = useState("");
@@ -87,7 +83,7 @@ const NewCategory = () => {
         if (canSave) {
             axios.put(`http://127.0.0.1:5000/api/categories/new-category`, data)
                 .then(response => {
-                        navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                        navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${id}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                     }
                 )
         }
@@ -190,7 +186,7 @@ const NewCategory = () => {
 
                               <button type="button" className="btn btn-primary mb-3"
                                       onClick={() => {
-                                          navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${categorySId}&category=${categoryS}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                          navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${id}&category=${selectedCategory1}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                       }
                                       }
                               >Back

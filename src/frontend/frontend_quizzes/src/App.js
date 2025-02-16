@@ -22,7 +22,7 @@ function App() {
                   <Route path="/question/new-question" element={<NewQuestion />} />
                   <Route path="/question/copy-question/:id" element={<QuestionCopy />} />
 
-                  <Route path="/:questions*" element={<Questions />} />
+                  <Route path="/:questions/*" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
                   <Route path="/quizzes" element={<Quizzes />} />
               </Routes>
