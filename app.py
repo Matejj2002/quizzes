@@ -142,12 +142,24 @@ def logout():
 
 @app.route('/api/questions/', methods=['GET'])
 def get_questions():
+    print("AAAA")
     limit = request.args.get('limit', default=10, type=int)
     offset = request.args.get('offset', default=10, type=int)
     sort = request.args.get('sort', default="", type=str)
     act_cat = request.args.get('actualCategory', default=1, type=int)
     filters = request.args.get("filterType", default="", type=str)
     author_filter = request.args.get("authorFilterDec", default="", type=str)
+    question_filter = request.args.get("questionFilter", default="Active", type = str)
+
+    cond = False
+    if question_filter == "All":
+        cond = True
+    if question_filter == "Archived":
+        cond = True
+
+    if question_filter == "Active":
+        cond = False
+
 
     if filters == "Matching Question":
         filters = "matching_answer_question"
@@ -168,7 +180,12 @@ def get_questions():
 
         counter = 0
         for question in questions:
-            if not question['is_deleted'] and (question['versions']['type'] in filters or filters == '') and (
+            if question_filter == "Active" or question_filter == "Archived":
+                condition = (question['is_deleted'] == cond or question['is_deleted'] == None) #musi byt, lebo na zaciatku tam nebol tento flag
+            else:
+                condition = True
+
+            if condition and (question['versions']['type'] in filters or filters == '') and (
                     author_filter == 'All' or author_filter == "" or question['versions'][
                 'author_name'] == author_filter):
                 counter += 1
@@ -284,11 +301,17 @@ def fetch_question_data(question_id):
 def delete_question():
     data = request.get_json()
     question_id = data['id']
-    question = Question.query.get_or_404(question_id)
-    question.is_deleted = True
+    delete = data['delete']
+
+    if delete:
+        question = Question.query.get_or_404(question_id)
+        question.is_deleted = True
+    else:
+        question = Question.query.get_or_404(question_id)
+        question.is_deleted = False
     db.session.commit()
 
-    return jsonify({'deleted':True})
+    return jsonify({'deleted':delete})
 
 @app.route('/api/questions-update/<int:question_id>', methods=['GET'])
 def get_question(question_id):

@@ -221,6 +221,7 @@ class QuizTemplate(db.Model):
 
 # bud otazka alebo kategoria+pocet alebo -> QuizTemplateSection (title, description, quizTemplateItem - viacej, hodnotenie)
 class QuizTemplateItem(db.Model):
+    #nevie priamo o kvize, namiesto quiz_template ma quiz_template_section - je sucastou sekcie
     __tablename__ = 'quiz_template_items'
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))

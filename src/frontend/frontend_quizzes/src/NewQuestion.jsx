@@ -22,7 +22,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
         titleText = "New Question";
     }
     if (subButText === "Copy"){
-        titleText = "Copy Question";
+        titleText = "Copy of Question";
     }
     if (subButText === "Update"){
         titleText = "Update Question";

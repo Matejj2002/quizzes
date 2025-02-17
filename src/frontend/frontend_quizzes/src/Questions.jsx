@@ -41,6 +41,8 @@ const Questions = () => {
 
       const currentPage = parseInt(page || "1", 10);
 
+      const [questionFilter, setQuestionFilter] = useState("Active");
+
       useEffect(() => {
     setPage(parseInt(searchParams.get("page") || "1", 10));
 }, [searchParams]);
@@ -96,10 +98,9 @@ const Questions = () => {
             const offset = (currentPage - 1) * limit;
             const authorFilterDec = decodeURIComponent(authorFilter);
             const response = await axios.get('http://127.0.0.1:5000/api/questions/' , {
-            params: { limit, offset, sort, actualCategory, filterType, authorFilterDec },
+            params: { limit, offset, sort, actualCategory, filterType, authorFilterDec, questionFilter },
             });
-            setNumberOfQuestions(response.data[0].number_of_all_questions);
-            console.log(response.data[0].number_of_all_questions);
+            setNumberOfQuestions(response.data[0].number_of_all_questions);;
             setNumberOfQuestionsFilter(response.data[0].number_of_questions)
             setQuestions(response.data[2]);
       }catch (error){
@@ -125,7 +126,7 @@ const Questions = () => {
     useEffect(() => {
         setLoading(true);
         fetchQuestions(limit, offset, sort);
-    }, [sort, filterType]);
+    }, [sort, filterType, questionFilter]);
 
 
   const numberOfPages = Math.ceil(numberOfQuestions / limit);
@@ -198,7 +199,8 @@ const Questions = () => {
 
   const handleQuestionDelete = async (questionId) =>{
       const data = {
-          "id" : questionId
+          "id" : questionId,
+          "delete" : true,
       }
         await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
             .then(response => {
@@ -211,8 +213,25 @@ const Questions = () => {
     alert("The question has been marked as deleted.");
     }
 
-    const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"]
-    const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"]
+    const handleQuestionRestore = async (questionId) =>{
+      const data = {
+          "id" : questionId,
+          "delete" : false
+      }
+        await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
+            .then(response => {
+                    window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+
+    alert("The question has been marked as deleted.");
+    }
+
+    const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"];
+    const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"];
+    const showQuestionsFilter = ["Active", "Archived", "All"]
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -230,8 +249,36 @@ const Questions = () => {
                             <h2 className="mb-4">{actualCategoryString}</h2>
 
                             <div>
-
                                 <div className='mb-3 d-flex justify-content-end'>
+                                    <div className="dropdown">
+                                        <button className="btn btn-secondary text-decoration-none me-2"
+                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {questionFilter}
+                                        </button>
+                                        <ul className="dropdown-menu dropdown-menu-end">
+                                            <span className="d-flex justify-content-center fw-bold mb-2">Active</span>
+                                            {
+                                                showQuestionsFilter.map((name, index) => (
+                                                    <li key={index}>
+                                                        <a className="dropdown-item fs-6" href=""
+                                                           onClick={(e) => {
+                                                               e.preventDefault();
+
+                                                               setQuestionFilter(name);
+                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                           }
+                                                           }
+
+                                                        >
+                                                            {name}
+                                                        </a>
+                                                    </li>
+
+                                                ))
+                                            }
+                                        </ul>
+                                    </div>
+
                                     <div className="dropdown">
                                         <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -299,6 +346,7 @@ const Questions = () => {
                                         </ul>
                                     </div>
 
+
                                     <div className="dropdown">
                                         <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -353,15 +401,15 @@ const Questions = () => {
                                     <button type="button" className="btn btn-success" onClick={(e) => {
                                         navigate(`/category/new-category`, {
                                             state: {
-                                                catPath : category,
-                                                id : actualCategory,
-                                                selectedCategory : actualCategoryString,
-                                                limit : limit,
+                                                catPath: category,
+                                                id: actualCategory,
+                                                selectedCategory: actualCategoryString,
+                                                limit: limit,
                                                 offset: offset,
-                                                sort : sort,
-                                                page : page,
-                                                filterType : filterType,
-                                                authorFilter : authorFilter,
+                                                sort: sort,
+                                                page: page,
+                                                filterType: filterType,
+                                                authorFilter: authorFilter,
                                             }
                                         });
                                     }}>Add category
@@ -383,15 +431,15 @@ const Questions = () => {
                                                                 e.preventDefault();
                                                                 navigate(`/question/${question.id}`, {
                                                                     state: {
-                                                                        catPath : category,
-                                                                        id : actualCategory,
-                                                                        selectedCategory : actualCategoryString,
-                                                                        limit : limit,
+                                                                        catPath: category,
+                                                                        id: actualCategory,
+                                                                        selectedCategory: actualCategoryString,
+                                                                        limit: limit,
                                                                         offset: offset,
-                                                                        sort : sort,
-                                                                        page : page,
-                                                                        filterType : filterType,
-                                                                        authorFilter : authorFilter,
+                                                                        sort: sort,
+                                                                        page: page,
+                                                                        filterType: filterType,
+                                                                        authorFilter: authorFilter,
                                                                     }
                                                                 });
                                                             }
@@ -406,22 +454,36 @@ const Questions = () => {
                                                     <div
                                                         className="d-flex justify-content-between align-items-center w-100">
                                                         <p className="m-0 text-truncate">{question.versions.text}</p>
-                                                        <button className="btn btn-danger btn-xs p-0 px-1 ms-1"
-                                                                style={{fontSize: "0.75rem"}}
-                                                                onClick={() => {
-                                                                if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                    handleQuestionDelete(question.id);
-                                                                }
-                                                              }}>
-                                                            Archive
-                                                        </button>
+                                                        {questionFilter === "Active" && (
+                                                              <button className="btn btn-outline-danger btn-xs p-0 px-1 ms-1"
+                                                                      style={{ fontSize: "0.75rem" }}
+                                                                      onClick={() => {
+                                                                        if (window.confirm("Are you sure you want to delete this question?")) {
+                                                                          handleQuestionDelete(question.id);
+                                                                        }
+                                                                      }}>
+                                                                Archive
+                                                              </button>
+                                                            )}
+
+                                                        {questionFilter === "Archived" && (
+                                                              <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
+                                                                      style={{ fontSize: "0.75rem" }}
+                                                                      onClick={() => {
+                                                                        if (window.confirm("Are you sure you want to restore this question?")) {
+                                                                          handleQuestionRestore(question.id);
+                                                                        }
+                                                                      }}>
+                                                                Restore
+                                                              </button>
+                                                            )}
 
                                                     </div>
                                                     <div
                                                         className="d-flex justify-content-between align-items-center w-100">
                                                         <span
                                                             className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
-                                                        <button className="btn btn-success btn-xs p-0 px-1 ms-1"
+                                                        <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
                                                                 style={{fontSize: "0.75rem"}}
                                                                 onClick={() => {
                                                                     navigate(`/question/copy-question/${question.id}`, {
