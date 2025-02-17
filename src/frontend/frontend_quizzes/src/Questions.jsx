@@ -467,7 +467,7 @@ const Questions = () => {
                                                             )}
 
                                                         {questionFilter === "Archived" && (
-                                                              <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
+                                                              <button className="btn btn-outline-primary btn-xs p-0 px-1 ms-1"
                                                                       style={{ fontSize: "0.75rem" }}
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to restore this question?")) {
