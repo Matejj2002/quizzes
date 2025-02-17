@@ -8,6 +8,7 @@ import QuestionDetail from "./QuestionDetail";
 import Quizzes from "./Quizzes";
 import Login from "./Login";
 import QuestionCopy from "./QuestionCopy";
+import Quizzes2 from "./Quizzes2";
 
 const Home = () => <h1>Domovska stranka</h1>;
 
@@ -24,7 +25,8 @@ function App() {
 
                   <Route path="/:questions/*" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
-                  <Route path="/quizzes" element={<Quizzes />} />
+                  <Route path="/quizzes" element={<Quizzes2 />} />
+                  <Route path="/quizzeso" element={<Quizzes />} />
               </Routes>
       </div>
   );
