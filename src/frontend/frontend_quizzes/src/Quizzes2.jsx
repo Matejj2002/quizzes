@@ -100,37 +100,6 @@ const Quizzes2 = () => {
        finally {}
     }
 
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:5000/api/get_questions_category/${sections[pageNum-2]["categoryId"]}`, {
-            params: {
-                includeSubCat: sections[pageNum-2]["includeSubCategories"]
-            }
-        });
-        setQuestions(response.data.questions);
-      } catch (error) {
-        console.error("Error fetching data", error);
-      } finally {
-      }
-    }
-
-//     const handleCheckBoxQuestions = (questionId) => {
-//     setCopyOfSections((prevSections) => {
-//         return prevSections.map((section, index) => {
-//             if (index === pageNum - 2) {
-//                 const isAlreadySelected = section.questions.includes(questionId);
-//                 return {
-//                     ...section,
-//                     questions: isAlreadySelected
-//                         ? section.questions.filter((id) => id !== questionId)
-//                         : [...section.questions, questionId] // Add if not selected
-//                 };
-//             }
-//             return section;
-//         });
-//     });
-// };
-
     const handleCheckBoxQuestions = (question) => {
     setCopyOfSections((prevSections) => {
         return prevSections.map((section, index) => {
@@ -141,7 +110,7 @@ const Quizzes2 = () => {
                     ...section,
                     questions: isAlreadySelected
                         ? section.questions.filter(q => q.id !== question.id)
-                        : [...section.questions, { id: question.id, title: question.title }]
+                        : [...section.questions, { id: question.id, title: question.title, type: question.type, dateCreated: question.dateCreated, author: question.authorName }]
                 };
             }
             return section;
@@ -179,7 +148,18 @@ const Quizzes2 = () => {
     }
 }, [sections, pageNum, copyOfSections[pageNum-2]?.categoryId, copyOfSections[pageNum-2]?.includeSubCategories]);
 
+    function handleRemoveQuestion(index) {
+        sections[pageNum - 2].questions.splice(index, 1);
+        setSections([...sections]);
+    }
+    function handleOrderChange(index, newValue) {
+        const updatedSections = [...sections];
+        updatedSections[pageNum - 2].questions[index].order = parseInt(newValue, 10);
+        setSections(updatedSections);
+    }
+
     console.log(sections);
+
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -346,23 +326,61 @@ const Quizzes2 = () => {
 
                                             {sections[pageNum-2]["randomQuestions"] === "questions" && (
                                                 <div>
-                                                    {sections[pageNum - 2]?.questions.map((quest) => {
-                                                        return (
-                                                            <div key={quest.id}
-                                                                 className="flex flex-col space-y-2 p-4 border border-gray-300 rounded-lg shadow-md mb-4">
-                                                                <strong>Question title: </strong>{quest.title}<br/>
-                                                                <strong>Question id: </strong>{quest.id}<br/>
+                                                    <ol className="list-group">
+                                                        {
+                                                            sections[pageNum-2]?.questions.map((question, index) => (
 
-                                                            </div>
-                                                        );
-                                                    })}
+                                                                <li key={index}
+                                                                    className="list-group-item d-flex justify-content-between align-items-start">
+                                                                    <input
+                                                                        type="number"
+                                                                        className="form-control form-control-sm me-2"
+                                                                        max={copyOfSections[pageNum-2].questions.length}
+                                                                        style={{width: "50px"}}
+                                                                        value={question.order || index + 1}
+                                                                        onChange={(e) => handleOrderChange(index, e.target.value)}
+                                                                    />
+                                                                    <div
+                                                                        className="ms-2 me-auto text-truncate text-start w-100">
+                                                                        <div
+                                                                            className="d-flex justify-content-between align-items-center w-100">
+                                                                            <h2 className="h5 text-start text-truncate">
+                                                                                <a href="#"
+                                                                                   className="text-decoration-none">
+                                                                                    {question.title || "No title available"}
+                                                                                </a>
+                                                                            </h2>
+                                                                            <span
+                                                                                className="badge text-bg-primary rounded-pill flex-shrink-0">{question.type}
+                                                        </span>
+                                                                        </div>
+                                                                        <div
+                                                                            className="d-flex justify-content-between align-items-center w-100">
+                                                                            <p className="m-0 text-truncate">{question.text}</p>
+                                                                        </div>
+                                                                        <div
+                                                                            className="d-flex justify-content-between align-items-center w-100">
+                                                        <span
+                                                            className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}</span><br/>
+                                                                            <button
+                                                                                className="btn btn-outline-danger btn-xs p-0 px-1 ms-1"
+                                                                                style={{fontSize: "0.75rem"}}
+                                                                                onClick={() => handleRemoveQuestion(index)}>
+                                                                                Remove
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            ))
+                                                        }
+                                                    </ol>
                                                 </div>
                                             )}
                                         </div>
                                     )}
                                     <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
                                             data-bs-target="#staticBackdrop"
-                                            onClick={()=>{
+                                            onClick={() => {
                                                 setCopyOfSections(sections);
                                             }}
 
@@ -436,14 +454,14 @@ const Quizzes2 = () => {
                                                         <input className="form-check-input" type="radio"
                                                                name="randomOrSelectQuestions"
                                                                id="exampleRadios1" value="option1"
-                                                               checked={copyOfSections[pageNum-2]["randomQuestions"] === "random"}
+                                                               checked={copyOfSections[pageNum - 2]["randomQuestions"] === "random"}
                                                                onChange={(e) => {
                                                                    const updatedSections = [...copyOfSections];
-                                                                    updatedSections[pageNum - 2] = {
-                                                                        ...updatedSections[pageNum - 2],
-                                                                        randomQuestions: "random"
-                                                                    };
-                                                                    setCopyOfSections(updatedSections);
+                                                                   updatedSections[pageNum - 2] = {
+                                                                       ...updatedSections[pageNum - 2],
+                                                                       randomQuestions: "random"
+                                                                   };
+                                                                   setCopyOfSections(updatedSections);
                                                                }}/>
                                                         <label className="form-check-label" htmlFor="exampleRadios1">
                                                             Random Questions
@@ -509,8 +527,7 @@ const Quizzes2 = () => {
                                                                                         className="form-checkbox"
                                                                                         onChange={() => handleCheckBoxQuestions(question)}
                                                                                         checked={copyOfSections[pageNum - 2]?.questions.some(q => q.id === question.id)}
-                                                                                        // onChange={() => handleCheckBoxQuestions(question.id)}
-                                                                                        //checked={copyOfSections[pageNum-2]["questions"].includes(question.id)}
+
                                                                                     />
                                                                                     <label htmlFor={`question-${question.id}`}>
                                                                                         {question.title || "No title"}
