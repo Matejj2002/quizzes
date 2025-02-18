@@ -20,17 +20,17 @@ const Quizzes2 = () => {
 
     const [categorySelect, setCategorySelect] = useState("");
 
-     const [copyOfSection, setCopyOfSection] = useState([{
-         sectionId: 1,
-            shuffle: false,
-            categoryId: 1,
-            categoryName: "supercategory",
-            includeSubCategories: false,
-            randomQuestions: "random",
-            questionsCount: 1,
-            questions: [],
-            show : false
-     }]);
+     const [copyOfSections, setCopyOfSections] = useState([{
+        sectionId: 1,
+        shuffle:false,
+        questions:[],
+        categoryId: 1,
+        categoryName: "supercategory",
+        includeSubCategories: false,
+        randomQuestions: "random",
+        questionsCount: 1,
+        show : false
+    }]);
 
     const [sections, setSections] = useState([{
         sectionId: 1,
@@ -269,8 +269,8 @@ const Quizzes2 = () => {
                                     <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
                                             data-bs-target="#staticBackdrop"
                                             onClick={()=>{
-                                                setCopyOfSection(sections[pageNum-2]);
-                                                console.log(copyOfSection);
+                                                setCopyOfSections(sections);
+                                                console.log(copyOfSections);
 
                                             }}
 
@@ -292,18 +292,18 @@ const Quizzes2 = () => {
                                                     <select
                                                         id="select-category"
                                                         className="form-select"
-                                                        value={sections[pageNum - 2]["categoryId"] || ""}
+                                                        value={copyOfSections[pageNum - 2]["categoryId"] || ""}
                                                         onChange={(e) => {
                                                             const selectedOption = categorySelect.find(
                                                                 (cat) => cat.id === parseInt(e.target.value)
                                                             );
-                                                            const updatedSections = [...sections];
+                                                            const updatedSections = [...copyOfSections];
                                                             updatedSections[pageNum - 2] = {
                                                                 ...updatedSections[pageNum - 2],
                                                                 categoryId: selectedOption.id,
                                                                 categoryName: selectedOption.title,
                                                             };
-                                                            setSections(updatedSections);
+                                                            setCopyOfSections(updatedSections);
 
                                                         }}
                                                     >
@@ -323,14 +323,14 @@ const Quizzes2 = () => {
                                                             className="form-check-input"
                                                             type="checkbox"
                                                             id="includeSubcategories"
-                                                            checked={sections[pageNum - 2]["includeSubCategories"]}
+                                                            checked={copyOfSections[pageNum - 2]["includeSubCategories"]}
                                                             onChange={(e) => {
-                                                                const updatedSections = [...sections];
+                                                                const updatedSections = [...copyOfSections];
                                                                 updatedSections[pageNum - 2] = {
                                                                     ...updatedSections[pageNum - 2],
                                                                     includeSubCategories: e.target.checked
                                                                 };
-                                                                setSections(updatedSections);
+                                                                setCopyOfSections(updatedSections);
                                                             }
                                                             }
                                                         />
@@ -344,14 +344,14 @@ const Quizzes2 = () => {
                                                         <input className="form-check-input" type="radio"
                                                                name="randomOrSelectQuestions"
                                                                id="exampleRadios1" value="option1"
-                                                               checked={sections[pageNum-2]["randomQuestions"] === "random"}
+                                                               checked={copyOfSections[pageNum-2]["randomQuestions"] === "random"}
                                                                onChange={(e) => {
-                                                                   const updatedSections = [...sections];
+                                                                   const updatedSections = [...copyOfSections];
                                                                     updatedSections[pageNum - 2] = {
                                                                         ...updatedSections[pageNum - 2],
                                                                         randomQuestions: "random"
                                                                     };
-                                                                    setSections(updatedSections);
+                                                                    setCopyOfSections(updatedSections);
                                                                }}/>
                                                         <label className="form-check-label" htmlFor="exampleRadios1">
                                                             Random Questions
@@ -361,21 +361,21 @@ const Quizzes2 = () => {
                                                         <input className="form-check-input" type="radio"
                                                                name="randomOrSelectQuestions"
                                                                id="exampleRadios2" value="option2"
-                                                               checked={sections[pageNum-2]["randomQuestions"] === "questions"}
+                                                               checked={copyOfSections[pageNum-2]["randomQuestions"] === "questions"}
                                                                onChange={(e) => {
-                                                                   const updatedSections = [...sections];
+                                                                   const updatedSections = [...copyOfSections];
                                                                     updatedSections[pageNum - 2] = {
                                                                         ...updatedSections[pageNum - 2],
                                                                         randomQuestions: "questions"
                                                                     };
-                                                                    setSections(updatedSections);
+                                                                    setCopyOfSections(updatedSections);
                                                                }}/>
                                                         <label className="form-check-label" htmlFor="exampleRadios2">
                                                             Select Questions
                                                         </label>
                                                     </div>
 
-                                                    {sections[pageNum-2]["randomQuestions"] === "random" && (
+                                                    {copyOfSections[pageNum-2]["randomQuestions"] === "random" && (
                                                         <div className="mb-3">
                                                             <label htmlFor="randomQuestionsCount" className="form-label">
                                                                 Random questions count
@@ -387,22 +387,22 @@ const Quizzes2 = () => {
                                                                 placeholder="Enter count"
                                                                 min="1"
                                                                 max="500"
-                                                                value={sections[pageNum-2]["questionsCount"]}
+                                                                value={copyOfSections[pageNum-2]["questionsCount"]}
                                                                 onChange={(e) => {
-                                                                    const updatedSections = [...sections];
+                                                                    const updatedSections = [...copyOfSections];
                                                                     updatedSections[pageNum - 2] = {
                                                                         ...updatedSections[pageNum - 2],
                                                                         questionsCount: parseInt(e.target.value)
                                                                     };
-                                                                    setSections(updatedSections);
+                                                                    setCopyOfSections(updatedSections);
                                                                 }}
                                                             />
                                                         </div>
                                                     )}
 
-                                                    {sections[pageNum-2]["randomQuestions"] === "questions" && (
+                                                    {copyOfSections[pageNum-2]["randomQuestions"] === "questions" && (
                                                         <div>
-
+                                                            Questions
                                                         </div>
                                                         )
                                                     }
@@ -415,12 +415,17 @@ const Quizzes2 = () => {
                                                     <button type="button" className="btn btn-primary"
                                                             data-bs-dismiss="modal"
                                                             onClick={() => {
-                                                                const updatedSections = [...sections];
-                                                                    updatedSections[pageNum - 2] = {
-                                                                        ...updatedSections[pageNum - 2],
-                                                                        show: true
-                                                                    };
+                                                                const updatedSections = [...copyOfSections];
+                                                                updatedSections[pageNum - 2] = {
+                                                                    ...updatedSections[pageNum - 2],
+                                                                    show: true
+                                                                };
+
+                                                                setCopyOfSections(updatedSections);
+
+                                                                setTimeout(() => {
                                                                     setSections(updatedSections);
+                                                                }, 0);
                                                             }}
                                                     >Add
                                                     </button>
