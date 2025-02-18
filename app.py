@@ -82,7 +82,6 @@ def get_access_token():
     CLIENT_ID = "Ov23likPzKaEmFtQM7kn"
     CLIENT_SECRET = "a75b4914df0b956f87bf79d9dfaba76d5b64a96b"
     code = request.args.get('code')
-    print("Received code:", code)
 
     params = {
         'client_id': CLIENT_ID,
@@ -117,7 +116,6 @@ def get_user_data():
 
     if response.ok:
         data = response.json()
-        print("User data:", data)
         return jsonify(data)
     else:
         return jsonify({"error": "Failed to retrieve user data"}), response.status_code
@@ -142,7 +140,6 @@ def logout():
 
 @app.route('/api/questions/', methods=['GET'])
 def get_questions():
-    print("AAAA")
     limit = request.args.get('limit', default=10, type=int)
     offset = request.args.get('offset', default=10, type=int)
     sort = request.args.get('sort', default="", type=str)
@@ -365,6 +362,9 @@ def category_show_helper(category_id):
 @app.route('/api/categories/new-category', methods=["PUT"])
 def new_category():
     data = request.get_json()
+
+    if data["supercategory"] == 0:
+        data["supercategory"] = None
 
     new_categor = Category(
         supercategory_id=data['supercategory'],
@@ -673,6 +673,8 @@ def add_question_version(id):
 
 @app.route("/api/get-category-tree", methods=["GET"])
 def get_tree_categories():
+    categories = Category.query.filter(Category.id is None).all()
+    print("CCC", categories)
     return tree_categories(Category.query.get_or_404(1))
 
 
