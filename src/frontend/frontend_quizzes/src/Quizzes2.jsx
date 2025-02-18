@@ -9,6 +9,8 @@ const Quizzes2 = () => {
     const [pageNum, setPageNum] = useState(1);
     const [pageCount, setPageCount] = useState(3);
 
+    const [questions, setQuestions] = useState([]);
+
     const [quizTitle, setQuizTitle] = useState("");
     const [randomOrder, setRandomOrder] = useState(false);
     const [numberOfCorrections, setNumberOfCorrections] = useState(0);
@@ -72,6 +74,20 @@ const Quizzes2 = () => {
             questionsCount: 1,
             questions: [],
             show : false
+        }])
+
+        setCopyOfSections((prevSections) => [
+        ...prevSections,
+        {
+            sectionId: prevSections.length + 1,
+            shuffle: false,
+            categoryId: 1,
+            categoryName: "supercategory",
+            includeSubCategories: false,
+            randomQuestions: "random",
+            questionsCount: 1,
+            questions: [],
+            show : false
         }
     ]);
     }
@@ -83,6 +99,37 @@ const Quizzes2 = () => {
       }catch (error){}
        finally {}
     }
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:5000/api/get_questions_category/${sections[pageNum-2]["categoryId"]}`, {
+            params: {
+                includeSubCat: sections[pageNum-2]["includeSubCategories"]
+            }
+        });
+        setQuestions(response.data.questions);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      } finally {
+      }
+    }
+
+    const handleCheckBoxQuestions = (questionId) => {
+    setCopyOfSections((prevSections) => {
+        return prevSections.map((section, index) => {
+            if (index === pageNum - 2) {
+                const isAlreadySelected = section.questions.includes(questionId);
+                return {
+                    ...section,
+                    questions: isAlreadySelected
+                        ? section.questions.filter((id) => id !== questionId)
+                        : [...section.questions, questionId] // Add if not selected
+                };
+            }
+            return section;
+        });
+    });
+};
 
     useEffect(() => {
     const fetchAllData = async () => {
@@ -96,6 +143,24 @@ const Quizzes2 = () => {
     fetchAllData();
 
   }, []);
+
+    useEffect(() => {
+    if (pageNum - 2 >= 0 && sections[pageNum - 2]) {
+        const fetchQuestions = async () => {
+            try {
+                const response = await axios.get(
+                    `http://127.0.0.1:5000/api/get_questions_category/${copyOfSections[pageNum - 2].categoryId}`,
+                    { params: { includeSubCat: copyOfSections[pageNum - 2].includeSubCategories } }
+                );
+                setQuestions(response.data.questions);
+            } catch (error) {
+                console.error("Error fetching data", error);
+            }
+        };
+        fetchQuestions();
+    }
+}, [sections, pageNum, copyOfSections[pageNum-2]?.categoryId, copyOfSections[pageNum-2]?.includeSubCategories]);
+
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -256,13 +321,21 @@ const Quizzes2 = () => {
                                                         questions: </strong>{sections[pageNum - 2]["shuffle"] ? 'true' : 'false'}<br/>
                                                     <strong>Category: </strong>{sections[pageNum - 2]["categoryName"]}<br/>
                                                     <strong>Include
-                                                        subcategories: </strong>{sections[pageNum - 2]["categoryId"] ? 'true' : 'false'}<br/>
+                                                        subcategories: </strong>{sections[pageNum - 2]["includeSubCategories"] ? 'true' : 'false'}<br/>
                                                     <strong>Number of questions: </strong>{sections[pageNum - 2]["questionsCount"]}<br/>
                                                 </div>
                                             )}
 
                                             {sections[pageNum-2]["randomQuestions"] === "questions" && (
-                                                <p>questions</p>
+                                                <div>
+                                                    {sections[pageNum - 2]?.questions.map((questionId) => {
+                                                        return (
+                                                            <div key={questionId} className="flex items-center space-x-2">
+                                                                <span>Question ID: {questionId}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             )}
                                         </div>
                                     )}
@@ -270,8 +343,6 @@ const Quizzes2 = () => {
                                             data-bs-target="#staticBackdrop"
                                             onClick={()=>{
                                                 setCopyOfSections(sections);
-                                                console.log(copyOfSections);
-
                                             }}
 
                                     >Add Question
@@ -402,7 +473,33 @@ const Quizzes2 = () => {
 
                                                     {copyOfSections[pageNum-2]["randomQuestions"] === "questions" && (
                                                         <div>
-                                                            Questions
+                                                            <details>
+                                                                <summary>Questions</summary>
+                                                                <div>
+                                                                    <label>Questions</label>
+                                                                    {Array.isArray(questions) && questions.length > 0 ? (
+                                                                        <div>
+                                                                            {questions.map((question) => (
+                                                                                <div key={question.id} className="flex items-center space-x-2">
+                                                                                    <input
+                                                                                        type="checkbox"
+                                                                                        id={`question-${question.id}`}
+                                                                                        value={question.id}
+                                                                                        className="form-checkbox"
+                                                                                        onChange={() => handleCheckBoxQuestions(question.id)}
+                                                                                        checked={copyOfSections[pageNum-2]["questions"].includes(question.id)}
+                                                                                    />
+                                                                                    <label htmlFor={`question-${question.id}`}>
+                                                                                        {question.title || "No title"}
+                                                                                    </label>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p>No questions available</p>
+                                                                    )}
+                                                                </div>
+                                                            </details>
                                                         </div>
                                                         )
                                                     }
