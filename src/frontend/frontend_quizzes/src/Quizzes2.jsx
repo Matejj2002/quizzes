@@ -114,16 +114,34 @@ const Quizzes2 = () => {
       }
     }
 
-    const handleCheckBoxQuestions = (questionId) => {
+//     const handleCheckBoxQuestions = (questionId) => {
+//     setCopyOfSections((prevSections) => {
+//         return prevSections.map((section, index) => {
+//             if (index === pageNum - 2) {
+//                 const isAlreadySelected = section.questions.includes(questionId);
+//                 return {
+//                     ...section,
+//                     questions: isAlreadySelected
+//                         ? section.questions.filter((id) => id !== questionId)
+//                         : [...section.questions, questionId] // Add if not selected
+//                 };
+//             }
+//             return section;
+//         });
+//     });
+// };
+
+    const handleCheckBoxQuestions = (question) => {
     setCopyOfSections((prevSections) => {
         return prevSections.map((section, index) => {
             if (index === pageNum - 2) {
-                const isAlreadySelected = section.questions.includes(questionId);
+                const isAlreadySelected = section.questions.some(q => q.id === question.id);
+
                 return {
                     ...section,
                     questions: isAlreadySelected
-                        ? section.questions.filter((id) => id !== questionId)
-                        : [...section.questions, questionId] // Add if not selected
+                        ? section.questions.filter(q => q.id !== question.id)
+                        : [...section.questions, { id: question.id, title: question.title }]
                 };
             }
             return section;
@@ -161,7 +179,7 @@ const Quizzes2 = () => {
     }
 }, [sections, pageNum, copyOfSections[pageNum-2]?.categoryId, copyOfSections[pageNum-2]?.includeSubCategories]);
 
-
+    console.log(sections);
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -328,10 +346,13 @@ const Quizzes2 = () => {
 
                                             {sections[pageNum-2]["randomQuestions"] === "questions" && (
                                                 <div>
-                                                    {sections[pageNum - 2]?.questions.map((questionId) => {
+                                                    {sections[pageNum - 2]?.questions.map((quest) => {
                                                         return (
-                                                            <div key={questionId} className="flex items-center space-x-2">
-                                                                <span>Question ID: {questionId}</span>
+                                                            <div key={quest.id}
+                                                                 className="flex flex-col space-y-2 p-4 border border-gray-300 rounded-lg shadow-md mb-4">
+                                                                <strong>Question title: </strong>{quest.title}<br/>
+                                                                <strong>Question id: </strong>{quest.id}<br/>
+
                                                             </div>
                                                         );
                                                     })}
@@ -486,8 +507,10 @@ const Quizzes2 = () => {
                                                                                         id={`question-${question.id}`}
                                                                                         value={question.id}
                                                                                         className="form-checkbox"
-                                                                                        onChange={() => handleCheckBoxQuestions(question.id)}
-                                                                                        checked={copyOfSections[pageNum-2]["questions"].includes(question.id)}
+                                                                                        onChange={() => handleCheckBoxQuestions(question)}
+                                                                                        checked={copyOfSections[pageNum - 2]?.questions.some(q => q.id === question.id)}
+                                                                                        // onChange={() => handleCheckBoxQuestions(question.id)}
+                                                                                        //checked={copyOfSections[pageNum-2]["questions"].includes(question.id)}
                                                                                     />
                                                                                     <label htmlFor={`question-${question.id}`}>
                                                                                         {question.title || "No title"}
