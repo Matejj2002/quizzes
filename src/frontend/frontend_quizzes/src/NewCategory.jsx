@@ -24,7 +24,7 @@ const NewCategory = () => {
     const authorFilter = location.state['authorFilter']
     const navigate = useNavigate();
 
-    const [categorySelect, setCategorySelect] = useState("");
+    const [categorySelect, setCategorySelect] = useState([]);
 
     const [loading, setLoading] = useState(false);
     const [category, setCategory] = useState([]);
@@ -49,7 +49,7 @@ const NewCategory = () => {
   const fetchCategorySelect = async () => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
-            setCategorySelect(response.data);
+            setCategorySelect([{id:0, title:"None (Create top-level category)"}, ...response.data]);
       }catch (error){
       }finally {
           setLoading(false);
@@ -117,6 +117,8 @@ const NewCategory = () => {
         fetchCategory();
         fetchCategorySelect();
     }, []);
+    console.log(selectedCategoryId);
+    console.log(selectedCategory);
 
   if (localStorage.getItem("accessToken")) {
       return (
@@ -144,10 +146,11 @@ const NewCategory = () => {
                               <select
                                   id="select-category"
                                   className="form-select"
-                                  value={selectedCategoryId || ""}
+                                  value={selectedCategoryId || "0"}
                                   onChange={(e) => {
+
                                       const selectedOption = categorySelect.find(
-                                          (cat) => cat.id === parseInt(e.target.value)
+                                          (cat) => cat.id === Number(e.target.value)
                                       );
                                       setSelectedCategory(selectedOption.title);
                                       setSelectedCategoryId(selectedOption.id);
@@ -156,6 +159,7 @@ const NewCategory = () => {
                                   <option value="" disabled>
                                       Select a category
                                   </option>
+
                                   {Array.isArray(categorySelect) &&
                                       categorySelect.map((cat) => (
                                           <option key={cat.id} value={cat.id}>
@@ -166,7 +170,7 @@ const NewCategory = () => {
                           </div>
 
                           <div className="input-group mb-3 ">
-                              <span className="input-group-text">Title</span>
+                          <span className="input-group-text">Title</span>
                               <input type="text" className="form-control" onChange={handleChange}/>
                           </div>
 
