@@ -4,6 +4,8 @@ import Section from "./Section";
 import QuestionModal from "./QuestionModal";
 import Login from "./Login";
 import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min";
 
 const Quizzes2 = () => {
     const [pageNum, setPageNum] = useState(1);
@@ -70,7 +72,7 @@ const Quizzes2 = () => {
     };
 
     const addPage = (index) =>{
-        setPageNum(index + 1);
+        setPageNum(index);
         setSections((prevSections) => [
         ...prevSections,
         {
@@ -101,6 +103,7 @@ const Quizzes2 = () => {
             show : false
         }
     ]);
+
     }
 
     const fetchCategorySelect = async () => {
@@ -175,8 +178,7 @@ const Quizzes2 = () => {
         setSections(updatedSections);
     }
 
-    // console.log(sections);
-
+    console.log(pageNum)
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -188,443 +190,508 @@ const Quizzes2 = () => {
                         <div className="col-2 sidebar">
                         </div>
                         <div className="col-8">
-                            {pageNum === 1 && (
-                                <div>
-                                    <h1>Quiz Settings</h1>
-                                    <div className="mb-3">
-                                        <label htmlFor="QuizTitle" className="form-label">
-                                            Title
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="QuizTitle"
-                                            placeholder="Quiz title"
-                                            value={quizTitle}
-                                            onChange={(e) => setQuizTitle(e.target.value)}
-                                        />
-                                    </div>
+                            <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                <li className="nav-item" role="presentation">
+                                    <button className="nav-link active" id="home-tab" data-bs-toggle="tab"
+                                            data-bs-target="#home-tab-pane" type="button" role="tab"
+                                            aria-controls="home-tab-pane" aria-selected="true"
+                                            onClick={() => setPageNum(1)}>Quiz Settings
+                                    </button>
+                                </li>
+                                {Array.from({length: pageCount - 2}, (_, index) => (
+                                    <li className="nav-item" role="presentation" key={index+2}>
+                                        <button
+                                            className={`nav-link ${index+2 === pageNum ? "active" : ""}`}
+                                            id={`tab-${index+2}`}
+                                            data-bs-toggle="tab"
+                                            data-bs-target={`#tab-pane-${index+2}`}
+                                            type="button"
+                                            role="tab"
+                                            aria-controls={`tab-pane-${index+2}`}
+                                            aria-selected={index+2 === pageNum}
+                                            onClick={() => {
+                                                setPageNum(index + 2)
+                                            }}
+                                        >
+                                            Section {index + 1}
+                                        </button>
+                                    </li>
+                                ))}
 
-                                    <div className="form-check">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
-                                            id="shuffleSections"
-                                            checked={shuffleSections}
-                                            onChange={(e) => setShuffleSections(e.target.checked)}
-                                        />
-                                        <label className="form-check-label" htmlFor="shuffleSections">
-                                            Shuffle sections
-                                        </label>
-                                    </div>
+                                <li className="nav-item" role="presentation">
+                                    <button className="nav-link" id="disabled-tab" data-bs-toggle="tab"
+                                            type="button" role="tab"
+                                            aria-controls="disabled-tab-pane" aria-selected="true"
+                                            onClick={() => {
+                                                setPageCount(pageCount + 1);
+                                                addPage(pageCount);
+                                            }}
+                                    >+
+                                    </button>
+                                </li>
+                            </ul>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="correctionsNum" className="form-label">
-                                            Number of corrections per attempt
-                                        </label>
-                                        <input
-                                            type="number"
-                                            className="form-control w-25"
-                                            id="correctionsNum"
-                                            placeholder="Enter Number"
-                                            min="1"
-                                            max="10"
-                                            value={numberOfCorrections}
-                                            onChange={(e) => setNumberOfCorrections(e.target.value)}
-                                        />
-                                    </div>
+                            <div className="tab-content" id="myTabContent">
+                                <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
+                                     aria-labelledby="home-tab" tabIndex="0">
+                                    <div>
+                                        <h1>Quiz Settings</h1>
+                                        <div className="mb-3">
+                                            <label htmlFor="QuizTitle" className="form-label">
+                                                Title
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="QuizTitle"
+                                                placeholder="Quiz title"
+                                                value={quizTitle}
+                                                onChange={(e) => setQuizTitle(e.target.value)}
+                                            />
+                                        </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="timeFinish" className="form-label">
-                                            Time limit (Minutes)
-                                        </label>
-                                        <input
-                                            type="number"
-                                            className="form-control w-25"
-                                            id="timeFinish"
-                                            placeholder="Enter Minutes"
-                                            min="1"
-                                            max="500"
-                                            value={minutesToFinish}
-                                            onChange={(e) => setMinutesToFinish(parseInt(e.target.value))}
-                                        />
-                                    </div>
+                                        <div className="form-check">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="shuffleSections"
+                                                checked={shuffleSections}
+                                                onChange={(e) => setShuffleSections(e.target.checked)}
+                                            />
+                                            <label className="form-check-label" htmlFor="shuffleSections">
+                                                Shuffle sections
+                                            </label>
+                                        </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="dateOpen" className="form-label">Open the quiz</label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control form-control-sm w-25"
-                                            id="dateOpen"
-                                            value={dateOpen}
-                                            onChange={(e) => setDateOpen(e.target.value)}
-                                        />
-                                    </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="correctionsNum" className="form-label">
+                                                Number of corrections per attempt
+                                            </label>
+                                            <input
+                                                type="number"
+                                                className="form-control w-25"
+                                                id="correctionsNum"
+                                                placeholder="Enter Number"
+                                                min="1"
+                                                max="10"
+                                                value={numberOfCorrections}
+                                                onChange={(e) => setNumberOfCorrections(e.target.value)}
+                                            />
+                                        </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="dateClose" className="form-label">Close the quiz</label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control form-control-sm w-25"
-                                            id="dateClose"
-                                            value={dateClose}
-                                            onChange={(e) => setDateClose(e.target.value)}
-                                        />
-                                    </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="timeFinish" className="form-label">
+                                                Time limit (Minutes)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                className="form-control w-25"
+                                                id="timeFinish"
+                                                placeholder="Enter Minutes"
+                                                min="1"
+                                                max="500"
+                                                value={minutesToFinish}
+                                                onChange={(e) => setMinutesToFinish(parseInt(e.target.value))}
+                                            />
+                                        </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="dateCheck" className="form-label">The quiz can be reviewed from</label>
-                                        <input
-                                            type="datetime-local"
-                                            className="form-control form-control-sm w-25"
-                                            id="dateCheck"
-                                            value={dateCheck}
-                                            onChange={(e) => setDateCheck(e.target.value)}
-                                        />
-                                    </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="dateOpen" className="form-label">Open the quiz</label>
+                                            <input
+                                                type="datetime-local"
+                                                className="form-control form-control-sm w-25"
+                                                id="dateOpen"
+                                                value={dateOpen}
+                                                onChange={(e) => setDateOpen(e.target.value)}
+                                            />
+                                        </div>
 
-                                    <div className="form-check">
-                                        <input className="form-check-input" type="radio" name="independentAttempts"
-                                               id="exampleRadios1" value="option1"
-                                               checked={selectedOption === "option1"}
-                                               onChange={(e) => setSelectedOption(e.target.value)}/>
-                                        <label className="form-check-label" htmlFor="exampleRadios1">
-                                            Attempts are independent
-                                        </label>
-                                    </div>
-                                    <div className="form-check">
-                                        <input className="form-check-input" type="radio" name="independentAttempts"
-                                               id="exampleRadios2" value="option2"
-                                               checked={selectedOption === "option2"}
-                                               onChange={(e) => setSelectedOption(e.target.value)}/>
-                                        <label className="form-check-label" htmlFor="exampleRadios2">
-                                            Attempts are corrections of previous attempt
-                                        </label>
+                                        <div className="mb-3">
+                                            <label htmlFor="dateClose" className="form-label">Close the quiz</label>
+                                            <input
+                                                type="datetime-local"
+                                                className="form-control form-control-sm w-25"
+                                                id="dateClose"
+                                                value={dateClose}
+                                                onChange={(e) => setDateClose(e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label htmlFor="dateCheck" className="form-label">The quiz can be reviewed
+                                                from</label>
+                                            <input
+                                                type="datetime-local"
+                                                className="form-control form-control-sm w-25"
+                                                id="dateCheck"
+                                                value={dateCheck}
+                                                onChange={(e) => setDateCheck(e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="form-check">
+                                            <input className="form-check-input" type="radio" name="independentAttempts"
+                                                   id="exampleRadios1" value="option1"
+                                                   checked={selectedOption === "option1"}
+                                                   onChange={(e) => setSelectedOption(e.target.value)}/>
+                                            <label className="form-check-label" htmlFor="exampleRadios1">
+                                                Attempts are independent
+                                            </label>
+                                        </div>
+                                        <div className="form-check">
+                                            <input className="form-check-input" type="radio" name="independentAttempts"
+                                                   id="exampleRadios2" value="option2"
+                                                   checked={selectedOption === "option2"}
+                                                   onChange={(e) => setSelectedOption(e.target.value)}/>
+                                            <label className="form-check-label" htmlFor="exampleRadios2">
+                                                Attempts are corrections of previous attempt
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
+                                <div className="tab-pane fade" id="profile-tab-pane" role="tabpanel"
+                                     aria-labelledby="profile-tab" tabIndex="0">...
+                                </div>
+                                <div className="tab-pane fade" id="contact-tab-pane" role="tabpanel"
+                                     aria-labelledby="contact-tab" tabIndex="0">...
+                                </div>
+                                <div className="tab-pane fade" id="disabled-tab-pane" role="tabpanel"
+                                     aria-labelledby="disabled-tab" tabIndex="0">...
+                                </div>
+                            </div>
 
                             {(pageNum > 1 && pageNum < pageCount) && (
-                                <div>
-                                    <h2>{sections[pageNum - 2]["title"]}</h2>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter section title..."
-                                        value={sections[pageNum-2]["title"]}
-                                        onChange={
-                                            handleTitle
-                                        }
-                                        className="form-control mt-2"
-                                    />
-                                    <div className="form-check">
-                                        <input className="form-check-input" type="checkbox" value=""
-                                               checked={sections[pageNum - 2]["shuffle"]} onChange={toggleShuffle}
-                                               id="shuffleSection"/>
-                                        <label className="form-check-label" htmlFor="shuffleSection">
-                                            Shuffle
-                                        </label>
-                                    </div>
-                                    {sections[pageNum - 2]["show"] === true && (
-                                        <div>
-                                            {sections[pageNum - 2]["randomQuestions"] === "random" && (
-                                                <div>
-                                                    <strong>Shuffle
-                                                        questions: </strong>{sections[pageNum - 2]["shuffle"] ? 'true' : 'false'}<br/>
-                                                    <strong>Category: </strong>{sections[pageNum - 2]["categoryName"]}<br/>
-                                                    <strong>Include
-                                                        subcategories: </strong>{sections[pageNum - 2]["includeSubCategories"] ? 'true' : 'false'}<br/>
-                                                    <strong>Number of
-                                                        questions: </strong>{sections[pageNum - 2]["questionsCount"]}<br/>
-                                                </div>
-                                            )}
+                            <div className="tab-content mt-3">
+                                    <div
+                                        key={pageNum}
+                                        className={`tab-pane fade ${pageNum === pageNum ? "show active" : ""}`}
+                                        id={`tab-pane-${pageNum}`}
+                                        role="tabpanel"
+                                        aria-labelledby={`tab-${pageNum}`}
+                                    >
+                                        <h2>{sections[pageNum - 2]?.title}</h2>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter section title..."
+                                            value={sections[pageNum - 2]?.title}
+                                            onChange={
+                                                handleTitle
+                                            }
+                                            className="form-control mt-2"
+                                        />
+                                        <div className="form-check">
+                                            <input className="form-check-input" type="checkbox" value=""
+                                                   checked={sections[pageNum - 2]?.shuffle} onChange={toggleShuffle}
+                                                   id="shuffleSection"/>
+                                            <label className="form-check-label" htmlFor="shuffleSection">
+                                                Shuffle
+                                            </label>
+                                        </div>
+                                        {sections[pageNum - 2]?.show === true && (
+                                            <div>
+                                                {sections[pageNum - 2]?.randomQuestions === "random" && (
+                                                    <div>
+                                                        <strong>Shuffle
+                                                            questions: </strong>{sections[pageNum - 2]?.shuffle ? 'true' : 'false'}<br/>
+                                                        <strong>Category: </strong>{sections[pageNum - 2]?.categoryName}<br/>
+                                                        <strong>Include
+                                                            subcategories: </strong>{sections[pageNum - 2]?.includeSubCategories ? 'true' : 'false'}<br/>
+                                                        <strong>Number of
+                                                            questions: </strong>{sections[pageNum - 2]?.questionsCount}<br/>
+                                                    </div>
+                                                )}
 
-                                            {sections[pageNum - 2]["randomQuestions"] === "questions" && (
-                                                <div>
-                                                    <ol className="list-group">
-                                                        {
-                                                            sections[pageNum - 2]?.questions.map((question, index) => (
+                                                {sections[pageNum - 2]?.randomQuestions === "questions" && (
+                                                    <div>
+                                                        <ol className="list-group">
+                                                            {
+                                                                sections[pageNum - 2]?.questions.map((question, index) => (
 
-                                                                <li key={index}
-                                                                    className="list-group-item d-flex justify-content-between align-items-start">
-                                                                    <input
-                                                                        type="number"
-                                                                        className="form-control form-control-sm me-2"
-                                                                        max={copyOfSections[pageNum - 2].questions.length}
-                                                                        style={{width: "50px"}}
-                                                                        value={question.order || index + 1}
-                                                                        onChange={(e) => handleOrderChange(index, e.target.value)}
-                                                                    />
-                                                                    <div
-                                                                        className="ms-2 me-auto text-truncate text-start w-100">
+                                                                    <li key={index}
+                                                                        className="list-group-item d-flex justify-content-between align-items-start">
+                                                                        <input
+                                                                            type="number"
+                                                                            className="form-control form-control-sm me-2"
+                                                                            max={copyOfSections[pageNum - 2].questions.length}
+                                                                            style={{width: "50px"}}
+                                                                            value={question.order || index + 1}
+                                                                            onChange={(e) => handleOrderChange(index, e.target.value)}
+                                                                        />
                                                                         <div
-                                                                            className="d-flex justify-content-between align-items-center w-100">
-                                                                            <h2 className="h5 text-start text-truncate">
-                                                                                <a href="#"
-                                                                                   className="text-decoration-none">
-                                                                                    {question.title || "No title available"}
-                                                                                </a>
-                                                                            </h2>
-                                                                            <span
-                                                                                className="badge text-bg-primary rounded-pill flex-shrink-0">{question.type}
+                                                                            className="ms-2 me-auto text-truncate text-start w-100">
+                                                                            <div
+                                                                                className="d-flex justify-content-between align-items-center w-100">
+                                                                                <h2 className="h5 text-start text-truncate">
+                                                                                    <a href="#"
+                                                                                       className="text-decoration-none">
+                                                                                        {question.title || "No title available"}
+                                                                                    </a>
+                                                                                </h2>
+                                                                                <span
+                                                                                    className="badge text-bg-primary rounded-pill flex-shrink-0">{question.type}
                                                         </span>
-                                                                        </div>
-                                                                        <div
-                                                                            className="d-flex justify-content-between align-items-center w-100">
-                                                                            <p className="m-0 text-truncate">{question.text}</p>
-                                                                        </div>
-                                                                        <div
-                                                                            className="d-flex justify-content-between align-items-center w-100">
+                                                                            </div>
+                                                                            <div
+                                                                                className="d-flex justify-content-between align-items-center w-100">
+                                                                                <p className="m-0 text-truncate">{question.text}</p>
+                                                                            </div>
+                                                                            <div
+                                                                                className="d-flex justify-content-between align-items-center w-100">
                                                         <span
                                                             className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}</span><br/>
-                                                                            <button
-                                                                                className="btn btn-outline-danger btn-xs p-0 px-1 ms-1"
-                                                                                style={{fontSize: "0.75rem"}}
-                                                                                onClick={() => handleRemoveQuestion(index)}>
-                                                                                Remove
-                                                                            </button>
+                                                                                <button
+                                                                                    className="btn btn-outline-danger btn-xs p-0 px-1 ms-1"
+                                                                                    style={{fontSize: "0.75rem"}}
+                                                                                    onClick={() => handleRemoveQuestion(index)}>
+                                                                                    Remove
+                                                                                </button>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                </li>
-                                                            ))
-                                                        }
-                                                    </ol>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
-                                            data-bs-target="#staticBackdrop"
-                                            onClick={() => {
-                                                setCopyOfSections(sections);
-                                            }}
+                                                                    </li>
+                                                                ))
+                                                            }
+                                                        </ol>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                        <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
+                                                data-bs-target="#staticBackdrop"
+                                                onClick={() => {
+                                                    setCopyOfSections(sections);
+                                                }}
 
-                                    >Add Question
-                                    </button>
-                                    <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
-                                         data-bs-keyboard="false" tabIndex="-1"
-                                         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                        <div className="modal-dialog">
-                                            <div className="modal-content">
-                                                <div className="modal-header">
-                                                    <h1 className="modal-title fs-5"
-                                                        id="staticBackdropLabel">{pageNum - 1}</h1>
-                                                    <button type="button" className="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                </div>
-                                                <div className="modal-body">
-                                                    <label htmlFor="select-category">Category</label>
-                                                    <select
-                                                        id="select-category"
-                                                        className="form-select"
-                                                        value={copyOfSections[pageNum - 2]["categoryId"] || ""}
-                                                        onChange={(e) => {
-                                                            const selectedOption = categorySelect.find(
-                                                                (cat) => cat.id === parseInt(e.target.value)
-                                                            );
-                                                            const updatedSections = [...copyOfSections];
-                                                            updatedSections[pageNum - 2] = {
-                                                                ...updatedSections[pageNum - 2],
-                                                                categoryId: selectedOption.id,
-                                                                categoryName: selectedOption.title,
-                                                            };
-                                                            setCopyOfSections(updatedSections);
-
-                                                        }}
-                                                    >
-                                                        <option value="" disabled>
-                                                            Select a category
-                                                        </option>
-                                                        {Array.isArray(categorySelect) &&
-                                                            categorySelect.map((cat) => (
-                                                                <option key={cat.id} value={cat.id}>
-                                                                    {cat.title}
-                                                                </option>
-                                                            ))}
-                                                    </select>
-
-                                                    <div className="form-check">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            id="includeSubcategories"
-                                                            checked={copyOfSections[pageNum - 2]["includeSubCategories"]}
+                                        >Add Question
+                                        </button>
+                                        <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+                                             data-bs-keyboard="false" tabIndex="-1"
+                                             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div className="modal-dialog">
+                                                <div className="modal-content">
+                                                    <div className="modal-header">
+                                                        <h1 className="modal-title fs-5"
+                                                            id="staticBackdropLabel">{pageNum - 1}</h1>
+                                                        <button type="button" className="btn-close"
+                                                                data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div className="modal-body">
+                                                        <label htmlFor="select-category">Category</label>
+                                                        <select
+                                                            id="select-category"
+                                                            className="form-select"
+                                                            value={copyOfSections[pageNum - 2]?.categoryId || ""}
                                                             onChange={(e) => {
+                                                                const selectedOption = categorySelect.find(
+                                                                    (cat) => cat.id === parseInt(e.target.value)
+                                                                );
                                                                 const updatedSections = [...copyOfSections];
                                                                 updatedSections[pageNum - 2] = {
                                                                     ...updatedSections[pageNum - 2],
-                                                                    includeSubCategories: e.target.checked
+                                                                    categoryId: selectedOption.id,
+                                                                    categoryName: selectedOption.title,
                                                                 };
                                                                 setCopyOfSections(updatedSections);
-                                                            }
-                                                            }
-                                                        />
-                                                        <label className="form-check-label"
-                                                               htmlFor="includeSubcategories">
-                                                            Include subcategories
-                                                        </label>
-                                                    </div>
 
-                                                    <div className="form-check">
-                                                        <input className="form-check-input" type="radio"
-                                                               name="randomOrSelectQuestions"
-                                                               id="exampleRadios1" value="option1"
-                                                               checked={copyOfSections[pageNum - 2]["randomQuestions"] === "random"}
-                                                               onChange={(e) => {
-                                                                   const updatedSections = [...copyOfSections];
-                                                                   updatedSections[pageNum - 2] = {
-                                                                       ...updatedSections[pageNum - 2],
-                                                                       randomQuestions: "random"
-                                                                   };
-                                                                   setCopyOfSections(updatedSections);
-                                                               }}/>
-                                                        <label className="form-check-label" htmlFor="exampleRadios1">
-                                                            Random Questions
-                                                        </label>
-                                                    </div>
-                                                    <div className="form-check">
-                                                        <input className="form-check-input" type="radio"
-                                                               name="randomOrSelectQuestions"
-                                                               id="exampleRadios2" value="option2"
-                                                               checked={copyOfSections[pageNum - 2]["randomQuestions"] === "questions"}
-                                                               onChange={(e) => {
-                                                                   const updatedSections = [...copyOfSections];
-                                                                   updatedSections[pageNum - 2] = {
-                                                                       ...updatedSections[pageNum - 2],
-                                                                       randomQuestions: "questions"
-                                                                   };
-                                                                   setCopyOfSections(updatedSections);
-                                                               }}/>
-                                                        <label className="form-check-label" htmlFor="exampleRadios2">
-                                                            Select Questions
-                                                        </label>
-                                                    </div>
+                                                            }}
+                                                        >
+                                                            <option value="" disabled>
+                                                                Select a category
+                                                            </option>
+                                                            {Array.isArray(categorySelect) &&
+                                                                categorySelect.map((cat) => (
+                                                                    <option key={cat.id} value={cat.id}>
+                                                                        {cat.title}
+                                                                    </option>
+                                                                ))}
+                                                        </select>
 
-                                                    {copyOfSections[pageNum - 2]["randomQuestions"] === "random" && (
-                                                        <div className="mb-3">
-                                                            <label htmlFor="randomQuestionsCount"
-                                                                   className="form-label">
-                                                                Random questions count
-                                                            </label>
+                                                        <div className="form-check">
                                                             <input
-                                                                type="number"
-                                                                className="form-control w-25"
-                                                                id="randomQuestionsCount"
-                                                                placeholder="Enter count"
-                                                                min="1"
-                                                                max="500"
-                                                                value={copyOfSections[pageNum - 2]["questionsCount"]}
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id="includeSubcategories"
+                                                                checked={copyOfSections[pageNum - 2]?.includeSubCategories}
                                                                 onChange={(e) => {
                                                                     const updatedSections = [...copyOfSections];
                                                                     updatedSections[pageNum - 2] = {
                                                                         ...updatedSections[pageNum - 2],
-                                                                        questionsCount: parseInt(e.target.value)
+                                                                        includeSubCategories: e.target.checked
                                                                     };
                                                                     setCopyOfSections(updatedSections);
-                                                                }}
+                                                                }
+                                                                }
                                                             />
+                                                            <label className="form-check-label"
+                                                                   htmlFor="includeSubcategories">
+                                                                Include subcategories
+                                                            </label>
                                                         </div>
-                                                    )}
 
-                                                    {copyOfSections[pageNum - 2]["randomQuestions"] === "questions" && (
-                                                        <div>
-                                                            <details>
-                                                                <summary>Questions</summary>
-                                                                <div>
-                                                                    <label>Questions</label>
-                                                                    {Array.isArray(questions) && questions.length > 0 ? (
-                                                                        <div>
-                                                                            {questions.map((question) => (
-                                                                                <div key={question.id}
-                                                                                     className="flex items-center space-x-2 border border-2 border-primary p-3 mb-3">
-                                                                                    <input
-                                                                                        type="checkbox"
-                                                                                        id={`question-${question.id}`}
-                                                                                        value={question.id}
-                                                                                        className="form-checkbox"
-                                                                                        onChange={() => handleCheckBoxQuestions(question)}
-                                                                                        checked={copyOfSections[pageNum - 2]?.questions.some(q => q.id === question.id)}
+                                                        <div className="form-check">
+                                                            <input className="form-check-input" type="radio"
+                                                                   name="randomOrSelectQuestions"
+                                                                   id="exampleRadios1" value="option1"
+                                                                   checked={copyOfSections[pageNum - 2]?.randomQuestions === "random"}
+                                                                   onChange={(e) => {
+                                                                       const updatedSections = [...copyOfSections];
+                                                                       updatedSections[pageNum - 2] = {
+                                                                           ...updatedSections[pageNum - 2],
+                                                                           randomQuestions: "random"
+                                                                       };
+                                                                       setCopyOfSections(updatedSections);
+                                                                   }}/>
+                                                            <label className="form-check-label"
+                                                                   htmlFor="exampleRadios1">
+                                                                Random Questions
+                                                            </label>
+                                                        </div>
+                                                        <div className="form-check">
+                                                            <input className="form-check-input" type="radio"
+                                                                   name="randomOrSelectQuestions"
+                                                                   id="exampleRadios2" value="option2"
+                                                                   checked={copyOfSections[pageNum - 2]?.randomQuestions === "questions"}
+                                                                   onChange={(e) => {
+                                                                       const updatedSections = [...copyOfSections];
+                                                                       updatedSections[pageNum - 2] = {
+                                                                           ...updatedSections[pageNum - 2],
+                                                                           randomQuestions: "questions"
+                                                                       };
+                                                                       setCopyOfSections(updatedSections);
+                                                                   }}/>
+                                                            <label className="form-check-label"
+                                                                   htmlFor="exampleRadios2">
+                                                                Select Questions
+                                                            </label>
+                                                        </div>
 
-                                                                                    />
-                                                                                    <label
-                                                                                        htmlFor={`question-${question.id}`}>
-                                                                                        <div
-                                                                                            className="ms-2 me-auto text-start">
+                                                        {copyOfSections[pageNum - 2]?.randomQuestions === "random" && (
+                                                            <div className="mb-3">
+                                                                <label htmlFor="randomQuestionsCount"
+                                                                       className="form-label">
+                                                                    Random questions count
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    className="form-control w-25"
+                                                                    id="randomQuestionsCount"
+                                                                    placeholder="Enter count"
+                                                                    min="1"
+                                                                    max="500"
+                                                                    value={copyOfSections[pageNum - 2]?.questionsCount}
+                                                                    onChange={(e) => {
+                                                                        const updatedSections = [...copyOfSections];
+                                                                        updatedSections[pageNum - 2] = {
+                                                                            ...updatedSections[pageNum - 2],
+                                                                            questionsCount: parseInt(e.target.value)
+                                                                        };
+                                                                        setCopyOfSections(updatedSections);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        {copyOfSections[pageNum - 2]?.randomQuestions === "questions" && (
+                                                            <div>
+                                                                <details>
+                                                                    <summary>Questions</summary>
+                                                                    <div>
+                                                                        <label>Questions</label>
+                                                                        {Array.isArray(questions) && questions.length > 0 ? (
+                                                                            <div>
+                                                                                {questions.map((question) => (
+                                                                                    <div key={question.id}
+                                                                                         className="flex items-center space-x-2 border border-2 border-primary p-3 mb-3">
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            id={`question-${question.id}`}
+                                                                                            value={question.id}
+                                                                                            className="form-checkbox"
+                                                                                            onChange={() => handleCheckBoxQuestions(question)}
+                                                                                            checked={copyOfSections[pageNum - 2]?.questions.some(q => q.id === question.id)}
+
+                                                                                        />
+                                                                                        <label
+                                                                                            htmlFor={`question-${question.id}`}>
                                                                                             <div
-                                                                                                className="d-flex align-items-center">
-                                                                                                <h2 className="h5 text-start m-0"
-                                                                                                    style={{minWidth: "200px"}}>
-                                                                                                    <a href="#"
-                                                                                                       className="text-decoration-none">
-                                                                                                        {
-                                                                                                            question.title?.length < 20
-                                                                                                                ? question.title?.padEnd(20, ' ')
-                                                                                                                : question.title?.substring(0, 20)
-                                                                                                        }
-                                                                                                    </a>
-                                                                                                </h2>
-                                                                                                <span
-                                                                                                    className="badge text-bg-primary rounded-pill flex-shrink-0"
-                                                                                                    style= {{marginLeft: "4rem"}}>
+                                                                                                className="ms-2 me-auto text-start">
+                                                                                                <div
+                                                                                                    className="d-flex align-items-center">
+                                                                                                    <h2 className="h5 text-start m-0"
+                                                                                                        style={{minWidth: "200px"}}>
+                                                                                                        <a href="#"
+                                                                                                           className="text-decoration-none">
+                                                                                                            {
+                                                                                                                question.title?.length < 20
+                                                                                                                    ? question.title?.padEnd(20, ' ')
+                                                                                                                    : question.title?.substring(0, 20)
+                                                                                                            }
+                                                                                                        </a>
+                                                                                                    </h2>
+                                                                                                    <span
+                                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0"
+                                                                                                        style={{marginLeft: "4rem"}}>
                                                                                                     {question.type}
                                                                                                 </span>
-                                                                                            </div>
+                                                                                                </div>
 
-                                                                                            <div
-                                                                                                className="d-flex justify-content-between align-items-center w-100 mt-2">
-                                                                                                <p className="m-0 text-truncate"
-                                                                                                   style={{flexGrow: "1"}}>{question.text?.length < 40
-                                                                                                                ? question.text?.padEnd(40, ' ')
-                                                                                                                : question.text?.substring(0, 40)}
-                                                                                                </p>
-                                                                                            </div>
+                                                                                                <div
+                                                                                                    className="d-flex justify-content-between align-items-center w-100 mt-2">
+                                                                                                    <p className="m-0 text-truncate"
+                                                                                                       style={{flexGrow: "1"}}>{question.text?.length < 40
+                                                                                                        ? question.text?.padEnd(40, ' ')
+                                                                                                        : question.text?.substring(0, 40)}
+                                                                                                    </p>
+                                                                                                </div>
 
-                                                                                            <div
-                                                                                                className="d-flex justify-content-between align-items-center w-100 mt-2">
+                                                                                                <div
+                                                                                                    className="d-flex justify-content-between align-items-center w-100 mt-2">
                                                                                                 <span
                                                                                                     className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}</span>
+                                                                                                </div>
                                                                                             </div>
-                                                                                        </div>
-                                                                                    </label>
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <p>No questions available</p>
-                                                                    )}
-                                                                </div>
-                                                            </details>
-                                                        </div>
-                                                    )
-                                                    }
+                                                                                        </label>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <p>No questions available</p>
+                                                                        )}
+                                                                    </div>
+                                                                </details>
+                                                            </div>
+                                                        )
+                                                        }
 
-                                                </div>
-                                                <div className="modal-footer">
-                                                    <button type="button" className="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Close
-                                                    </button>
-                                                    <button type="button" className="btn btn-primary"
-                                                            data-bs-dismiss="modal"
-                                                            onClick={() => {
-                                                                const updatedSections = [...copyOfSections];
-                                                                updatedSections[pageNum - 2] = {
-                                                                    ...updatedSections[pageNum - 2],
-                                                                    show: true
-                                                                };
+                                                    </div>
+                                                    <div className="modal-footer">
+                                                        <button type="button" className="btn btn-secondary"
+                                                                data-bs-dismiss="modal">Close
+                                                        </button>
+                                                        <button type="button" className="btn btn-primary"
+                                                                data-bs-dismiss="modal"
+                                                                onClick={() => {
+                                                                    const updatedSections = [...copyOfSections];
+                                                                    updatedSections[pageNum - 2] = {
+                                                                        ...updatedSections[pageNum - 2],
+                                                                        show: true
+                                                                    };
 
-                                                                setCopyOfSections(updatedSections);
+                                                                    setCopyOfSections(updatedSections);
 
-                                                                setTimeout(() => {
-                                                                    setSections(updatedSections);
-                                                                }, 0);
-                                                            }}
-                                                    >Add
-                                                    </button>
+                                                                    setTimeout(() => {
+                                                                        setSections(updatedSections);
+                                                                    }, 0);
+                                                                }}
+                                                        >Add
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                </div>
+                            </div>
                             )}
 
                             {pageNum === pageCount && (
@@ -643,19 +710,6 @@ const Quizzes2 = () => {
                                     </button>
                                 </div>
                             )}
-
-                            <ul className="pagination">
-                                {Array.from({length: pageCount}, (_, index) => (
-                                    <li className={`page-item ${pageNum === index + 1 ? 'active' : ''}`} key={index}>
-                                        <button
-                                            className="page-link"
-                                            onClick={() => setPageNum(index + 1)}
-                                        >
-                                            {index + 1}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
 
                         </div>
                         <div className="col-2">
