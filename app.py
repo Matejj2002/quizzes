@@ -196,6 +196,7 @@ def get_questions():
                     'id': question['id'],
                     "category_id": question['category_id'],
                     "category": question['category'],
+                    "is_deleted": question["is_deleted"],
                     "versions": versions
                 }
 
@@ -673,9 +674,9 @@ def add_question_version(id):
 
 @app.route("/api/get-category-tree", methods=["GET"])
 def get_tree_categories():
-    categories = Category.query.filter(Category.id is None).all()
-    print("CCC", categories)
-    return tree_categories(Category.query.get_or_404(1))
+    result= tree_categories(Category.query.get_or_404(1))
+    result['title'] = ""
+    return result
 
 
 def tree_categories(node):
@@ -698,7 +699,7 @@ def list_subcategories(node):
     traverse(node)
     return subcategories
 
-def generate_category_tree(category, level=1):
+def generate_category_tree(category, level=0):
     result = []
 
     result.append({
@@ -717,6 +718,7 @@ def generate_category_tree(category, level=1):
 def get_category_to_select():
     cat = tree_categories(Category.query.get_or_404(1))
     result = generate_category_tree(cat)
+    result.pop(0)
     return result
 
 @app.route("/api/get_questions_category/<int:index>", methods=["GET"])
@@ -735,10 +737,14 @@ def get_questions_from_category(index):
     for i in questions:
         latest_version = max(i.question_version, key=lambda v: v.dateCreated)
         if not i.is_deleted or i.is_deleted == None:
+            author = Teacher.query.get_or_404(latest_version.author_id).name
             version = {
                 "id" : latest_version.id,
                 "title" : latest_version.title,
-                "text": latest_version.text
+                "text": latest_version.text,
+                "type": latest_version.type,
+                "dateCreated": latest_version.dateCreated,
+                "authorName": author
             }
             questions_versions.append(version)
 

@@ -49,7 +49,7 @@ const NewCategory = () => {
   const fetchCategorySelect = async () => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
-            setCategorySelect([{id:0, title:"None (Create top-level category)"}, ...response.data]);
+            setCategorySelect([{id:1, title:"None (Create top-level category)"}, ...response.data]);
       }catch (error){
       }finally {
           setLoading(false);

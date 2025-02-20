@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import "./CategoryLink.css"
 import { useNavigate,useLocation  } from "react-router-dom";
 
-const SubCategories = ({ category, catPath,  level = 1 }) => {
+const SubCategories = ({ category, catPath,  level = 0 }) => {
     const navigate = useNavigate();
 
     const includesP = () => {

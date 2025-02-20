@@ -1,7 +1,7 @@
 import React from "react";
 import "./CategoryLink.css"
 
-const CategorySelect = ({ category, catPath,  level = 1 }) => {
+const CategorySelect = ({ category, catPath,  level = 0 }) => {
     const includesP = () => {
         for (let i =0; i < catPath.length; i++){
             if (catPath[i][1] === category.id){

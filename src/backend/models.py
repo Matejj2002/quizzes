@@ -228,7 +228,7 @@ class QuizTemplateItem(db.Model):
     question_count = db.Column(db.Integer)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     include_sub_categories = db.Column(db.Boolean, default=False)
-    # vaha hodnotenia - evaluate
+    evaluate = db.Column(db.Integer, default = 1)
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_items')

@@ -209,19 +209,6 @@ const Quizzes2 = () => {
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
-                                            id="randomOrder"
-                                            checked={randomOrder}
-                                            onChange={(e) => setRandomOrder(e.target.checked)}
-                                        />
-                                        <label className="form-check-label" htmlFor="randomOrder">
-                                            Randomize questions order
-                                        </label>
-                                    </div>
-
-                                    <div className="form-check">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
                                             id="shuffleSections"
                                             checked={shuffleSections}
                                             onChange={(e) => setShuffleSections(e.target.checked)}

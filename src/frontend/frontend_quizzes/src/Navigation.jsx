@@ -50,14 +50,14 @@ const Navigation = () =>{
                     </ul>
                 </div>
                 <div className="d-flex">
-                    <p className="me-3">{userData.login}</p>
-
                     <img
                         src={userData.avatar_url}
                         alt={`${userData.name}'s profile`}
-                        style={{width: "30px", height: "30px", borderRadius: "50%", cursor:"pointer"}}
+                        style={{width: "30px", height: "30px", borderRadius: "50%", cursor: "pointer"}}
                         data-bs-toggle="dropdown"
                     />
+                    <p data-bs-toggle="dropdown">{userData.login}</p>
+                    <div className="dropdown-toggle"></div>
 
                     <ul className="dropdown-menu dropdown-menu-end">
                         <li>

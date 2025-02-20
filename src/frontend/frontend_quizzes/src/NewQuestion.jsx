@@ -22,7 +22,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
         titleText = "New Question";
     }
     if (subButText === "Copy"){
-        titleText = "Copy of Question";
+        titleText = "Copy of " + location.state["questionTitle"];
     }
     if (subButText === "Update"){
         titleText = "Update Question";
@@ -39,7 +39,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
     const selectedCategory1 = location.state['selectedCategory'];
     const idQ = location.state['id'];
     const filters = location.state['filterType'];
-    const authorFilter = location.state['authorFilter']
+    const authorFilter = location.state['authorFilter'];
 
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});

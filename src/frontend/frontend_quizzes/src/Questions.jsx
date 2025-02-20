@@ -251,7 +251,7 @@ const Questions = () => {
                             <div>
                                 <div className='mb-3 d-flex justify-content-end'>
                                     <div className="dropdown">
-                                        <button className="btn btn-secondary text-decoration-none me-2"
+                                        <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             {questionFilter}
                                         </button>
@@ -455,8 +455,7 @@ const Questions = () => {
                                                         className="d-flex justify-content-between align-items-center w-100">
                                                         <p className="m-0 text-truncate">{question.versions.text}</p>
                                                         {questionFilter === "Active" && (
-                                                              <button className="btn btn-outline-danger btn-xs p-0 px-1 ms-1"
-                                                                      style={{ fontSize: "0.75rem" }}
+                                                              <button className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to delete this question?")) {
                                                                           handleQuestionDelete(question.id);
@@ -467,8 +466,7 @@ const Questions = () => {
                                                             )}
 
                                                         {questionFilter === "Archived" && (
-                                                              <button className="btn btn-outline-primary btn-xs p-0 px-1 ms-1"
-                                                                      style={{ fontSize: "0.75rem" }}
+                                                              <button className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to restore this question?")) {
                                                                           handleQuestionRestore(question.id);
@@ -478,16 +476,42 @@ const Questions = () => {
                                                               </button>
                                                             )}
 
+                                                        {(questionFilter === "All" && question.is_deleted === false) && (
+                                                            <button
+                                                                className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
+                                                                onClick={() => {
+                                                                    if (window.confirm("Are you sure you want to delete this question?")) {
+                                                                        handleQuestionDelete(question.id);
+                                                                    }
+                                                                }}>
+                                                                Archive
+                                                            </button>
+                                                        )
+                                                        }
+
+                                                        {(questionFilter === "All" && question.is_deleted === true) && (
+                                                            <button
+                                                                className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
+                                                                onClick={() => {
+                                                                    if (window.confirm("Are you sure you want to restore this question?")) {
+                                                                        handleQuestionRestore(question.id);
+                                                                    }
+                                                                }}>
+                                                                Restore
+                                                            </button>
+                                                        )
+                                                        }
+
                                                     </div>
                                                     <div
                                                         className="d-flex justify-content-between align-items-center w-100">
                                                         <span
                                                             className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
                                                         <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
-                                                                style={{fontSize: "0.75rem"}}
                                                                 onClick={() => {
                                                                     navigate(`/question/copy-question/${question.id}`, {
                                                                     state: {
+                                                                        questionTitle: question.versions.title,
                                                                         catPath : category,
                                                                         id : actualCategory,
                                                                         selectedCategory : actualCategoryString,
