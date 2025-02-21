@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import Navigation from "./Navigation";
-import Section from "./Section";
 import QuestionModal from "./QuestionModal";
 import Login from "./Login";
 import axios from "axios";
@@ -22,7 +21,7 @@ const Quizzes2 = () => {
     const [dateCheck, setDateCheck] = useState("");
     const [shuffleSections, setShuffleSections] = useState(false);
 
-    const [categorySelect, setCategorySelect] = useState("");
+    const [categorySelect, setCategorySelect] = useState([{id: "1", title:"All"}]);
 
      const [copyOfSections, setCopyOfSections] = useState([{
         sectionId: 1,
@@ -30,7 +29,7 @@ const Quizzes2 = () => {
         questions:[],
         categoryId: 1,
         categoryName: "supercategory",
-        includeSubCategories: false,
+        includeSubCategories: true,
         randomQuestions: "random",
          title: "Section 1",
         questionsCount: 1,
@@ -44,7 +43,7 @@ const Quizzes2 = () => {
         categoryId: 1,
         title: "Section 1",
         categoryName: "supercategory",
-        includeSubCategories: false,
+        includeSubCategories: true,
         randomQuestions: "random",
         questionsCount: 1,
         show : false
@@ -80,7 +79,7 @@ const Quizzes2 = () => {
             shuffle: false,
             categoryId: 1,
             categoryName: "supercategory",
-            includeSubCategories: false,
+            includeSubCategories: true,
             randomQuestions: "random",
             title: "Section " + (prevSections.length + 1),
             questionsCount: 1,
@@ -95,7 +94,7 @@ const Quizzes2 = () => {
             shuffle: false,
             categoryId: 1,
             categoryName: "supercategory",
-            includeSubCategories: false,
+            includeSubCategories: true,
             randomQuestions: "random",
             title: "Section "+ (prevSections.length + 1),
             questionsCount: 1,
@@ -109,7 +108,10 @@ const Quizzes2 = () => {
     const fetchCategorySelect = async () => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
-            setCategorySelect(response.data);
+            setCategorySelect(prevCategories => [
+                  { id: 1, title: "All" },
+                  ...response.data
+                ]);
       }catch (error){}
        finally {}
     }
@@ -124,7 +126,7 @@ const Quizzes2 = () => {
                     ...section,
                     questions: isAlreadySelected
                         ? section.questions.filter(q => q.id !== question.id)
-                        : [...section.questions, { id: question.id, title: question.title, type: question.type, dateCreated: question.dateCreated, author: question.authorName }]
+                        : [...section.questions, { id: question.id, title: question.title, type: question.type, evaluation:1, dateCreated: question.dateCreated, author: question.authorName }]
                 };
             }
             return section;
@@ -166,11 +168,30 @@ const Quizzes2 = () => {
         sections[pageNum - 2].questions.splice(index, 1);
         setSections([...sections]);
     }
-    function handleOrderChange(index, newValue) {
-        const updatedSections = [...sections];
-        updatedSections[pageNum - 2].questions[index].order = parseInt(newValue, 10);
-        setSections(updatedSections);
-    }
+    const handleOrderChange = (index, direction) => {
+        const updatedQuestions = [...copyOfSections[pageNum - 2].questions];
+
+          if (updatedQuestions.length <= 1) {
+              return;
+          }
+
+          const currentQuestion = updatedQuestions[index];
+
+          if (direction === "up" && index > 0) {
+              updatedQuestions[index] = updatedQuestions[index - 1];
+            updatedQuestions[index - 1] = currentQuestion;
+          }
+          else if (direction === "down" && index < updatedQuestions.length - 1) {
+              updatedQuestions[index] = updatedQuestions[index + 1];
+            updatedQuestions[index + 1] = currentQuestion;
+          }
+
+          setCopyOfSections(prevSections => {
+            const newSections = [...prevSections];
+            newSections[pageNum - 2].questions = updatedQuestions;
+            return newSections;
+          });
+        };
 
     function handleEvaluateChange(index, newValue) {
         const updatedSections = [...sections];
@@ -178,7 +199,7 @@ const Quizzes2 = () => {
         setSections(updatedSections);
     }
 
-    console.log(pageNum)
+
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -221,10 +242,13 @@ const Quizzes2 = () => {
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link" id="disabled-tab" data-bs-toggle="tab"
                                             type="button" role="tab"
-                                            aria-controls="disabled-tab-pane" aria-selected="true"
-                                            onClick={() => {
+                                            aria-controls="disabled-tab-pane"
+
+                                            onClick={(event) => {
+                                                event.preventDefault();
                                                 setPageCount(pageCount + 1);
                                                 addPage(pageCount);
+                                                event.target.classList.remove("active");
                                             }}
                                     >+
                                     </button>
@@ -235,7 +259,7 @@ const Quizzes2 = () => {
                                 <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
                                      aria-labelledby="home-tab" tabIndex="0">
                                     <div>
-                                        <h1>Quiz Settings</h1>
+                                        <h1 className="mb-3">Quiz Settings</h1>
                                         <div className="mb-3">
                                             <label htmlFor="QuizTitle" className="form-label">
                                                 Title
@@ -250,7 +274,7 @@ const Quizzes2 = () => {
                                             />
                                         </div>
 
-                                        <div className="form-check">
+                                        <div className="form-check mb-3">
                                             <input
                                                 className="form-check-input"
                                                 type="checkbox"
@@ -329,7 +353,7 @@ const Quizzes2 = () => {
                                             />
                                         </div>
 
-                                        <div className="form-check">
+                                        <div className="form-check mb-3">
                                             <input className="form-check-input" type="radio" name="independentAttempts"
                                                    id="exampleRadios1" value="option1"
                                                    checked={selectedOption === "option1"}
@@ -349,22 +373,14 @@ const Quizzes2 = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="tab-pane fade" id="profile-tab-pane" role="tabpanel"
-                                     aria-labelledby="profile-tab" tabIndex="0">...
-                                </div>
-                                <div className="tab-pane fade" id="contact-tab-pane" role="tabpanel"
-                                     aria-labelledby="contact-tab" tabIndex="0">...
-                                </div>
-                                <div className="tab-pane fade" id="disabled-tab-pane" role="tabpanel"
-                                     aria-labelledby="disabled-tab" tabIndex="0">...
-                                </div>
+
                             </div>
 
                             {(pageNum > 1 && pageNum < pageCount) && (
                             <div className="tab-content mt-3">
                                     <div
                                         key={pageNum}
-                                        className={`tab-pane fade ${pageNum === pageNum ? "show active" : ""}`}
+                                        className={`tab-pane fade show active`}
                                         id={`tab-pane-${pageNum}`}
                                         role="tabpanel"
                                         aria-labelledby={`tab-${pageNum}`}
@@ -390,46 +406,93 @@ const Quizzes2 = () => {
                                         {sections[pageNum - 2]?.show === true && (
                                             <div>
                                                 {sections[pageNum - 2]?.randomQuestions === "random" && (
-                                                    <div>
-                                                        <strong>Shuffle
-                                                            questions: </strong>{sections[pageNum - 2]?.shuffle ? 'true' : 'false'}<br/>
-                                                        <strong>Category: </strong>{sections[pageNum - 2]?.categoryName}<br/>
-                                                        <strong>Include
-                                                            subcategories: </strong>{sections[pageNum - 2]?.includeSubCategories ? 'true' : 'false'}<br/>
-                                                        <strong>Number of
-                                                            questions: </strong>{sections[pageNum - 2]?.questionsCount}<br/>
-                                                    </div>
+                                                    <ul className="list-group list-group-flush">
+                                                      <li className="list-group-item">{sections[pageNum - 2]?.shuffle ? (
+                                                        <p>Section is shuffled</p>
+                                                      ) : (
+                                                        <p>Section is not shuffled</p>
+                                                      )}</li>
+                                                        <li className="list-group-item">
+                                                            <p>Name of category is {sections[pageNum - 2]?.categoryName}</p>
+                                                        </li>
+                                                        <li className="list-group-item">{sections[pageNum - 2]?.includeSubCategories ? (
+                                                        <p>Questions are included from subcategories</p>
+                                                      ) : (
+                                                        <p>Questions are not included from subcategories</p>
+                                                      )}</li>
+                                                      <li className="list-group-item"><p>Number of questions is {sections[pageNum - 2]?.questionsCount}</p></li>
+
+                                                    </ul>
                                                 )}
 
                                                 {sections[pageNum - 2]?.randomQuestions === "questions" && (
                                                     <div>
                                                         <ol className="list-group">
+                                                            <li className="list-group-item d-flex justify-content-between align-items-center fw-bold">
+                                                                <div className="d-flex" style={{width: "80px"}}>Order
+                                                                </div>
+                                                                <div className="d-flex"
+                                                                     style={{width: "200px"}}>Question
+                                                                </div>
+                                                                <div className="d-flex" style={{width: "80px"}}>Weight
+                                                                </div>
+                                                                <div className="d-flex justify-content-end"
+                                                                     style={{width: "50px"}}>Remove
+                                                                </div>
+                                                            </li>
                                                             {
                                                                 sections[pageNum - 2]?.questions.map((question, index) => (
 
                                                                     <li key={index}
                                                                         className="list-group-item d-flex justify-content-between align-items-start">
-                                                                        <input
-                                                                            type="number"
-                                                                            className="form-control form-control-sm me-2"
-                                                                            max={copyOfSections[pageNum - 2].questions.length}
-                                                                            style={{width: "50px"}}
-                                                                            value={question.order || index + 1}
-                                                                            onChange={(e) => handleOrderChange(index, e.target.value)}
-                                                                        />
+                                                                        <div className="d-flex flex-column">
+                                                                            <button
+                                                                                className="btn btn-outline-secondary btn-sm p-0"
+                                                                                onClick={() => handleOrderChange(index, "up")}
+                                                                                style={{width: "30px", height: "25px"}}
+                                                                            >
+                                                                                <i className="bi bi-arrow-up"></i>
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-outline-secondary btn-sm p-0 mt-1"
+                                                                                onClick={() => handleOrderChange(index, "down")}
+                                                                                style={{width: "30px", height: "25px"}}
+                                                                            >
+                                                                                <i className="bi bi-arrow-down"></i>
+                                                                            </button>
+                                                                        </div>
                                                                         <div
-                                                                            className="ms-2 me-auto text-truncate text-start w-100">
+                                                                            className="ms-2 me-auto text-truncate text-start w-100 ">
                                                                             <div
-                                                                                className="d-flex justify-content-between align-items-center w-100">
-                                                                                <h2 className="h5 text-start text-truncate">
-                                                                                    <a href="#"
-                                                                                       className="text-decoration-none">
-                                                                                        {question.title || "No title available"}
-                                                                                    </a>
-                                                                                </h2>
-                                                                                <span
-                                                                                    className="badge text-bg-primary rounded-pill flex-shrink-0">{question.type}
-                                                        </span>
+                                                                                className="d-flex">
+                                                                                <div
+                                                                                    className="d-flex align-items-center" style={{width:"600px"}}>
+                                                                                    <h2 className="h5 text-start text-truncate">
+                                                                                        <a href="#"
+                                                                                           className="text-decoration-none me-1">
+                                                                                            {question.title || "No title available"}
+                                                                                        </a>
+                                                                                    </h2>
+                                                                                    <span
+                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{question.type}
+                                                                                </span>
+                                                                                </div>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="form-control form-control-sm "
+                                                                                    style={{ width: "50px"}}
+                                                                                    min="1"
+                                                                                    value={question.evaluation}
+                                                                                    onChange={(e) => handleEvaluateChange(index, e.target.value)}
+                                                                                />
+
+                                                                                <button
+                                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                                                    style={{marginLeft:"220px"}}
+                                                                                    onClick={() => handleRemoveQuestion(index)}
+                                                                                >
+                                                                                    <i className="bi bi-trash"></i>
+                                                                                </button>
                                                                             </div>
                                                                             <div
                                                                                 className="d-flex justify-content-between align-items-center w-100">
@@ -437,14 +500,9 @@ const Quizzes2 = () => {
                                                                             </div>
                                                                             <div
                                                                                 className="d-flex justify-content-between align-items-center w-100">
-                                                        <span
-                                                            className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}</span><br/>
-                                                                                <button
-                                                                                    className="btn btn-outline-danger btn-xs p-0 px-1 ms-1"
-                                                                                    style={{fontSize: "0.75rem"}}
-                                                                                    onClick={() => handleRemoveQuestion(index)}>
-                                                                                    Remove
-                                                                                </button>
+                                                                            <span
+                                                                                className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}
+                                                                            </span>
                                                                             </div>
                                                                         </div>
                                                                     </li>
@@ -463,253 +521,20 @@ const Quizzes2 = () => {
 
                                         >Add Question
                                         </button>
-                                        <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
-                                             data-bs-keyboard="false" tabIndex="-1"
-                                             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div className="modal-dialog">
-                                                <div className="modal-content">
-                                                    <div className="modal-header">
-                                                        <h1 className="modal-title fs-5"
-                                                            id="staticBackdropLabel">{pageNum - 1}</h1>
-                                                        <button type="button" className="btn-close"
-                                                                data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                    </div>
-                                                    <div className="modal-body">
-                                                        <label htmlFor="select-category">Category</label>
-                                                        <select
-                                                            id="select-category"
-                                                            className="form-select"
-                                                            value={copyOfSections[pageNum - 2]?.categoryId || ""}
-                                                            onChange={(e) => {
-                                                                const selectedOption = categorySelect.find(
-                                                                    (cat) => cat.id === parseInt(e.target.value)
-                                                                );
-                                                                const updatedSections = [...copyOfSections];
-                                                                updatedSections[pageNum - 2] = {
-                                                                    ...updatedSections[pageNum - 2],
-                                                                    categoryId: selectedOption.id,
-                                                                    categoryName: selectedOption.title,
-                                                                };
-                                                                setCopyOfSections(updatedSections);
-
-                                                            }}
-                                                        >
-                                                            <option value="" disabled>
-                                                                Select a category
-                                                            </option>
-                                                            {Array.isArray(categorySelect) &&
-                                                                categorySelect.map((cat) => (
-                                                                    <option key={cat.id} value={cat.id}>
-                                                                        {cat.title}
-                                                                    </option>
-                                                                ))}
-                                                        </select>
-
-                                                        <div className="form-check">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                id="includeSubcategories"
-                                                                checked={copyOfSections[pageNum - 2]?.includeSubCategories}
-                                                                onChange={(e) => {
-                                                                    const updatedSections = [...copyOfSections];
-                                                                    updatedSections[pageNum - 2] = {
-                                                                        ...updatedSections[pageNum - 2],
-                                                                        includeSubCategories: e.target.checked
-                                                                    };
-                                                                    setCopyOfSections(updatedSections);
-                                                                }
-                                                                }
-                                                            />
-                                                            <label className="form-check-label"
-                                                                   htmlFor="includeSubcategories">
-                                                                Include subcategories
-                                                            </label>
-                                                        </div>
-
-                                                        <div className="form-check">
-                                                            <input className="form-check-input" type="radio"
-                                                                   name="randomOrSelectQuestions"
-                                                                   id="exampleRadios1" value="option1"
-                                                                   checked={copyOfSections[pageNum - 2]?.randomQuestions === "random"}
-                                                                   onChange={(e) => {
-                                                                       const updatedSections = [...copyOfSections];
-                                                                       updatedSections[pageNum - 2] = {
-                                                                           ...updatedSections[pageNum - 2],
-                                                                           randomQuestions: "random"
-                                                                       };
-                                                                       setCopyOfSections(updatedSections);
-                                                                   }}/>
-                                                            <label className="form-check-label"
-                                                                   htmlFor="exampleRadios1">
-                                                                Random Questions
-                                                            </label>
-                                                        </div>
-                                                        <div className="form-check">
-                                                            <input className="form-check-input" type="radio"
-                                                                   name="randomOrSelectQuestions"
-                                                                   id="exampleRadios2" value="option2"
-                                                                   checked={copyOfSections[pageNum - 2]?.randomQuestions === "questions"}
-                                                                   onChange={(e) => {
-                                                                       const updatedSections = [...copyOfSections];
-                                                                       updatedSections[pageNum - 2] = {
-                                                                           ...updatedSections[pageNum - 2],
-                                                                           randomQuestions: "questions"
-                                                                       };
-                                                                       setCopyOfSections(updatedSections);
-                                                                   }}/>
-                                                            <label className="form-check-label"
-                                                                   htmlFor="exampleRadios2">
-                                                                Select Questions
-                                                            </label>
-                                                        </div>
-
-                                                        {copyOfSections[pageNum - 2]?.randomQuestions === "random" && (
-                                                            <div className="mb-3">
-                                                                <label htmlFor="randomQuestionsCount"
-                                                                       className="form-label">
-                                                                    Random questions count
-                                                                </label>
-                                                                <input
-                                                                    type="number"
-                                                                    className="form-control w-25"
-                                                                    id="randomQuestionsCount"
-                                                                    placeholder="Enter count"
-                                                                    min="1"
-                                                                    max="500"
-                                                                    value={copyOfSections[pageNum - 2]?.questionsCount}
-                                                                    onChange={(e) => {
-                                                                        const updatedSections = [...copyOfSections];
-                                                                        updatedSections[pageNum - 2] = {
-                                                                            ...updatedSections[pageNum - 2],
-                                                                            questionsCount: parseInt(e.target.value)
-                                                                        };
-                                                                        setCopyOfSections(updatedSections);
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        )}
-
-                                                        {copyOfSections[pageNum - 2]?.randomQuestions === "questions" && (
-                                                            <div>
-                                                                <details>
-                                                                    <summary>Questions</summary>
-                                                                    <div>
-                                                                        <label>Questions</label>
-                                                                        {Array.isArray(questions) && questions.length > 0 ? (
-                                                                            <div>
-                                                                                {questions.map((question) => (
-                                                                                    <div key={question.id}
-                                                                                         className="flex items-center space-x-2 border border-2 border-primary p-3 mb-3">
-                                                                                        <input
-                                                                                            type="checkbox"
-                                                                                            id={`question-${question.id}`}
-                                                                                            value={question.id}
-                                                                                            className="form-checkbox"
-                                                                                            onChange={() => handleCheckBoxQuestions(question)}
-                                                                                            checked={copyOfSections[pageNum - 2]?.questions.some(q => q.id === question.id)}
-
-                                                                                        />
-                                                                                        <label
-                                                                                            htmlFor={`question-${question.id}`}>
-                                                                                            <div
-                                                                                                className="ms-2 me-auto text-start">
-                                                                                                <div
-                                                                                                    className="d-flex align-items-center">
-                                                                                                    <h2 className="h5 text-start m-0"
-                                                                                                        style={{minWidth: "200px"}}>
-                                                                                                        <a href="#"
-                                                                                                           className="text-decoration-none">
-                                                                                                            {
-                                                                                                                question.title?.length < 20
-                                                                                                                    ? question.title?.padEnd(20, ' ')
-                                                                                                                    : question.title?.substring(0, 20)
-                                                                                                            }
-                                                                                                        </a>
-                                                                                                    </h2>
-                                                                                                    <span
-                                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0"
-                                                                                                        style={{marginLeft: "4rem"}}>
-                                                                                                    {question.type}
-                                                                                                </span>
-                                                                                                </div>
-
-                                                                                                <div
-                                                                                                    className="d-flex justify-content-between align-items-center w-100 mt-2">
-                                                                                                    <p className="m-0 text-truncate"
-                                                                                                       style={{flexGrow: "1"}}>{question.text?.length < 40
-                                                                                                        ? question.text?.padEnd(40, ' ')
-                                                                                                        : question.text?.substring(0, 40)}
-                                                                                                    </p>
-                                                                                                </div>
-
-                                                                                                <div
-                                                                                                    className="d-flex justify-content-between align-items-center w-100 mt-2">
-                                                                                                <span
-                                                                                                    className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}</span>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </label>
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        ) : (
-                                                                            <p>No questions available</p>
-                                                                        )}
-                                                                    </div>
-                                                                </details>
-                                                            </div>
-                                                        )
-                                                        }
-
-                                                    </div>
-                                                    <div className="modal-footer">
-                                                        <button type="button" className="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Close
-                                                        </button>
-                                                        <button type="button" className="btn btn-primary"
-                                                                data-bs-dismiss="modal"
-                                                                onClick={() => {
-                                                                    const updatedSections = [...copyOfSections];
-                                                                    updatedSections[pageNum - 2] = {
-                                                                        ...updatedSections[pageNum - 2],
-                                                                        show: true
-                                                                    };
-
-                                                                    setCopyOfSections(updatedSections);
-
-                                                                    setTimeout(() => {
-                                                                        setSections(updatedSections);
-                                                                    }, 0);
-                                                                }}
-                                                        >Add
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <QuestionModal
+                                            pageNum={pageNum}
+                                            copyOfSections={copyOfSections}
+                                            categorySelect={categorySelect}
+                                            questions={questions}
+                                            handleCheckBoxQuestions={handleCheckBoxQuestions}
+                                            setCopyOfSections={setCopyOfSections}
+                                            setSections={setSections}
+                                        />
                                     </div>
 
                             </div>
                             )}
 
-                            {pageNum === pageCount && (
-                                <div>
-                                    <h2>Last Page</h2>
-                                    <button className="btn btn-outline-primary"
-                                            onClick={() => {
-                                                setPageCount(pageCount + 1);
-                                                addPage(pageCount);
-                                            }}>Pridaj sekciu
-                                    </button>
-                                    <br/>
-                                    <button className="btn btn-outline-success"
-                                            onClick={() => {
-                                            }}>Submit
-                                    </button>
-                                </div>
-                            )}
 
                         </div>
                         <div className="col-2">
