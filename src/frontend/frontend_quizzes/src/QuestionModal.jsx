@@ -1,17 +1,77 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import axios from "axios";
 
 const QuestionModal = ({
     pageNum,
     copyOfSections,
     categorySelect,
-    questions,
-    handleCheckBoxQuestions,
     setCopyOfSections,
     setSections
 }) => {
-    const [addedQuestions, setAddedQuestions] = useState([]);
+    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, type: "random", includeSubCategories: true});
+    const [questions, setQuestions] = useState([]);
+    console.log(addedQuestions);
 
+    useEffect(() => {
+    if (addedQuestions.type === "random") {
+        setAddedQuestions((prevState) => ({
+            ...prevState,
+            questions: {
+                count: 1,
+            }
+        }));
+    }else{
+        setAddedQuestions((prevState) => ({
+            ...prevState,
+            questions: []
+        }));
+    }
+}, [addedQuestions.type]);
 
+    useEffect(() => {
+    if (pageNum - 2 >= 0) {
+        const fetchQuestions = async () => {
+            try {
+                const response = await axios.get(
+                    `http://127.0.0.1:5000/api/get_questions_category/${addedQuestions.categoryId}`,
+                    { params: { includeSubCat: addedQuestions.includeSubCategories } }
+                );
+                setQuestions(response.data.questions);
+            } catch (error) {
+                console.error("Error fetching data", error);
+            }
+        };
+        fetchQuestions();
+    }
+}, [pageNum, addedQuestions.categoryId, addedQuestions.includeSubCategories]);
+
+    const handleCheckBoxQuestions = (question) => {
+    setAddedQuestions((prevState) => {
+        // Uistíme sa, že questions je pole pred použitím .some()
+        const questionsArray = Array.isArray(prevState.questions) ? prevState.questions : [];
+
+        const isAlreadySelected = questionsArray.some(q => q.id === question.id);
+
+        return {
+            ...prevState,
+            questions: isAlreadySelected
+                ? questionsArray.filter(q => q.id !== question.id) // Ak už je zaškrtnutá, odstránime ju
+                : [
+                    ...questionsArray, // Inak ju pridáme
+                    {
+                        id: question.id,
+                        title: question.title,
+                        type: question.type,
+                        evaluation: 1,
+                        dateCreated: question.dateCreated,
+                        author: question.authorName
+                    }
+                ]
+        };
+    });
+};
+
+        console.log(questions);
     return (
         <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
              data-bs-keyboard="false" tabIndex="-1"
@@ -30,18 +90,16 @@ const QuestionModal = ({
                         <select
                             id="select-category"
                             className="form-select"
-                            value={copyOfSections[pageNum - 2]?.categoryId || ""}
+                            value={addedQuestions.categoryId || ""}
                             onChange={(e) => {
                                 const selectedOption = categorySelect.find(
                                     (cat) => cat.id === parseInt(e.target.value)
                                 );
-                                const updatedSections = [...copyOfSections];
-                                updatedSections[pageNum - 2] = {
-                                    ...updatedSections[pageNum - 2],
-                                    categoryId: selectedOption.id,
-                                    categoryName: selectedOption.title,
-                                };
-                                setCopyOfSections(updatedSections);
+
+                                setAddedQuestions((prevState) => ({
+                                    ...prevState,
+                                    categoryId: selectedOption.id
+                                }));
 
                             }}
                         >
@@ -61,15 +119,13 @@ const QuestionModal = ({
                                 className="form-check-input"
                                 type="checkbox"
                                 id="includeSubcategories"
-                                checked={copyOfSections[pageNum - 2]?.includeSubCategories || copyOfSections[pageNum - 2]?.categoryId === 1}
-                                disabled={copyOfSections[pageNum - 2]?.categoryId === 1}
+                                checked={addedQuestions.includeSubCategories || addedQuestions.categoryId === 1}
+                                disabled={addedQuestions.categoryId === 1}
                                 onChange={(e) => {
-                                    const updatedSections = [...copyOfSections];
-                                    updatedSections[pageNum - 2] = {
-                                        ...updatedSections[pageNum - 2],
-                                        includeSubCategories: e.target.checked
-                                    };
-                                    setCopyOfSections(updatedSections);
+                                    setAddedQuestions((prevState) => ({
+                                            ...prevState,
+                                            includeSubCategories: e.target.checked
+                                        }));
                                 }
                                 }
                             />
@@ -83,14 +139,12 @@ const QuestionModal = ({
                             <input className="form-check-input" type="radio"
                                    name="randomOrSelectQuestions"
                                    id="exampleRadios1" value="option1"
-                                   checked={copyOfSections[pageNum - 2]?.randomQuestions === "random"}
+                                   checked={addedQuestions.type === "random"}
                                    onChange={(e) => {
-                                       const updatedSections = [...copyOfSections];
-                                       updatedSections[pageNum - 2] = {
-                                           ...updatedSections[pageNum - 2],
-                                           randomQuestions: "random"
-                                       };
-                                       setCopyOfSections(updatedSections);
+                                       setAddedQuestions((prevState) => ({
+                                            ...prevState,
+                                            type: "random"
+                                        }));
                                    }}/>
                             <label className="form-check-label"
                                    htmlFor="exampleRadios1">
@@ -101,14 +155,12 @@ const QuestionModal = ({
                             <input className="form-check-input" type="radio"
                                    name="randomOrSelectQuestions"
                                    id="exampleRadios2" value="option2"
-                                   checked={copyOfSections[pageNum - 2]?.randomQuestions === "questions"}
+                                   checked={addedQuestions.type === "questions"}
                                    onChange={(e) => {
-                                       const updatedSections = [...copyOfSections];
-                                       updatedSections[pageNum - 2] = {
-                                           ...updatedSections[pageNum - 2],
-                                           randomQuestions: "questions"
-                                       };
-                                       setCopyOfSections(updatedSections);
+                                       setAddedQuestions((prevState) => ({
+                                            ...prevState,
+                                            type: "questions"
+                                        }));
                                    }}/>
                             <label className="form-check-label"
                                    htmlFor="exampleRadios2">
@@ -116,7 +168,7 @@ const QuestionModal = ({
                             </label>
                         </div>
 
-                        {copyOfSections[pageNum - 2]?.randomQuestions === "random" && (
+                        {addedQuestions.type === "random" && (
                             <div className="mb-3">
                                 <label htmlFor="randomQuestionsCount"
                                        className="form-label">
@@ -129,20 +181,21 @@ const QuestionModal = ({
                                     placeholder="Enter count"
                                     min="1"
                                     max="500"
-                                    value={copyOfSections[pageNum - 2]?.questionsCount}
+                                    value={addedQuestions.questions?.count}
                                     onChange={(e) => {
-                                        const updatedSections = [...copyOfSections];
-                                        updatedSections[pageNum - 2] = {
-                                            ...updatedSections[pageNum - 2],
-                                            questionsCount: parseInt(e.target.value)
-                                        };
-                                        setCopyOfSections(updatedSections);
+                                        setAddedQuestions((prevState) => ({
+                                            ...prevState,
+                                            questions: {
+                                                ...prevState.questions || {},
+                                                count: e.target.value
+                                            }
+                                        }));
                                     }}
                                 />
                             </div>
                         )}
 
-                        {copyOfSections[pageNum - 2]?.randomQuestions === "questions" && (
+                        {addedQuestions.type === "questions" && (
                             <div>
                                 <details>
                                     <summary>Questions</summary>
@@ -160,12 +213,8 @@ const QuestionModal = ({
                                                                 value={question.id}
                                                                 onChange={() => {
                                                                     handleCheckBoxQuestions(question);
-                                                                    setAddedQuestions(prevQuestions => [
-                                                                        ...prevQuestions,
-                                                                        {title: question.title, id: question.id}
-                                                                    ]);
                                                                 }}
-                                                                checked={copyOfSections[pageNum - 2]?.questions.some(q => q.id === question.id)}
+                                                                checked={Array.isArray(addedQuestions.questions) && addedQuestions.questions.some(q => q.id === question.id)}
                                                                 aria-label="Checkbox for following text input"
                                                             />
                                                         </div>
@@ -205,6 +254,7 @@ const QuestionModal = ({
                                         ...updatedSections[pageNum - 2],
                                         show: true
                                     };
+
 
                                     setCopyOfSections(updatedSections);
 

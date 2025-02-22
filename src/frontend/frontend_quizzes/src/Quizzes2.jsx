@@ -40,6 +40,7 @@ const Quizzes2 = () => {
         sectionId: 1,
         shuffle:false,
         questions:[],
+        items: [],
         categoryId: 1,
         title: "Section 1",
         categoryName: "supercategory",
@@ -199,6 +200,7 @@ const Quizzes2 = () => {
         setSections(updatedSections);
     }
 
+    console.log(sections);
 
     if (localStorage.getItem("accessToken")) {
         return (
