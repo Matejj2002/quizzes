@@ -10,10 +10,7 @@ const Quizzes2 = () => {
     const [pageNum, setPageNum] = useState(1);
     const [pageCount, setPageCount] = useState(3);
 
-    const [questions, setQuestions] = useState([]);
-
     const [quizTitle, setQuizTitle] = useState("");
-    const [randomOrder, setRandomOrder] = useState(false);
     const [numberOfCorrections, setNumberOfCorrections] = useState(0);
     const [minutesToFinish, setMinutesToFinish] = useState(1);
     const [dateOpen, setDateOpen] = useState("");
@@ -23,31 +20,11 @@ const Quizzes2 = () => {
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title:"All"}]);
 
-     const [copyOfSections, setCopyOfSections] = useState([{
-        sectionId: 1,
-        shuffle:false,
-        questions:[],
-        categoryId: 1,
-        categoryName: "supercategory",
-        includeSubCategories: true,
-        randomQuestions: "random",
-         title: "Section 1",
-        questionsCount: 1,
-        show : false
-    }]);
-
     const [sections, setSections] = useState([{
         sectionId: 1,
         shuffle:false,
-        questions:[],
         items: [],
-        categoryId: 1,
         title: "Section 1",
-        categoryName: "supercategory",
-        includeSubCategories: true,
-        randomQuestions: "random",
-        questionsCount: 1,
-        show : false
     }]);
 
 
@@ -78,32 +55,9 @@ const Quizzes2 = () => {
         {
             sectionId: prevSections.length + 1,
             shuffle: false,
-            categoryId: 1,
-            categoryName: "supercategory",
-            includeSubCategories: true,
-            randomQuestions: "random",
             title: "Section " + (prevSections.length + 1),
-            questionsCount: 1,
-            questions: [],
-            show : false
+            items: [],
         }])
-
-        setCopyOfSections((prevSections) => [
-        ...prevSections,
-        {
-            sectionId: prevSections.length + 1,
-            shuffle: false,
-            categoryId: 1,
-            categoryName: "supercategory",
-            includeSubCategories: true,
-            randomQuestions: "random",
-            title: "Section "+ (prevSections.length + 1),
-            questionsCount: 1,
-            questions: [],
-            show : false
-        }
-    ]);
-
     }
 
     const fetchCategorySelect = async () => {
@@ -117,23 +71,6 @@ const Quizzes2 = () => {
        finally {}
     }
 
-    const handleCheckBoxQuestions = (question) => {
-    setCopyOfSections((prevSections) => {
-        return prevSections.map((section, index) => {
-            if (index === pageNum - 2) {
-                const isAlreadySelected = section.questions.some(q => q.id === question.id);
-
-                return {
-                    ...section,
-                    questions: isAlreadySelected
-                        ? section.questions.filter(q => q.id !== question.id)
-                        : [...section.questions, { id: question.id, title: question.title, type: question.type, evaluation:1, dateCreated: question.dateCreated, author: question.authorName }]
-                };
-            }
-            return section;
-        });
-    });
-};
 
     useEffect(() => {
     const fetchAllData = async () => {
@@ -148,59 +85,130 @@ const Quizzes2 = () => {
 
   }, []);
 
-    useEffect(() => {
-    if (pageNum - 2 >= 0 && sections[pageNum - 2]) {
-        const fetchQuestions = async () => {
-            try {
-                const response = await axios.get(
-                    `http://127.0.0.1:5000/api/get_questions_category/${copyOfSections[pageNum - 2].categoryId}`,
-                    { params: { includeSubCat: copyOfSections[pageNum - 2].includeSubCategories } }
-                );
-                setQuestions(response.data.questions);
-            } catch (error) {
-                console.error("Error fetching data", error);
+    function handleRemoveQuestion(itemIndex, questionIndex) {
+    setSections((prevSections) =>
+        prevSections.map((section, secIndex) => {
+            if (secIndex === pageNum - 2) {
+                return {
+                    ...section,
+                    items: section.items.map((item, i) => {
+                        if (i === itemIndex) {
+                            return {
+                                ...item,
+                                questions: Array.isArray(item.questions)
+                                    ? item.questions.filter((_, qIndex) => qIndex !== questionIndex)
+                                    : item.questions
+                            };
+                        }
+                        return item;
+                    })
+                };
             }
-        };
-        fetchQuestions();
-    }
-}, [sections, pageNum, copyOfSections[pageNum-2]?.categoryId, copyOfSections[pageNum-2]?.includeSubCategories]);
+            return section;
+        })
+    );
+}
+    const handleOrderChange = (itemIndex, questionIndex, direction) => {
+    setSections((prevSections) =>
+        prevSections.map((section, secIndex) => {
+            if (secIndex === pageNum - 2) {
+                return {
+                    ...section,
+                    items: section.items.map((item, i) => {
+                        if (i === itemIndex && Array.isArray(item.questions) && item.questions.length > 1) {
+                            const updatedQuestions = [...item.questions];
 
-    function handleRemoveQuestion(index) {
-        sections[pageNum - 2].questions.splice(index, 1);
-        setSections([...sections]);
-    }
-    const handleOrderChange = (index, direction) => {
-        const updatedQuestions = [...copyOfSections[pageNum - 2].questions];
+                            if (direction === "up" && questionIndex > 0) {
+                                [updatedQuestions[questionIndex], updatedQuestions[questionIndex - 1]] =
+                                    [updatedQuestions[questionIndex - 1], updatedQuestions[questionIndex]];
+                            }
+                            else if (direction === "down" && questionIndex < updatedQuestions.length - 1) {
+                                [updatedQuestions[questionIndex], updatedQuestions[questionIndex + 1]] =
+                                    [updatedQuestions[questionIndex + 1], updatedQuestions[questionIndex]];
+                            }
 
-          if (updatedQuestions.length <= 1) {
-              return;
-          }
+                            return { ...item, questions: updatedQuestions };
+                        }
+                        return item;
+                    }),
+                };
+            }
+            return section;
+        })
+    );
+};
 
-          const currentQuestion = updatedQuestions[index];
+    const handleEvaluateChange = (itemIndex, questionIndex, newValue) => {
+    setSections((prevSections) =>
+        prevSections.map((section, secIndex) => {
+            if (secIndex === pageNum - 2) {
+                return {
+                    ...section,
+                    items: section.items.map((item, i) => {
+                        if (i === itemIndex && Array.isArray(item.questions)) {
+                            return {
+                                ...item,
+                                questions: item.questions.map((question, qIndex) => {
+                                    if (qIndex === questionIndex) {
+                                        return { ...question, evaluation: parseInt(newValue, 10) };
+                                    }
+                                    return question;
+                                }),
+                            };
+                        }
+                        return item;
+                    }),
+                };
+            }
+            return section;
+        })
+    );
+};
 
-          if (direction === "up" && index > 0) {
-              updatedQuestions[index] = updatedQuestions[index - 1];
-            updatedQuestions[index - 1] = currentQuestion;
-          }
-          else if (direction === "down" && index < updatedQuestions.length - 1) {
-              updatedQuestions[index] = updatedQuestions[index + 1];
-            updatedQuestions[index + 1] = currentQuestion;
-          }
 
-          setCopyOfSections(prevSections => {
-            const newSections = [...prevSections];
-            newSections[pageNum - 2].questions = updatedQuestions;
-            return newSections;
-          });
-        };
+    const handleAddItemToSection = (item) => {
+    setSections((prevState) =>
+        prevState.map((section) => ({
+            ...section,
+            items: Array.isArray(section.items) ? [...section.items, item] : [item]
+        }))
+    );
+};
 
-    function handleEvaluateChange(index, newValue) {
-        const updatedSections = [...sections];
-        updatedSections[pageNum - 2].questions[index].evaluation = parseInt(newValue, 10);
-        setSections(updatedSections);
-    }
+    const handleRemoveItem = (itemIndex) => {
+    setSections((prevSections) =>
+        prevSections.map((section, secIndex) => {
+            if (secIndex === pageNum - 2) {
+                return {
+                    ...section,
+                    items: section.items.filter((_, i) => i !== itemIndex),
+                };
+            }
+            return section;
+        })
+    );
+};
+    const handleOrderChangeItem = (itemIndex, direction) => {
+    setSections((prevSections) =>
+        prevSections.map((section, secIndex) => {
+            if (secIndex === pageNum - 2) {
+                const updatedItems = [...section.items];
 
-    console.log(sections);
+                if (direction === "up" && itemIndex > 0) {
+                    [updatedItems[itemIndex], updatedItems[itemIndex - 1]] =
+                        [updatedItems[itemIndex - 1], updatedItems[itemIndex]];
+                }
+                else if (direction === "down" && itemIndex < updatedItems.length - 1) {
+                    [updatedItems[itemIndex], updatedItems[itemIndex + 1]] =
+                        [updatedItems[itemIndex + 1], updatedItems[itemIndex]];
+                }
+
+                return { ...section, items: updatedItems };
+            }
+            return section;
+        })
+    );
+};
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -405,131 +413,203 @@ const Quizzes2 = () => {
                                                 Shuffle
                                             </label>
                                         </div>
-                                        {sections[pageNum - 2]?.show === true && (
-                                            <div>
-                                                {sections[pageNum - 2]?.randomQuestions === "random" && (
-                                                    <ul className="list-group list-group-flush">
-                                                      <li className="list-group-item">{sections[pageNum - 2]?.shuffle ? (
-                                                        <p>Section is shuffled</p>
-                                                      ) : (
-                                                        <p>Section is not shuffled</p>
-                                                      )}</li>
-                                                        <li className="list-group-item">
-                                                            <p>Name of category is {sections[pageNum - 2]?.categoryName}</p>
-                                                        </li>
-                                                        <li className="list-group-item">{sections[pageNum - 2]?.includeSubCategories ? (
-                                                        <p>Questions are included from subcategories</p>
-                                                      ) : (
-                                                        <p>Questions are not included from subcategories</p>
-                                                      )}</li>
-                                                      <li className="list-group-item"><p>Number of questions is {sections[pageNum - 2]?.questionsCount}</p></li>
-
-                                                    </ul>
-                                                )}
-
-                                                {sections[pageNum - 2]?.randomQuestions === "questions" && (
-                                                    <div>
-                                                        <ol className="list-group">
-                                                            <li className="list-group-item d-flex justify-content-between align-items-center fw-bold">
-                                                                <div className="d-flex" style={{width: "80px"}}>Order
+                                        {
+                                            sections[pageNum - 2].items.map((item, indexItem) => {
+                                                if (item.type === "questions") {
+                                                    return (
+                                                        <div className="border p-3 mb-3">
+                                                            <div className="d-flex justify-content-between mb-3">
+                                                                <div className="d-flex">
+                                                                    <p className="fw-bold h5">Item {indexItem + 1}</p>
+                                                                    <button
+                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
+                                                                        onClick={() => handleOrderChangeItem(indexItem, "up")}
+                                                                        style={{
+                                                                            width: "30px",
+                                                                            height: "25px"
+                                                                        }}
+                                                                    >
+                                                                        <i className="bi bi-arrow-up"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
+                                                                        onClick={() => handleOrderChangeItem(indexItem, "down")}
+                                                                        style={{
+                                                                            width: "30px",
+                                                                            height: "25px"
+                                                                        }}
+                                                                    >
+                                                                        <i className="bi bi-arrow-down"></i>
+                                                                    </button>
                                                                 </div>
-                                                                <div className="d-flex"
-                                                                     style={{width: "200px"}}>Question
-                                                                </div>
-                                                                <div className="d-flex" style={{width: "80px"}}>Weight
-                                                                </div>
-                                                                <div className="d-flex justify-content-end"
-                                                                     style={{width: "50px"}}>Remove
-                                                                </div>
-                                                            </li>
-                                                            {
-                                                                sections[pageNum - 2]?.questions.map((question, index) => (
+                                                                <button
+                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                                    style={{marginLeft: "220px"}}
+                                                                    onClick={() => handleRemoveItem(indexItem, indexItem)}
+                                                                >
+                                                                    <i className="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                            <ol className="list-group">
+                                                                <li className="list-group-item d-flex justify-content-between align-items-center fw-bold">
+                                                                    <div className="d-flex"
+                                                                         style={{width: "80px"}}>Order
+                                                                    </div>
+                                                                    <div className="d-flex"
+                                                                         style={{width: "200px"}}>Question
+                                                                    </div>
+                                                                    <div className="d-flex"
+                                                                         style={{width: "80px"}}>Weight
+                                                                    </div>
+                                                                    <div className="d-flex justify-content-end"
+                                                                         style={{width: "50px"}}>Remove
+                                                                    </div>
+                                                                </li>
+                                                                {
+                                                                    item.questions.map((question, index) => (
 
-                                                                    <li key={index}
-                                                                        className="list-group-item d-flex justify-content-between align-items-start">
-                                                                        <div className="d-flex flex-column">
-                                                                            <button
-                                                                                className="btn btn-outline-secondary btn-sm p-0"
-                                                                                onClick={() => handleOrderChange(index, "up")}
-                                                                                style={{width: "30px", height: "25px"}}
-                                                                            >
-                                                                                <i className="bi bi-arrow-up"></i>
-                                                                            </button>
-                                                                            <button
-                                                                                className="btn btn-outline-secondary btn-sm p-0 mt-1"
-                                                                                onClick={() => handleOrderChange(index, "down")}
-                                                                                style={{width: "30px", height: "25px"}}
-                                                                            >
-                                                                                <i className="bi bi-arrow-down"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                        <div
-                                                                            className="ms-2 me-auto text-truncate text-start w-100 ">
-                                                                            <div
-                                                                                className="d-flex">
-                                                                                <div
-                                                                                    className="d-flex align-items-center" style={{width:"600px"}}>
-                                                                                    <h2 className="h5 text-start text-truncate">
-                                                                                        <a href="#"
-                                                                                           className="text-decoration-none me-1">
-                                                                                            {question.title || "No title available"}
-                                                                                        </a>
-                                                                                    </h2>
-                                                                                    <span
-                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{question.type}
-                                                                                </span>
-                                                                                </div>
-                                                                                <input
-                                                                                    type="number"
-                                                                                    className="form-control form-control-sm "
-                                                                                    style={{ width: "50px"}}
-                                                                                    min="1"
-                                                                                    value={question.evaluation}
-                                                                                    onChange={(e) => handleEvaluateChange(index, e.target.value)}
-                                                                                />
-
+                                                                        <li key={index}
+                                                                            className="list-group-item d-flex justify-content-between align-items-start">
+                                                                            <div className="d-flex flex-column">
                                                                                 <button
-                                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
-                                                                                    style={{marginLeft:"220px"}}
-                                                                                    onClick={() => handleRemoveQuestion(index)}
+                                                                                    className="btn btn-outline-secondary btn-sm p-0"
+                                                                                    onClick={() => handleOrderChange(indexItem, index, "up")}
+                                                                                    style={{
+                                                                                        width: "30px",
+                                                                                        height: "25px"
+                                                                                    }}
                                                                                 >
-                                                                                    <i className="bi bi-trash"></i>
+                                                                                    <i className="bi bi-arrow-up"></i>
+                                                                                </button>
+                                                                                <button
+                                                                                    className="btn btn-outline-secondary btn-sm p-0 mt-1"
+                                                                                    onClick={() => handleOrderChange(indexItem, index, "down")}
+                                                                                    style={{
+                                                                                        width: "30px",
+                                                                                        height: "25px"
+                                                                                    }}
+                                                                                >
+                                                                                    <i className="bi bi-arrow-down"></i>
                                                                                 </button>
                                                                             </div>
                                                                             <div
-                                                                                className="d-flex justify-content-between align-items-center w-100">
-                                                                                <p className="m-0 text-truncate">{question.text}</p>
-                                                                            </div>
-                                                                            <div
-                                                                                className="d-flex justify-content-between align-items-center w-100">
+                                                                                className="ms-2 me-auto text-truncate text-start w-100 ">
+                                                                                <div
+                                                                                    className="d-flex">
+                                                                                    <div
+                                                                                        className="d-flex align-items-center"
+                                                                                        style={{width: "600px"}}>
+                                                                                        <h2 className="h5 text-start text-truncate">
+                                                                                            <a href="#"
+                                                                                               className="text-decoration-none me-1">
+                                                                                                {question.title || "No title available"}
+                                                                                            </a>
+                                                                                        </h2>
+                                                                                        <span
+                                                                                            className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{question.type}
+                                                                                </span>
+                                                                                    </div>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        className="form-control form-control-sm "
+                                                                                        style={{width: "50px"}}
+                                                                                        min="1"
+                                                                                        value={question.evaluation}
+                                                                                        onChange={(e) => handleEvaluateChange(indexItem, index, e.target.value)}
+                                                                                    />
+
+                                                                                    <button
+                                                                                        className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                                                        style={{marginLeft: "220px"}}
+                                                                                        onClick={() => handleRemoveQuestion(indexItem, index)}
+                                                                                    >
+                                                                                        <i className="bi bi-trash"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                                <div
+                                                                                    className="d-flex justify-content-between align-items-center w-100">
+                                                                                    <p className="m-0 text-truncate">{question.text}</p>
+                                                                                </div>
+                                                                                <div
+                                                                                    className="d-flex justify-content-between align-items-center w-100">
                                                                             <span
                                                                                 className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}
                                                                             </span>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </li>
-                                                                ))
-                                                            }
-                                                        </ol>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                                                                        </li>
+                                                                    ))
+                                                                }
+                                                            </ol>
+                                                        </div>
+                                                    )
+                                                } else if (item.type === "random") {
+                                                    return (
+                                                        <div className="border p-3 mb-3">
+                                                            <div className="d-flex justify-content-between mb-3">
+                                                                <div className="d-flex">
+                                                                    <p className="fw-bold h5">Item {indexItem + 1}</p>
+                                                                    <button
+                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
+                                                                        onClick={() => handleOrderChangeItem(indexItem, "up")}
+                                                                        style={{
+                                                                            width: "30px",
+                                                                            height: "25px"
+                                                                        }}
+                                                                    >
+                                                                        <i className="bi bi-arrow-up"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
+                                                                        onClick={() => handleOrderChangeItem(indexItem, "down")}
+                                                                        style={{
+                                                                            width: "30px",
+                                                                            height: "25px"
+                                                                        }}
+                                                                    >
+                                                                        <i className="bi bi-arrow-down"></i>
+                                                                    </button>
+                                                                </div>
+                                                                <button
+                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                                    style={{marginLeft: "220px"}}
+                                                                    onClick={() => handleRemoveItem(indexItem, indexItem)}
+                                                                >
+                                                                    <i className="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                            <ul className="list-group list-group-flush">
+                                                                <li className="list-group-item">{sections[pageNum - 2]?.shuffle ? (
+                                                                    <p>Section is shuffled</p>
+                                                                ) : (
+                                                                    <p>Section is not shuffled</p>
+                                                                )}</li>
+                                                                <li className="list-group-item">
+                                                                    <p>Name of category
+                                                                        is {item.categoryName}</p>
+                                                                </li>
+                                                                <li className="list-group-item">{item.includeSubCategories ? (
+                                                                    <p>Questions are included from subcategories</p>
+                                                                ) : (
+                                                                    <p>Questions are not included from subcategories</p>
+                                                                )}</li>
+                                                                <li className="list-group-item"><p>Number of questions
+                                                                    is {item.questions.count}</p></li>
+
+                                                            </ul>
+                                                        </div>
+                                                    )
+                                                }
+                                            })
+                                        }
                                         <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
                                                 data-bs-target="#staticBackdrop"
-                                                onClick={() => {
-                                                    setCopyOfSections(sections);
-                                                }}
-
                                         >Add Question
                                         </button>
                                         <QuestionModal
                                             pageNum={pageNum}
-                                            copyOfSections={copyOfSections}
                                             categorySelect={categorySelect}
-                                            questions={questions}
-                                            handleCheckBoxQuestions={handleCheckBoxQuestions}
-                                            setCopyOfSections={setCopyOfSections}
+                                            handleAddItem={handleAddItemToSection}
                                             setSections={setSections}
                                         />
                                     </div>

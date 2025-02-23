@@ -3,14 +3,11 @@ import axios from "axios";
 
 const QuestionModal = ({
     pageNum,
-    copyOfSections,
     categorySelect,
-    setCopyOfSections,
-    setSections
+    handleAddItem
 }) => {
-    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, type: "random", includeSubCategories: true});
+    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: []});
     const [questions, setQuestions] = useState([]);
-    console.log(addedQuestions);
 
     useEffect(() => {
     if (addedQuestions.type === "random") {
@@ -47,7 +44,6 @@ const QuestionModal = ({
 
     const handleCheckBoxQuestions = (question) => {
     setAddedQuestions((prevState) => {
-        // Uistíme sa, že questions je pole pred použitím .some()
         const questionsArray = Array.isArray(prevState.questions) ? prevState.questions : [];
 
         const isAlreadySelected = questionsArray.some(q => q.id === question.id);
@@ -55,9 +51,9 @@ const QuestionModal = ({
         return {
             ...prevState,
             questions: isAlreadySelected
-                ? questionsArray.filter(q => q.id !== question.id) // Ak už je zaškrtnutá, odstránime ju
+                ? questionsArray.filter(q => q.id !== question.id)
                 : [
-                    ...questionsArray, // Inak ju pridáme
+                    ...questionsArray,
                     {
                         id: question.id,
                         title: question.title,
@@ -71,7 +67,6 @@ const QuestionModal = ({
     });
 };
 
-        console.log(questions);
     return (
         <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
              data-bs-keyboard="false" tabIndex="-1"
@@ -98,7 +93,8 @@ const QuestionModal = ({
 
                                 setAddedQuestions((prevState) => ({
                                     ...prevState,
-                                    categoryId: selectedOption.id
+                                    categoryId: selectedOption.id,
+                                    categoryName: selectedOption.title
                                 }));
 
                             }}
@@ -247,19 +243,11 @@ const QuestionModal = ({
                         </button>
                         <button type="button" className="btn btn-primary"
                                 data-bs-dismiss="modal"
-                                disabled={addedQuestions.length === 0 && copyOfSections[pageNum - 2]?.randomQuestions === "questions"}
+                                disabled={addedQuestions.questions?.length === 0 && addedQuestions.type === "questions"}
                                 onClick={() => {
-                                    const updatedSections = [...copyOfSections];
-                                    updatedSections[pageNum - 2] = {
-                                        ...updatedSections[pageNum - 2],
-                                        show: true
-                                    };
-
-
-                                    setCopyOfSections(updatedSections);
-
                                     setTimeout(() => {
-                                        setSections(updatedSections);
+                                        handleAddItem(addedQuestions);
+                                        setAddedQuestions({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: []})
                                     }, 0);
                                 }}
                         >Add
