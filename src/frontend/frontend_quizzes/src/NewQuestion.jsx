@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios, {create} from 'axios';
+import axios from 'axios';
 import {useParams, useNavigate} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';

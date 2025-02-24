@@ -74,8 +74,23 @@ const QuestionModal = ({
             <div className="modal-dialog modal-dialog-scrollable">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5"
-                            id="staticBackdropLabel">{pageNum - 1}</h1>
+                        <button type="button" className="btn btn-primary"
+                                data-bs-dismiss="modal"
+                                disabled={addedQuestions.questions?.length === 0 && addedQuestions.type === "questions"}
+                                onClick={() => {
+                                    setTimeout(() => {
+                                        handleAddItem(addedQuestions);
+                                        setAddedQuestions({
+                                            categoryId: 1,
+                                            categoryName: "supercategory",
+                                            type: "random",
+                                            includeSubCategories: true,
+                                            questions: []
+                                        })
+                                    }, 0);
+                                }}
+                        >Add
+                        </button>
                         <button type="button" className="btn-close"
                                 data-bs-dismiss="modal"
                                 aria-label="Close"></button>
@@ -104,7 +119,7 @@ const QuestionModal = ({
                             </option>
                             {Array.isArray(categorySelect) &&
                                 categorySelect.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
+                                    <option key={cat.id} value={cat.id || ""}>
                                         {cat.title}
                                     </option>
                                 ))}
@@ -177,7 +192,7 @@ const QuestionModal = ({
                                     placeholder="Enter count"
                                     min="1"
                                     max="500"
-                                    value={addedQuestions.questions?.count}
+                                    value={addedQuestions.questions?.count || ""}
                                     onChange={(e) => {
                                         setAddedQuestions((prevState) => ({
                                             ...prevState,
@@ -206,7 +221,7 @@ const QuestionModal = ({
                                                                 type="checkbox"
                                                                 className="form-check-input mt-0"
                                                                 id={`question-${question.id}`}
-                                                                value={question.id}
+                                                                value={question.id || ""}
                                                                 onChange={() => {
                                                                     handleCheckBoxQuestions(question);
                                                                 }}

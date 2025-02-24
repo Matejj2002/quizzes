@@ -5,7 +5,6 @@ from flask_dance.contrib.github import make_github_blueprint
 from flask_cors import CORS
 from src.backend.views import *
 from src.backend.models import *
-from graphviz import Digraph
 from flask_session import Session
 import requests
 import os
@@ -120,18 +119,6 @@ def get_user_data():
     else:
         return jsonify({"error": "Failed to retrieve user data"}), response.status_code
 
-
-@app.route('/categories')
-def categories():
-    if github.authorized:
-        root_categories = Category.query.filter(Category.supercategory_id == None).all()
-        category_graph = draw_category_graph(root_categories)
-        category_graph.render('static/category_hierarchy')
-        return '<img src= "static/category_hierarchy.png">'
-    else:
-        abort(403)
-
-
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
@@ -146,7 +133,7 @@ def get_questions():
     act_cat = request.args.get('actualCategory', default=1, type=int)
     filters = request.args.get("filterType", default="", type=str)
     author_filter = request.args.get("authorFilterDec", default="", type=str)
-    question_filter = request.args.get("questionFilter", default="Active", type = str)
+    question_filter = request.args.get("questionFilter", default="Active", type=str)
 
     cond = False
     if question_filter == "All":
@@ -156,7 +143,6 @@ def get_questions():
 
     if question_filter == "Active":
         cond = False
-
 
     if filters == "Matching Question":
         filters = "matching_answer_question"
@@ -178,7 +164,8 @@ def get_questions():
         counter = 0
         for question in questions:
             if question_filter == "Active" or question_filter == "Archived":
-                condition = (question['is_deleted'] == cond or question['is_deleted'] == None) #musi byt, lebo na zaciatku tam nebol tento flag
+                condition = (question['is_deleted'] == cond or question[
+                    'is_deleted'] == None)  # musi byt, lebo na zaciatku tam nebol tento flag
             else:
                 condition = True
 
@@ -295,6 +282,7 @@ def fetch_question_data(question_id):
 
     return question_dict
 
+
 @app.route('/api/questions/delete', methods=['PUT'])
 def delete_question():
     data = request.get_json()
@@ -309,7 +297,8 @@ def delete_question():
         question.is_deleted = False
     db.session.commit()
 
-    return jsonify({'deleted':delete})
+    return jsonify({'deleted': delete})
+
 
 @app.route('/api/questions-update/<int:question_id>', methods=['GET'])
 def get_question(question_id):
@@ -451,7 +440,7 @@ def add_new_question():
                                      title=title,
                                      text=text,
                                      dateCreated=datetime.datetime.now(),
-                                     author_id= author_id.id,  # potom upravit
+                                     author_id=author_id.id,
                                      type=type_q
                                      )
 
@@ -674,7 +663,7 @@ def add_question_version(id):
 
 @app.route("/api/get-category-tree", methods=["GET"])
 def get_tree_categories():
-    result= tree_categories(Category.query.get_or_404(1))
+    result = tree_categories(Category.query.get_or_404(1))
     result['title'] = ""
     return result
 
@@ -686,6 +675,7 @@ def tree_categories(node):
         "children": [tree_categories(child) for child in node.subcategories]
     }
     return result
+
 
 def list_subcategories(node):
     subcategories = []
@@ -699,13 +689,12 @@ def list_subcategories(node):
     traverse(node)
     return subcategories
 
-def generate_category_tree(category, level=0):
-    result = []
 
-    result.append({
+def generate_category_tree(category, level=0):
+    result = [{
         "id": category["id"],
         "title": f"{'– ' * (level - 1)}{category['title']}"
-    })
+    }]
 
     if category.get("children"):
         for i in category['children']:
@@ -720,6 +709,7 @@ def get_category_to_select():
     result = generate_category_tree(cat)
     result.pop(0)
     return result
+
 
 @app.route("/api/get_questions_category/<int:index>", methods=["GET"])
 def get_questions_from_category(index):
@@ -739,8 +729,8 @@ def get_questions_from_category(index):
         if not i.is_deleted or i.is_deleted == None:
             author = Teacher.query.get_or_404(latest_version.author_id).name
             version = {
-                "id" : latest_version.id,
-                "title" : latest_version.title,
+                "id": latest_version.id,
+                "title": latest_version.title,
                 "text": latest_version.text,
                 "type": latest_version.type,
                 "dateCreated": latest_version.dateCreated,
@@ -750,21 +740,11 @@ def get_questions_from_category(index):
 
     return {"questions": questions_versions}
 
-
-def draw_category_graph(categories, graph=None, parent=None):
-    if graph is None:
-        graph = Digraph(format='png', engine='dot')
-        graph.attr(rankdir='LR')
-
-    for category in categories:
-        graph.node(str(category.id), category.title)
-        if parent:
-            graph.edge(str(parent.id), str(category.id))
-
-        if category.subcategories:
-            draw_category_graph(category.subcategories, graph, category)
-    return graph
-
+@app.route("/api/new-quiz-template", methods=["PUT"])
+def create_new_quiz_template():
+    data = request.get_json()
+    print(data)
+    return {}, 200
 
 if __name__ == '__main__':
     with app.app_context():

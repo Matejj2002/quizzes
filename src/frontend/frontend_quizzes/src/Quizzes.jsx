@@ -209,6 +209,28 @@ const Quizzes = () => {
         })
     );
 };
+    const saveChanges = () => {
+        const updatedData = {
+            sections: sections,
+            quizTitle: quizTitle,
+            numberOfCorrections: numberOfCorrections,
+            minutesToFinish: minutesToFinish,
+            dateOpen: dateOpen,
+            dateClose: dateClose,
+            dateCheck: dateCheck,
+            shuffleSections: shuffleSections
+
+        }
+        axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
+            .then(
+                response => {
+                    window.location.href = '/questions';
+            }
+            )
+            .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+    }
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -230,16 +252,16 @@ const Quizzes = () => {
                                     </button>
                                 </li>
                                 {Array.from({length: pageCount - 2}, (_, index) => (
-                                    <li className="nav-item" role="presentation" key={index+2}>
+                                    <li className="nav-item" role="presentation" key={index + 2}>
                                         <button
-                                            className={`nav-link ${index+2 === pageNum ? "active" : ""}`}
-                                            id={`tab-${index+2}`}
+                                            className={`nav-link ${index + 2 === pageNum ? "active" : ""}`}
+                                            id={`tab-${index + 2}`}
                                             data-bs-toggle="tab"
-                                            data-bs-target={`#tab-pane-${index+2}`}
+                                            data-bs-target={`#tab-pane-${index + 2}`}
                                             type="button"
                                             role="tab"
-                                            aria-controls={`tab-pane-${index+2}`}
-                                            aria-selected={index+2 === pageNum}
+                                            aria-controls={`tab-pane-${index + 2}`}
+                                            aria-selected={index + 2 === pageNum}
                                             onClick={() => {
                                                 setPageNum(index + 2)
                                             }}
@@ -263,6 +285,20 @@ const Quizzes = () => {
                                     >+
                                     </button>
                                 </li>
+
+                                <li className="nav-item" role="presentation">
+                                    <button className="btn btn-success" id="disabled-tab" data-bs-toggle="tab"
+                                            type="button" role="tab"
+                                            aria-controls="disabled-tab-pane"
+
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                saveChanges();
+                                            }}
+                                    >Submit
+                                    </button>
+                                </li>
+
                             </ul>
 
                             <div className="tab-content" id="myTabContent">
@@ -387,7 +423,7 @@ const Quizzes = () => {
                             </div>
 
                             {(pageNum > 1 && pageNum < pageCount) && (
-                            <div className="tab-content mt-3">
+                            <div className="tab-content mt-3" id={`tab-content-${pageNum}`}>
                                     <div
                                         key={pageNum}
                                         className={`tab-pane fade show active`}
