@@ -79,7 +79,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
             answers: answersSel,
             author: author
         };
-        if (!questionDetail || copy) {
+        if (subButText === "Submit" || subButText === "Copy") {
             if (questionType !== 'Question Type' && title !=="" && text !=="") {
                 axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
                     .then(response => {
@@ -126,6 +126,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
                 }
             }
         }else{
+            console.log(id);
             axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
             .then(response => {
                     window.location.href = '/questions';
@@ -227,8 +228,6 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
     const AnswerSetter = async (newAnswers) => {
         setAnswers(newAnswers)
     };
-
-    console.log(createMoreQuestions);
 
     if (localStorage.getItem("accessToken")) {
         return (
