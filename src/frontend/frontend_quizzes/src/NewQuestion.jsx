@@ -12,7 +12,7 @@ import Categories from "./CategoriesTree/Categories";
 import Navigation from "./Navigation";
 import Login from "./Login";
 
-const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}) => {
+const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
@@ -53,11 +53,11 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
 
-    const [checkSubmit, setCheckSubmit] = useState([]);
+    const [checkSubmit, setCheckSubmit] = useState("");
 
     const [author, setAuthor] = useState("");
 
-    const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions);
+    const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions || false);
 
     const saveChanges = () => {
         let answersSel = []
@@ -126,7 +126,6 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
                 }
             }
         }else{
-            console.log(id);
             axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
             .then(response => {
                     window.location.href = '/questions';
@@ -213,7 +212,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
         fetchCategorySelect();
         getUSerData();
 
-        if (questionDetail) {
+        if (subButText !== "Submit") {
           fetchData();
         }
       } catch (error) {

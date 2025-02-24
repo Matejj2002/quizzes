@@ -87,8 +87,8 @@ const Quizzes = () => {
 
     function handleRemoveQuestion(itemIndex, questionIndex) {
     setSections((prevSections) =>
-        prevSections.map((section, secIndex) => {
-            if (secIndex === pageNum - 2) {
+        prevSections.map((section, sectionIndex) => {
+            if (sectionIndex === pageNum - 2) {
                 return {
                     ...section,
                     items: section.items.map((item, i) => {
@@ -110,8 +110,8 @@ const Quizzes = () => {
 }
     const handleOrderChange = (itemIndex, questionIndex, direction) => {
     setSections((prevSections) =>
-        prevSections.map((section, secIndex) => {
-            if (secIndex === pageNum - 2) {
+        prevSections.map((section, sectionIndex) => {
+            if (sectionIndex === pageNum - 2) {
                 return {
                     ...section,
                     items: section.items.map((item, i) => {
@@ -140,8 +140,8 @@ const Quizzes = () => {
 
     const handleEvaluateChange = (itemIndex, questionIndex, newValue) => {
     setSections((prevSections) =>
-        prevSections.map((section, secIndex) => {
-            if (secIndex === pageNum - 2) {
+        prevSections.map((section, sectionIndex) => {
+            if (sectionIndex === pageNum - 2) {
                 return {
                     ...section,
                     items: section.items.map((item, i) => {
@@ -167,8 +167,8 @@ const Quizzes = () => {
 
 
     const handleAddItemToSection = (item) => {
-    setSections((prevState) =>
-        prevState.map((section) => ({
+    setSections((prevSections) =>
+        prevSections.map((section) => ({
             ...section,
             items: Array.isArray(section.items) ? [...section.items, item] : [item]
         }))
@@ -177,8 +177,8 @@ const Quizzes = () => {
 
     const handleRemoveItem = (itemIndex) => {
     setSections((prevSections) =>
-        prevSections.map((section, secIndex) => {
-            if (secIndex === pageNum - 2) {
+        prevSections.map((section, sectionIndex) => {
+            if (sectionIndex === pageNum - 2) {
                 return {
                     ...section,
                     items: section.items.filter((_, i) => i !== itemIndex),
