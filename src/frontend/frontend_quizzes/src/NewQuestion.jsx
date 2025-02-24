@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, {create} from 'axios';
 import {useParams, useNavigate} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -40,6 +40,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
     const idQ = location.state['id'];
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter'];
+    const newQuestions = location.state["newQuestions"];
 
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
@@ -56,6 +57,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
 
     const [author, setAuthor] = useState("");
 
+    const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions);
 
     const saveChanges = () => {
         let answersSel = []
@@ -81,7 +83,35 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
             if (questionType !== 'Question Type' && title !=="" && text !=="") {
                 axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
                     .then(response => {
-                        window.location.href = '/questions';
+                        if (createMoreQuestions){
+                            setTitle("");
+                            setText("");
+                            setQuestionType("Matching Question");
+                            setSelectedCategoryId(idQ);
+                            setSelectedCategory(selectedCategory1);
+                            setCategorySelect("");
+                            setAnswers({});
+                            setCheckSubmit([]);
+
+
+                            navigate(`/question/new-question`, {
+                                            state: {
+                                                catPath: category,
+                                                id: idQ,
+                                                selectedCategory: selectedCategory1,
+                                                limit: limit,
+                                                offset: offset,
+                                                sort: sort,
+                                                page: page,
+                                                filterType: filters,
+                                                authorFilter: authorFilter,
+                                                newQuestions: createMoreQuestions
+                                            }
+                                        });
+                             window.location.reload();
+                        }else {
+                            window.location.href = '/questions';
+                        }
                     })
                     .catch(error => {
                         console.error('Error saving changes:', error);
@@ -98,7 +128,7 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
         }else{
             axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
             .then(response => {
-                window.location.href = '/questions';
+                    window.location.href = '/questions';
             })
             .catch(error => {
                 console.error('Error saving changes:', error);
@@ -197,6 +227,8 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
     const AnswerSetter = async (newAnswers) => {
         setAnswers(newAnswers)
     };
+
+    console.log(createMoreQuestions);
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -315,8 +347,21 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
                                 </div>
                             )}
 
-                            <div className='mb-3 d-flex mt-3'>
-                                <button type="button" className="btn btn-success mb-3 me-3"
+                            <div className='mb-3 mt-3'>
+                                {subButText === "Submit" && (
+                                    <div className="form-check me-3">
+                                        <input className="form-check-input" type="checkbox" name="independentAttempts"
+                                               id="exampleRadios2" value="option2"
+                                               checked={createMoreQuestions}
+                                               onChange={(e) => setCreateMoreQuestions(e.target.checked)}
+                                                />
+                                        <label className="form-check-label" htmlFor="exampleRadios2">
+                                            Create more questions
+                                        </label>
+                                    </div>
+                                )}
+
+                                <button type="button" className="btn btn-success mb-3 me-3 mt-3"
                                         onClick={() => {
                                             saveChanges();
                                         }
@@ -324,9 +369,9 @@ const NewQuestion = ({questionDetail = false, copy = false, subButText="Submit"}
                                 >{subButText}
                                 </button>
 
-                                <button type="button" className="btn btn-primary mb-3"
+                                <button type="button" className="btn btn-primary mb-3 mt-3"
                                         onClick={() => {
-                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                         }
                                         }
                                 >Back
