@@ -489,16 +489,16 @@ const Quizzes = () => {
                                                             <ol className="list-group">
                                                                 <li className="list-group-item d-flex justify-content-between align-items-center fw-bold">
                                                                     <div className="d-flex"
-                                                                         style={{width: "80px"}}>Order
+                                                                         style={{width: "10%"}}>Order
                                                                     </div>
                                                                     <div className="d-flex"
-                                                                         style={{width: "200px"}}>Question
+                                                                         style={{width: "25%"}}>Question
                                                                     </div>
                                                                     <div className="d-flex"
-                                                                         style={{width: "80px"}}>Weight
+                                                                         style={{width: "10%"}}>Weight
                                                                     </div>
                                                                     <div className="d-flex justify-content-end"
-                                                                         style={{width: "50px"}}>Remove
+                                                                         style={{width: "5%"}}>Remove
                                                                     </div>
                                                                 </li>
                                                                 {
@@ -506,12 +506,12 @@ const Quizzes = () => {
 
                                                                         <li key={index}
                                                                             className="list-group-item d-flex justify-content-between align-items-start">
-                                                                            <div className="d-flex flex-column">
+                                                                            <div className="d-flex flex-column" style={{width:"5%"}}>
                                                                                 <button
                                                                                     className="btn btn-outline-secondary btn-sm p-0"
                                                                                     onClick={() => handleOrderChange(indexItem, index, "up")}
                                                                                     style={{
-                                                                                        width: "30px",
+                                                                                        width: "80%",
                                                                                         height: "25px"
                                                                                     }}
                                                                                 >
@@ -521,7 +521,7 @@ const Quizzes = () => {
                                                                                     className="btn btn-outline-secondary btn-sm p-0 mt-1"
                                                                                     onClick={() => handleOrderChange(indexItem, index, "down")}
                                                                                     style={{
-                                                                                        width: "30px",
+                                                                                        width: "80%",
                                                                                         height: "25px"
                                                                                     }}
                                                                                 >
@@ -534,7 +534,7 @@ const Quizzes = () => {
                                                                                     className="d-flex">
                                                                                     <div
                                                                                         className="d-flex align-items-center"
-                                                                                        style={{width: "600px"}}>
+                                                                                        style={{width: "66%"}}>
                                                                                         <h2 className="h5 text-start text-truncate">
                                                                                             <a href="#"
                                                                                                className="text-decoration-none me-1">
@@ -548,7 +548,7 @@ const Quizzes = () => {
                                                                                     <input
                                                                                         type="number"
                                                                                         className="form-control form-control-sm "
-                                                                                        style={{width: "50px"}}
+                                                                                        style={{width: "5%"}}
                                                                                         min="1"
                                                                                         value={question.evaluation}
                                                                                         onChange={(e) => handleEvaluateChange(indexItem, index, e.target.value)}
@@ -556,7 +556,7 @@ const Quizzes = () => {
 
                                                                                     <button
                                                                                         className="btn btn-outline-danger btn-xs p-0 px-1"
-                                                                                        style={{marginLeft: "220px"}}
+                                                                                        style={{marginLeft: "25%"}}
                                                                                         onClick={() => handleRemoveQuestion(indexItem, index)}
                                                                                     >
                                                                                         <i className="bi bi-trash"></i>
