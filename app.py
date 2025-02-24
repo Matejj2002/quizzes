@@ -7,7 +7,10 @@ from src.backend.views import *
 from src.backend.models import *
 from flask_session import Session
 import requests
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -27,8 +30,8 @@ Session(app)
 db.init_app(app)
 
 blueprint = make_github_blueprint(
-    client_id="Ov23lieQz4ZgXYOsohz8",
-    client_secret="fb0fedccfd01d5922305db0f4c5bab429d7c1e3f",
+    client_id=os.getenv("GITHUB_CLIENT_ID"),
+    client_secret=os.getenv("GITHUB_CLIENT_SECRET"),
     redirect_to='index'
 )
 app.register_blueprint(blueprint, url_prefix="/login")
@@ -39,14 +42,6 @@ admin.add_view(PolymorphicModelView(Teacher, db.session))
 admin.add_view(QuestionView(Question, db.session))
 admin.add_view(QuestionVersionView(QuestionVersion, db.session))
 admin.add_view(CategoryView(Category, db.session))
-
-
-class ChoiceView(ModelView):
-    column_list = ('id', 'text', 'choice_question_id')
-    form_columns = ('text', 'choice_question_id')
-    column_searchable_list = ['text']
-
-
 admin.add_view(ChoiceView(Choice, db.session))
 
 

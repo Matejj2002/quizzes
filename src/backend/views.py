@@ -35,7 +35,7 @@ class PolymorphicModelView(ModelView):
 
 class QuestionVersionView(ModelView):
     form_columns = ['author', 'questions', 'type', 'title']
-    column_list = ['id','author', 'questions', 'question_id', 'type', 'title']
+    column_list = ['id', 'author', 'questions', 'question_id', 'type', 'title']
 
     form_extra_fields = {
         'author': QuerySelectField(
@@ -122,3 +122,9 @@ class MyAdminIndexView(AdminIndexView):
             abort(403)
 
         return super().index()
+
+
+class ChoiceView(ModelView):
+    column_list = ('id', 'text', 'choice_question_id')
+    form_columns = ('text', 'choice_question_id')
+    column_searchable_list = ['text']
