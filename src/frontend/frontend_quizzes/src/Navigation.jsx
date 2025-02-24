@@ -53,10 +53,10 @@ const Navigation = () =>{
                     <img
                         src={userData.avatar_url}
                         alt={`${userData.name}'s profile`}
-                        style={{width: "30px", height: "30px", borderRadius: "50%", cursor: "pointer"}}
+                        style={{width: "30px", height: "30px", borderRadius: "50%", cursor: "pointer", marginRight:"5px"}}
                         data-bs-toggle="dropdown"
                     />
-                    <p data-bs-toggle="dropdown">{userData.login}</p>
+                    <p data-bs-toggle="dropdown" className="me-1" style={{cursor: "pointer"}}>{userData.login}</p>
                     <div className="dropdown-toggle"></div>
 
                     <ul className="dropdown-menu dropdown-menu-end">
