@@ -28,6 +28,7 @@ const Quizzes = () => {
     }]);
 
 
+        console.log(sections);
     const [selectedOption, setSelectedOption] = useState("option1");
 
     const toggleShuffle = () => {
@@ -168,10 +169,15 @@ const Quizzes = () => {
 
     const handleAddItemToSection = (item) => {
     setSections((prevSections) =>
-        prevSections.map((section) => ({
-            ...section,
-            items: Array.isArray(section.items) ? [...section.items, item] : [item]
-        }))
+        prevSections.map((section) => {
+            if (section.sectionId === pageNum-1) {
+                return {
+                    ...section,
+                    items: Array.isArray(section.items) ? [...section.items, item] : [item]
+                };
+            }
+            return section;
+        })
     );
 };
 
@@ -218,13 +224,14 @@ const Quizzes = () => {
             dateOpen: dateOpen,
             dateClose: dateClose,
             dateCheck: dateCheck,
+            typeOfAttempts: selectedOption,
             shuffleSections: shuffleSections
 
         }
         axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
             .then(
                 response => {
-                    window.location.href = '/questions';
+                    // window.location.href = '/questions';
             }
             )
             .catch(error => {
