@@ -7,7 +7,8 @@ import NewQuestion from "./NewQuestion";
 import QuestionDetail from "./QuestionDetail";
 import Login from "./Login";
 import QuestionCopy from "./QuestionCopy";
-import Quizzes from "./Quizzes";
+import NewQuiz from "./Quizzes/NewQuiz";
+import Quiz from "./Quizzes/Quiz";
 
 const Home = () => <h1>Domovska stranka</h1>;
 
@@ -24,7 +25,8 @@ function App() {
 
                   <Route path="/:questions/*" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
-                  <Route path="/quizzes" element={<Quizzes />} />
+                  <Route path="/new-quiz" element={<NewQuiz />} />
+                  <Route path="/quizzes" element={<Quiz />} />
               </Routes>
       </div>
   );

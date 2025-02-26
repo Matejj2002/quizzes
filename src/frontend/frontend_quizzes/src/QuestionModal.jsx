@@ -192,7 +192,7 @@ const QuestionModal = ({
                                     placeholder="Enter count"
                                     min="1"
                                     max="500"
-                                    value={addedQuestions.questions?.count || ""}
+                                    value={addedQuestions.questions?.count || "1"}
                                     onChange={(e) => {
                                         setAddedQuestions((prevState) => ({
                                             ...prevState,
@@ -262,7 +262,7 @@ const QuestionModal = ({
                                 onClick={() => {
                                     setTimeout(() => {
                                         handleAddItem(addedQuestions);
-                                        setAddedQuestions({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: []})
+                                        setAddedQuestions({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: {count: 1}})
                                     }, 0);
                                 }}
                         >Add

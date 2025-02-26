@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import Navigation from "./Navigation";
-import QuestionModal from "./QuestionModal";
-import Login from "./Login";
+import Navigation from "../Navigation";
+import QuestionModal from "../QuestionModal";
+import Login from "../Login";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
-const Quizzes = () => {
+const NewQuiz = () => {
     const [pageNum, setPageNum] = useState(1);
     const [pageCount, setPageCount] = useState(3);
 
@@ -231,7 +231,7 @@ const Quizzes = () => {
         axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
             .then(
                 response => {
-                    // window.location.href = '/questions';
+                    window.location.href = '/quizzes';
             }
             )
             .catch(error => {
@@ -671,10 +671,10 @@ const Quizzes = () => {
     } else {
         return (
             <div>
-                <Login path={"/quizzes"}></Login>
+                <Login path={"/new-quiz"}></Login>
             </div>
         );
     }
 }
 
-export default Quizzes;
+export default NewQuiz;
