@@ -15,6 +15,7 @@ const QuestionModal = ({
             ...prevState,
             questions: {
                 count: 1,
+                evaluation: 1
             }
         }));
     }else{
@@ -85,7 +86,7 @@ const QuestionModal = ({
                                             categoryName: "supercategory",
                                             type: "random",
                                             includeSubCategories: true,
-                                            questions: []
+                                            questions: {count: 1}
                                         })
                                     }, 0);
                                 }}

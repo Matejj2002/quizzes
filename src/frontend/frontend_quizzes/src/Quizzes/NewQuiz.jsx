@@ -18,27 +18,26 @@ const NewQuiz = () => {
     const [dateCheck, setDateCheck] = useState("");
     const [shuffleSections, setShuffleSections] = useState(false);
 
-    const [categorySelect, setCategorySelect] = useState([{id: "1", title:"All"}]);
+    const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
     const [sections, setSections] = useState([{
         sectionId: 1,
-        shuffle:false,
-        items: [],
+        shuffle: false,
+        questions: [],
         title: "Section 1",
     }]);
 
 
-        console.log(sections);
     const [selectedOption, setSelectedOption] = useState("option1");
 
     const toggleShuffle = () => {
-    setSections((prevSections) => {
-        const updatedSections = [...prevSections];
-        updatedSections[pageNum - 2] = {
-            ...updatedSections[pageNum - 2],
-            shuffle: !updatedSections[pageNum - 2].shuffle,
-        };
-        return updatedSections;
+        setSections((prevSections) => {
+            const updatedSections = [...prevSections];
+            updatedSections[pageNum - 2] = {
+                ...updatedSections[pageNum - 2],
+                shuffle: !updatedSections[pageNum - 2].shuffle,
+            };
+            return updatedSections;
         });
     };
 
@@ -49,172 +48,127 @@ const NewQuiz = () => {
         setSections(updatedSections);
     };
 
-    const addPage = (index) =>{
+    const addPage = (index) => {
         setPageNum(index);
         setSections((prevSections) => [
-        ...prevSections,
-        {
-            sectionId: prevSections.length + 1,
-            shuffle: false,
-            title: "Section " + (prevSections.length + 1),
-            items: [],
-        }])
+            ...prevSections,
+            {
+                sectionId: prevSections.length + 1,
+                shuffle: false,
+                title: "Section " + (prevSections.length + 1),
+                questions: [],
+            }])
     }
 
     const fetchCategorySelect = async () => {
-      try{
+        try {
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
             setCategorySelect(prevCategories => [
-                  { id: 1, title: "All" },
-                  ...response.data
-                ]);
-      }catch (error){}
-       finally {}
+                {id: 1, title: "All"},
+                ...response.data
+            ]);
+        } catch (error) {
+        } finally {
+        }
     }
 
 
     useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        await fetchCategorySelect();
-      } catch (error) {
-        console.error("Error during fetch:", error);
-      }
+        const fetchAllData = async () => {
+            try {
+                await fetchCategorySelect();
+            } catch (error) {
+                console.error("Error during fetch:", error);
+            }
+        };
+
+        fetchAllData();
+
+    }, []);
+    const handleEvaluateChange = (questionIndex, newValue) => {
+        setSections((prevSections) =>
+            prevSections.map((section, sectionIndex) => {
+                if (sectionIndex === pageNum - 2) {
+                    return {
+                        ...section,
+                        questions: section.questions.map((question, qIndex) =>
+                            qIndex === questionIndex
+                                ? {...question, evaluation: parseInt(newValue, 10)}
+                                : question
+                        ),
+                    };
+                }
+                return section;
+            })
+        );
     };
 
-    fetchAllData();
+    const handleAddItemToSection = (newQuestions) => {
+        setSections((prevSections) =>
+            prevSections.map((section) => {
+                if (section?.sectionId === pageNum - 1) {
+                    const updatedQuestions = Array.isArray(section.questions) ? [...section.questions] : [];
 
-  }, []);
-
-    function handleRemoveQuestion(itemIndex, questionIndex) {
-    setSections((prevSections) =>
-        prevSections.map((section, sectionIndex) => {
-            if (sectionIndex === pageNum - 2) {
-                return {
-                    ...section,
-                    items: section.items.map((item, i) => {
-                        if (i === itemIndex) {
-                            return {
-                                ...item,
-                                questions: Array.isArray(item.questions)
-                                    ? item.questions.filter((_, qIndex) => qIndex !== questionIndex)
-                                    : item.questions
-                            };
+                    if (newQuestions.type === "questions") {
+                        for (const question of newQuestions.questions) {
+                            updatedQuestions.push({...question, questionType: "questions"});
                         }
-                        return item;
-                    })
-                };
-            }
-            return section;
-        })
-    );
-}
-    const handleOrderChange = (itemIndex, questionIndex, direction) => {
-    setSections((prevSections) =>
-        prevSections.map((section, sectionIndex) => {
-            if (sectionIndex === pageNum - 2) {
-                return {
-                    ...section,
-                    items: section.items.map((item, i) => {
-                        if (i === itemIndex && Array.isArray(item.questions) && item.questions.length > 1) {
-                            const updatedQuestions = [...item.questions];
-
-                            if (direction === "up" && questionIndex > 0) {
-                                [updatedQuestions[questionIndex], updatedQuestions[questionIndex - 1]] =
-                                    [updatedQuestions[questionIndex - 1], updatedQuestions[questionIndex]];
-                            }
-                            else if (direction === "down" && questionIndex < updatedQuestions.length - 1) {
-                                [updatedQuestions[questionIndex], updatedQuestions[questionIndex + 1]] =
-                                    [updatedQuestions[questionIndex + 1], updatedQuestions[questionIndex]];
-                            }
-
-                            return { ...item, questions: updatedQuestions };
+                    } else {
+                        const count = newQuestions.questions.count;
+                        for (let i = 0; i < count; i++) {
+                            updatedQuestions.push({
+                                categoryName: newQuestions.categoryName,
+                                includeSubCategories: newQuestions.includeSubCategories,
+                                categoryId: newQuestions.categoryId,
+                                questionType: newQuestions.type,
+                                evaluation: 1
+                            });
                         }
-                        return item;
-                    }),
-                };
-            }
-            return section;
-        })
-    );
-};
+                    }
 
-    const handleEvaluateChange = (itemIndex, questionIndex, newValue) => {
-    setSections((prevSections) =>
-        prevSections.map((section, sectionIndex) => {
-            if (sectionIndex === pageNum - 2) {
-                return {
-                    ...section,
-                    items: section.items.map((item, i) => {
-                        if (i === itemIndex && Array.isArray(item.questions)) {
-                            return {
-                                ...item,
-                                questions: item.questions.map((question, qIndex) => {
-                                    if (qIndex === questionIndex) {
-                                        return { ...question, evaluation: parseInt(newValue, 10) };
-                                    }
-                                    return question;
-                                }),
-                            };
-                        }
-                        return item;
-                    }),
-                };
-            }
-            return section;
-        })
-    );
-};
-
-
-    const handleAddItemToSection = (item) => {
-    setSections((prevSections) =>
-        prevSections.map((section) => {
-            if (section.sectionId === pageNum-1) {
-                return {
-                    ...section,
-                    items: Array.isArray(section.items) ? [...section.items, item] : [item]
-                };
-            }
-            return section;
-        })
-    );
-};
+                    return {
+                        ...section,
+                        questions: updatedQuestions
+                    };
+                }
+                return section;
+            })
+        );
+    };
 
     const handleRemoveItem = (itemIndex) => {
-    setSections((prevSections) =>
-        prevSections.map((section, sectionIndex) => {
-            if (sectionIndex === pageNum - 2) {
-                return {
-                    ...section,
-                    items: section.items.filter((_, i) => i !== itemIndex),
-                };
-            }
-            return section;
-        })
-    );
-};
+        setSections((prevSections) =>
+            prevSections.map((section, sectionIndex) => {
+                if (sectionIndex === pageNum - 2) {
+                    return {
+                        ...section,
+                        questions: section.questions.filter((_, i) => i !== itemIndex),
+                    };
+                }
+                return section;
+            })
+        );
+    };
     const handleOrderChangeItem = (itemIndex, direction) => {
-    setSections((prevSections) =>
-        prevSections.map((section, secIndex) => {
-            if (secIndex === pageNum - 2) {
-                const updatedItems = [...section.items];
+        setSections((prevSections) =>
+            prevSections.map((section, secIndex) => {
+                if (secIndex === pageNum - 2) {
+                    const updatedQuestions = [...section.questions];
 
-                if (direction === "up" && itemIndex > 0) {
-                    [updatedItems[itemIndex], updatedItems[itemIndex - 1]] =
-                        [updatedItems[itemIndex - 1], updatedItems[itemIndex]];
-                }
-                else if (direction === "down" && itemIndex < updatedItems.length - 1) {
-                    [updatedItems[itemIndex], updatedItems[itemIndex + 1]] =
-                        [updatedItems[itemIndex + 1], updatedItems[itemIndex]];
-                }
+                    if (direction === "up" && itemIndex > 0) {
+                        [updatedQuestions[itemIndex], updatedQuestions[itemIndex - 1]] =
+                            [updatedQuestions[itemIndex - 1], updatedQuestions[itemIndex]];
+                    } else if (direction === "down" && itemIndex < updatedQuestions.length - 1) {
+                        [updatedQuestions[itemIndex], updatedQuestions[itemIndex + 1]] =
+                            [updatedQuestions[itemIndex + 1], updatedQuestions[itemIndex]];
+                    }
 
-                return { ...section, items: updatedItems };
-            }
-            return section;
-        })
-    );
-};
+                    return {...section, questions: updatedQuestions};
+                }
+                return section;
+            })
+        );
+    };
     const saveChanges = () => {
         const updatedData = {
             sections: sections,
@@ -232,11 +186,41 @@ const NewQuiz = () => {
             .then(
                 response => {
                     window.location.href = '/quizzes';
-            }
+                }
             )
             .catch(error => {
-                        console.error('Error saving changes:', error);
-                    });
+                console.error('Error saving changes:', error);
+            });
+    }
+
+    const handleDateOpenChange = (e) => {
+        const newDate = e.target.value;
+
+        if (newDate < dateClose){
+            setDateOpen(newDate);
+        }else{
+            alert("Open date cannot be later than close date!");
+        }
+    }
+
+    const handleDateCloseChange = (e) => {
+        const newDate = e.target.value;
+
+        if (newDate > dateClose){
+            setDateClose(newDate);
+        }else{
+            alert("Close date cannot sooner than open date!");
+        }
+    }
+
+    const handleDateCheck = (e) => {
+        const newDate = e.target.value;
+
+        if ( newDate > dateOpen && newDate < dateClose){
+            setDateCheck(newDate);
+        }else{
+            alert("Check date must be between open and close date!");
+        }
     }
 
     if (localStorage.getItem("accessToken")) {
@@ -273,7 +257,7 @@ const NewQuiz = () => {
                                                 setPageNum(index + 2)
                                             }}
                                         >
-                                            Section {index + 1}
+                                            {sections[index].title || "Section " + (index+1)}
                                         </button>
                                     </li>
                                 ))}
@@ -293,7 +277,7 @@ const NewQuiz = () => {
                                     </button>
                                 </li>
 
-                                <li className="nav-item" role="presentation">
+                                <li className="nav-item ms-auto" role="presentation">
                                     <button className="btn btn-success" id="disabled-tab" data-bs-toggle="tab"
                                             type="button" role="tab"
                                             aria-controls="disabled-tab-pane"
@@ -342,7 +326,7 @@ const NewQuiz = () => {
 
                                         <div className="mb-3">
                                             <label htmlFor="correctionsNum" className="form-label">
-                                                Number of corrections per attempt
+                                                Number of attempts
                                             </label>
                                             <input
                                                 type="number"
@@ -354,6 +338,25 @@ const NewQuiz = () => {
                                                 value={numberOfCorrections}
                                                 onChange={(e) => setNumberOfCorrections(e.target.value)}
                                             />
+                                        </div>
+
+                                        <div className="form-check mb-3">
+                                            <input className="form-check-input" type="radio" name="independentAttempts"
+                                                   id="exampleRadios1" value="option1"
+                                                   checked={selectedOption === "option1"}
+                                                   onChange={(e) => setSelectedOption(e.target.value)}/>
+                                            <label className="form-check-label" htmlFor="exampleRadios1">
+                                                Attempts are independent
+                                            </label>
+                                        </div>
+                                        <div className="form-check mb-3">
+                                            <input className="form-check-input" type="radio" name="independentAttempts"
+                                                   id="exampleRadios2" value="option2"
+                                                   checked={selectedOption === "option2"}
+                                                   onChange={(e) => setSelectedOption(e.target.value)}/>
+                                            <label className="form-check-label" htmlFor="exampleRadios2">
+                                                Attempts are corrections of previous attempt
+                                            </label>
                                         </div>
 
                                         <div className="mb-3">
@@ -379,7 +382,7 @@ const NewQuiz = () => {
                                                 className="form-control form-control-sm w-25"
                                                 id="dateOpen"
                                                 value={dateOpen}
-                                                onChange={(e) => setDateOpen(e.target.value)}
+                                                onChange={handleDateOpenChange}
                                             />
                                         </div>
 
@@ -390,7 +393,7 @@ const NewQuiz = () => {
                                                 className="form-control form-control-sm w-25"
                                                 id="dateClose"
                                                 value={dateClose}
-                                                onChange={(e) => setDateClose(e.target.value)}
+                                                onChange={handleDateCloseChange}
                                             />
                                         </div>
 
@@ -402,27 +405,8 @@ const NewQuiz = () => {
                                                 className="form-control form-control-sm w-25"
                                                 id="dateCheck"
                                                 value={dateCheck}
-                                                onChange={(e) => setDateCheck(e.target.value)}
+                                                onChange={handleDateCheck}
                                             />
-                                        </div>
-
-                                        <div className="form-check mb-3">
-                                            <input className="form-check-input" type="radio" name="independentAttempts"
-                                                   id="exampleRadios1" value="option1"
-                                                   checked={selectedOption === "option1"}
-                                                   onChange={(e) => setSelectedOption(e.target.value)}/>
-                                            <label className="form-check-label" htmlFor="exampleRadios1">
-                                                Attempts are independent
-                                            </label>
-                                        </div>
-                                        <div className="form-check">
-                                            <input className="form-check-input" type="radio" name="independentAttempts"
-                                                   id="exampleRadios2" value="option2"
-                                                   checked={selectedOption === "option2"}
-                                                   onChange={(e) => setSelectedOption(e.target.value)}/>
-                                            <label className="form-check-label" htmlFor="exampleRadios2">
-                                                Attempts are corrections of previous attempt
-                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -430,7 +414,7 @@ const NewQuiz = () => {
                             </div>
 
                             {(pageNum > 1 && pageNum < pageCount) && (
-                            <div className="tab-content mt-3" id={`tab-content-${pageNum}`}>
+                                <div className="tab-content mt-3" id={`tab-content-${pageNum}`}>
                                     <div
                                         key={pageNum}
                                         className={`tab-pane fade show active`}
@@ -457,42 +441,105 @@ const NewQuiz = () => {
                                             </label>
                                         </div>
                                         {
-                                            sections[pageNum - 2].items.map((item, indexItem) => {
-                                                if (item.type === "questions") {
+                                            sections[pageNum - 2].questions.map((item, indexQuestion) => {
+                                                if (item.questionType === "questions") {
                                                     return (
-                                                        <div className="border p-3 mb-3">
-                                                            <div className="d-flex justify-content-between mb-3">
-                                                                <div className="d-flex">
-                                                                    <p className="fw-bold h5">Item {indexItem + 1}</p>
-                                                                    <button
-                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
-                                                                        onClick={() => handleOrderChangeItem(indexItem, "up")}
-                                                                        style={{
-                                                                            width: "30px",
-                                                                            height: "25px"
-                                                                        }}
-                                                                    >
-                                                                        <i className="bi bi-arrow-up"></i>
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
-                                                                        onClick={() => handleOrderChangeItem(indexItem, "down")}
-                                                                        style={{
-                                                                            width: "30px",
-                                                                            height: "25px"
-                                                                        }}
-                                                                    >
-                                                                        <i className="bi bi-arrow-down"></i>
-                                                                    </button>
+                                                    <div className="mb-3">
+                                                        <ol className="list-group">
+                                                            <li className="list-group-item d-flex justify-content-between align-items-center fw-bold">
+                                                                <div className="d-flex"
+                                                                     style={{width: "10%"}}>Order
                                                                 </div>
-                                                                <button
-                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
-                                                                    style={{marginLeft: "220px"}}
-                                                                    onClick={() => handleRemoveItem(indexItem, indexItem)}
-                                                                >
-                                                                    <i className="bi bi-trash"></i>
-                                                                </button>
-                                                            </div>
+                                                                <div className="d-flex"
+                                                                     style={{width: "25%"}}>Question
+                                                                </div>
+                                                                <div className="d-flex"
+                                                                     style={{width: "10%"}}>Weight
+                                                                </div>
+                                                                <div className="d-flex justify-content-end"
+                                                                     style={{width: "5%"}}>Remove
+                                                                </div>
+                                                            </li>
+                                                            {
+                                                                <li key={indexQuestion}
+                                                                    className="list-group-item d-flex justify-content-between align-items-start">
+                                                                    <div className="d-flex flex-column"
+                                                                         style={{width: "5%"}}>
+                                                                        <button
+                                                                            className="btn btn-outline-secondary btn-sm p-0"
+                                                                            onClick={() => handleOrderChangeItem(indexQuestion, "up")}
+                                                                            style={{
+                                                                                width: "80%",
+                                                                                height: "25px"
+                                                                            }}
+                                                                        >
+                                                                            <i className="bi bi-arrow-up"></i>
+                                                                        </button>
+                                                                        <button
+                                                                            className="btn btn-outline-secondary btn-sm p-0 mt-1"
+                                                                            onClick={() => handleOrderChangeItem(indexQuestion, "down")}
+                                                                            style={{
+                                                                                width: "80%",
+                                                                                height: "25px"
+                                                                            }}
+                                                                        >
+                                                                            <i className="bi bi-arrow-down"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div
+                                                                        className="ms-2 me-auto text-truncate text-start w-100 ">
+                                                                        <div
+                                                                            className="d-flex">
+                                                                            <div
+                                                                                className="d-flex align-items-center"
+                                                                                style={{width: "66%"}}>
+                                                                                <h2 className="h5 text-start text-truncate">
+                                                                                    <a href="#"
+                                                                                       className="text-decoration-none me-1">
+                                                                                        {item.title || "No title available"}
+                                                                                    </a>
+                                                                                </h2>
+                                                                                <span
+                                                                                    className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{item.type}
+                                                                                </span>
+                                                                            </div>
+                                                                            <input
+                                                                                type="number"
+                                                                                className="form-control form-control-sm "
+                                                                                style={{width: "5%"}}
+                                                                                min="1"
+                                                                                value={item.evaluation}
+                                                                                onChange={(e) => handleEvaluateChange(indexQuestion, e.target.value)}
+                                                                            />
+
+                                                                            <button
+                                                                                className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                                                style={{marginLeft: "25%"}}
+                                                                                onClick={() => handleRemoveItem(indexQuestion)}
+                                                                            >
+                                                                                <i className="bi bi-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div
+                                                                            className="d-flex justify-content-between align-items-center w-100">
+                                                                            <p className="m-0 text-truncate">{item.text}</p>
+                                                                        </div>
+                                                                        <div
+                                                                            className="d-flex justify-content-between align-items-center w-100">
+                                                                            <span
+                                                                                className="m-0 text-secondary text-truncate">Last updated {item.dateCreated} by {item.author}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+
+                                                            }
+                                                        </ol>
+                                                    </div>
+                                                    )
+                                                } else if (item.questionType === "random") {
+                                                    return (
+                                                        <div className="mb-3">
                                                             <ol className="list-group">
                                                                 <li className="list-group-item d-flex justify-content-between align-items-center fw-bold">
                                                                     <div className="d-flex"
@@ -509,138 +556,79 @@ const NewQuiz = () => {
                                                                     </div>
                                                                 </li>
                                                                 {
-                                                                    item.questions.map((question, index) => (
-
-                                                                        <li key={index}
-                                                                            className="list-group-item d-flex justify-content-between align-items-start">
-                                                                            <div className="d-flex flex-column" style={{width:"5%"}}>
-                                                                                <button
-                                                                                    className="btn btn-outline-secondary btn-sm p-0"
-                                                                                    onClick={() => handleOrderChange(indexItem, index, "up")}
-                                                                                    style={{
-                                                                                        width: "80%",
-                                                                                        height: "25px"
-                                                                                    }}
-                                                                                >
-                                                                                    <i className="bi bi-arrow-up"></i>
-                                                                                </button>
-                                                                                <button
-                                                                                    className="btn btn-outline-secondary btn-sm p-0 mt-1"
-                                                                                    onClick={() => handleOrderChange(indexItem, index, "down")}
-                                                                                    style={{
-                                                                                        width: "80%",
-                                                                                        height: "25px"
-                                                                                    }}
-                                                                                >
-                                                                                    <i className="bi bi-arrow-down"></i>
-                                                                                </button>
-                                                                            </div>
+                                                                    <li key={indexQuestion}
+                                                                        className="list-group-item d-flex justify-content-between align-items-start">
+                                                                        <div className="d-flex flex-column"
+                                                                             style={{width: "5%"}}>
+                                                                            <button
+                                                                                className="btn btn-outline-secondary btn-sm p-0"
+                                                                                onClick={() => handleOrderChangeItem(indexQuestion, "up")}
+                                                                                style={{
+                                                                                    width: "80%",
+                                                                                    height: "25px"
+                                                                                }}
+                                                                            >
+                                                                                <i className="bi bi-arrow-up"></i>
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-outline-secondary btn-sm p-0 mt-1"
+                                                                                onClick={() => handleOrderChangeItem(indexQuestion, "down")}
+                                                                                style={{
+                                                                                    width: "80%",
+                                                                                    height: "25px"
+                                                                                }}
+                                                                            >
+                                                                                <i className="bi bi-arrow-down"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div
+                                                                            className="ms-2 me-auto text-truncate text-start w-100 ">
                                                                             <div
-                                                                                className="ms-2 me-auto text-truncate text-start w-100 ">
+                                                                                className="d-flex">
                                                                                 <div
-                                                                                    className="d-flex">
-                                                                                    <div
-                                                                                        className="d-flex align-items-center"
-                                                                                        style={{width: "66%"}}>
-                                                                                        <h2 className="h5 text-start text-truncate">
-                                                                                            <a href="#"
-                                                                                               className="text-decoration-none me-1">
-                                                                                                {question.title || "No title available"}
-                                                                                            </a>
-                                                                                        </h2>
-                                                                                        <span
-                                                                                            className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{question.type}
+                                                                                    className="d-flex align-items-center"
+                                                                                    style={{width: "66%"}}>
+                                                                                    <h2 className="h5 text-start text-truncate">
+                                                                                        <a href="#"
+                                                                                           className="text-decoration-none me-1">
+                                                                                            Random Question
+                                                                                        </a>
+                                                                                    </h2>
+                                                                                    <span
+                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{item.type}
                                                                                 </span>
-                                                                                    </div>
-                                                                                    <input
-                                                                                        type="number"
-                                                                                        className="form-control form-control-sm "
-                                                                                        style={{width: "5%"}}
-                                                                                        min="1"
-                                                                                        value={question.evaluation}
-                                                                                        onChange={(e) => handleEvaluateChange(indexItem, index, e.target.value)}
-                                                                                    />
+                                                                                </div>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="form-control form-control-sm "
+                                                                                    style={{width: "5%"}}
+                                                                                    min="1"
+                                                                                    value={item.evaluation}
+                                                                                    onChange={(e) => handleEvaluateChange(indexQuestion, e.target.value)}
+                                                                                />
 
-                                                                                    <button
-                                                                                        className="btn btn-outline-danger btn-xs p-0 px-1"
-                                                                                        style={{marginLeft: "25%"}}
-                                                                                        onClick={() => handleRemoveQuestion(indexItem, index)}
-                                                                                    >
-                                                                                        <i className="bi bi-trash"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                                <div
-                                                                                    className="d-flex justify-content-between align-items-center w-100">
-                                                                                    <p className="m-0 text-truncate">{question.text}</p>
-                                                                                </div>
-                                                                                <div
-                                                                                    className="d-flex justify-content-between align-items-center w-100">
-                                                                            <span
-                                                                                className="m-0 text-secondary text-truncate">Last updated {question.dateCreated} by {question.author}
-                                                                            </span>
-                                                                                </div>
+                                                                                <button
+                                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                                                    style={{marginLeft: "25%"}}
+                                                                                    onClick={() => handleRemoveItem(indexQuestion)}
+                                                                                >
+                                                                                    <i className="bi bi-trash"></i>
+                                                                                </button>
                                                                             </div>
-                                                                        </li>
-                                                                    ))
+
+                                                                            <div
+                                                                                className="d-flex justify-content-between align-items-center w-100">
+                                                                            <span
+                                                                                className="m-0 text-secondary text-truncate">Question from {item.categoryName} and {item.includeSubCategories ? '' : 'not'} include sub categories
+                                                                            </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </li>
+
                                                                 }
                                                             </ol>
                                                         </div>
-                                                    )
-                                                } else if (item.type === "random") {
-                                                    return (
-                                                        <div className="border p-3 mb-3">
-                                                            <div className="d-flex justify-content-between mb-3">
-                                                                <div className="d-flex">
-                                                                    <p className="fw-bold h5">Item {indexItem + 1}</p>
-                                                                    <button
-                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
-                                                                        onClick={() => handleOrderChangeItem(indexItem, "up")}
-                                                                        style={{
-                                                                            width: "30px",
-                                                                            height: "25px"
-                                                                        }}
-                                                                    >
-                                                                        <i className="bi bi-arrow-up"></i>
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn btn-outline-secondary btn-sm p-0 mb-3"
-                                                                        onClick={() => handleOrderChangeItem(indexItem, "down")}
-                                                                        style={{
-                                                                            width: "30px",
-                                                                            height: "25px"
-                                                                        }}
-                                                                    >
-                                                                        <i className="bi bi-arrow-down"></i>
-                                                                    </button>
-                                                                </div>
-                                                                <button
-                                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
-                                                                    style={{marginLeft: "220px"}}
-                                                                    onClick={() => handleRemoveItem(indexItem, indexItem)}
-                                                                >
-                                                                    <i className="bi bi-trash"></i>
-                                                                </button>
-                                                            </div>
-                                                            <ul className="list-group list-group-flush">
-                                                                <li className="list-group-item">{sections[pageNum - 2]?.shuffle ? (
-                                                                    <p>Section is shuffled</p>
-                                                                ) : (
-                                                                    <p>Section is not shuffled</p>
-                                                                )}</li>
-                                                                <li className="list-group-item">
-                                                                    <p>Name of category
-                                                                        is {item.categoryName}</p>
-                                                                </li>
-                                                                <li className="list-group-item">{item.includeSubCategories ? (
-                                                                    <p>Questions are included from subcategories</p>
-                                                                ) : (
-                                                                    <p>Questions are not included from subcategories</p>
-                                                                )}</li>
-                                                                <li className="list-group-item"><p>Number of questions
-                                                                    is {item.questions.count}</p></li>
 
-                                                            </ul>
-                                                        </div>
                                                     )
                                                 }
                                             })
