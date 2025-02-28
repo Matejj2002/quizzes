@@ -34,7 +34,7 @@ const Questions = () => {
       const offset = parseInt(searchParams.get("offset") || "0", 10);
 
       const [actualCategory, setActualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
-      const [actualCategoryString, setActualCategoryString] = useState(categoryList.at(categoryList.length-1) ||"supercategory");
+      const [actualCategoryString, setActualCategoryString] = useState(searchParams.get("category") || categoryList.at(categoryList.length-1) ||"supercategory");
       const [categoryPath , setCategoryPath] = useState([]);
 
       const [allCategories, setAllCategories] = useState([]);

@@ -8,6 +8,7 @@ const QuestionModal = ({
 }) => {
     const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: []});
     const [questions, setQuestions] = useState([]);
+    const [typeQuestionSelected, setTypeQuestionSelected] = useState(1);
 
     useEffect(() => {
     if (addedQuestions.type === "random") {
@@ -32,7 +33,7 @@ const QuestionModal = ({
             try {
                 const response = await axios.get(
                     `http://127.0.0.1:5000/api/get_questions_category/${addedQuestions.categoryId}`,
-                    { params: { includeSubCat: addedQuestions.includeSubCategories } }
+                    { params: { includeSubCat: addedQuestions.includeSubCategories, typeQuestionSelected: typeQuestionSelected } }
                 );
                 setQuestions(response.data.questions);
             } catch (error) {
@@ -41,7 +42,7 @@ const QuestionModal = ({
         };
         fetchQuestions();
     }
-}, [pageNum, addedQuestions.categoryId, addedQuestions.includeSubCategories]);
+}, [pageNum, addedQuestions.categoryId, addedQuestions.includeSubCategories, typeQuestionSelected]);
 
     const handleCheckBoxQuestions = (question) => {
     setAddedQuestions((prevState) => {
@@ -67,7 +68,9 @@ const QuestionModal = ({
         };
     });
 };
+    const questionTypes = ["","All", "Matching Question", "Short Question", "Multiple Choice"]
 
+    console.log(typeQuestionSelected);
     return (
         <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
              data-bs-keyboard="false" tabIndex="-1"
@@ -100,7 +103,7 @@ const QuestionModal = ({
                         <label htmlFor="select-category">Category</label>
                         <select
                             id="select-category"
-                            className="form-select"
+                            className="form-select mb-3"
                             value={addedQuestions.categoryId || ""}
                             onChange={(e) => {
                                 const selectedOption = categorySelect.find(
@@ -126,6 +129,38 @@ const QuestionModal = ({
                                 ))}
                         </select>
 
+                        <label htmlFor="select-type">Type of question</label>
+                        <select
+                            id="select-type"
+                            className="form-select mb-3"
+                            value={typeQuestionSelected}
+                            onChange={(e) => {
+
+                                setTypeQuestionSelected(e.target.value);
+                            }
+                            }
+                        >
+                            {
+                             questionTypes.map((type, index) => {
+                                 if (index === 0) {
+                                     return (
+                                     <option value="" disabled>
+                                         Select type of question
+                                     </option>
+                                     )
+                                 }else{
+                                     return (
+                                         <option key={"questionType" + index} value={index || ""}>
+                                             {type}
+                                         </option>
+                                     )
+                                 }
+                                 }
+                             )
+                            }
+
+                        </select>
+
                         <div className="form-check">
                             <input
                                 className="form-check-input"
@@ -135,9 +170,9 @@ const QuestionModal = ({
                                 disabled={addedQuestions.categoryId === 1}
                                 onChange={(e) => {
                                     setAddedQuestions((prevState) => ({
-                                            ...prevState,
-                                            includeSubCategories: e.target.checked
-                                        }));
+                                        ...prevState,
+                                        includeSubCategories: e.target.checked
+                                    }));
                                 }
                                 }
                             />
@@ -154,9 +189,9 @@ const QuestionModal = ({
                                    checked={addedQuestions.type === "random"}
                                    onChange={(e) => {
                                        setAddedQuestions((prevState) => ({
-                                            ...prevState,
-                                            type: "random"
-                                        }));
+                                           ...prevState,
+                                           type: "random"
+                                       }));
                                    }}/>
                             <label className="form-check-label"
                                    htmlFor="exampleRadios1">
@@ -170,9 +205,9 @@ const QuestionModal = ({
                                    checked={addedQuestions.type === "questions"}
                                    onChange={(e) => {
                                        setAddedQuestions((prevState) => ({
-                                            ...prevState,
-                                            type: "questions"
-                                        }));
+                                           ...prevState,
+                                           type: "questions"
+                                       }));
                                    }}/>
                             <label className="form-check-label"
                                    htmlFor="exampleRadios2">
@@ -232,7 +267,7 @@ const QuestionModal = ({
                                                         </div>
                                                         <div
                                                             className="form-control bg-light d-flex align-items-center justify-content-between">
-                                                            <a className="text-truncate" href = "#">{question.title}</a>
+                                                            <a className="text-truncate" href="#">{question.title}</a>
 
                                                             <span
                                                                 className="input-group-text badge text-bg-primary rounded-pill flex-shrink-0">
@@ -263,7 +298,13 @@ const QuestionModal = ({
                                 onClick={() => {
                                     setTimeout(() => {
                                         handleAddItem(addedQuestions);
-                                        setAddedQuestions({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: {count: 1}})
+                                        setAddedQuestions({
+                                            categoryId: 1,
+                                            categoryName: "supercategory",
+                                            type: "random",
+                                            includeSubCategories: true,
+                                            questions: {count: 1}
+                                        })
                                     }, 0);
                                 }}
                         >Add
