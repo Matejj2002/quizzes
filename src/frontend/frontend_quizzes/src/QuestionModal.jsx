@@ -6,7 +6,7 @@ const QuestionModal = ({
     categorySelect,
     handleAddItem
 }) => {
-    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", includeSubCategories: true, questions: []});
+    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", questionType:"All", includeSubCategories: true, questions: []});
     const [questions, setQuestions] = useState([]);
     const [typeQuestionSelected, setTypeQuestionSelected] = useState(1);
 
@@ -70,7 +70,6 @@ const QuestionModal = ({
 };
     const questionTypes = ["","All", "Matching Question", "Short Question", "Multiple Choice"]
 
-    console.log(typeQuestionSelected);
     return (
         <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
              data-bs-keyboard="false" tabIndex="-1"
@@ -89,6 +88,7 @@ const QuestionModal = ({
                                             categoryName: "supercategory",
                                             type: "random",
                                             includeSubCategories: true,
+                                            questionType: "All",
                                             questions: {count: 1}
                                         })
                                     }, 0);
@@ -135,7 +135,13 @@ const QuestionModal = ({
                             className="form-select mb-3"
                             value={typeQuestionSelected}
                             onChange={(e) => {
+                                const selectedIndex = e.target.selectedIndex;
+                                const selectedType = questionTypes[selectedIndex];
 
+                                setAddedQuestions((prevState) => ({
+                                    ...prevState,
+                                    questionType: selectedType
+                                }));
                                 setTypeQuestionSelected(e.target.value);
                             }
                             }
@@ -302,6 +308,7 @@ const QuestionModal = ({
                                             categoryId: 1,
                                             categoryName: "supercategory",
                                             type: "random",
+                                            questionType: "All",
                                             includeSubCategories: true,
                                             questions: {count: 1}
                                         })

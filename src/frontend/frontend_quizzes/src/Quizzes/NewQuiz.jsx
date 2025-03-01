@@ -17,6 +17,7 @@ const NewQuiz = () => {
     const [dateClose, setDateClose] = useState("");
     const [dateCheck, setDateCheck] = useState("");
     const [shuffleSections, setShuffleSections] = useState(false);
+    const [checkSubmit, setCheckSubmit] = useState("");
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
@@ -27,6 +28,7 @@ const NewQuiz = () => {
         title: "Section 1",
     }]);
 
+    console.log(sections);
 
     const [selectedOption, setSelectedOption] = useState("option1");
 
@@ -121,6 +123,7 @@ const NewQuiz = () => {
                                 includeSubCategories: newQuestions.includeSubCategories,
                                 categoryId: newQuestions.categoryId,
                                 questionType: newQuestions.type,
+                                questionAnswerType: newQuestions.questionType,
                                 evaluation: 1
                             });
                         }
@@ -182,6 +185,24 @@ const NewQuiz = () => {
             shuffleSections: shuffleSections
 
         }
+
+        if (quizTitle === ""){
+            setCheckSubmit("Please fill quiz title")
+            return ;
+        }
+        if (dateOpen === ""){
+            setCheckSubmit("Open the quiz is not filled correctly")
+            return ;
+        }
+        if (dateClose === ""){
+            setCheckSubmit("Close the quiz is not filled correctly")
+            return;
+        }
+        if (dateCheck   === ""){
+            setCheckSubmit("The quiz can be reviewed from is not filled correctly")
+            return;
+        }
+
         axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
             .then(
                 response => {
@@ -229,11 +250,27 @@ const NewQuiz = () => {
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation></Navigation>
                 </header>
+
                 <div className="container-fluid" style={{ marginTop: "50px" }}>
+                    {
+                                checkSubmit.length !== 0 && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {checkSubmit}
+                                    </div>
+                                )
+                    }
                     <div className="row">
                         <div className="col-2 sidebar">
                         </div>
                         <div className="col-8">
+                            {
+                                pageNum === 1 ? (
+                                    <h1>Quiz Settings</h1>
+                                ) :
+                                (
+                                <h1>Sections</h1>
+                                )
+                            }
                             <ul className="nav nav-tabs" id="myTab" role="tablist">
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link active" id="home-tab" data-bs-toggle="tab"
@@ -296,7 +333,7 @@ const NewQuiz = () => {
                                 <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
                                      aria-labelledby="home-tab" tabIndex="0">
                                     <div>
-                                        <h1 className="mb-3">Quiz Settings</h1>
+                                        {/*<h1 className="mb-3">Quiz Settings</h1>*/}
                                         <div className="mb-3">
                                             <label htmlFor="QuizTitle" className="form-label">
                                                 Title
@@ -305,7 +342,7 @@ const NewQuiz = () => {
                                                 type="text"
                                                 className="form-control"
                                                 id="QuizTitle"
-                                                placeholder="Quiz title"
+                                                placeholder="New Quiz"
                                                 value={quizTitle}
                                                 onChange={(e) => setQuizTitle(e.target.value)}
                                             />
@@ -422,18 +459,20 @@ const NewQuiz = () => {
                                         role="tabpanel"
                                         aria-labelledby={`tab-${pageNum}`}
                                     >
-                                        <h2>{sections[pageNum - 2]?.title}</h2>
+                                        {/*<h2>{sections[pageNum - 2]?.title}</h2>*/}
+                                        <label htmlFor={`section-title-${pageNum}`} className="form-label">
+                                            Title:
+                                        </label>
                                         <input
+                                            id={`section-title-${pageNum}`}
                                             type="text"
                                             placeholder="Enter section title..."
                                             value={sections[pageNum - 2]?.title}
-                                            onChange={
-                                                handleTitle
-                                            }
-                                            className="form-control mt-2"
+                                            onChange={handleTitle}
+                                            className="form-control"
                                         />
                                         <div className="form-check">
-                                            <input className="form-check-input" type="checkbox" value=""
+                                        <input className="form-check-input" type="checkbox" value=""
                                                    checked={sections[pageNum - 2]?.shuffle} onChange={toggleShuffle}
                                                    id="shuffleSection"/>
                                             <label className="form-check-label" htmlFor="shuffleSection">
@@ -595,7 +634,7 @@ const NewQuiz = () => {
                                                                                         </a>
                                                                                     </h2>
                                                                                     <span
-                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{item.type}
+                                                                                        className="badge text-bg-primary rounded-pill flex-shrink-0 align-self-start">{item.questionAnswerType}
                                                                                 </span>
                                                                                 </div>
                                                                                 <input

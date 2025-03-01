@@ -33,6 +33,12 @@ const Quiz = () => {
 
   }, []);
 
+    const handleUpdateQuiz = (e, quiz) => {
+        e.preventDefault();
+
+        console.log(quiz);
+    }
+
     console.log(quizzes);
     if (localStorage.getItem("accessToken")) {
         return (
@@ -53,9 +59,20 @@ const Quiz = () => {
                             {quizzes.map((quiz) => {
                                     return (
                                         <div className="border p-3 mb-3 mt-3 ">
+                                            <div className="d-flex justify-content-between">
                                             <h2 className="h5">
-                                            <a href = "#" className=" text-decoration-none">{quiz.title}</a>
-                                                </h2>
+                                                <a href="#" className=" text-decoration-none"
+                                                    onClick={(e) => handleUpdateQuiz(e, quiz)}
+                                                >{quiz.title}</a>
+                                            </h2>
+                                            <button
+                                                className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                style={{marginLeft: "25%"}}
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                            </div>
+
                                             {quiz.shuffle_sections && (
                                                 <p>Sections will be shuffled.</p>
                                             )}
@@ -73,7 +90,7 @@ const Quiz = () => {
                                             <p>Quiz has {quiz.sections.length} sections</p>
 
                                             <span
-                                                className="m-0 text-secondary text-truncate">Time to finish (Minutes):  {quiz.time_to_finish}</span><br/>
+                                                className="m-0 text-secondary text-truncate">Time to finish (Minutes): {quiz.time_to_finish}</span><br/>
                                             <span
                                                 className="m-0 text-secondary text-truncate">Opened from {quiz.date_time_close} to {quiz.date_time_open}</span><br/>
                                             <span
