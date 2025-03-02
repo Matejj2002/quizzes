@@ -5,23 +5,42 @@ import Login from "../Login";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+import {useLocation} from "react-router-dom";
+
+const formatDateTimeLocal = (rfcDate) => {
+    if (!rfcDate) return "";
+
+    const date = new Date(rfcDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
 const NewQuiz = () => {
-    const [pageNum, setPageNum] = useState(1);
-    const [pageCount, setPageCount] = useState(3);
+    const location = useLocation();
 
-    const [quizTitle, setQuizTitle] = useState("");
-    const [numberOfCorrections, setNumberOfCorrections] = useState(0);
-    const [minutesToFinish, setMinutesToFinish] = useState(1);
-    const [dateOpen, setDateOpen] = useState("");
-    const [dateClose, setDateClose] = useState("");
-    const [dateCheck, setDateCheck] = useState("");
-    const [shuffleSections, setShuffleSections] = useState(false);
+    const [pageNum, setPageNum] = useState(1);
+    const [pageCount, setPageCount] = useState( location.state?.sections.length+1 || 3);
+    const [newUpdateQuiz, setNewUpdateQuiz] = useState(location.state?.newUpdateQuiz || "Submit")
+
+    const [quizTitle, setQuizTitle] = useState(location.state?.title ?? "");
+    const [numberOfCorrections, setNumberOfCorrections] = useState(location.state?.numberOfCorrections || 0);
+    const [minutesToFinish, setMinutesToFinish] = useState(location.state?.minutesToFinish || 1);
+    const [dateOpen, setDateOpen] = useState(formatDateTimeLocal(location.state?.dateOpen) || "");
+    const [dateClose, setDateClose] = useState(formatDateTimeLocal(location.state?.dateClose) || "");
+    const [dateCheck, setDateCheck] = useState(formatDateTimeLocal(location.state?.dateCheck) || "");
+    const [shuffleSections, setShuffleSections] = useState(location.state?.shuffleSections || false);
     const [checkSubmit, setCheckSubmit] = useState("");
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
-    const [sections, setSections] = useState([{
+    const [quizId, setQuizId] = useState(location.state?.quizId || 0)
+
+    const [sections, setSections] = useState( location.state?.sections || [{
         sectionId: 1,
         shuffle: false,
         questions: [],
@@ -30,7 +49,7 @@ const NewQuiz = () => {
 
     console.log(sections);
 
-    const [selectedOption, setSelectedOption] = useState("option1");
+    const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "option1");
 
     const toggleShuffle = () => {
         setSections((prevSections) => {
@@ -182,23 +201,24 @@ const NewQuiz = () => {
             dateClose: dateClose,
             dateCheck: dateCheck,
             typeOfAttempts: selectedOption,
-            shuffleSections: shuffleSections
+            shuffleSections: shuffleSections,
+            quizId: quizId
 
         }
-
-        if (quizTitle === ""){
+        console.log(quizTitle);
+        if (quizTitle === "") {
             setCheckSubmit("Please fill quiz title")
-            return ;
+            return;
         }
-        if (dateOpen === ""){
+        if (dateOpen === "") {
             setCheckSubmit("Open the quiz is not filled correctly")
-            return ;
+            return;
         }
-        if (dateClose === ""){
+        if (dateClose === "") {
             setCheckSubmit("Close the quiz is not filled correctly")
             return;
         }
-        if (dateCheck   === ""){
+        if (dateCheck === "") {
             setCheckSubmit("The quiz can be reviewed from is not filled correctly")
             return;
         }
@@ -323,7 +343,7 @@ const NewQuiz = () => {
                                                 event.preventDefault();
                                                 saveChanges();
                                             }}
-                                    >Submit
+                                    >{newUpdateQuiz}
                                     </button>
                                 </li>
 

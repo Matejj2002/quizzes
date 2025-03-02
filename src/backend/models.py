@@ -201,38 +201,25 @@ class Student(User):
 class QuizTemplate(db.Model):
     __tablename__ = 'quiz_templates'
     id = db.Column(db.Integer, primary_key=True)
-    random_order = db.Column(db.Boolean, default=False)
+    title = db.Column(db.String)
     ordered = db.Column(db.Boolean, default=True)
-    filter_on_question = db.Column(db.Boolean, default=False)
-    number_of_attempts = db.Column(db.Integer, default=0)
-    number_of_corrections = db.Column(db.Integer,
-                                      default=0)  # number_of_corrections - nazov zmenit  # pocet moznych oprav jedneho pokusu
-    order = db.Column(db.ARRAY(db.Integer))
+    shuffle_sections = db.Column(db.Boolean, default=False)
+    correction_of_attempts = db.Column(db.String)
+
+    number_of_corrections = db.Column(db.Integer, default=0)
+
+    is_deleted = db.Column(db.Boolean, default=False)
+
+    order = db.Column(db.ARRAY(db.Integer))  # usporiadanie sekcii
+
     date_time_open = db.Column(db.DateTime)
     date_time_close = db.Column(db.DateTime)
     time_to_finish = db.Column(db.Integer)
     datetime_check = db.Column(db.DateTime)
-    # datetime_check - od kedy sa da skontrolovat
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')
-    quiz_template_items = db.relationship('QuizTemplateItem', back_populates='quiz_template')
-
-
-# bud otazka alebo kategoria+pocet alebo -> QuizTemplateSection (title, description, quizTemplateItem - viacej, hodnotenie)
-class QuizTemplateItem(db.Model):
-    #nevie priamo o kvize, namiesto quiz_template ma quiz_template_section - je sucastou sekcie
-    __tablename__ = 'quiz_template_items'
-    id = db.Column(db.Integer, primary_key=True)
-    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
-    question_count = db.Column(db.Integer)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
-    include_sub_categories = db.Column(db.Boolean, default=False)
-    evaluate = db.Column(db.Integer, default = 1)
-
-    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
-    quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_items')
-    category = db.relationship('Category', back_populates='quiz_template_items')
+    quiz_template_section = db.relationship('QuizTemplateSection', back_populates='quiz_template', cascade="all, delete")
 
 
 class QuizTemplateSection(db.Model):
@@ -240,8 +227,34 @@ class QuizTemplateSection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
     description = db.Column(db.Text)
+    shuffle = db.Column(db.Boolean)
+    order = db.Column(db.ARRAY(db.Integer))  # usporiadanie itemov
 
-    quiz_template_item_id = db.Column(db.Integer, db.ForeignKey('quiz_template_items'))
+    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
+    quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_section')
+
+    quiz_template_section_items = db.relationship('QuizTemplateItem', back_populates='item_section', cascade="all, delete")
+
+
+# bud otazka alebo kategoria+pocet alebo -> QuizTemplateSection (title, description, quizTemplateItem - viacej, hodnotenie)
+class QuizTemplateItem(db.Model):
+    # nevie priamo o kvize, namiesto quiz_template ma quiz_template_section - je sucastou sekcie
+    __tablename__ = 'quiz_template_items'
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
+    question_count = db.Column(db.Integer)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    include_sub_categories = db.Column(db.Boolean)
+    evaluate = db.Column(db.Integer, default=0)
+    question_type = db.Column(db.String)
+
+    category = db.relationship('Category', back_populates='quiz_template_items')
+    question = db.relationship('Question')
+
+    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
+
+    item_section_id = db.Column(db.Integer, db.ForeignKey('quiz_template_section.id'))
+    item_section = db.relationship('QuizTemplateSection', back_populates='quiz_template_section_items')
 
 
 class Quiz(db.Model):
@@ -257,11 +270,21 @@ class Quiz(db.Model):
     quiz_items = db.relationship('QuizItem', back_populates='quiz')
 
 
+# vytvorit quizSection - pamata si finalne poradie - vzdy to bude uz v takomto poradi ako tu urci poradie
 class QuizItem(db.Model):
+    # zachovavat sekcie - pridat
+    # quizItem spojene s quizTemplateItem
     __tablename__ = 'quiz_items'
     id = db.Column(db.Integer, primary_key=True)
-    answer = db.Column(db.String(255))
-    score = db.Column(db.Float)
+    answer = db.Column(db.Text)  # Text - ako json, podla typu otazky
+    score = db.Column(db.Float)  # Decimal
+
+    # komentar - defaultne null ku otazke - studentske komentare
+    # najviac jeden komentar - odkaz na komentar
+    # ako autor bude student
+    # z ktorej quizItem je komentar - students_comment
+
+    # ucitelsky komentar ku otazke - ako teachers_comment , komentar ucitela k odpovedi
 
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
     quiz = db.relationship('Quiz', back_populates='quiz_items')

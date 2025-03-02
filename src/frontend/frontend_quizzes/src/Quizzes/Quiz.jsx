@@ -35,11 +35,39 @@ const Quiz = () => {
 
     const handleUpdateQuiz = (e, quiz) => {
         e.preventDefault();
+        navigate("/new-quiz",{
+            state: {
+                title: quiz.title,
+                numberOfCorrections: quiz.number_of_corrections,
+                minutesToFinish: quiz.time_to_finish,
+                dateOpen: quiz.date_time_open,
+                dateClose: quiz.date_time_close,
+                dateCheck: quiz.datetime_check,
+                shuffleSections: quiz.shuffle_sections,
+                selectedOption: quiz.correction_of_attempts,
+                sections: quiz.sections,
+                newUpdateQuiz: "Update",
+                quizId : quiz.id
 
-        console.log(quiz);
+            }
+        })
+    }
+    console.log(quizzes);
+    const handleArchiveQuiz = (e, quiz) => {
+        const updatedData = {
+            quiz_template_id: quiz.id
+        }
+        axios.put(`http://127.0.0.1:5000/api/archive-quiz`, updatedData)
+            .then(
+                response => {
+                    window.location.href = '/quizzes';
+                }
+            )
+            .catch(error => {
+                console.error('Error saving changes:', error);
+            });
     }
 
-    console.log(quizzes);
     if (localStorage.getItem("accessToken")) {
         return (
             <div>
@@ -68,6 +96,12 @@ const Quiz = () => {
                                             <button
                                                 className="btn btn-outline-danger btn-xs p-0 px-1"
                                                 style={{marginLeft: "25%"}}
+                                                onClick={(e) => {
+                                                    if (window.confirm("Are you sure you want to archive this quiz?")) {
+                                                        handleArchiveQuiz(e, quiz)
+                                                    }
+                                                }
+                                                }
                                             >
                                                 <i className="bi bi-trash"></i>
                                             </button>

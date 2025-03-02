@@ -3,8 +3,7 @@ from flask_migrate import Migrate
 from flask_admin import Admin
 from flask_dance.contrib.github import make_github_blueprint
 from flask_cors import CORS
-from src.backend.views import *
-from src.backend.models import *
+from src.backend.api_functions import *
 from flask_session import Session
 import requests
 from dotenv import load_dotenv
@@ -113,6 +112,7 @@ def get_user_data():
         return jsonify(data)
     else:
         return jsonify({"error": "Failed to retrieve user data"}), response.status_code
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -238,46 +238,6 @@ def get_teachers():
     return jsonify(all_teachers), 200
 
 
-def fetch_question_data(question_id):
-    question = Question.query.get_or_404(question_id)
-
-    versions = question.question_version
-
-    versions_list = [
-        {
-            "id": version.id,
-            "title": version.title,
-            "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
-            "author_id": version.author_id,
-            "author_name": version.author.name,
-            "text": version.text,
-            "type": version.type
-        }
-        for version in versions
-    ]
-
-    if len(versions) > 0:
-        newest_version = max(
-            versions_list,
-            key=lambda x: datetime.datetime.strptime(x['dateCreated'], '%Y-%m-%d %H:%M:%S')
-        )
-    else:
-        newest_version = None
-
-    question_dict = {
-        'id': question.id,
-        "category_id": question.category_id,
-        "is_deleted": question.is_deleted,
-        "category": question.category.title if question.category else None,
-        "versions": newest_version,
-        "author_id": newest_version['author_id'],
-        "author_name": newest_version['author_name'],
-        "type": newest_version['type'],
-    }
-
-    return question_dict
-
-
 @app.route('/api/questions/delete', methods=['PUT'])
 def delete_question():
     data = request.get_json()
@@ -306,42 +266,6 @@ def categories_show(category_id):
     result = category_show_helper(category_id)
 
     return jsonify(result), 200
-
-
-def category_show_helper(category_id):
-    category = Category.query.get_or_404(category_id)
-
-    visited = set()
-    visited.add(category)
-
-    visited_id = set()
-    visited_id.add(category.id)
-
-    category_set = set()
-    category_set.add(category)
-
-    while len(category_set) != 0:
-        category_set_pom = set()
-        for category in category_set:
-
-            for cat1 in category.subcategories.all():
-                if not cat1 in visited:
-                    category_set_pom.add(cat1)
-                    visited.add(cat1)
-                    visited_id.add(cat1.id)
-        category_set = category_set_pom
-
-    questions = Question.query.all()
-
-    result = []
-
-    for question in questions:
-        if question.category_id in visited_id:
-            result.append(
-                fetch_question_data(question.id)
-            )
-
-    return result
 
 
 @app.route('/api/categories/new-category', methods=["PUT"])
@@ -663,41 +587,6 @@ def get_tree_categories():
     return result
 
 
-def tree_categories(node):
-    result = {
-        "title": node.title,
-        "id": node.id,
-        "children": [tree_categories(child) for child in node.subcategories]
-    }
-    return result
-
-
-def list_subcategories(node):
-    subcategories = []
-
-    # Helper function to traverse and collect subcategories
-    def traverse(node):
-        for child in node.subcategories:
-            subcategories.append({"title": child.title, "id": child.id})
-            traverse(child)
-
-    traverse(node)
-    return subcategories
-
-
-def generate_category_tree(category, level=0):
-    result = [{
-        "id": category["id"],
-        "title": f"{'– ' * (level - 1)}{category['title']}"
-    }]
-
-    if category.get("children"):
-        for i in category['children']:
-            result.extend(generate_category_tree(i, level + 1))
-
-    return result
-
-
 @app.route("/api/get-category-tree-array", methods=["GET"])
 def get_category_to_select():
     cat = tree_categories(Category.query.get_or_404(1))
@@ -709,6 +598,18 @@ def get_category_to_select():
 @app.route("/api/get_questions_category/<int:index>", methods=["GET"])
 def get_questions_from_category(index):
     subcat = request.args.get('includeSubCat')
+    question_type = int(request.args.get("typeQuestionSelected"))
+
+    type_sel = []
+    if question_type == 1:
+        type_sel = ["short_answer_question", "matching_answer_question", "multiple_answer_question"]
+    if question_type == 2:
+        type_sel = ["matching_answer_question"]
+    if question_type == 3:
+        type_sel = ["short_answer_question"]
+    if question_type == 4:
+        type_sel = ["multiple_answer_question"]
+
     questions = []
     if subcat == 'true':
         cats = list_subcategories(Category.query.get_or_404(index))
@@ -721,10 +622,11 @@ def get_questions_from_category(index):
     questions_versions = []
     for i in questions:
         latest_version = max(i.question_version, key=lambda v: v.dateCreated)
-        if not i.is_deleted or i.is_deleted == None:
+
+        if latest_version.type in type_sel and (not i.is_deleted or i.is_deleted is None):
             author = Teacher.query.get_or_404(latest_version.author_id).name
             version = {
-                "id": latest_version.id,
+                "id": i.id,
                 "title": latest_version.title,
                 "text": latest_version.text,
                 "type": latest_version.type,
@@ -735,11 +637,199 @@ def get_questions_from_category(index):
 
     return {"questions": questions_versions}
 
+
+@app.route("/api/get-quiz-templates", methods=["GET"])
+def get_quiz_templates():
+    quiz_templates = QuizTemplate.query.all()
+
+    result = []
+
+    for template in quiz_templates:
+        if template.is_deleted:
+            continue
+
+        template_sub = {
+            "id": template.id,
+            "title": template.title,
+            "date_time_open": template.date_time_open,
+            "date_time_close": template.date_time_close,
+            "time_to_finish": template.time_to_finish,
+            "shuffle_sections": template.shuffle_sections,
+            "correction_of_attempts": template.correction_of_attempts,
+            "number_of_corrections": template.number_of_corrections,
+            "datetime_check": template.datetime_check,
+            "order": template.order,
+            "sections": []
+        }
+        section_count = 1
+        for section in template.quiz_template_section:
+            pom_section = {
+                "sectionId": section_count,
+                "title": section.title,
+                "shuffle": section.shuffle,
+                "order": section.order,
+                "questions": []
+            }
+            section_count += 1
+
+            for question_item in section.quiz_template_section_items:
+                question = question_item.question
+
+                if question is not None:
+                    latest_version = max(question.question_version, key=lambda v: v.dateCreated)
+                    pom_section["questions"].append(
+                        {"id": question.id,
+                         "author": latest_version.author.name,
+                         "dateCreated": latest_version.dateCreated,
+                         "evaluation": question_item.evaluate,
+                         "questionType": "questions",
+                         "title": latest_version.title,
+                         "type": latest_version.type
+                         }
+                    )
+                else:
+                    pom_section["questions"].append(
+                        {
+                            "categoryId": question_item.category_id,
+                            "categoryName": question_item.category.title,
+                            "evaluation": question_item.evaluate,
+                            "includeSubCategories": question_item.include_sub_categories,
+                            "questionAnswerType": question_item.question_type,
+                            "questionType": "random"
+                        }
+                    )
+            template_sub["sections"].append(pom_section)
+
+        result.append(template_sub)
+
+    return {"result": result}, 200
+
+
+@app.route("/api/archive-quiz", methods=["PUT"])
+def archive_quiz():
+    quiz_template_id = request.get_json()["quiz_template_id"]
+
+    archive_quiz_template = QuizTemplate.query.filter_by(id=quiz_template_id).first()
+    archive_quiz_template.is_deleted = True
+    db.session.commit()
+
+    return {}
+
+
+@app.route("/api/update-quiz-template", methods=["PUT"])
+def update_quiz_template():
+    data = request.get_json()
+    # quiz_template_id = data["quizId"]
+    #
+    # quiz_template = QuizTemplate.query.filter_by(id=quiz_template_id).first()
+    # quiz_template.title = data["quizTitle"]
+    # quiz_template.shuffle_sections = data["shuffleSections"]
+    # quiz_template.correction_of_attempts = data["typeOfAttempts"]
+    # quiz_template.number_of_corrections = data["numberOfCorrections"]
+    # quiz_template.date_time_open = data["dateOpen"]
+    # quiz_template.date_time_close = data["dateClose"]
+    # quiz_template.time_to_finish = data["minutesToFinish"]
+    # quiz_template.datetime_check = data["dateCheck"]
+    #
+    # db.session.commit()
+
+    quiz_template = QuizTemplate.query.all()
+
+    for quiz in quiz_template:
+        db.session.delete(quiz)
+        db.session.commit()
+
+
+
+
+    return {}
+
+
 @app.route("/api/new-quiz-template", methods=["PUT"])
 def create_new_quiz_template():
     data = request.get_json()
     print(data)
+    if data["quizId"] !=0:
+        quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
+        db.session.delete(quiz_template)
+        db.session.commit()
+
+    quiz_template = QuizTemplate(
+        title=data["quizTitle"],
+        shuffle_sections=data['shuffleSections'],
+        correction_of_attempts=data["typeOfAttempts"],
+        number_of_corrections=data["numberOfCorrections"],
+        date_time_open=data["dateOpen"],
+        date_time_close=data["dateClose"],
+        time_to_finish=data["minutesToFinish"],
+        datetime_check=data["dateCheck"]
+    )
+
+    db.session.add(quiz_template)
+    db.session.commit()
+
+    quiz_template_id = quiz_template.id
+
+    sections = []
+    for section in data["sections"]:
+        section_added = QuizTemplateSection(
+            title=section["title"],
+            description="",
+            quiz_template_id=quiz_template_id,
+            shuffle=section["shuffle"]
+        )
+        db.session.add(section_added)
+        db.session.commit()
+
+        sections.append(section_added)
+
+        quiz_template_items = []
+        for question in section["questions"]:
+            if question["questionType"] == "questions":
+                print(question)
+                original_question = QuestionVersion.query.filter_by(question_id=question["id"]).first()
+                question_item = QuizTemplateItem(
+                    question_id=original_question.question_id,
+                    evaluate=question["evaluation"],
+                    item_section_id=section_added.id
+                )
+
+                db.session.add(question_item)
+                db.session.commit()
+                quiz_template_items.append(question_item)
+
+            else:
+                question_item = QuizTemplateItem(
+                    item_section_id=section_added.id,
+                    category_id=question["categoryId"],
+                    evaluate=question["evaluation"],
+                    include_sub_categories=question["includeSubCategories"],
+                    question_type=question["questionAnswerType"]
+
+                )
+
+                db.session.add(question_item)
+                db.session.commit()
+                quiz_template_items.append(question_item)
+
+        ordered_items = []
+        for i in quiz_template_items:
+            ordered_items.append(i.id)
+
+        section_added.order = ordered_items
+
+        db.session.commit()
+
+    ordered_sections_ids = []
+    for i in sections:
+        ordered_sections_ids.append(i.id)
+
+    quiz_template.order = ordered_sections_ids
+
+    db.session.commit()
+
     return {}, 200
+
 
 if __name__ == '__main__':
     with app.app_context():
