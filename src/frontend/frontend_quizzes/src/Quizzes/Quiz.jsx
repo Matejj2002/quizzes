@@ -52,7 +52,6 @@ const Quiz = () => {
             }
         })
     }
-    console.log(quizzes);
     const handleArchiveQuiz = (e, quiz) => {
         const updatedData = {
             quiz_template_id: quiz.id

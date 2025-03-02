@@ -24,7 +24,7 @@ const NewQuiz = () => {
     const location = useLocation();
 
     const [pageNum, setPageNum] = useState(1);
-    const [pageCount, setPageCount] = useState( location.state?.sections.length+1 || 3);
+    const [pageCount, setPageCount] = useState( location.state?.sections.length+2 || 3);
     const [newUpdateQuiz, setNewUpdateQuiz] = useState(location.state?.newUpdateQuiz || "Submit")
 
     const [quizTitle, setQuizTitle] = useState(location.state?.title ?? "");
