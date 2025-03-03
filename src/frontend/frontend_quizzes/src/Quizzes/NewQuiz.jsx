@@ -205,7 +205,7 @@ const NewQuiz = () => {
             quizId: quizId
 
         }
-        console.log(quizTitle);
+
         if (quizTitle === "") {
             setCheckSubmit("Please fill quiz title")
             return;
@@ -223,15 +223,23 @@ const NewQuiz = () => {
             return;
         }
 
-        axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
-            .then(
-                response => {
-                    window.location.href = '/quizzes';
+         axios.post(`http://127.0.0.1:5000/api/new-quiz-template-check`, sections)
+            .then(response => {
+                if (response.data["message"]){
+                    axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
+                    .then(
+                        response => {
+                            window.location.href = '/quizzes';
+                        }
+                    )
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+                }else{
+                    setCheckSubmit("Quiz cannot be generated");
                 }
-            )
-            .catch(error => {
-                console.error('Error saving changes:', error);
-            });
+            })
+            .catch(error => console.error('Chyba:', error));
     }
 
     const handleDateOpenChange = (e) => {

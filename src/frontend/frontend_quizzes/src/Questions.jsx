@@ -100,7 +100,7 @@ const Questions = () => {
             const response = await axios.get('http://127.0.0.1:5000/api/questions/' , {
             params: { limit, offset, sort, actualCategory, filterType, authorFilterDec, questionFilter },
             });
-            setNumberOfQuestions(response.data[0].number_of_all_questions);;
+            setNumberOfQuestions(response.data[0].number_of_all_questions);
             setNumberOfQuestionsFilter(response.data[0].number_of_questions)
             setQuestions(response.data[2]);
       }catch (error){
@@ -111,12 +111,17 @@ const Questions = () => {
 
     useEffect(() => {
         setLoading(true);
-        fetchQuestions(limit, offset);
+        fetchQuestions(limit);
+  }, [limit, offset, page, authorFilter]);
+
+  useEffect(() => {
+        setLoading(true);
+        fetchQuestions(limit);
         setCategoryPath([]);
+        setPage(1);
         fetchCategory(actualCategory);
         fetchAllCategory();
-  }, [limit, offset, page, actualCategory, authorFilter]);
-
+  }, [actualCategory]);
 
   useEffect(() => {
     fetchAllTeachers();
