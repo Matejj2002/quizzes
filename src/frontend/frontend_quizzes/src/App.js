@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {BrowserRouter as Router , Routes, Route, Navigate} from 'react-router-dom';
+import React from 'react';
+import {Routes, Route, Navigate} from 'react-router-dom';
 import Questions from "./Questions";
 import NewCategory from "./NewCategory";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';

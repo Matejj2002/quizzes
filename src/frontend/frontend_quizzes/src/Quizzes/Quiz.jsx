@@ -58,7 +58,7 @@ const Quiz = () => {
         }
         axios.put(`http://127.0.0.1:5000/api/archive-quiz`, updatedData)
             .then(
-                response => {
+                () => {
                     window.location.href = '/quizzes';
                 }
             )
@@ -88,6 +88,7 @@ const Quiz = () => {
                                         <div className="border p-3 mb-3 mt-3 ">
                                             <div className="d-flex justify-content-between">
                                             <h2 className="h5">
+                                                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                 <a href="#" className=" text-decoration-none"
                                                     onClick={(e) => handleUpdateQuiz(e, quiz)}
                                                 >{quiz.title}</a>

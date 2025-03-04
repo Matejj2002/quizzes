@@ -38,6 +38,7 @@ const NewQuestion = ({subButText="Submit"}) => {
     const sort = location.state['sort'];
     const selectedCategory1 = location.state['selectedCategory'];
     const idQ = location.state['id'];
+    console.log(idQ, selectedCategory1);
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter'];
     const newQuestions = location.state["newQuestions"];
@@ -256,7 +257,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <select
                                     id="select-category"
                                     className="form-select"
-                                    value={selectedCategoryId || ""}
+                                    value={selectedCategoryId}
                                     onChange={(e) => {
                                         const selectedOption = categorySelect.find(
                                             (cat) => cat.id === parseInt(e.target.value)
@@ -369,7 +370,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
                                 <button type="button" className="btn btn-primary mb-3 mt-3"
                                         onClick={() => {
-                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory1}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                         }
                                         }
                                 >Back

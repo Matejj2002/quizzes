@@ -25,7 +25,7 @@ const NewQuiz = () => {
 
     const [pageNum, setPageNum] = useState(1);
     const [pageCount, setPageCount] = useState( location.state?.sections.length+2 || 3);
-    const [newUpdateQuiz, setNewUpdateQuiz] = useState(location.state?.newUpdateQuiz || "Submit")
+    const [newUpdateQuiz] = useState(location.state?.newUpdateQuiz || "Submit")
 
     const [quizTitle, setQuizTitle] = useState(location.state?.title ?? "");
     const [numberOfCorrections, setNumberOfCorrections] = useState(location.state?.numberOfCorrections || 0);
@@ -38,7 +38,7 @@ const NewQuiz = () => {
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
-    const [quizId, setQuizId] = useState(location.state?.quizId || 0)
+    const [quizId] = useState(location.state?.quizId || 0)
 
     const [sections, setSections] = useState( location.state?.sections || [{
         sectionId: 1,
@@ -47,7 +47,6 @@ const NewQuiz = () => {
         title: "Section 1",
     }]);
 
-    console.log(sections);
 
     const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "option1");
 
@@ -84,7 +83,7 @@ const NewQuiz = () => {
     const fetchCategorySelect = async () => {
         try {
             const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
-            setCategorySelect(prevCategories => [
+            setCategorySelect(() => [
                 {id: 1, title: "All"},
                 ...response.data
             ]);
@@ -103,7 +102,7 @@ const NewQuiz = () => {
             }
         };
 
-        fetchAllData();
+        fetchAllData().then(() => {});
 
     }, []);
     const handleEvaluateChange = (questionIndex, newValue) => {
@@ -228,7 +227,7 @@ const NewQuiz = () => {
                 if (response.data["message"]){
                     axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
                     .then(
-                        response => {
+                        () => {
                             window.location.href = '/quizzes';
                         }
                     )
@@ -236,7 +235,7 @@ const NewQuiz = () => {
                         console.error('Error saving changes:', error);
                     });
                 }else{
-                    setCheckSubmit("Quiz cannot be generated");
+                    setCheckSubmit(response.data["error"]);
                 }
             })
             .catch(error => console.error('Chyba:', error));
@@ -245,7 +244,7 @@ const NewQuiz = () => {
     const handleDateOpenChange = (e) => {
         const newDate = e.target.value;
 
-        if (newDate < dateClose){
+        if (newDate < dateClose || dateClose === ""){
             setDateOpen(newDate);
         }else{
             alert("Open date cannot be later than close date!");
@@ -255,7 +254,7 @@ const NewQuiz = () => {
     const handleDateCloseChange = (e) => {
         const newDate = e.target.value;
 
-        if (newDate > dateClose){
+        if (newDate > dateClose  && dateOpen < newDate){
             setDateClose(newDate);
         }else{
             alert("Close date cannot sooner than open date!");
@@ -271,6 +270,15 @@ const NewQuiz = () => {
             alert("Check date must be between open and close date!");
         }
     }
+
+    const handleDeleteSection = (sectionId) => {
+          const updatedSections = sections.filter((section) => section.sectionId !== sectionId);
+          setSections(updatedSections);
+          setPageCount(pageCount-1);
+          setPageNum(pageNum-1);
+        };
+
+    console.log(sections);
 
     if (localStorage.getItem("accessToken")) {
         return (
@@ -508,6 +516,7 @@ const NewQuiz = () => {
                                             </label>
                                         </div>
                                         {
+                                            // eslint-disable-next-line array-callback-return
                                             sections[pageNum - 2].questions.map((item, indexQuestion) => {
                                                 if (item.questionType === "questions") {
                                                     return (
@@ -561,6 +570,7 @@ const NewQuiz = () => {
                                                                                 className="d-flex align-items-center"
                                                                                 style={{width: "66%"}}>
                                                                                 <h2 className="h5 text-start text-truncate">
+                                                                                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                                                     <a href="#"
                                                                                        className="text-decoration-none me-1">
                                                                                         {item.title || "No title available"}
@@ -656,6 +666,7 @@ const NewQuiz = () => {
                                                                                     className="d-flex align-items-center"
                                                                                     style={{width: "66%"}}>
                                                                                     <h2 className="h5 text-start text-truncate">
+                                                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                                                         <a href="#"
                                                                                            className="text-decoration-none me-1">
                                                                                             Random Question
@@ -700,10 +711,19 @@ const NewQuiz = () => {
                                                 }
                                             })
                                         }
-                                        <button type="button" className="btn btn-primary mb-1" data-bs-toggle="modal"
-                                                data-bs-target="#staticBackdrop"
-                                        >Add Question
-                                        </button>
+                                        <div className="d-flex justify-content-between">
+                                            <button type="button" className="btn btn-primary mb-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#staticBackdrop"
+                                            >Add Question
+                                            </button>
+
+                                            <button type="button" className="btn btn-danger mb-1"
+                                                    disabled={pageNum-1 === 1}
+                                                onClick={() => handleDeleteSection(pageNum - 1)}
+                                            >Delete Section
+                                            </button>
+                                        </div>
                                         <QuestionModal
                                             pageNum={pageNum}
                                             categorySelect={categorySelect}

@@ -13,11 +13,11 @@ const Questions = () => {
 
       const categoryList = category ? category.split("/") : [];
 
-      const [searchParams, setSearchParams] = useSearchParams();
+      const [searchParams] = useSearchParams();
       const navigate = useNavigate();
 
       const [numberOfQuestions, setNumberOfQuestions ] = useState(0);
-      const [loading, setLoading] = useState(true);
+      const [, setLoading] = useState(true);
       const [questions , setQuestions] = useState([]);
       const [numberOfQuestionsFilter,setNumberOfQuestionsFilter] = useState(0);
 
@@ -33,19 +33,17 @@ const Questions = () => {
       const limit = parseInt(searchParams.get("limit") || "10", 10);
       const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-      const [actualCategory, setActualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
-      const [actualCategoryString, setActualCategoryString] = useState(searchParams.get("category") || categoryList.at(categoryList.length-1) ||"supercategory");
+      const [actualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
+      const [actualCategoryString] = useState(searchParams.get("category") || categoryList.at(categoryList.length-1) || "supercategory");
       const [categoryPath , setCategoryPath] = useState([]);
-
-      const [allCategories, setAllCategories] = useState([]);
 
       const currentPage = parseInt(page || "1", 10);
 
       const [questionFilter, setQuestionFilter] = useState("Active");
 
       useEffect(() => {
-    setPage(parseInt(searchParams.get("page") || "1", 10));
-}, [searchParams]);
+        setPage(parseInt(searchParams.get("page") || "1", 10));
+        }, [searchParams]);
 
       useEffect(() => {
     if (categoryPath.length > 0) {
@@ -65,17 +63,6 @@ const Questions = () => {
             setCategoryPath(response.data);
 
       }catch (error){
-
-      }finally {
-          setLoading(false);
-      }
-  }
-
-  const fetchAllCategory = async () => {
-      try{
-          const response = await axios.get('http://127.0.0.1:5000/api/categories');
-          setAllCategories(response.data);
-      }catch(error){
 
       }finally {
           setLoading(false);
@@ -111,34 +98,40 @@ const Questions = () => {
 
     useEffect(() => {
         setLoading(true);
-        fetchQuestions(limit);
-  }, [limit, offset, page, authorFilter]);
-
-  useEffect(() => {
-        setLoading(true);
-        fetchQuestions(limit);
-        setCategoryPath([]);
-        setPage(1);
-        fetchCategory(actualCategory);
-        fetchAllCategory();
-  }, [actualCategory]);
-
-  useEffect(() => {
-    fetchAllTeachers();
-}, []);
-
+        const fetchQuestionsOnUrlChange = async () => {
+            setLoading(true);
+            await fetchQuestions(limit);
+            setLoading(false);
+        };
+        fetchQuestionsOnUrlChange().then(() => {});
+        }, [page, authorFilter, sort, filterType, questionFilter]);
 
     useEffect(() => {
         setLoading(true);
-        fetchQuestions(limit, offset, sort);
-    }, [sort, filterType, questionFilter]);
+        const fetchQuestionsOnUrlChange = async () => {
+            setLoading(true);
+            await fetchQuestions(limit);
+            setLoading(false);
+        };
+        fetchQuestionsOnUrlChange().then(() => {});
+        setCategoryPath([]);
+        setPage(1);
+        fetchCategory(actualCategory).then(() => {});
+
+    }, [actualCategory]);
+
+
+    useEffect(() => {
+        fetchAllTeachers().then(() => {});
+    }, []);
+
 
 
   const numberOfPages = Math.ceil(numberOfQuestions / limit);
   const pageNumbers = [];
 
-  if (numberOfPages > 1 && parseInt(page) <= numberOfPages){
-      const pageNum = parseInt(page);
+  if (numberOfPages > 1 && page <= numberOfPages){
+      const pageNum = page;
 
       if (!pageNumbers.includes(pageNum-1) && pageNum-1 >1){
         pageNumbers.push(pageNum-1);
@@ -208,7 +201,7 @@ const Questions = () => {
           "delete" : true,
       }
         await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
-            .then(response => {
+            .then(() => {
                     window.location.reload();
                     })
                     .catch(error => {
@@ -224,7 +217,7 @@ const Questions = () => {
           "delete" : false
       }
         await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
-            .then(response => {
+            .then(() => {
                     window.location.reload();
                     })
                     .catch(error => {
@@ -265,6 +258,7 @@ const Questions = () => {
                                             {
                                                 showQuestionsFilter.map((name, index) => (
                                                     <li key={index}>
+                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                         <a className="dropdown-item fs-6" href=""
                                                            onClick={(e) => {
                                                                e.preventDefault();
@@ -294,6 +288,7 @@ const Questions = () => {
                                             {
                                                 teachers.map((teacher, index) => (
                                                     <li key={index}>
+                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                         <a className="dropdown-item fs-6" href=""
                                                            onClick={(e) => {
                                                                e.preventDefault();
@@ -328,6 +323,7 @@ const Questions = () => {
                                             {
                                                 filterTypes.map((name, index) => (
                                                     <li key={index}>
+                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                         <a className="dropdown-item fs-6" href=""
                                                            onClick={(e) => {
                                                                e.preventDefault();
@@ -361,6 +357,7 @@ const Questions = () => {
                                             {
                                                 sortTable.map((name, index) => (
                                                     <li key={index}>
+                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                         <a className="dropdown-item fs-6" href=""
                                                            onClick={(e) => {
                                                                e.preventDefault();
@@ -384,7 +381,7 @@ const Questions = () => {
                                         </ul>
                                     </div>
 
-                                    <button type="button" className="btn btn-success me-1" onClick={(e) => {
+                                    <button type="button" className="btn btn-success me-1" onClick={() => {
                                         navigate(`/question/new-question`, {
                                             state: {
                                                 catPath: category,
@@ -403,7 +400,7 @@ const Questions = () => {
                                     >Add question
                                     </button>
 
-                                    <button type="button" className="btn btn-success" onClick={(e) => {
+                                    <button type="button" className="btn btn-success" onClick={() => {
                                         navigate(`/category/new-category`, {
                                             state: {
                                                 catPath: category,
@@ -432,6 +429,7 @@ const Questions = () => {
                                                     <div
                                                         className="d-flex justify-content-between align-items-center w-100">
                                                         <h2 className="h5 text-start text-truncate">
+                                                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                             <a href="" onClick={(e) => {
                                                                 e.preventDefault();
                                                                 navigate(`/question/${question.id}`, {
@@ -463,7 +461,7 @@ const Questions = () => {
                                                               <button className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                          handleQuestionDelete(question.id);
+                                                                          handleQuestionDelete(question.id).then(() => {});
                                                                         }
                                                                       }}>
                                                                 Archive
@@ -474,7 +472,7 @@ const Questions = () => {
                                                               <button className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to restore this question?")) {
-                                                                          handleQuestionRestore(question.id);
+                                                                          handleQuestionRestore(question.id).then(() => {});
                                                                         }
                                                                       }}>
                                                                 Restore
@@ -486,7 +484,7 @@ const Questions = () => {
                                                                 className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
                                                                 onClick={() => {
                                                                     if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                        handleQuestionDelete(question.id);
+                                                                        handleQuestionDelete(question.id).then(() => {});
                                                                     }
                                                                 }}>
                                                                 Archive
@@ -499,7 +497,7 @@ const Questions = () => {
                                                                 className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
                                                                 onClick={() => {
                                                                     if (window.confirm("Are you sure you want to restore this question?")) {
-                                                                        handleQuestionRestore(question.id);
+                                                                        handleQuestionRestore(question.id).then(() => {});
                                                                     }
                                                                 }}>
                                                                 Restore
