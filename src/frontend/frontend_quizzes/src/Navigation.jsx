@@ -27,7 +27,7 @@ const Navigation = () =>{
   };
 
     useEffect(() => {
-    getUserData();
+    getUserData().then(() => {});
   }, []);
 
     return (

@@ -219,7 +219,8 @@ class QuizTemplate(db.Model):
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')
-    quiz_template_section = db.relationship('QuizTemplateSection', back_populates='quiz_template', cascade="all, delete")
+    quiz_template_section = db.relationship('QuizTemplateSection', back_populates='quiz_template',
+                                            cascade="all, delete")
 
 
 class QuizTemplateSection(db.Model):
@@ -233,10 +234,13 @@ class QuizTemplateSection(db.Model):
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     quiz_template = db.relationship('QuizTemplate', back_populates='quiz_template_section')
 
-    quiz_template_section_items = db.relationship('QuizTemplateItem', back_populates='item_section', cascade="all, delete")
+    quiz_template_section_items = db.relationship('QuizTemplateItem', back_populates='item_section',
+                                                  cascade="all, delete")
 
 
-# bud otazka alebo kategoria+pocet alebo -> QuizTemplateSection (title, description, quizTemplateItem - viacej, hodnotenie)
+# bud otazka alebo kategoria+pocet alebo -> QuizTemplateSection (title, description, quizTemplateItem - viacej,
+# hodnotenie)
+
 class QuizTemplateItem(db.Model):
     # nevie priamo o kvize, namiesto quiz_template ma quiz_template_section - je sucastou sekcie
     __tablename__ = 'quiz_template_items'
@@ -248,12 +252,12 @@ class QuizTemplateItem(db.Model):
     evaluate = db.Column(db.Integer, default=0)
     question_type = db.Column(db.String)
 
+    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
+    item_section_id = db.Column(db.Integer, db.ForeignKey('quiz_template_section.id'))
+
     category = db.relationship('Category', back_populates='quiz_template_items')
     question = db.relationship('Question')
 
-    quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
-
-    item_section_id = db.Column(db.Integer, db.ForeignKey('quiz_template_section.id'))
     item_section = db.relationship('QuizTemplateSection', back_populates='quiz_template_section_items')
 
 
@@ -266,8 +270,21 @@ class Quiz(db.Model):
     date_time_correction_finished = db.Column(db.DateTime)
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
+    # quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
+
     quiz_template = db.relationship('QuizTemplate')
-    quiz_items = db.relationship('QuizItem', back_populates='quiz')
+    quiz_sections = db.relationship('QuizSection', back_populates='quiz')
+
+
+class QuizSection(db.Model):
+    __tablename__ = 'quiz_sections'
+    id = db.Column(db.Integer, primary_key=True)
+    order = db.Column(db.ARRAY(db.Integer))
+    #quiz_item_id = db.Column(db.Integer, db.ForeignKey('quiz_items.id'))
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
+
+    quiz_items = db.relationship('QuizItem', back_populates='items')
+    quiz = db.relationship("Quiz", back_populates='quiz_sections')
 
 
 # vytvorit quizSection - pamata si finalne poradie - vzdy to bude uz v takomto poradi ako tu urci poradie
@@ -276,8 +293,14 @@ class QuizItem(db.Model):
     # quizItem spojene s quizTemplateItem
     __tablename__ = 'quiz_items'
     id = db.Column(db.Integer, primary_key=True)
+    order = db.Column(db.ARRAY(db.Integer))
     answer = db.Column(db.Text)  # Text - ako json, podla typu otazky
-    score = db.Column(db.Float)  # Decimal
+    score = db.Column(db.DECIMAL(10, 2))  # Decimal
+
+    students_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
+    teachers_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
+
+    quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
 
     # komentar - defaultne null ku otazke - studentske komentare
     # najviac jeden komentar - odkaz na komentar
@@ -286,7 +309,7 @@ class QuizItem(db.Model):
 
     # ucitelsky komentar ku otazke - ako teachers_comment , komentar ucitela k odpovedi
 
-    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
-    quiz = db.relationship('Quiz', back_populates='quiz_items')
+    items = db.relationship("QuizSection")
+
     question_version_id = db.Column(db.Integer, db.ForeignKey('question_versions.id'))
     question_version = db.relationship('QuestionVersion')

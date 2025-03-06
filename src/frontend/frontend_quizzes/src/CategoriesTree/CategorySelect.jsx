@@ -2,17 +2,9 @@ import React from "react";
 import "./CategoryLink.css"
 
 const CategorySelect = ({ category, catPath,  level = 0 }) => {
-    const includesP = () => {
-        for (let i =0; i < catPath.length; i++){
-            if (catPath[i][1] === category.id){
-                return true;
-            }
-        }
-        return false;
-    }
-
-  return (
+    return (
     <div>
+        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
       <a href = "" className="text-decoration-none category-link"
          key={category.title}
 

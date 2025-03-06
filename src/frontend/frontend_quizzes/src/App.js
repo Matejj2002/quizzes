@@ -9,6 +9,7 @@ import Login from "./Login";
 import QuestionCopy from "./QuestionCopy";
 import NewQuiz from "./Quizzes/NewQuiz";
 import Quiz from "./Quizzes/Quiz";
+import GeneratedQuiz from "./Quizzes/GeneratedQuiz";
 
 const Home = () => <h1>Domovska stranka</h1>;
 
@@ -27,6 +28,7 @@ function App() {
                   <Route path="/category/new-category" element={<NewCategory />} />
                   <Route path="/new-quiz" element={<NewQuiz />} />
                   <Route path="/quizzes" element={<Quiz />} />
+                  <Route path="/generated-quiz" element={<GeneratedQuiz />} />
               </Routes>
       </div>
   );

@@ -11,7 +11,7 @@ const Categories = ({catPath, type= "SubCat"}) => {
       setCategories(data);
     };
 
-    fetchTreeData();
+    fetchTreeData().then(() => {});
   }, []);
 
   return (

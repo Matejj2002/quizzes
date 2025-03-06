@@ -7,10 +7,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import {useLocation} from "react-router-dom";
 
-const formatDateTimeLocal = (rfcDate) => {
-    if (!rfcDate) return "";
+const formatDate = (actDate) => {
+    if (!actDate) return "";
 
-    const date = new Date(rfcDate);
+    const date = new Date(actDate);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
@@ -30,10 +30,10 @@ const NewQuiz = () => {
     const [quizTitle, setQuizTitle] = useState(location.state?.title ?? "");
     const [numberOfCorrections, setNumberOfCorrections] = useState(location.state?.numberOfCorrections || 0);
     const [minutesToFinish, setMinutesToFinish] = useState(location.state?.minutesToFinish || 1);
-    const [dateOpen, setDateOpen] = useState(formatDateTimeLocal(location.state?.dateOpen) || "");
-    const [dateClose, setDateClose] = useState(formatDateTimeLocal(location.state?.dateClose) || "");
-    const [dateCheck, setDateCheck] = useState(formatDateTimeLocal(location.state?.dateCheck) || "");
-    const [shuffleSections, setShuffleSections] = useState(location.state?.shuffleSections || false);
+    const [dateOpen, setDateOpen] = useState(formatDate(location.state?.dateOpen) || "");
+    const [dateClose, setDateClose] = useState(formatDate(location.state?.dateClose) || "");
+    const [dateCheck, setDateCheck] = useState(formatDate(location.state?.dateCheck) || "");
+    const [shuffleSections, setShuffleSections] = useState(Boolean(location.state?.shuffleSections) || false);
     const [checkSubmit, setCheckSubmit] = useState("");
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
@@ -50,7 +50,7 @@ const NewQuiz = () => {
 
     const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "option1");
 
-    const toggleShuffle = () => {
+    const updateShuffle = () => {
         setSections((prevSections) => {
             const updatedSections = [...prevSections];
             updatedSections[pageNum - 2] = {
@@ -179,6 +179,7 @@ const NewQuiz = () => {
                     if (direction === "up" && itemIndex > 0) {
                         [updatedQuestions[itemIndex], updatedQuestions[itemIndex - 1]] =
                             [updatedQuestions[itemIndex - 1], updatedQuestions[itemIndex]];
+
                     } else if (direction === "down" && itemIndex < updatedQuestions.length - 1) {
                         [updatedQuestions[itemIndex], updatedQuestions[itemIndex + 1]] =
                             [updatedQuestions[itemIndex + 1], updatedQuestions[itemIndex]];
@@ -278,10 +279,7 @@ const NewQuiz = () => {
           setPageNum(pageNum-1);
         };
 
-    console.log(sections);
-
-    if (localStorage.getItem("accessToken")) {
-        return (
+    return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation></Navigation>
@@ -344,7 +342,7 @@ const NewQuiz = () => {
                                                 event.preventDefault();
                                                 setPageCount(pageCount + 1);
                                                 addPage(pageCount);
-                                                event.target.classList.remove("active");
+                                                event.target["classList"].remove("active");
                                             }}
                                     >+
                                     </button>
@@ -509,7 +507,7 @@ const NewQuiz = () => {
                                         />
                                         <div className="form-check">
                                         <input className="form-check-input" type="checkbox" value=""
-                                                   checked={sections[pageNum - 2]?.shuffle} onChange={toggleShuffle}
+                                                   checked={sections[pageNum - 2]?.shuffle} onChange={updateShuffle}
                                                    id="shuffleSection"/>
                                             <label className="form-check-label" htmlFor="shuffleSection">
                                                 Shuffle
@@ -742,14 +740,11 @@ const NewQuiz = () => {
                     </div>
                 </div>
             </div>
-        );
-    } else {
-        return (
-            <div>
-                <Login path={"/new-quiz"}></Login>
-            </div>
-        );
-    }
+        ) : (
+        <div>
+            <Login path={"/new-quiz"}></Login>
+        </div>
+    )
 }
 
 export default NewQuiz;

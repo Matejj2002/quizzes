@@ -24,7 +24,7 @@ const Login = ({path = "/questions/1"}) =>{
                     });
             }
 
-            getAccessToken();
+            getAccessToken().then(() => {});
         }
 
     }, [])

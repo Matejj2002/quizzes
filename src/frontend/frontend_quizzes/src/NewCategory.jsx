@@ -26,7 +26,7 @@ const NewCategory = () => {
 
     const [categorySelect, setCategorySelect] = useState([]);
 
-    const [loading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [category, setCategory] = useState([]);
     const [title, setTitle] = useState('');
     const [slug, setSlug] = useState("");
@@ -82,7 +82,7 @@ const NewCategory = () => {
 
         if (canSave) {
             axios.put(`http://127.0.0.1:5000/api/categories/new-category`, data)
-                .then(response => {
+                .then(() => {
                         navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${id}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                     }
                 )
@@ -114,14 +114,13 @@ const NewCategory = () => {
 
   useEffect(() => {
         setLoading(true);
-        fetchCategory();
-        fetchCategorySelect();
+        fetchCategory().then(() => {});
+        fetchCategorySelect().then(() => {});
     }, []);
     console.log(selectedCategoryId);
     console.log(selectedCategory);
 
-  if (localStorage.getItem("accessToken")) {
-      return (
+      return localStorage.getItem("accessToken") ? (
           <div>
               <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                   <Navigation></Navigation>
@@ -146,7 +145,7 @@ const NewCategory = () => {
                               <select
                                   id="select-category"
                                   className="form-select"
-                                  value={selectedCategoryId || "0"}
+                                  value={selectedCategoryId.toString() || "0"}
                                   onChange={(e) => {
 
                                       const selectedOption = categorySelect.find(
@@ -202,14 +201,11 @@ const NewCategory = () => {
                   </div>
               </div>
           </div>
+      ) : (
+          <div>
+              <Login></Login>
+          </div>
       )
-  }else{
-        return (
-            <div>
-                <Login></Login>
-            </div>
-        )
-    }
 }
 
 export default NewCategory;

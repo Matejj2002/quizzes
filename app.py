@@ -7,6 +7,7 @@ from src.backend.api_functions import *
 from flask_session import Session
 import requests
 from dotenv import load_dotenv
+from config import *
 import os
 
 load_dotenv()
@@ -19,7 +20,6 @@ CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/quizzes"
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizzes.db'
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = not app.debug
@@ -86,7 +86,6 @@ def get_access_token():
     headers = {'Accept': 'application/json'}
     response = requests.post(url, params=params, headers=headers)
 
-    print(response.json())
     if response.ok:
         return jsonify(response.json())
     else:
@@ -130,12 +129,11 @@ def get_questions():
     author_filter = request.args.get("authorFilterDec", default="", type=str)
     question_filter = request.args.get("questionFilter", default="Active", type=str)
 
-    cond = False
+    cond = True
     if question_filter == "All":
         cond = True
     if question_filter == "Archived":
         cond = True
-
     if question_filter == "Active":
         cond = False
 
@@ -147,6 +145,7 @@ def get_questions():
 
     if filters == "Multiple Choice Question":
         filters = "multiple_answer_question"
+
     if filters == ['']:
         change_fil = True
     else:
@@ -159,21 +158,23 @@ def get_questions():
         counter = 0
         for question in questions:
             if question_filter == "Active" or question_filter == "Archived":
-                condition = (question['is_deleted'] == cond or question[
-                    'is_deleted'] == None)  # musi byt, lebo na zaciatku tam nebol tento flag
+                condition = question['is_deleted'] == cond
             else:
                 condition = True
 
             if condition and (question['versions']['type'] in filters or filters == '') and (
-                    author_filter == 'All' or author_filter == "" or question['versions'][
-                'author_name'] == author_filter):
+                    author_filter == 'All' or author_filter == ""
+                    or question['versions']['author_name'] == author_filter):
+
                 counter += 1
 
                 if question['versions']['text'] is not None:
                     pass
                 else:
                     question['versions']['text'] = ""
+
                 versions = question['versions']
+
                 question_dict = {
                     'id': question['id'],
                     "category_id": question['category_id'],
@@ -219,7 +220,7 @@ def get_questions():
         return jsonify(all_questions), 200
 
     except Exception as e:
-        return jsonify({}), 404
+        return jsonify({"error": e}), 404
 
 
 @app.route('/api/teachers', methods=['GET'])
@@ -600,40 +601,7 @@ def get_questions_from_category(index):
     subcat = request.args.get('includeSubCat')
     question_type = int(request.args.get("typeQuestionSelected"))
 
-    type_sel = []
-    if question_type == 1:
-        type_sel = ["short_answer_question", "matching_answer_question", "multiple_answer_question"]
-    if question_type == 2:
-        type_sel = ["matching_answer_question"]
-    if question_type == 3:
-        type_sel = ["short_answer_question"]
-    if question_type == 4:
-        type_sel = ["multiple_answer_question"]
-
-    questions = []
-    if subcat == 'true':
-        cats = list_subcategories(Category.query.get_or_404(index))
-        for i in cats:
-            pom_questions = Question.query.filter_by(category_id=i['id']).all()
-            questions.extend(pom_questions)
-
-    questions.extend(Question.query.filter_by(category_id=index).all())
-
-    questions_versions = []
-    for i in questions:
-        latest_version = max(i.question_version, key=lambda v: v.dateCreated)
-
-        if latest_version.type in type_sel and (not i.is_deleted or i.is_deleted is None):
-            author = Teacher.query.get_or_404(latest_version.author_id).name
-            version = {
-                "id": i.id,
-                "title": latest_version.title,
-                "text": latest_version.text,
-                "type": latest_version.type,
-                "dateCreated": latest_version.dateCreated,
-                "authorName": author
-            }
-            questions_versions.append(version)
+    questions_versions = get_questions_from_category_helper(subcat, question_type, index)
 
     return {"questions": questions_versions}
 
@@ -716,40 +684,139 @@ def archive_quiz():
     return {}
 
 
-@app.route("/api/update-quiz-template", methods=["PUT"])
-def update_quiz_template():
+@app.route("/api/new-quiz-template-check", methods=["POST"])
+def check_new_quiz_template():
     data = request.get_json()
-    # quiz_template_id = data["quizId"]
-    #
-    # quiz_template = QuizTemplate.query.filter_by(id=quiz_template_id).first()
-    # quiz_template.title = data["quizTitle"]
-    # quiz_template.shuffle_sections = data["shuffleSections"]
-    # quiz_template.correction_of_attempts = data["typeOfAttempts"]
-    # quiz_template.number_of_corrections = data["numberOfCorrections"]
-    # quiz_template.date_time_open = data["dateOpen"]
-    # quiz_template.date_time_close = data["dateClose"]
-    # quiz_template.time_to_finish = data["minutesToFinish"]
-    # quiz_template.datetime_check = data["dateCheck"]
-    #
-    # db.session.commit()
+    questions_ids = []
+    random_questions = []
+    random_questions_dict = {}
 
-    quiz_template = QuizTemplate.query.all()
+    for section in data:
+        for question in section["questions"]:
+            if question["questionType"] == "questions":
+                questions_ids.append(question["id"])
+            else:
+                random_questions.append(question)
 
-    for quiz in quiz_template:
-        db.session.delete(quiz)
-        db.session.commit()
+                cat_name = ""
+                if question["includeSubCategories"]:
+                    cat_name = " with Subcategories"
+
+                if question["categoryName"] + cat_name in random_questions_dict:
+                    random_questions_dict[question["categoryName"] + cat_name] += 1
+                else:
+                    random_questions_dict[question["categoryName"] + cat_name] = 1
+
+    random_questions_ids = []
+    for rand_question in random_questions:
+        question_type = 0
+
+        if rand_question["questionAnswerType"] == "All":
+            question_type = 1
+        if rand_question["questionAnswerType"] == "Matching Question":
+            question_type = 2
+        if rand_question["questionAnswerType"] == "Short Question":
+            question_type = 3
+        if rand_question["questionAnswerType"] == "Multiple Choice":
+            question_type = 4
+
+        if rand_question["includeSubCategories"]:
+            include_sub_cats = "true"
+        else:
+            include_sub_cats = "false"
+
+        questions_to_select = get_questions_from_category_helper(include_sub_cats, question_type,
+                                                                 rand_question["categoryId"])
+
+        if rand_question["includeSubCategories"]:
+            name = rand_question["categoryName"] + " with Subcategories"
+        else:
+            name = rand_question["categoryName"]
+
+        if random_questions_dict[name] > len(questions_to_select):
+            return {"message": False,
+                    "error": f"category {name} doesnt have enought questions. Needed: {random_questions_dict[name]} but has only {len(questions_to_select)} questions"}
+
+        questions_random_ids = [i["id"] for i in questions_to_select]
+
+        from random import shuffle
+
+        for question_id in questions_ids:
+            if question_id in questions_random_ids:
+                questions_random_ids.remove(question_id)
+
+        shuffle(questions_random_ids)
+        random_questions_ids.append(questions_random_ids)
+
+    def backtrack(index, selected, used, lists, results):
+        if index == len(lists):
+            results.append(selected[:])
+            return True
+
+        for num in lists[index]:
+            if num not in used:
+                selected.append(num)
+                used.add(num)
+
+                if backtrack(index + 1, selected, used, lists, results):
+                    return True
+
+                selected.pop()
+                used.remove(num)
+
+        return False
+
+    result = []
+    backtrack(0, [], set(), random_questions_ids, result)
+
+    if len(result) == 0:
+        return {"message": False, "error": "Quiz cannot be generated"}
+    else:
+        return {"message": True, "result": result}
 
 
+@app.route("/api/questions-quiz/<int:index>", methods=["GET"])
+def get_questions_quiz(index):
+    question = Question.query.get_or_404(index)
+
+    newest_version = None
+    for i in question.question_version:
+        if newest_version is None:
+            newest_version = i
+        elif i.dateCreated > newest_version.dateCreated:
+            newest_version = i
+
+    answers = []
+    if newest_version.type == "matching_answer_question":
+        for matching_pair in newest_version.matching_question:
+            answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide})
 
 
-    return {}
+    if newest_version.type == "multiple_answer_question":
+        for choice in newest_version.multiple_answers:
+            answers.append(
+                {
+                    "text": choice.text,
+                    "isSingle": choice.is_single
+                }
+        )
+
+
+    return {
+        "id": newest_version.id,
+        "question_id": newest_version.question_id,
+        "title": newest_version.title,
+        "text": newest_version.text,
+        "type": newest_version.type,
+        "answers": answers
+    }
 
 
 @app.route("/api/new-quiz-template", methods=["PUT"])
 def create_new_quiz_template():
     data = request.get_json()
-    print(data)
-    if data["quizId"] !=0:
+
+    if data["quizId"] != 0:
         quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
         db.session.delete(quiz_template)
         db.session.commit()
@@ -786,10 +853,8 @@ def create_new_quiz_template():
         quiz_template_items = []
         for question in section["questions"]:
             if question["questionType"] == "questions":
-                print(question)
-                original_question = QuestionVersion.query.filter_by(question_id=question["id"]).first()
                 question_item = QuizTemplateItem(
-                    question_id=original_question.question_id,
+                    question_id=question["id"],
                     evaluate=question["evaluation"],
                     item_section_id=section_added.id
                 )
@@ -833,10 +898,6 @@ def create_new_quiz_template():
 
 if __name__ == '__main__':
     with app.app_context():
-        import sys
-
-        # sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.venv/Lib//site-packages'))
-
         # print('AA')
         # db.create_all()
         # print('Database created and tables initialized!')

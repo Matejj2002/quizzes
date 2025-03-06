@@ -193,7 +193,7 @@ const QuestionModal = ({
                                    name="randomOrSelectQuestions"
                                    id="exampleRadios1" value="option1"
                                    checked={addedQuestions.type === "random"}
-                                   onChange={(e) => {
+                                   onChange={() => {
                                        setAddedQuestions((prevState) => ({
                                            ...prevState,
                                            type: "random"
@@ -209,7 +209,7 @@ const QuestionModal = ({
                                    name="randomOrSelectQuestions"
                                    id="exampleRadios2" value="option2"
                                    checked={addedQuestions.type === "questions"}
-                                   onChange={(e) => {
+                                   onChange={() => {
                                        setAddedQuestions((prevState) => ({
                                            ...prevState,
                                            type: "questions"
@@ -273,6 +273,7 @@ const QuestionModal = ({
                                                         </div>
                                                         <div
                                                             className="form-control bg-light d-flex align-items-center justify-content-between">
+                                                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                             <a className="text-truncate" href="#">{question.title}</a>
 
                                                             <span

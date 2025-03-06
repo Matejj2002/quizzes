@@ -81,7 +81,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             author: author
         };
         if (subButText === "Submit" || subButText === "Copy") {
-            if (questionType !== 'Question Type' && title !=="" && text !=="") {
+            if (title !=="" && text !=="") {
                 axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
                     .then(response => {
                         if (createMoreQuestions){
@@ -120,20 +120,26 @@ const NewQuestion = ({subButText="Submit"}) => {
             }else{
                 if (title === ""){
                     setCheckSubmit("Title must be provided")
-                }else if (questionType === 'Question Type') {
-                    setCheckSubmit("No type of question provided")
                 }else if (text === ""){
                     setCheckSubmit("Text must be provided")
                 }
             }
         }else{
-            axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
-            .then(response => {
-                    window.location.href = '/questions';
-            })
-            .catch(error => {
-                console.error('Error saving changes:', error);
-            });
+            if (title !=="" && text !=="") {
+                axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
+                    .then(response => {
+                        window.location.href = '/questions';
+                    })
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+            }else{
+                if (title === ""){
+                    setCheckSubmit("Title must be provided")
+                }else if (text === ""){
+                    setCheckSubmit("Text must be provided")
+                }
+            }
         }
 
     }
@@ -229,8 +235,7 @@ const NewQuestion = ({subButText="Submit"}) => {
         setAnswers(newAnswers)
     };
 
-    if (localStorage.getItem("accessToken")) {
-        return (
+        return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation></Navigation>
@@ -383,15 +388,11 @@ const NewQuestion = ({subButText="Submit"}) => {
                     </div>
                 </div>
             </div>
-        )
-
-    }else{
-        return (
+        ) : (
             <div>
                 <Login></Login>
             </div>
         )
-    }
 }
 
 export default NewQuestion

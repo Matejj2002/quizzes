@@ -108,3 +108,42 @@ def generate_category_tree(category, level=0):
             result.extend(generate_category_tree(i, level + 1))
 
     return result
+
+
+def get_questions_from_category_helper(subcat, question_type, index):
+    type_sel = []
+    if question_type == 1:
+        type_sel = ["short_answer_question", "matching_answer_question", "multiple_answer_question"]
+    if question_type == 2:
+        type_sel = ["matching_answer_question"]
+    if question_type == 3:
+        type_sel = ["short_answer_question"]
+    if question_type == 4:
+        type_sel = ["multiple_answer_question"]
+
+    questions = []
+    if subcat == 'true':
+        cats = list_subcategories(Category.query.get_or_404(index))
+        for i in cats:
+            pom_questions = Question.query.filter_by(category_id=i['id']).all()
+            questions.extend(pom_questions)
+
+    questions.extend(Question.query.filter_by(category_id=index).all())
+
+    questions_versions = []
+    for i in questions:
+        latest_version = max(i.question_version, key=lambda v: v.dateCreated)
+
+        if latest_version.type in type_sel and not i.is_deleted:
+            author = Teacher.query.get_or_404(latest_version.author_id).name
+            version = {
+                "id": i.id,  # Question.id
+                "title": latest_version.title,
+                "text": latest_version.text,
+                "type": latest_version.type,
+                "dateCreated": latest_version.dateCreated,
+                "authorName": author
+            }
+            questions_versions.append(version)
+
+    return questions_versions

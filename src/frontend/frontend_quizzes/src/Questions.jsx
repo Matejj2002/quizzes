@@ -11,74 +11,69 @@ import Login from "./Login";
 const Questions = () => {
     const { "*": category } = useParams();
 
-      const categoryList = category ? category.split("/") : [];
+    const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"];
+    const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"];
+    const showQuestionsFilter = ["Active", "Archived", "All"]
 
-      const [searchParams] = useSearchParams();
-      const navigate = useNavigate();
+    const categoryList = category ? category.split("/") : [];
 
-      const [numberOfQuestions, setNumberOfQuestions ] = useState(0);
-      const [, setLoading] = useState(true);
-      const [questions , setQuestions] = useState([]);
-      const [numberOfQuestionsFilter,setNumberOfQuestionsFilter] = useState(0);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
-      const [teachers, setTeachers] = useState([]);
-      const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "");
+    const [numberOfQuestions, setNumberOfQuestions ] = useState(0);
+    const [questions , setQuestions] = useState([]);
+    const [numberOfQuestionsFilter,setNumberOfQuestionsFilter] = useState(0);
 
-      const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
+    const [teachers, setTeachers] = useState([]);
+    const [authorFilter, setAuthorFilter] = useState(searchParams.get("author-filter") || "");
 
-      const [sort, setSort] = useState(searchParams.get("sort") || "");
+    const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
 
-      const [filterType, setFilterType] = useState(searchParams.get("filter-type") || "");
+    const [sort, setSort] = useState(searchParams.get("sort") || "");
 
-      const limit = parseInt(searchParams.get("limit") || "10", 10);
-      const offset = parseInt(searchParams.get("offset") || "0", 10);
+    const [filterType, setFilterType] = useState(searchParams.get("filter-type") || "");
 
-      const [actualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
-      const [actualCategoryString] = useState(searchParams.get("category") || categoryList.at(categoryList.length-1) || "supercategory");
-      const [categoryPath , setCategoryPath] = useState([]);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-      const currentPage = parseInt(page || "1", 10);
+    const [actualCategory] = useState(parseInt(searchParams.get("category_id") || 1));
+    const [actualCategoryString] = useState(searchParams.get("category") || categoryList.at(categoryList.length-1) || "supercategory");
+    const [categoryPath , setCategoryPath] = useState([]);
 
-      const [questionFilter, setQuestionFilter] = useState("Active");
+    const currentPage = parseInt(page || "1", 10);
 
-      useEffect(() => {
+    const [questionFilter, setQuestionFilter] = useState("Active");
+
+    useEffect(() => {
         setPage(parseInt(searchParams.get("page") || "1", 10));
         }, [searchParams]);
 
-      useEffect(() => {
-    if (categoryPath.length > 0) {
-      const catPathFull = categoryPath.map(item => item[0]).reverse().join('/');
+    useEffect(() => {
+        if (categoryPath.length > 0) {
+            const catPathFull = categoryPath.map(item => item[0]).reverse().join('/');
+            const newUrl = `/questions/${catPathFull}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`;
 
-      const newUrl = `/questions/${catPathFull}?page=${page}&limit=${limit}&offset=${offset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`;
-
-
-      navigate(newUrl, { replace: true });
-    }
-  }, [categoryPath, navigate]);
+            navigate(newUrl, { replace: true });
+            }
+        }, [categoryPath, navigate]);
 
 
-  const fetchCategory = async (index) => {
-      try{
+    const fetchCategory = async (index) => {
+        try{
             const response = await axios.get(`http://127.0.0.1:5000/api/questions/categories/get-path-to-supercategory/${index}`)
             setCategoryPath(response.data);
 
-      }catch (error){
+        }catch (error){}
+        finally {}
+    }
 
-      }finally {
-          setLoading(false);
-      }
-  }
-
-  const fetchAllTeachers = async () => {
-      try{
-          const response = await axios.get('http://127.0.0.1:5000/api/teachers');
-          setTeachers(response.data);
-      }catch(error){
-
-      }finally {
-          setLoading(false);
-      }
-  }
+    const fetchAllTeachers = async () => {
+        try{
+            const response = await axios.get('http://127.0.0.1:5000/api/teachers');
+            setTeachers(response.data);
+        }catch(error){}
+        finally {}
+    }
 
   const fetchQuestions = async (limit) => {
       try {
@@ -87,33 +82,24 @@ const Questions = () => {
             const response = await axios.get('http://127.0.0.1:5000/api/questions/' , {
             params: { limit, offset, sort, actualCategory, filterType, authorFilterDec, questionFilter },
             });
-            setNumberOfQuestions(response.data[0].number_of_all_questions);
-            setNumberOfQuestionsFilter(response.data[0].number_of_questions)
+            setNumberOfQuestions(response.data[0]["number_of_all_questions"]);
+            setNumberOfQuestionsFilter(response.data[0]["number_of_questions"])
             setQuestions(response.data[2]);
-      }catch (error){
-      }finally {
-            setLoading(false);
-      }
+
+      }catch (error){}
+      finally {}
   }
 
-    useEffect(() => {
-        setLoading(true);
-        const fetchQuestionsOnUrlChange = async () => {
-            setLoading(true);
+    const fetchQuestionsChange = async () => {
             await fetchQuestions(limit);
-            setLoading(false);
-        };
-        fetchQuestionsOnUrlChange().then(() => {});
+    };
+
+    useEffect(() => {
+        fetchQuestionsChange().then(() => {});
         }, [page, authorFilter, sort, filterType, questionFilter]);
 
     useEffect(() => {
-        setLoading(true);
-        const fetchQuestionsOnUrlChange = async () => {
-            setLoading(true);
-            await fetchQuestions(limit);
-            setLoading(false);
-        };
-        fetchQuestionsOnUrlChange().then(() => {});
+        fetchQuestionsChange().then(() => {});
         setCategoryPath([]);
         setPage(1);
         fetchCategory(actualCategory).then(() => {});
@@ -125,80 +111,40 @@ const Questions = () => {
         fetchAllTeachers().then(() => {});
     }, []);
 
-
-
-  const numberOfPages = Math.ceil(numberOfQuestions / limit);
-  const pageNumbers = [];
-
-  if (numberOfPages > 1 && page <= numberOfPages){
-      const pageNum = page;
-
-      if (!pageNumbers.includes(pageNum-1) && pageNum-1 >1){
-        pageNumbers.push(pageNum-1);
-      }
-
-      if (!pageNumbers.includes(pageNum) && pageNum > 1 && pageNum< numberOfPages){
-        pageNumbers.push(pageNum);
-      }
-
-      if (!pageNumbers.includes(pageNum+1) && pageNum+1 < numberOfPages){
-        pageNumbers.push(pageNum+1);
-      }
-
-  }
-
   const handlePageChange = (selectedPage) => {
         const newOffset = selectedPage.selected * limit;
 
         navigate(`/questions/${category}?page=${selectedPage.selected + 1}&limit=${limit}&offset=${newOffset}&category=${actualCategoryString}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
     };
 
-  const authorFilterShow = () =>{
-      if (authorFilter === ""){
-          return "Author"
+  const filtersShow = (name, typeFilter) => {
+      if (typeFilter === ""){
+          return name;
       }
 
-      return "Author: " + authorFilter
+      return name + ": " + typeFilter
+
   }
 
-  const typeFilterShow = () =>{
-      if (filterType === ""){
-          return "Type"
+  const showQuestionsErr = () => {
+      let errorMessage = "";
+      if (numberOfQuestions === 0) {
+          errorMessage = "No questions in this category";
+      }
+      if (numberOfQuestionsFilter === 0) {
+          errorMessage = "No questions with those filters"
       }
 
-      return "Type: " + filterType;
+      return errorMessage !== "" && (
+          <div className="alert alert-danger" role="alert">
+              {errorMessage}
+          </div>
+      )
   }
-
-  const sortFilterShow = () =>{
-      if (sort === ""){
-          return "Sort"
-      }
-
-      return "Sort: " + sort;
-  }
-
-  const showQuestionsErr = () =>{
-        if (numberOfQuestions === 0){
-            return (
-                <div className="alert alert-danger" role="alert">
-                    No questions in this category
-                </div>
-            )
-        }
-
-        if (numberOfQuestionsFilter === 0){
-             return (
-                <div className="alert alert-danger" role="alert">
-                    No questions with those filters
-                </div>
-            )
-        }
-  }
-
-  const handleQuestionDelete = async (questionId) =>{
+  const handleQuestionDeleteRestore = async (questionId, delRes, text) =>{
       const data = {
           "id" : questionId,
-          "delete" : true,
+          "delete" : delRes,
       }
         await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
             .then(() => {
@@ -208,31 +154,10 @@ const Questions = () => {
                         console.error('Error saving changes:', error);
                     });
 
-    alert("The question has been marked as deleted.");
+            alert(text);
     }
 
-    const handleQuestionRestore = async (questionId) =>{
-      const data = {
-          "id" : questionId,
-          "delete" : false
-      }
-        await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
-            .then(() => {
-                    window.location.reload();
-                    })
-                    .catch(error => {
-                        console.error('Error saving changes:', error);
-                    });
-
-    alert("The question has been marked as deleted.");
-    }
-
-    const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"];
-    const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"];
-    const showQuestionsFilter = ["Active", "Archived", "All"]
-
-    if (localStorage.getItem("accessToken")) {
-        return (
+    return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation></Navigation>
@@ -281,7 +206,7 @@ const Questions = () => {
                                     <div className="dropdown">
                                         <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {authorFilterShow()}
+                                            {filtersShow("Author", authorFilter)}
                                         </button>
                                         <ul className="dropdown-menu dropdown-menu-end">
                                             <span className="d-flex justify-content-center fw-bold mb-2">Author</span>
@@ -316,7 +241,7 @@ const Questions = () => {
                                     <div className="dropdown">
                                         <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {typeFilterShow()}
+                                            {filtersShow("Type", filterType)}
                                         </button>
                                         <ul className="dropdown-menu dropdown-menu-end">
                                             <span className="d-flex justify-content-center fw-bold mb-2">Type</span>
@@ -351,7 +276,7 @@ const Questions = () => {
                                     <div className="dropdown">
                                         <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {sortFilterShow()}
+                                            {filtersShow("Sort", sort)}
                                         </button>
                                         <ul className="dropdown-menu dropdown-menu-end">
                                             {
@@ -461,7 +386,7 @@ const Questions = () => {
                                                               <button className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                          handleQuestionDelete(question.id).then(() => {});
+                                                                          handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
                                                                         }
                                                                       }}>
                                                                 Archive
@@ -472,19 +397,19 @@ const Questions = () => {
                                                               <button className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
                                                                       onClick={() => {
                                                                         if (window.confirm("Are you sure you want to restore this question?")) {
-                                                                          handleQuestionRestore(question.id).then(() => {});
+                                                                          handleQuestionDeleteRestore(question.id, false, "Question has been marked as active").then(() => {});
                                                                         }
                                                                       }}>
                                                                 Restore
                                                               </button>
                                                             )}
 
-                                                        {(questionFilter === "All" && question.is_deleted === false) && (
+                                                        {(questionFilter === "All" && !question["is_deleted"]) && (
                                                             <button
                                                                 className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
                                                                 onClick={() => {
                                                                     if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                        handleQuestionDelete(question.id).then(() => {});
+                                                                        handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
                                                                     }
                                                                 }}>
                                                                 Archive
@@ -492,12 +417,12 @@ const Questions = () => {
                                                         )
                                                         }
 
-                                                        {(questionFilter === "All" && question.is_deleted === true) && (
+                                                        {(questionFilter === "All" && question["is_deleted"]) && (
                                                             <button
                                                                 className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
                                                                 onClick={() => {
                                                                     if (window.confirm("Are you sure you want to restore this question?")) {
-                                                                        handleQuestionRestore(question.id).then(() => {});
+                                                                        handleQuestionDeleteRestore(question.id, false, "Question has been marked as active").then(() => {});
                                                                     }
                                                                 }}>
                                                                 Restore
@@ -568,15 +493,11 @@ const Questions = () => {
 
                 </div>
             </div>
-        );
-    }else{
-        return (
-            <div>
-                <Login></Login>
-            </div>
-        )
-    }
-
+        ) : (
+        <div>
+            <Login></Login>
+        </div>
+    )
 }
 
 export default Questions;
