@@ -1,6 +1,9 @@
 import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { Toast } from "bootstrap";
 
 const GeneratedQuiz = () => {
     const location = useLocation();
@@ -64,10 +67,26 @@ const GeneratedQuiz = () => {
                 setLoading(false);
                 setQuiz({ ...quiz });
 
-                console.log(quiz);
             });
         }
     }, [randomQuestions]);
+
+
+    const handleSaveQuiz = () => {
+        const updatedData = {
+            "quiz": quiz,
+            "questions": questionsData
+        }
+        axios.put(`http://127.0.0.1:5000/api/new-quiz-student`, updatedData)
+                    .then(
+                        () => {
+                            window.location.href = '/quizzes';
+                        }
+                    )
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                    });
+    }
 
 
     if (loading) {
@@ -84,6 +103,8 @@ const GeneratedQuiz = () => {
 
             {quiz.sections[page]?.questions.map((question, index) => (
                 <div className="border p-3 mb-3 mt-3" key={index}>
+                    <h2>{questionsData[question.id]?.title}</h2>
+                    <p>{questionsData[question.id]?.text}</p>
 
                     {questionsData[question.id]?.type === "matching_answer_question" && (
                         <div>
@@ -102,7 +123,7 @@ const GeneratedQuiz = () => {
                             <p><strong>Multiple answer question</strong></p>
                             {questionsData[question.id].answers.map((ans, idx) => (
                                 <div className="form-check" key={idx}>
-                                    <input className="form-check-input" type="checkbox" />
+                                    <input className="form-check-input" type="checkbox"/>
                                     <label className="form-check-label">{ans.text}</label>
                                 </div>
                             ))}
@@ -112,19 +133,26 @@ const GeneratedQuiz = () => {
                     {questionsData[question.id]?.type === "short_answer_question" && (
                         <div>
                             <p><strong>Short answer question</strong></p>
-                            <input type="text" className="form-control mt-3" placeholder="Answer" />
+                            <input type="text" className="form-control mt-3" placeholder="Answer"/>
                         </div>
                     )}
                 </div>
             ))}
 
+            <button type="button" className="btn btn-success"
+                    onClick={handleSaveQuiz}
+                >
+                Save
+            </button>
+            <br></br>
+
             <button type="button" className="btn btn-primary" disabled={page === 0}
-                onClick={() => setPage((prev) => prev - 1)}>
+                    onClick={() => setPage((prev) => prev - 1)}>
                 Previous Page
             </button>
 
             <button type="button" className="btn btn-primary" disabled={page + 1 >= quiz.sections.length}
-                onClick={() => setPage((prev) => prev + 1)}>
+                    onClick={() => setPage((prev) => prev + 1)}>
                 Next Page
             </button>
         </div>
