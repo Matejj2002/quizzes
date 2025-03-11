@@ -8,6 +8,7 @@ import Categories from "./CategoriesTree/Categories";
 import ReactPaginate from "react-paginate";
 import Login from "./Login";
 
+
 const Questions = () => {
     const { "*": category } = useParams();
 
@@ -43,6 +44,9 @@ const Questions = () => {
     const currentPage = parseInt(page || "1", 10);
 
     const [questionFilter, setQuestionFilter] = useState("Active");
+
+    const questionTypesHuman = {"matching_answer_question": "Matching Question", "short_answer_question" : "Short Question", "multiple_answer_question": "Multiple Choice"};
+
 
     useEffect(() => {
         setPage(parseInt(searchParams.get("page") || "1", 10));
@@ -376,7 +380,7 @@ const Questions = () => {
                                                             </a>
                                                         </h2>
                                                         <span
-                                                            className="badge text-bg-primary rounded-pill flex-shrink-0">{question.versions.type}
+                                                            className="badge text-bg-primary rounded-pill flex-shrink-0">{questionTypesHuman[question.versions.type]}
                                                         </span>
                                                     </div>
                                                     <div

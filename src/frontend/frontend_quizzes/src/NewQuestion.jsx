@@ -373,7 +373,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 >{subButText}
                                 </button>
 
-                                <button type="button" className="btn btn-primary mb-3 mt-3"
+                                <button type="button" className="btn btn-outline-primary mb-3 mt-3"
                                         onClick={() => {
                                             navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory1}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                         }

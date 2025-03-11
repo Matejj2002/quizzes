@@ -686,7 +686,26 @@ def archive_quiz():
 
 @app.route("/api/new-quiz-template-check", methods=["POST"])
 def check_new_quiz_template():
-    data = request.get_json()
+    student_quizzes = []
+    try:
+        f_data = request.get_json()
+        data = f_data["sections"]
+
+        student_quizzes = Quiz.query.filter(
+            Quiz.student_id == 3,
+            Quiz.quiz_template_id == f_data["id"]
+        ).all()
+
+    except:
+        data = request.get_json()
+
+    # if len(student_quizzes) > 0:
+    #     result = []
+    #     for section in student_quizzes[0].quiz_sections:
+    #         for item in section.quiz_items:
+    #             result.append(item.question_version_id)
+    #     return {"message": True, "result": result}
+
     questions_ids = []
     random_questions = []
     random_questions_dict = {}
@@ -711,7 +730,7 @@ def check_new_quiz_template():
     for rand_question in random_questions:
         question_type = 0
 
-        if rand_question["questionAnswerType"] == "All":
+        if rand_question["questionAnswerType"] == "Any Type":
             question_type = 1
         if rand_question["questionAnswerType"] == "Matching Question":
             question_type = 2
@@ -772,13 +791,13 @@ def check_new_quiz_template():
     if len(result) == 0:
         return {"message": False, "error": "Quiz cannot be generated"}
     else:
-        return {"message": True, "result": result}
+        return {"message": True, "result": result,
+                "number_of_questions": len(questions_ids) + len(random_questions_ids)}
 
 
 @app.route("/api/questions-quiz/<int:index>", methods=["GET"])
 def get_questions_quiz(index):
     question = Question.query.get_or_404(index)
-
     newest_version = None
     for i in question.question_version:
         if newest_version is None:
@@ -791,7 +810,6 @@ def get_questions_quiz(index):
         for matching_pair in newest_version.matching_question:
             answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide})
 
-
     if newest_version.type == "multiple_answer_question":
         for choice in newest_version.multiple_answers:
             answers.append(
@@ -799,8 +817,7 @@ def get_questions_quiz(index):
                     "text": choice.text,
                     "isSingle": choice.is_single
                 }
-        )
-
+            )
 
     return {
         "id": newest_version.id,
@@ -818,6 +835,10 @@ def create_new_quiz_template():
 
     if data["quizId"] != 0:
         quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
+        quiz = Quiz.query.filter_by(quiz_template_id=data["quizId"]).all()
+
+        for i in quiz:
+            db.session.delete(i)
         db.session.delete(quiz_template)
         db.session.commit()
 
@@ -894,6 +915,108 @@ def create_new_quiz_template():
     db.session.commit()
 
     return {}, 200
+
+
+@app.route("/api/new-quiz-student", methods=["PUT"])
+def new_quiz_student():
+    data = request.get_json()
+    quiz = data["quiz"]
+    refresh_quiz = data["refreshQuiz"]
+    questions = data["questions"]
+    student_id = data["student_id"]
+
+    student_quizzes = Quiz.query.filter(
+        Quiz.student_id == student_id,
+        Quiz.quiz_template_id == quiz["id"]
+    ).all()
+
+    if len(student_quizzes) > 0:
+        if refresh_quiz:
+            res = Quiz.query.filter(Quiz.id == student_quizzes[0].id).first()
+            res.date_time_started = datetime.datetime.now()
+            db.session.commit()
+        return {"created": False, "quiz_id": student_quizzes[0].id}
+
+    new_quiz = Quiz(
+        date_time_started=datetime.datetime.now(),
+        # date_time_finished=datetime.datetime.now(),
+        quiz_template_id=quiz["id"],
+        student_id=student_id
+    )
+
+    time_to_finish = db.session.query(QuizTemplate.time_to_finish).filter(
+        QuizTemplate.id == quiz["id"]).first().time_to_finish
+
+    db.session.add(new_quiz)
+    db.session.commit()
+
+    order_sections = []
+    for section in quiz["sections"]:
+        section_added = QuizSection(
+            quiz_id=new_quiz.id
+        )
+
+        db.session.add(section_added)
+        db.session.commit()
+        order_sections.append(section_added.id)
+
+        order_questions = []
+        for question in section["questions"]:
+            new_item = QuizItem(
+                answer="",
+                score=1,
+                question_version_id=questions[str(question["id"])]["id"],
+                quiz_section_id=section_added.id
+            )
+            db.session.add(new_item)
+            db.session.commit()
+
+            order_questions.append(new_item.id)
+
+        section_added.order = order_questions
+        new_quiz.order = order_sections
+        db.session.commit()
+
+    return {"created": True, "time_to_finish": time_to_finish}
+
+
+@app.route("/api/quiz-student-load", methods=["GET"])
+def get_quiz_student_load():
+    student_id = request.args.get('student_id')
+    quiz_id = request.args.get('quiz_id')
+
+    quiz = Quiz.query.filter(
+        Quiz.student_id == int(student_id),
+        Quiz.id == int(quiz_id)
+    ).first()
+
+    result = {"sections": [], "start_time": quiz.date_time_started,
+              "minutes_to_finish": quiz.quiz_template.time_to_finish}
+
+    quiz_templates = Quiz.query.filter(Quiz.id == int(quiz_id)).first()
+    quiz_templates_id = quiz_templates.quiz_template_id
+    quiz_temp = QuizTemplate.query.filter(QuizTemplate.id == int(quiz_templates_id)).first()
+    section_titles = []
+    for i in quiz_temp.quiz_template_section:
+        section_titles.append(i.title)
+    cnt = 0
+    for section in quiz.order:
+        add_section = {"questions": [], "title": ""}
+
+        for item in QuizItem.query.filter(QuizItem.quiz_section_id == section):
+            add_section["questions"].append(
+                {
+                    "id": item.question_version.question_id,
+                    "questionType": "questions",
+                }
+            )
+
+            add_section["title"] = section_titles[cnt]
+
+        result["sections"].append(add_section)
+        cnt += 1
+
+    return result
 
 
 if __name__ == '__main__':

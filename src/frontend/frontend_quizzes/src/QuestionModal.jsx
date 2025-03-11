@@ -6,7 +6,7 @@ const QuestionModal = ({
     categorySelect,
     handleAddItem
 }) => {
-    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", questionType:"All", includeSubCategories: true, questions: []});
+    const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", questionType:"Any Type", includeSubCategories: true, questions: []});
     const [questions, setQuestions] = useState([]);
     const [typeQuestionSelected, setTypeQuestionSelected] = useState(1);
 
@@ -68,7 +68,9 @@ const QuestionModal = ({
         };
     });
 };
-    const questionTypes = ["","All", "Matching Question", "Short Question", "Multiple Choice"]
+    const questionTypes = ["","Any Type", "Matching Question", "Short Question", "Multiple Choice"]
+    const questionTypesHuman = {"matching_answer_question": "Matching Question", "short_answer_question" : "Short Question", "multiple_answer_question": "Multiple Choice"};
+
 
     return (
         <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static"
@@ -88,7 +90,7 @@ const QuestionModal = ({
                                             categoryName: "supercategory",
                                             type: "random",
                                             includeSubCategories: true,
-                                            questionType: "All",
+                                            questionType: "Any Type",
                                             questions: {count: 1}
                                         })
                                     }, 0);
@@ -278,7 +280,7 @@ const QuestionModal = ({
 
                                                             <span
                                                                 className="input-group-text badge text-bg-primary rounded-pill flex-shrink-0">
-                                                                {question.type}
+                                                                {questionTypesHuman[question.type]}
                                                               </span>
                                                         </div>
 
@@ -309,7 +311,7 @@ const QuestionModal = ({
                                             categoryId: 1,
                                             categoryName: "supercategory",
                                             type: "random",
-                                            questionType: "All",
+                                            questionType: "Any Type",
                                             includeSubCategories: true,
                                             questions: {count: 1}
                                         })

@@ -268,11 +268,14 @@ class Quiz(db.Model):
     date_time_finished = db.Column(db.DateTime)
     date_time_correction_started = db.Column(db.DateTime)
     date_time_correction_finished = db.Column(db.DateTime)
+    order = db.Column(db.ARRAY(db.Integer))
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     # quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
 
-    quiz_template = db.relationship('QuizTemplate')
+    quiz_template = db.relationship('QuizTemplate', cascade="all, delete")
+
     quiz_sections = db.relationship('QuizSection', back_populates='quiz')
 
 
@@ -280,7 +283,7 @@ class QuizSection(db.Model):
     __tablename__ = 'quiz_sections'
     id = db.Column(db.Integer, primary_key=True)
     order = db.Column(db.ARRAY(db.Integer))
-    #quiz_item_id = db.Column(db.Integer, db.ForeignKey('quiz_items.id'))
+    # quiz_item_id = db.Column(db.Integer, db.ForeignKey('quiz_items.id'))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
 
     quiz_items = db.relationship('QuizItem', back_populates='items')
@@ -293,7 +296,6 @@ class QuizItem(db.Model):
     # quizItem spojene s quizTemplateItem
     __tablename__ = 'quiz_items'
     id = db.Column(db.Integer, primary_key=True)
-    order = db.Column(db.ARRAY(db.Integer))
     answer = db.Column(db.Text)  # Text - ako json, podla typu otazky
     score = db.Column(db.DECIMAL(10, 2))  # Decimal
 

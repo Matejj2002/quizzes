@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from "../Navigation";
 import Login from "../Login";
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min";
 const Quiz = () => {
     const navigate = useNavigate();
 
@@ -89,13 +87,13 @@ const Quiz = () => {
                                                 <div className="d-flex">
                                                     <h2 className="h5">
                                                         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                                        <a href="#" className=" text-decoration-none"
+                                                        <a href="#" className="text-decoration-none me-1"
                                                            onClick={(e) => handleUpdateQuiz(e, quiz)}
                                                         >{quiz.title}</a>
                                                     </h2>
 
                                                     <button
-                                                        className="btn btn-outline-primary btn-sm p-0 px-1"
+                                                        className="btn btn-outline-primary btn-sm p-0 px-1 me-1"
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             navigate("/generated-quiz", {
@@ -107,6 +105,21 @@ const Quiz = () => {
                                                         }
                                                     >
                                                         Generate Quiz
+                                                    </button>
+
+                                                    <button className="btn btn-outline-primary"
+                                                        onClick={(e) =>{
+                                                            e.preventDefault()
+                                                            navigate("/generated-quiz", {
+                                                                state: {
+                                                                    quiz: quiz,
+                                                                    refreshQuiz: true,
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+
+                                                        <i className="bi bi-arrow-clockwise"></i>
                                                     </button>
 
                                                 </div>
