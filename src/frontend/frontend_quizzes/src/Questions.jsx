@@ -164,10 +164,14 @@ const Questions = () => {
     return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                    <Navigation></Navigation>
+                    <Navigation orderNav={[<a className="navbar-brand"
+                                              href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
+                        <a className="nav-link" href="http://localhost:3000/quizzes">Quizzes</a>,
+                        <a className="nav-link" aria-current="page"
+                           href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
                 </header>
                 <div className="container-fluid text-center" style={{marginTop: "50px"}}>
-                    <div className="row">
+                <div className="row">
                         <div className="col-2 sidebar"
                              style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
                             <Categories catPath={categoryPath}/>

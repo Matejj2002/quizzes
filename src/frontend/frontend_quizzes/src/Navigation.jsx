@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
-const Navigation = () =>{
+const Navigation = ({orderNav}) => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({});
+
     async function getUserData() {
         await fetch("http://127.0.0.1:5000/getUserData", {
                 method: "GET",
                 headers: {
-                    "Authorization" : "Bearer " + localStorage.getItem("accessToken")
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
                 }
             }
-
         ).then((response) => {
             return response.json();
         }).then((data) => {
@@ -22,18 +22,19 @@ const Navigation = () =>{
     }
 
     const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    navigate("/login");
-  };
+        localStorage.removeItem("accessToken");
+        navigate("/login");
+    };
 
     useEffect(() => {
-    getUserData().then(() => {});
-  }, []);
+        getUserData().then(() => {
+        });
+    }, []);
 
     return (
         <nav className="navbar fixed-top bg-body-tertiary">
             <div className="container-fluid">
-                <a className="navbar-brand" href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>
+                {orderNav[0]}
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
                         aria-label="Toggle navigation">
@@ -41,19 +42,22 @@ const Navigation = () =>{
                 </button>
                 <div className="collapse navbar-collapse" id="navbarScroll">
                     <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                        <li className="nav-item">
-                            <a className="nav-link active" aria-current="page" href="http://127.0.0.1:5000/admin/">Admin</a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link" href="http://localhost:3000/quizzes">Quizzes</a>
-                        </li>
+                        {orderNav.slice(1).map((link) => (
+                            <li className="nav-item">{link}</li>
+                        ))}
                     </ul>
                 </div>
                 <div className="d-flex">
                     <img
                         src={userData.avatar_url}
                         alt={`${userData.name}'s profile`}
-                        style={{width: "30px", height: "30px", borderRadius: "50%", cursor: "pointer", marginRight:"5px"}}
+                        style={{
+                            width: "30px",
+                            height: "30px",
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            marginRight: "5px"
+                        }}
                         data-bs-toggle="dropdown"
                     />
                     <p data-bs-toggle="dropdown" className="me-1" style={{cursor: "pointer"}}>{userData.login}</p>

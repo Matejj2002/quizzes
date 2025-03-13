@@ -42,7 +42,7 @@ const QuizTemplateTabs =({setPageNum, pageCount, pageNum, sections, setPageCount
                             event.target["classList"].remove("active");
                         }}
                 >
-                    <i className="bi bi-plus-lg" style={{color: "green"}}></i>
+                    <i className="bi bi-plus-circle-fill" style={{color:"green"}}></i>
                 </button>
             </li>
 
@@ -56,7 +56,7 @@ const QuizTemplateTabs =({setPageNum, pageCount, pageNum, sections, setPageCount
                             event.preventDefault();
                             saveChanges();
                         }}
-                        disabled={!quizTitle.trim() || numberOfCorrections <= 0 || minutesToFinish <= 0 || isNaN(minutesToFinish) || checkSections()}
+                        disabled={!quizTitle.trim() || numberOfCorrections <= 0 || isNaN(numberOfCorrections) || minutesToFinish <= 0 || isNaN(minutesToFinish) || checkSections()}
                 >{newUpdateQuiz}
                 </button>
             </li>

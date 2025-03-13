@@ -38,7 +38,6 @@ const NewQuestion = ({subButText="Submit"}) => {
     const sort = location.state['sort'];
     const selectedCategory1 = location.state['selectedCategory'];
     const idQ = location.state['id'];
-    console.log(idQ, selectedCategory1);
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter'];
     const newQuestions = location.state["newQuestions"];
@@ -53,6 +52,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
+    const [questionFeedback, setQuestionFeedback] = useState('')
 
     const [checkSubmit, setCheckSubmit] = useState("");
 
@@ -78,7 +78,8 @@ const NewQuestion = ({subButText="Submit"}) => {
             category_id: selectedCategoryId,
             questionType: questionType,
             answers: answersSel,
-            author: author
+            author: author,
+            feedback: questionFeedback
         };
         if (subButText === "Submit" || subButText === "Copy") {
             if (title !=="" && text !=="") {
@@ -186,6 +187,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             setSelectedCategoryId(response.data["category_id"]);
             setTitle(response.data["title"]);
             setText(response.data["text"]);
+            setQuestionFeedback(response.data["question_feedback"])
 
             if (response.data["type"] === "matching_answer_question"){
                 setQuestionType("Matching Question")
@@ -238,7 +240,11 @@ const NewQuestion = ({subButText="Submit"}) => {
         return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                    <Navigation></Navigation>
+                    <Navigation orderNav={[<a className="navbar-brand"
+                                              href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
+                        <a className="nav-link" href="http://localhost:3000/quizzes">Quizzes</a>,
+                        <a className="nav-link" aria-current="page"
+                           href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
                 </header>
                 <div className="container-fluid" style={{marginTop: "50px"}}>
                     <div className="row">
@@ -327,6 +333,20 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 />
                             </div>
 
+                            <div className="mb-3">
+                                <label htmlFor="questionFeedback" className="form-label">
+                                    Question Feedback
+                                </label>
+                                <textarea
+                                    className="form-control"
+                                    id="questionFeedback"
+                                    value={questionFeedback}
+                                    placeholder="Question feedback"
+                                    onChange={(e) => setQuestionFeedback(e.target.value)}
+                                    rows={4}
+                                />
+                            </div>
+
                             {questionType === "Matching Question" && (
                                 <div>
                                     <h2>{questionType}</h2>
@@ -358,7 +378,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                                id="exampleRadios2" value="option2"
                                                checked={createMoreQuestions}
                                                onChange={(e) => setCreateMoreQuestions(e.target.checked)}
-                                                />
+                                        />
                                         <label className="form-check-label" htmlFor="exampleRadios2">
                                             Create more questions
                                         </label>

@@ -2,9 +2,11 @@ import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../Navigation";
+import {clear} from "@testing-library/user-event/dist/clear";
 const GeneratedQuiz = () => {
     const location = useLocation();
     const [quiz, setQuiz] = useState(location.state?.quiz);
+    const [review, setReview] = useState(location.state?.review || false)
     const [refreshQuiz, setRefreshQuiz] = useState(location.state?.refreshQuiz || false);
     const [questionsData, setQuestionsData] = useState({});
     const [randomQuestions, setRandomQuestions] = useState([]);
@@ -12,8 +14,9 @@ const GeneratedQuiz = () => {
     const [loading, setLoading] = useState(true);
     const [numberOfQuestions, setNumberOfQuestions] = useState(0);
     const [dateStart, setDateStart] = useState(0);
-    const [count, setCount] = useState(0);
+    const [count, setCount] = useState(-1);
     const [minutesToFinish, setMinutesToFinish] = useState(0);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (!quiz?.sections) {
@@ -32,16 +35,49 @@ const GeneratedQuiz = () => {
     }, []);
 
     useEffect(() => {
+
         const interval = setInterval(() => {
-            setCount(prev => Math.max(0, Math.floor(prev-1)));
+            setCount(prev => Math.max(-1, Math.floor(prev-1)));
         }, 1000);
+
 
         return () => clearInterval(interval);
     }, [dateStart, minutesToFinish]);
 
-    const fetchQuestion = async (questionId) => {
+
+    useEffect(() => {
+            if (count % 60 === 0 && count !== -1) {
+            handleSaveQuiz(false, "C");
+        }
+
+            if (count === 0 ) {
+                const updatedData = {
+                    quiz_template_id: quiz.id,
+                    student_id: 3
+                }
+                const setDateFinish = async () => {
+                    axios.put(`http://127.0.0.1:5000/api/quiz-finish`, updatedData).then(
+                        () => {
+                        }
+                    );
+
+                }
+                setCount(-1);
+                setDateFinish();
+                setReview(true);
+            }
+
+    }, [count]);
+
+    console.log(review);
+
+    const fetchQuestion = async (questionId, itemId) => {
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`);
+            const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`, {
+                params: {
+                    item_id: itemId,
+                    review: review
+                }});
             setQuestionsData(prevData => ({
                 ...prevData,
                 [questionId]: response.data
@@ -64,7 +100,7 @@ const GeneratedQuiz = () => {
             quiz.sections.forEach((section) => {
                 section.questions.forEach((question) => {
                     if (!questionsData[question.id] && question.questionType === "questions") {
-                        fetchQuestions.push(fetchQuestion(question.id));
+                        fetchQuestions.push(fetchQuestion(question.id, question.item_id));
                     } else {
                         if (!question.id){
                             question.id = randomQuestions[cnt];
@@ -79,14 +115,16 @@ const GeneratedQuiz = () => {
             });
 
             Promise.all(fetchQuestions).then(() => {
-                setQuiz({ ...quiz });
+                setQuiz({ ...quiz }
+                );
             });
         }
     }, [randomQuestions]);
 
+    const [quizGenerated, setQuizGenerated] = useState(false);
 
    useEffect(() => {
-    if (Object.keys(questionsData).length !== numberOfQuestions || numberOfQuestions === 0) {
+    if (quizGenerated || Object.keys(questionsData).length !== numberOfQuestions || numberOfQuestions === 0) {
         return;
     }
 
@@ -94,17 +132,45 @@ const GeneratedQuiz = () => {
         setLoading(true);
         await generateQuiz();
         setLoading(false);
+        setQuizGenerated(true);
     };
 
-    generateQuizWait().then(() => {});
+    generateQuizWait().then(() => {
+    });
 
 }, [questionsData]);
 
-    const handleSaveQuiz = () => {
+
+    const handleSaveQuiz = async (finalSave , res) => {
+        setIsSaving(true);
+        const updatedData = {
+            "quiz": quiz,
+            "data": questionsData,
+            "finalSave": finalSave
+        }
+        console.log(finalSave, res);
+        axios.put(`http://127.0.0.1:5000/api/quiz_set_answers`, updatedData).then( () =>{
+                setTimeout(() => {
+                setIsSaving(false);
+
+                if (finalSave){
+                    window.location.href = "/quizzes";
+                }
+
+            }, 3000);
+
+            }
+
+        ).catch( () => {
+            setTimeout(() => {
+                setIsSaving(false);
+            }, 3000);
+        })
+
         return false;
     }
-    const generateQuiz = () => {
 
+    const generateQuiz = () => {
         const updatedData = {
             "quiz": quiz,
             "questions": questionsData,
@@ -126,10 +192,14 @@ const GeneratedQuiz = () => {
 
                                 setQuiz(prevQuiz => ({
                                     ...prevQuiz,
-                                    sections: result.data.sections
+                                    sections: result.data.sections,
+                                    answers: []
                                 }));
 
                                 const startTime = new Date(result.data.start_time);
+
+                                const finishTime = new Date(result.data.end_time).getTime();
+
                                 const startMilis = startTime.getTime()
                                 const timeToFinish = result.data.minutes_to_finish * 60 *1000
 
@@ -142,13 +212,15 @@ const GeneratedQuiz = () => {
                                 const differenceInMilliseconds = endDate.getTime() - nowDate.getTime();
                                 const differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-                                if (now> endTime){
-                                    setCount(0);
+
+                                if (now > endTime || (result.data.end_time !== null && now < finishTime) ){
+                                    setCount(-1);
                                 }else{
                                     setCount(differenceInSeconds);
                                 }
 
                                 setRandomQuestions([]);
+                                setQuestionsData([]);
                             }else{
                                 setCount(response.data.time_to_finish *60)
                             }
@@ -163,7 +235,6 @@ const GeneratedQuiz = () => {
     }
 
 
-
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center">
@@ -175,20 +246,23 @@ const GeneratedQuiz = () => {
     const hours = Math.floor(count / 3600);
   const minutes = Math.floor((count % 3600) / 60);
   const seconds = count % 60;
-
   const showTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
     return (
         <div>
             <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                <Navigation></Navigation>
+                <Navigation orderNav={[<a className="navbar-brand" href="http://localhost:3000/quizzes">Quizzes</a>,
+                    <a className="nav-link"
+                       href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
+                    <a className="nav-link" aria-current="page"
+                       href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
             </header>
             <div className="container-fluid" style={{marginTop: "50px"}}>
                 <div className="row">
                     <div className="col-2 sidebar"></div>
                     <div className="col-8">
                         {
-                            count === 0 ? (
+                            count === -1 ? (
                                 <h3>
                                     Review
                                 </h3>
@@ -197,7 +271,14 @@ const GeneratedQuiz = () => {
                                     <div><h1>{quiz.title}</h1></div>
                                     <div className="d-flex align-items-center">
                                         <i className="bi bi-clock text-primary" style={{fontSize: '2rem', marginRight: "2px"}}></i>
-                                        <span className="text-xl font-bold">{showTime}</span>
+                                        {
+                                            count < 30 ? (
+                                                    <span
+                                                        className="text-xl font-bold text-danger">{showTime}</span>
+                                            ) : (
+                                                <span className="text-xl font-bold">{showTime}</span>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             )
@@ -222,32 +303,118 @@ const GeneratedQuiz = () => {
                                     </button>
                                 </li>
                             ))}
+
+                            <li className="nav-item ms-auto" role="presentation">
+                                {isSaving && (
+                                    <span
+                                        id="disabled-tab" data-bs-toggle="tab"
+                                        aria-controls="disabled-tab-pane"
+                                    >Saving ...
+                                </span>
+                                )}
+                            </li>
                         </ul>
 
-
-                        {quiz.sections[page]?.questions.map((question, index) => (
-                            <div className="border p-3 mb-3 mt-3" key={index}>
-                                {/*<h2>{questionsData[question.id]?.title}</h2>*/}
-                                <p>{questionsData[question.id]?.text}</p>
-
-                                {questionsData[question.id]?.type === "matching_answer_question" && (
-                                    <div>
-                                        {/*<p><strong>Matching question</strong></p>*/}
-                                        {questionsData[question.id].answers.map((ans, idx) => (
-                                            <div className="d-flex justify-content-between" key={idx}>
-                                                <p>{ans["leftSide"]}</p>
-                                                <p>{ans["rightSide"]}</p>
+                        <ul className="list-group mb-3">
+                            {quiz.sections[page]?.questions.map((question, index) => (
+                                <li className={`list-group-item ${review && !questionsData[question.id]?.isCorrect ? 'border-danger' : ''} 
+              ${review && questionsData[question.id]?.isCorrect ? 'border-success' : ''}`} key={index}>
+                                    <div className="d-flex justify-content-between">
+                                    <h2>{questionsData[question.id]?.title}</h2>
+                                        {( review && questionsData[question.id]?.isCorrect) && (
+                                            <div className="d-flex">
+                                            <i className="bi bi-check-circle text-success fs-3"></i>
+                                                <p className="text-success">{questionsData[question.id]?.points}b.</p>
                                             </div>
-                                        ))}
+                                        )}
+                                        {(review && !questionsData[question.id]?.isCorrect) && (
+                                            <div className="d-flex">
+                                                <i className="bi bi-x-circle text-danger fs-3"></i>
+                                                <p className="text-danger">{questionsData[question.id]?.points}b.</p>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                    <p>{questionsData[question.id]?.text}</p>
 
-                                {questionsData[question.id]?.type === "multiple_answer_question" && (
-                                    <div>
-                                        {/*<p><strong>Multiple answer question</strong></p>*/}
-                                        {questionsData[question.id].answers.map((ans, idx) => (
-                                            <div className="form-check" key={idx}>
-                                                <input className="form-check-input" type="checkbox"/>
+                                    <hr/>
+                                    {questionsData[question.id]?.type === "matching_answer_question" && (
+                                        <div className="mb-3">
+                                            {/*<p><strong>Matching question</strong></p>*/}
+
+                                            {questionsData[question.id].answers.map((ans, idx) => (
+                                                <div className="d-flex justify-content-between" key={idx}>
+                                                <p>{ans["leftSide"]}</p>
+                                                    <div className="dropdown">
+                                                        <button
+                                                            className="btn dropdown-toggle"
+                                                            type="button"
+                                                            id={`dropdown-${idx}`}
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"
+                                                            disabled={count === -1}
+                                                        >
+                                                            {ans.answer.length === 0 ? "Select Answer" : ans.answer}
+                                                        </button>
+                                                        <ul className="dropdown-menu"
+                                                            aria-labelledby={`dropdown-${idx}`}>
+                                                            {questionsData[question.id].answers.map((answ, optionIdx) => (
+                                                                <li key={optionIdx}>
+                                                                    <a
+                                                                        className="dropdown-item"
+                                                                        href="#"
+                                                                        onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        setQuestionsData(prevData => ({
+                                                                            ...prevData,
+                                                                            [question.id]: {
+                                                                                ...prevData[question.id],
+                                                                                answers: prevData[question.id].answers.map((item, index) =>
+                                                                                    index === idx
+                                                                                        ? {
+                                                                                            ...item,
+                                                                                            answer: answ["rightSide"]
+                                                                                          }
+                                                                                        : item
+                                                                                )
+                                                                            }
+                                                                        }));
+                                                                    }}
+                                                                    >
+                                                                        {answ["rightSide"]}
+                                                                    </a>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {questionsData[question.id]?.type === "multiple_answer_question" && (
+                                        <div className="mb-3">
+                                            {/*<p><strong>Multiple answer question</strong></p>*/}
+                                            {questionsData[question.id].answers.map((ans, idx) => (
+                                                <div className="form-check" key={idx}>
+                                                    <input className="form-check-input"
+                                                           type="checkbox"
+                                                           disabled={count === -1}
+                                                           checked={ans.answer === true}
+
+                                                           onChange={(e) => {
+                                                               const isChecked = e.target.checked;
+
+                                                               setQuestionsData((prevData) => ({
+                                                                   ...prevData,
+                                                                [question.id]: {
+                                                                  ...prevData[question.id],
+                                                                  answers: prevData[question.id].answers.map((item, index) =>
+                                                                    index === idx ? { ...item, answer: isChecked } : item
+                                                                  ),
+                                                                },
+                                                              }));
+                                                            }}
+                                                />
                                                 <label className="form-check-label">{ans.text}</label>
                                             </div>
                                         ))}
@@ -255,39 +422,87 @@ const GeneratedQuiz = () => {
                                 )}
 
                                 {questionsData[question.id]?.type === "short_answer_question" && (
-                                    <div>
+                                    <div className="mb-3">
                                         {/*<p><strong>Short answer question</strong></p>*/}
-                                        <input type="text" className="form-control mt-3" placeholder="Answer"/>
+                                        <input type="text" className="form-control mt-3"
+                                               placeholder="Answer"
+                                               disabled={count === -1}
+                                                value={questionsData[question.id]?.answers[0]["answer"]}
+                                               onChange={(e) => {
+                                                    const newAnswer = e.target.value;
+
+                                                    setQuestionsData((prevData) => ({
+                                                      ...prevData,
+                                                      [question.id]: {
+                                                        ...prevData[question.id],
+                                                        answers: [{ answer: newAnswer }],
+                                                      },
+                                                    }));
+                                                  }}
+
+                                        />
                                     </div>
                                 )}
-                            </div>
-                        ))}
 
-                        <div className="d-flex justify-content-between">
-                            <button type="button" className="btn btn-primary" disabled={page === 0} style={{marginRight: '3px'}}
-                                    onClick={() => setPage((prev) => prev - 1)}>
-                                &lt;
-                            </button>
+                                    {(review && !questionsData[question.id]?.isCorrect) && (
+                                        <p className="border border-danger p-3 rounded" style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                            {questionsData[question.id]?.feedback}
+                                        </p>
+                                    )
+                                    }
+                                </li>
+                            ))}
+                        </ul>
 
-                            <button type="button" className="btn btn-primary" disabled={page + 1 >= quiz.sections.length}
-                                    onClick={() => setPage((prev) => prev + 1)}>
-                                >
-                            </button>
-                        </div>
                         <br></br>
                         <div className="d-flex justify-content-between">
-                            <button type="button" className="btn btn-success"
-                                    onClick={handleSaveQuiz}
-                                    disabled={count === 0}
+                            <button type="button" className="btn btn-outline-secondary"
+                                    onClick={() => {
+                                        if (count !==-1){
+                                        handleSaveQuiz(false);
+                                        }
+                                        window.location.href = "/quizzes";}
+                            }
                             >
-                                Save
+                                Back to Quizzes
                             </button>
+                                <div>
+                                {page === 0 ? (
+                                <div></div>
+                                ) : (
+                                    <button type="button" className="btn btn-primary" disabled={page === 0}
+                                            style={{marginRight: '3px'}}
+                                            onClick={() => setPage((prev) => prev - 1)}>
+                                        <i className="bi bi-caret-left"></i> Back to {quiz.sections[page - 1].title}
 
-                            <button type="button" className="btn btn-outline-danger"
-                                    onClick={() => window.location.href="/quizzes"}
-                            >
-                                Close
-                            </button>
+                                    </button>
+                                )}
+                                    <button type="button" className="btn btn-success"
+                                            style={{marginRight: '3px'}}
+                                            disabled={count===-1}
+                                            onClick={() => handleSaveQuiz(false, "B")}
+                                    >
+                                        Save
+                                    </button>
+
+                                    {page+1 >= quiz.sections.length ? (
+                                        <button type="button" className="btn btn-primary"
+                                                style={{marginRight: '3px'}}
+                                                disabled={count === -1}
+                                                onClick={() => handleSaveQuiz(true, "A")}
+                                        >
+                                            Save & Finish
+                                        </button>
+                                    ) : (
+                                        <button type="button" className="btn btn-primary"
+                                                disabled={page + 1 >= quiz.sections.length}
+                                                onClick={() => setPage((prev) => prev + 1)}>
+                                            Next {quiz.sections[page + 1].title} <i className="bi bi-caret-right"></i>
+                                </button>
+                            )}
+
+                                    </div>
+
                         </div>
                     </div>
 

@@ -18,18 +18,28 @@ const Quiz = () => {
     }
 
 
+  //   useEffect(() => {
+  //   const fetchAllData = async () => {
+  //     try {
+  //       await fetchQuizzes();
+  //     } catch (error) {
+  //       console.error("Error during fetch:", error);
+  //     }
+  //   };
+  //
+  //   fetchAllData().then(() => {});
+  //
+  // }, []);
+
     useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        await fetchQuizzes();
-      } catch (error) {
-        console.error("Error during fetch:", error);
-      }
-    };
+        fetchQuizzes();
 
-    fetchAllData().then(() => {});
+        const interval = setInterval(() => {
+            fetchQuizzes();
+        }, 1000);
 
-  }, []);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleUpdateQuiz = (e, quiz) => {
         e.preventDefault();
@@ -68,7 +78,11 @@ const Quiz = () => {
     return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                    <Navigation></Navigation>
+                    <Navigation orderNav={[<a className="navbar-brand"  href="http://localhost:3000/quizzes">Quizzes</a>,
+                    <a className="nav-link"
+                       href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
+                    <a className="nav-link" aria-current="page"
+                       href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
                 </header>
                 <div className="container-fluid" style={{ marginTop: "50px" }}>
                     <div className="row">
@@ -92,35 +106,6 @@ const Quiz = () => {
                                                         >{quiz.title}</a>
                                                     </h2>
 
-                                                    <button
-                                                        className="btn btn-outline-primary btn-sm p-0 px-1 me-1"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            navigate("/generated-quiz", {
-                                                                state: {
-                                                                    quiz: quiz
-                                                                }
-                                                            });
-                                                        }
-                                                        }
-                                                    >
-                                                        Generate Quiz
-                                                    </button>
-
-                                                    <button className="btn btn-outline-primary"
-                                                        onClick={(e) =>{
-                                                            e.preventDefault()
-                                                            navigate("/generated-quiz", {
-                                                                state: {
-                                                                    quiz: quiz,
-                                                                    refreshQuiz: true,
-                                                                }
-                                                            });
-                                                        }}
-                                                    >
-
-                                                        <i className="bi bi-arrow-clockwise"></i>
-                                                    </button>
 
                                                 </div>
                                                 <button
@@ -151,14 +136,68 @@ const Quiz = () => {
                                                 <p>Attempts are corrections of previous attempt.</p>
                                             )}
 
-                                            <p>Quiz has {quiz.sections.length} sections</p>
+                                            <p>{quiz.number_of_questions} questions, {quiz.sections.length} sections</p>
 
                                             <span
                                                 className="m-0 text-secondary text-truncate">Time to finish (Minutes): {quiz["time_to_finish"]}</span><br/>
                                             <span
                                                 className="m-0 text-secondary text-truncate">Opened from {quiz["date_time_close"]} to {quiz["date_time_open"]}</span><br/>
                                             <span
-                                                className="m-0 text-secondary text-truncate">Check until {quiz["datetime_check"]} with {quiz["number_of_corrections"]} corrections</span><br/>
+                                                className="m-0 text-secondary text-truncate">Check from {quiz["datetime_check"]}</span><br/>
+
+
+                                            {quiz.is_finished ? (
+                                                <div>
+                                                    <button
+                                                        className="btn btn-outline-primary me-1"
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            navigate("/generated-quiz", {
+                                                                state: {
+                                                                    quiz: quiz,
+                                                                    refreshQuiz: true,
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        Attempt the quiz
+                                                    </button>
+                                                    {!quiz.first_generation && (
+                                                        <button
+                                                            className="btn btn-outline-primary me-1"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                navigate("/generated-quiz", {
+                                                                    state: {
+                                                                        quiz: quiz,
+                                                                        review: true
+                                                                    }
+                                                                });
+                                                            }
+                                                            }
+                                                        >
+                                                            Review Attempt
+                                                        </button>
+                                                    )}
+
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    className="btn btn-outline-primary me-1"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        navigate("/generated-quiz", {
+                                                            state: {
+                                                                quiz: quiz
+                                                            }
+                                                        });
+                                                    }
+                                                    }
+                                                >
+                                                Continue Attempt
+                                                </button>
+                                            )}
+
                                         </div>
                                     )
                                 }
@@ -172,11 +211,11 @@ const Quiz = () => {
 
 
             </div>
-        ) : (
-            <div>
-                <Login path={"/quizzes"}></Login>
-            </div>
-        )
+    ) : (
+        <div>
+            <Login path={"/quizzes"}></Login>
+        </div>
+    )
 }
 
 export default Quiz;

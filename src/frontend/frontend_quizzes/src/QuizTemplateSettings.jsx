@@ -51,7 +51,7 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                             min="1"
                             max="10"
                             value={numberOfCorrections}
-                            onChange={(e) => setNumberOfCorrections(e.target.value)}
+                            onChange={(e) => setNumberOfCorrections(parseInt(e.target.value))}
                         />
                     </div>
 
