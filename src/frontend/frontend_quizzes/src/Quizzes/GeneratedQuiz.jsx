@@ -69,7 +69,6 @@ const GeneratedQuiz = () => {
 
     }, [count]);
 
-    console.log(review);
 
     const fetchQuestion = async (questionId, itemId) => {
         try {
@@ -148,7 +147,6 @@ const GeneratedQuiz = () => {
             "data": questionsData,
             "finalSave": finalSave
         }
-        console.log(finalSave, res);
         axios.put(`http://127.0.0.1:5000/api/quiz_set_answers`, updatedData).then( () =>{
                 setTimeout(() => {
                 setIsSaving(false);
@@ -248,6 +246,19 @@ const GeneratedQuiz = () => {
   const seconds = count % 60;
   const showTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
+  let totalAchievedPoints = 0;
+  if (review && count === -1) {
+      totalAchievedPoints = Object.values(questionsData)
+          .reduce((sum, item) => sum + parseFloat(item.points), 0);
+  }
+  let totalPoints = 0;
+  if (review && count === -1) {
+      totalPoints = Object.values(questionsData)
+          .reduce((sum, item) => sum + parseFloat(item.max_points), 0);
+  }
+
+  let progressPercentage = (totalAchievedPoints / totalPoints) * 100;
+
     return (
         <div>
             <header className="navbar navbar-expand-lg bd-navbar sticky-top">
@@ -262,10 +273,21 @@ const GeneratedQuiz = () => {
                     <div className="col-2 sidebar"></div>
                     <div className="col-8">
                         {
-                            count === -1 ? (
-                                <h3>
-                                    Review
-                                </h3>
+                            (count === -1 && review === true) ? (
+                                <div>
+                                    <h3>
+                                        Review {quiz.title}
+                                    </h3>
+                                    <h4>Achieved points: <span
+                                        className="badge bg-primary">{totalAchievedPoints} / {totalPoints}</span></h4>
+
+                                    <div className="progress" role="progressbar" aria-valuenow="{progressPercentage}"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        <div className="progress-bar" style={{width: `${progressPercentage}%`}}>
+                                            {progressPercentage}%
+                                        </div>
+                                    </div>
+                                </div>
                             ) : (
                                 <div className="d-flex justify-content-between">
                                     <div><h1>{quiz.title}</h1></div>

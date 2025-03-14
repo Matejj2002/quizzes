@@ -10,6 +10,7 @@ class Question(db.Model):
     is_deleted = db.Column(db.Boolean, default=False)
     # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
     category = db.relationship("Category", backref='category')
+    question_feedback = db.Column(db.Text, default='')
 
     question_version = db.relationship('QuestionVersion', back_populates='questions', cascade='all, delete-orphan')
 
@@ -20,6 +21,7 @@ class Category(db.Model):
     title = db.Column(db.String)
     stug = db.Column(db.String, default='')
     supercategory_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
+
 
     subcategories = db.relationship(
         'Category', backref=db.backref('subcategory', remote_side=[id]),
@@ -126,6 +128,7 @@ class Choice(Answer):
     id = db.Column(db.Integer, db.ForeignKey('answers.id'), primary_key=True)
     text = db.Column(db.Text)
     is_single = db.Column(db.Boolean)
+    is_correct = db.Column(db.Boolean, default=False)
 
     choice_question_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.id'))
 
