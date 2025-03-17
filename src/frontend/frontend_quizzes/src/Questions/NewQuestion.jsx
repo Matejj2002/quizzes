@@ -305,33 +305,44 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 </select>
                             </div>
 
-                            <div className="mb-3">
-                                <label htmlFor="questionTitle" className="form-label">
-                                    Title
-                                </label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="questionTitle"
-                                    value={title}
-                                    placeholder="Question title"
-                                    onChange={(e) => setTitle(e.target.value)}
-                                />
-                            </div>
+                            <form className="was-validated">
+                                <div className="mb-3">
+                                    <label htmlFor="questionTitle" className="form-label">
+                                        Title
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="questionTitle"
+                                        value={title}
+                                        placeholder="Question title"
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        required
+                                    />
+                                    <div className="invalid-feedback">
+                                        Please enter title
+                                    </div>
+                                </div>
 
-                            <div className="mb-3">
-                                <label htmlFor="questionText" className="form-label">
-                                    Question Text
-                                </label>
-                                <textarea
-                                    className="form-control"
-                                    id="questionText"
-                                    value={text}
-                                    placeholder="Question text"
-                                    onChange={(e) => setText(e.target.value)}
-                                    rows={4}
-                                />
-                            </div>
+                                <div className="mb-3">
+                                    <label htmlFor="questionText" className="form-label">
+                                        Question Text
+                                    </label>
+                                    <textarea
+                                        className="form-control"
+                                        id="questionText"
+                                        value={text}
+                                        placeholder="Question text"
+                                        onChange={(e) => setText(e.target.value)}
+                                        rows={4}
+                                        required
+                                    />
+
+                                    <div className="invalid-feedback">
+                                        Please enter text of question
+                                    </div>
+                                </div>
+                            </form>
 
                             <div className="mb-3">
                                 <label htmlFor="questionFeedback" className="form-label">
@@ -344,37 +355,39 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     placeholder="Question feedback"
                                     onChange={(e) => setQuestionFeedback(e.target.value)}
                                     rows={4}
-                                />
-                            </div>
-
-                            {questionType === "Matching Question" && (
-                                <div>
-                                    <h2>{questionType}</h2>
-                                    <MatchingQuestion setAnswers={AnswerSetter} answers={answers}></MatchingQuestion>
-                                </div>
-                            )}
-
-                            {questionType === "Short Question" && (
-                                <div>
-                                    <h2>{questionType}</h2>
-                                    <ShortAnswerQuestion setAnswers={AnswerSetter}
-                                                         answers={answers}></ShortAnswerQuestion>
+                                    />
                                 </div>
 
-                            )}
+                                {questionType === "Matching Question" && (
+                                    <div>
+                                        <h2>{questionType}</h2>
+                                        <MatchingQuestion setAnswers={AnswerSetter}
+                                                          answers={answers}></MatchingQuestion>
+                                    </div>
+                                )}
 
-                            {questionType === "Multiple Choice Question" && (
-                                <div>
-                                    <h2>{questionType}</h2>
-                                    <MultipleChoiceQuestion setAnswers={AnswerSetter}
-                                                            answers={answers}></MultipleChoiceQuestion>
-                                </div>
-                            )}
+                                {questionType === "Short Question" && (
+                                    <div>
+                                        <h2>{questionType}</h2>
+                                        <ShortAnswerQuestion setAnswers={AnswerSetter}
+                                                             answers={answers}></ShortAnswerQuestion>
+                                    </div>
 
-                            <div className='mb-3 mt-3'>
+                                )}
+
+                                {questionType === "Multiple Choice Question" && (
+                                    <div>
+                                        <h2>{questionType}</h2>
+                                        <MultipleChoiceQuestion setAnswers={AnswerSetter}
+                                                                answers={answers}></MultipleChoiceQuestion>
+                                    </div>
+                                )}
+
+                            <div className='mb-3'>
                                 {subButText === "Submit" && (
-                                    <div className="form-check me-3">
-                                        <input className="form-check-input" type="checkbox" name="independentAttempts"
+                                    <div className="form-check me-3 mb-3">
+                                        <input className="form-check-input" type="checkbox"
+                                               name="independentAttempts"
                                                id="exampleRadios2" value="option2"
                                                checked={createMoreQuestions}
                                                onChange={(e) => setCreateMoreQuestions(e.target.checked)}
@@ -385,22 +398,24 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     </div>
                                 )}
 
-                                <button type="button" className="btn btn-success mb-3 me-3 mt-3"
-                                        onClick={() => {
-                                            saveChanges();
-                                        }
-                                        }
-                                >{subButText}
-                                </button>
+                                <div className="d-flex justify-content-between">
+                                    <button type="button" className="btn btn-outline-primary mb-3"
+                                            onClick={() => {
+                                                navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory1}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                            }
+                                            }
+                                    >Back
+                                    </button>
 
-                                <button type="button" className="btn btn-outline-primary mb-3 mt-3"
-                                        onClick={() => {
-                                            navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory1}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
-                                        }
-                                        }
-                                >Back
-                                </button>
-
+                                    <button type="button" className="btn btn-success mb-3"
+                                            disabled={title.length === 0 || text.length === 0}
+                                            onClick={() => {
+                                                saveChanges();
+                                            }
+                                            }
+                                    >{subButText}
+                                    </button>
+                                </div>
                             </div>
 
                         </div>

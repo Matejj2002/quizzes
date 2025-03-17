@@ -101,7 +101,6 @@ class Answer(db.Model):
     positive_feedback = db.Column(db.Text)
     negative_feedback = db.Column(db.Text)
     type = db.Column(db.String)
-    is_correct = db.Column(db.Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'question_version',
@@ -219,6 +218,8 @@ class QuizTemplate(db.Model):
     date_time_close = db.Column(db.DateTime)
     time_to_finish = db.Column(db.Integer)
     datetime_check = db.Column(db.DateTime)
+
+    feedback_type = db.Column(db.String)
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')

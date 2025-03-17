@@ -12,7 +12,9 @@ import Quiz from "./Quizzes/Quiz";
 import GeneratedQuiz from "./Quizzes/GeneratedQuiz";
 import QuizReview from "./Quizzes/QuizReview";
 
-const Home = () => <h1>Domovska stranka</h1>;
+const Home = () => {
+    window.location.href = "/quizzes";
+};
 
 function App() {
   return (

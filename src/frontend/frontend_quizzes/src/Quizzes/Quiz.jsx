@@ -199,7 +199,7 @@ const Quiz = () => {
                                                     }
                                                     }
                                                 >
-                                                Continue Attempt
+                                                Continue current attempt
                                                 </button>
                                             )}
 

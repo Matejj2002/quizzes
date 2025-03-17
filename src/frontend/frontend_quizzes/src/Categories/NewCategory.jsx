@@ -182,21 +182,22 @@ const NewCategory = () => {
                               <input type="text" className="form-control" value={slug} onChange={handleSlugChange}/>
                           </div>
 
-                          <div className='mb-3 d-flex justify-content-center'>
-                              <button type="button" className="btn btn-success mb-3 me-3"
-                                      onClick={() => {
-                                          saveCategory();
-                                      }
-                                      }
-                              >Submit
-                              </button>
-
-                              <button type="button" className="btn btn-primary mb-3"
+                          <div className='mb-3 d-flex justify-content-between'>
+                              <button type="button" className="btn btn-outline-primary mb-3"
                                       onClick={() => {
                                           navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${id}&category=${selectedCategory1}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                                       }
                                       }
                               >Back
+                              </button>
+
+                              <button type="button" className="btn btn-success mb-3"
+                                      disabled={title.length === 0}
+                                      onClick={() => {
+                                          saveCategory();
+                                      }
+                                      }
+                              >Submit
                               </button>
 
                           </div>

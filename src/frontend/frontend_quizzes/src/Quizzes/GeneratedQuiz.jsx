@@ -46,7 +46,7 @@ const GeneratedQuiz = () => {
 
     useEffect(() => {
             if (count % 60 === 0 && count !== -1) {
-            handleSaveQuiz(false, "C");
+            handleSaveQuiz(false);
         }
 
             if (count === 0 ) {
@@ -148,12 +148,11 @@ const GeneratedQuiz = () => {
             "finalSave": finalSave
         }
         axios.put(`http://127.0.0.1:5000/api/quiz_set_answers`, updatedData).then( () =>{
-                setTimeout(() => {
-                setIsSaving(false);
-
                 if (finalSave){
                     window.location.href = "/quizzes";
                 }
+                setTimeout(() => {
+                setIsSaving(false);
 
             }, 3000);
 
@@ -442,7 +441,7 @@ const GeneratedQuiz = () => {
                                     <button type="button" className="btn btn-success"
                                             style={{marginRight: '3px'}}
                                             disabled={count===-1}
-                                            onClick={() => handleSaveQuiz(false, "B")}
+                                            onClick={() => handleSaveQuiz(false)}
                                     >
                                         Save
                                     </button>
@@ -451,7 +450,7 @@ const GeneratedQuiz = () => {
                                         <button type="button" className="btn btn-primary"
                                                 style={{marginRight: '3px'}}
                                                 disabled={count === -1}
-                                                onClick={() => handleSaveQuiz(true, "A")}
+                                                onClick={() => handleSaveQuiz(true)}
                                         >
                                             Save & Finish
                                         </button>
