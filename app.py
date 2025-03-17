@@ -693,8 +693,7 @@ def get_quiz_templates():
         student_quizzes = Quiz.query.filter(
             Quiz.student_id == 3,
             Quiz.quiz_template_id == template.id
-        ).order_by(desc(Quiz.date_time_finished)).first()
-        print("AAAA",student_quizzes)
+        ).first()
 
         if student_quizzes is not None:
             template_sub["quiz_id"] = student_quizzes.id
@@ -722,7 +721,7 @@ def quiz_finish():
     student_quizzes = Quiz.query.filter(
         Quiz.student_id == data["student_id"],
         Quiz.quiz_template_id == data["quiz_template_id"]
-    ).order_by(desc(Quiz.date_time_finished)).first()
+    ).first()
 
     if student_quizzes is not None:
         student_quizzes.date_time_finished = datetime.datetime.now(pytz.utc)
@@ -1102,12 +1101,22 @@ def new_quiz_student():
     student_quizzes = Quiz.query.filter(
         Quiz.student_id == student_id,
         Quiz.quiz_template_id == quiz["id"]
-    ).order_by(desc(Quiz.date_time_started)).all()
-    print(student_quizzes)
-    if len(student_quizzes) >= 1:
-        print(student_quizzes[0].date_time_started + datetime.timedelta(minutes=int(QuizTemplate.query.filter(QuizTemplate.id == quiz["id"]).first().time_to_finish)) > datetime.datetime.now())
-        if student_quizzes[0].date_time_started + datetime.timedelta(minutes=int(QuizTemplate.query.filter(QuizTemplate.id == quiz["id"]).first().time_to_finish)) > datetime.datetime.now() and student_quizzes[0].date_time_finished ==None:
-            return {"created": False, "quiz_id": student_quizzes[0].id}
+    ).all()
+
+    if len(student_quizzes) == 1:
+        if refresh_quiz:
+            act_time = datetime.datetime.now()
+            res = Quiz.query.filter(Quiz.id == student_quizzes[0].id).first()
+            res.date_time_started = act_time
+            # res.date_time_finished = act_time + datetime.timedelta(minutes=quiz["time_to_finish"])
+            res.date_time_finished = None
+            # db.session.delete(res)
+            db.session.commit()
+
+        return {"created": False, "quiz_id": student_quizzes[0].id}
+
+    if len(student_quizzes) > 1:
+        return {}
 
     time_now = datetime.datetime.now()
     new_quiz = Quiz(
@@ -1161,26 +1170,28 @@ def get_quiz_student_load():
     quiz = Quiz.query.filter(
         Quiz.student_id == int(student_id),
         Quiz.id == int(quiz_id)
-    ).order_by(desc(Quiz.date_time_finished)).first()
+    ).first()
 
     if quiz is None:
         quiz = Quiz.query.filter(
             Quiz.student_id == int(student_id),
-            Quiz.id == Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).order_by(desc(Quiz.date_time_finished)).first().id
-        ).order_by(desc(Quiz.date_time_finished)).first()
+            Quiz.id == Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).first().id
+        ).first()
 
-        quiz_id = int(Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).order_by(desc(Quiz.date_time_finished)).first().id)
+        quiz_id = int(Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).first().id)
 
     result = {"sections": [], "start_time": quiz.date_time_started,
               "minutes_to_finish": quiz.quiz_template.time_to_finish,
               "end_time": quiz.date_time_finished, "now_check": datetime.datetime.now()}
 
-    quiz_templates = Quiz.query.filter(Quiz.id == int(quiz_id)).order_by(desc(Quiz.date_time_finished)).first()
+    quiz_templates = Quiz.query.filter(Quiz.id == int(quiz_id)).first()
     quiz_templates_id = quiz_templates.quiz_template_id
     quiz_temp = QuizTemplate.query.filter(QuizTemplate.id == int(quiz_templates_id)).first()
     section_titles = []
+
     for i in quiz_temp.quiz_template_section:
         section_titles.append(i.title)
+
     cnt = 0
     for section in quiz.order:
         add_section = {"questions": [], "title": ""}
@@ -1211,8 +1222,8 @@ def update_quiz_answers():
     question_data = data["data"]
     final_save = data["finalSave"]
 
-    quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == 3).order_by(desc(Quiz.date_time_finished)).first()
-    print(quiz)
+    quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == 3).first()
+
     for section in quiz.quiz_sections:
         for item in section.quiz_items:
             ans = question_data[str(item.question_version.question_id)]
