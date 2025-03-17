@@ -3,10 +3,10 @@ import axios from 'axios';
 import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import Navigation from "./Navigation";
-import Categories from "./CategoriesTree/Categories";
+import Navigation from "../Navigation";
+import Categories from "../CategoriesTree/Categories";
 import ReactPaginate from "react-paginate";
-import Login from "./Login";
+import Login from "../Login";
 
 
 const Questions = () => {

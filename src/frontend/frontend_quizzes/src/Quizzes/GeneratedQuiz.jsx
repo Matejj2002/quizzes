@@ -2,11 +2,10 @@ import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../Navigation";
-import {clear} from "@testing-library/user-event/dist/clear";
+
 const GeneratedQuiz = () => {
     const location = useLocation();
     const [quiz, setQuiz] = useState(location.state?.quiz);
-    const [review, setReview] = useState(location.state?.review || false)
     const [refreshQuiz, setRefreshQuiz] = useState(location.state?.refreshQuiz || false);
     const [questionsData, setQuestionsData] = useState({});
     const [randomQuestions, setRandomQuestions] = useState([]);
@@ -58,24 +57,25 @@ const GeneratedQuiz = () => {
                 const setDateFinish = async () => {
                     axios.put(`http://127.0.0.1:5000/api/quiz-finish`, updatedData).then(
                         () => {
+                            window.location.href = "/quizzes";
                         }
                     );
 
                 }
                 setCount(-1);
                 setDateFinish();
-                setReview(true);
             }
 
     }, [count]);
 
 
     const fetchQuestion = async (questionId, itemId) => {
+
         try {
             const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`, {
                 params: {
                     item_id: itemId,
-                    review: review
+                    review: false
                 }});
             setQuestionsData(prevData => ({
                 ...prevData,
@@ -246,19 +246,6 @@ const GeneratedQuiz = () => {
   const seconds = count % 60;
   const showTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  let totalAchievedPoints = 0;
-  if (review && count === -1) {
-      totalAchievedPoints = Object.values(questionsData)
-          .reduce((sum, item) => sum + parseFloat(item.points), 0);
-  }
-  let totalPoints = 0;
-  if (review && count === -1) {
-      totalPoints = Object.values(questionsData)
-          .reduce((sum, item) => sum + parseFloat(item.max_points), 0);
-  }
-
-  let progressPercentage = (totalAchievedPoints / totalPoints) * 100;
-
     return (
         <div>
             <header className="navbar navbar-expand-lg bd-navbar sticky-top">
@@ -272,29 +259,12 @@ const GeneratedQuiz = () => {
                 <div className="row">
                     <div className="col-2 sidebar"></div>
                     <div className="col-8">
-                        {
-                            (count === -1 && review === true) ? (
-                                <div>
-                                    <h3>
-                                        Review {quiz.title}
-                                    </h3>
-                                    <h4>Achieved points: <span
-                                        className="badge bg-primary">{totalAchievedPoints} / {totalPoints}</span></h4>
-
-                                    <div className="progress" role="progressbar" aria-valuenow="{progressPercentage}"
-                                         aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar" style={{width: `${progressPercentage}%`}}>
-                                            {progressPercentage}%
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
                                 <div className="d-flex justify-content-between">
                                     <div><h1>{quiz.title}</h1></div>
                                     <div className="d-flex align-items-center">
                                         <i className="bi bi-clock text-primary" style={{fontSize: '2rem', marginRight: "2px"}}></i>
                                         {
-                                            count < 30 ? (
+                                            count < 300 ? (
                                                     <span
                                                         className="text-xl font-bold text-danger">{showTime}</span>
                                             ) : (
@@ -303,8 +273,6 @@ const GeneratedQuiz = () => {
                                         }
                                     </div>
                                 </div>
-                            )
-                        }
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
                                 <li className="nav-item" role="presentation">
@@ -339,29 +307,13 @@ const GeneratedQuiz = () => {
 
                         <ul className="list-group mb-3">
                             {quiz.sections[page]?.questions.map((question, index) => (
-                                <li className={`list-group-item ${review && !questionsData[question.id]?.isCorrect ? 'border-danger' : ''} 
-              ${review && questionsData[question.id]?.isCorrect ? 'border-success' : ''}`} key={index}>
-                                    <div className="d-flex justify-content-between">
+                                <li className="list-group-item" key={index}>
                                     <h2>{questionsData[question.id]?.title}</h2>
-                                        {( review && questionsData[question.id]?.isCorrect) && (
-                                            <div className="d-flex">
-                                            <i className="bi bi-check-circle text-success fs-3"></i>
-                                                <p className="text-success">{questionsData[question.id]?.points}b.</p>
-                                            </div>
-                                        )}
-                                        {(review && !questionsData[question.id]?.isCorrect) && (
-                                            <div className="d-flex">
-                                                <i className="bi bi-x-circle text-danger fs-3"></i>
-                                                <p className="text-danger">{questionsData[question.id]?.points}b.</p>
-                                            </div>
-                                        )}
-                                    </div>
                                     <p>{questionsData[question.id]?.text}</p>
 
                                     <hr/>
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
-                                            {/*<p><strong>Matching question</strong></p>*/}
 
                                             {questionsData[question.id].answers.map((ans, idx) => (
                                                 <div className="d-flex justify-content-between" key={idx}>
@@ -373,7 +325,6 @@ const GeneratedQuiz = () => {
                                                             id={`dropdown-${idx}`}
                                                             data-bs-toggle="dropdown"
                                                             aria-expanded="false"
-                                                            disabled={count === -1}
                                                         >
                                                             {ans.answer.length === 0 ? "Select Answer" : ans.answer}
                                                         </button>
@@ -415,12 +366,10 @@ const GeneratedQuiz = () => {
 
                                     {questionsData[question.id]?.type === "multiple_answer_question" && (
                                         <div className="mb-3">
-                                            {/*<p><strong>Multiple answer question</strong></p>*/}
                                             {questionsData[question.id].answers.map((ans, idx) => (
                                                 <div className="form-check" key={idx}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
-                                                           disabled={count === -1}
                                                            checked={ans.answer === true}
 
                                                            onChange={(e) => {
@@ -445,10 +394,8 @@ const GeneratedQuiz = () => {
 
                                 {questionsData[question.id]?.type === "short_answer_question" && (
                                     <div className="mb-3">
-                                        {/*<p><strong>Short answer question</strong></p>*/}
                                         <input type="text" className="form-control mt-3"
                                                placeholder="Answer"
-                                               disabled={count === -1}
                                                 value={questionsData[question.id]?.answers[0]["answer"]}
                                                onChange={(e) => {
                                                     const newAnswer = e.target.value;
@@ -465,13 +412,6 @@ const GeneratedQuiz = () => {
                                         />
                                     </div>
                                 )}
-
-                                    {(review && !questionsData[question.id]?.isCorrect) && (
-                                        <p className="border border-danger p-3 rounded" style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                            {questionsData[question.id]?.feedback}
-                                        </p>
-                                    )
-                                    }
                                 </li>
                             ))}
                         </ul>

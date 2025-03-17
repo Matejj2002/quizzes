@@ -5,12 +5,12 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { useLocation } from 'react-router-dom';
-import MatchingQuestion from "./MatchingAnswerQuestions/MatchingQuestion";
-import ShortAnswerQuestion from "./ShortAnswerQuestion/ShortAnswerQuestion";
-import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQuestion";
-import Categories from "./CategoriesTree/Categories";
-import Navigation from "./Navigation";
-import Login from "./Login";
+import MatchingQuestion from "../MatchingAnswerQuestions/MatchingQuestion";
+import ShortAnswerQuestion from "../ShortAnswerQuestion/ShortAnswerQuestion";
+import MultipleChoiceQuestion from "../MultipleChoiceQuestions/MultipleChoiceQuestion";
+import Categories from "../CategoriesTree/Categories";
+import Navigation from "../Navigation";
+import Login from "../Login";
 
 const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();

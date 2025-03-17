@@ -1,15 +1,16 @@
 import React from 'react';
 import {Routes, Route, Navigate} from 'react-router-dom';
-import Questions from "./Questions";
-import NewCategory from "./NewCategory";
+import Questions from "./Questions/Questions";
+import NewCategory from "./Categories/NewCategory";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import NewQuestion from "./NewQuestion";
-import QuestionDetail from "./QuestionDetail";
+import NewQuestion from "./Questions/NewQuestion";
+import QuestionDetail from "./Questions/QuestionDetail";
 import Login from "./Login";
-import QuestionCopy from "./QuestionCopy";
+import QuestionCopy from "./Questions/QuestionCopy";
 import NewQuiz from "./Quizzes/NewQuiz";
 import Quiz from "./Quizzes/Quiz";
 import GeneratedQuiz from "./Quizzes/GeneratedQuiz";
+import QuizReview from "./Quizzes/QuizReview";
 
 const Home = () => <h1>Domovska stranka</h1>;
 
@@ -29,6 +30,7 @@ function App() {
                   <Route path="/new-quiz" element={<NewQuiz />} />
                   <Route path="/quizzes" element={<Quiz />} />
                   <Route path="/generated-quiz" element={<GeneratedQuiz />} />
+                  <Route path="/review-quiz" element={<QuizReview/>}></Route>
               </Routes>
       </div>
   );

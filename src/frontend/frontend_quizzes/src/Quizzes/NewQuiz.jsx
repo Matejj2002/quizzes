@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import Navigation from "../Navigation";
-import QuestionModal from "../QuestionModal";
+import QuestionModal from "./QuestionModal";
 import Login from "../Login";
 import axios from "axios";
 
 import {useLocation} from "react-router-dom";
-import QuizTemplateQuestionItem from "../QuizTemplateQuestionItem";
-import QuizTemplateTabs from "../QuizTemplateTabs";
-import QuizTemplateSettings from "../QuizTemplateSettings";
+import QuizTemplateQuestionItem from "./QuizTemplateQuestionItem";
+import QuizTemplateTabs from "./QuizTemplateTabs";
+import QuizTemplateSettings from "./QuizTemplateSettings";
 
 const formatDate = (actDate) => {
     if (!actDate) return "";
@@ -37,6 +37,7 @@ const NewQuiz = () => {
     const [dateCheck, setDateCheck] = useState(formatDate(location.state?.dateCheck) || "");
     const [shuffleSections, setShuffleSections] = useState(Boolean(location.state?.shuffleSections) || false);
     const [checkSubmit, setCheckSubmit] = useState("");
+    const [selectedFeedback, setSelectedFeedback] = useState(location.state?.selectedFeedback || "pointsReview");
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
@@ -204,7 +205,8 @@ const NewQuiz = () => {
             dateCheck: dateCheck,
             typeOfAttempts: selectedOption,
             shuffleSections: shuffleSections,
-            quizId: quizId
+            quizId: quizId,
+            feedbackType: selectedFeedback
 
         }
 
@@ -351,6 +353,8 @@ const NewQuiz = () => {
                                 handleDateCloseChange={handleDateCloseChange}
                                 dateCheck={dateCheck}
                                 handleDateCheck={handleDateCheck}
+                                selectedFeedback={selectedFeedback}
+                                setSelectedFeedback={setSelectedFeedback}
 
                             ></QuizTemplateSettings>
 

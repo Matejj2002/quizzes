@@ -17,7 +17,6 @@ const Quiz = () => {
        finally {}
     }
 
-
   //   useEffect(() => {
   //   const fetchAllData = async () => {
   //     try {
@@ -55,6 +54,7 @@ const Quiz = () => {
                 selectedOption: quiz["correction_of_attempts"],
                 sections: quiz.sections,
                 newUpdateQuiz: "Update",
+                selectedFeedback: quiz["feedbackType"],
                 quizId : quiz.id
 
             }
@@ -167,12 +167,17 @@ const Quiz = () => {
                                                             className="btn btn-outline-primary me-1"
                                                             onClick={(e) => {
                                                                 e.preventDefault();
-                                                                navigate("/generated-quiz", {
+                                                                // navigate("/generated-quiz", {
+                                                                //     state: {
+                                                                //         quiz: quiz,
+                                                                //         review: true
+                                                                //     }
+                                                                // });
+                                                                navigate("/review-quiz", {
                                                                     state: {
-                                                                        quiz: quiz,
-                                                                        review: true
+                                                                        quiz: quiz
                                                                     }
-                                                                });
+                                                                })
                                                             }
                                                             }
                                                         >

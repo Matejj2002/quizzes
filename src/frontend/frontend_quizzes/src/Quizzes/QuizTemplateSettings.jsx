@@ -1,6 +1,6 @@
 import React from "react";
 
-const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck}) =>{
+const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck, selectedFeedback, setSelectedFeedback}) =>{
     return (
         <div className="tab-content" id="myTabContent">
             <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
@@ -57,21 +57,21 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
 
                     <div className="form-check mb-3">
                         <input className="form-check-input" type="radio"
-                               name="independentAttempts"
-                               id="exampleRadios1" value="option1"
+                               name="attemptsIndependentLabel"
+                               id="attemptsIndependent" value="option1"
                                checked={selectedOption === "option1"}
                                onChange={(e) => setSelectedOption(e.target.value)}/>
-                        <label className="form-check-label" htmlFor="exampleRadios1">
+                        <label className="form-check-label" htmlFor="attemptsIndependent">
                             Attempts are independent
                         </label>
                     </div>
                     <div className="form-check mb-3">
                         <input className="form-check-input" type="radio"
-                               name="independentAttempts"
-                               id="exampleRadios2" value="option2"
+                               name="attemptsCorrectLabel"
+                               id="attemptsCorrect" value="option2"
                                checked={selectedOption === "option2"}
                                onChange={(e) => setSelectedOption(e.target.value)}/>
-                        <label className="form-check-label" htmlFor="exampleRadios2">
+                        <label className="form-check-label" htmlFor="attemptsCorrect">
                             Attempts are corrections of previous attempt
                         </label>
                     </div>
@@ -126,6 +126,48 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                             onChange={handleDateCheck}
                         />
                     </div>
+
+                    <h2>Show in review</h2>
+                    <div className="form-check mb-3">
+                        <input className="form-check-input" type="radio" name="feedbackType" value="pointsReview"
+                               id="points"
+                                checked={selectedFeedback === "pointsReview"}
+                               onChange={(e) => setSelectedFeedback(e.target.value)}
+                        />
+                        <label className="form-check-label" htmlFor="points">
+                            Points
+                        </label>
+                    </div>
+                    <div className="form-check mb-3">
+                        <input className="form-check-input" type="radio" name="feedbackType" id="questionFeedback" value="questionFeedback"
+                               checked={selectedFeedback === "questionFeedback"}
+                               onChange={(e) => setSelectedFeedback(e.target.value)}
+                               />
+                        <label className="form-check-label" htmlFor="questionFeedback">
+                            Questions feedback
+                        </label>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input className="form-check-input" type="radio" name="feedbackType" id="optionFeedback" value="optionsFeedback"
+                               checked={selectedFeedback === "optionsFeedback"}
+                               onChange={(e) => setSelectedFeedback(e.target.value)}
+                               />
+                        <label className="form-check-label" htmlFor="optionFeedback">
+                            Options feedback
+                        </label>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input className="form-check-input" type="radio" name="feedbackType" id="correctAnswer" value="correctAnswers"
+                               checked={selectedFeedback === "correctAnswers"}
+                               onChange={(e) => setSelectedFeedback(e.target.value)}
+                               />
+                        <label className="form-check-label" htmlFor="correctAnswer">
+                            Correct answers
+                        </label>
+                    </div>
+
                 </div>
             </div>
 
