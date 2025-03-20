@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../Navigation";
 import QuizReviewPoints from "./QuizReviewPoints";
-import QuizQuestionFeedback from "./QuizQuestionFeedback";
-import QuizOptionFeedback from "./QuizOptionFeedback";
 
 const QuizReview = () =>{
     const location = useLocation();
@@ -150,6 +148,7 @@ const QuizReview = () =>{
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
                                             {questionsData[question.id]?.answers.map((ans, idx) => (
+                                                <div>
                                                 <div className="d-flex justify-content-between" key={idx}>
                                                     <p>{ans["leftSide"]}</p>
                                                     <div className="dropdown">
@@ -178,6 +177,14 @@ const QuizReview = () =>{
                                                         </ul>
                                                     </div>
                                                 </div>
+                                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && ans?.feedback !=="") && (
+                                                    <p className="border border-danger p-3 rounded"
+                                                       style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                        {ans?.feedback}
+                                                    </p>
+                                            )
+                                            }
+                                                </div>
                                             ))}
                                         </div>
                                     )}
@@ -192,6 +199,14 @@ const QuizReview = () =>{
                                                            checked={ans.answer === true}
                                                     />
                                                     <label className="form-check-label">{ans?.text}</label>
+
+                                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && ans?.feedback !=="") && (
+                                                        <p className="border border-danger p-3 rounded"
+                                                           style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                            {ans?.feedback}
+                                                        </p>
+                                                    )
+                                                    }
                                                 </div>
                                             ))}
                                         </div>
@@ -204,10 +219,17 @@ const QuizReview = () =>{
                                                    disabled="true"
                                                    value={questionsData[question.id]?.answers[0]["answer"]}
                                             />
+                                            {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !=="") && (
+                                                <p className="border border-danger p-3 rounded"
+                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                    {questionsData[question.id]?.answers[0].feedback}
+                                                </p>
+                                            )
+                                            }
                                         </div>
                                     )}
 
-                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("questionFeedback")) && (
+                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("questionFeedback") && questionsData[question.id]?.feedback !=="") && (
                                         <p className="p-3 rounded"
                                            style={{
                                                background: "rgba(255, 0, 0, 0.3)"}}>
