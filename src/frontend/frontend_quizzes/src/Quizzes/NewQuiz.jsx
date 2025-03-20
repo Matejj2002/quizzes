@@ -38,6 +38,7 @@ const NewQuiz = () => {
     const [shuffleSections, setShuffleSections] = useState(Boolean(location.state?.shuffleSections) || false);
     const [checkSubmit, setCheckSubmit] = useState("");
     const [selectedFeedback, setSelectedFeedback] = useState(location.state?.selectedFeedback || ["pointsReview"]);
+    const [selectedFeedbackAfterClose, setSelectedFeedbackAfterClose] = useState(location.state?.selectedFeedback || ["pointsReview"]);
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
@@ -61,6 +62,13 @@ const NewQuiz = () => {
             checked ? [...prev, value] : prev.filter((item) => item !== value)
         );
     };
+
+    const handleSelectedFeedbackAfterCloseChange = (e) => {
+        const { value, checked } = e.target;
+        setSelectedFeedbackAfterClose((prev) =>
+            checked ? [...prev, value] : prev.filter((item) => item !== value)
+        );
+    }
 
     const updateShuffle = () => {
         setSections((prevSections) => {
@@ -367,6 +375,8 @@ const NewQuiz = () => {
                                 handleDateCheck={handleDateCheck}
                                 selectedFeedback = {selectedFeedback}
                                 handleSelectedFeedbackChange = {handleSelectedFeedbackChange}
+                                selectedFeedbackAfterClose={selectedFeedbackAfterClose}
+                                handleSelectedFeedbackAfterCloseChange={handleSelectedFeedbackAfterCloseChange}
 
                             ></QuizTemplateSettings>
 

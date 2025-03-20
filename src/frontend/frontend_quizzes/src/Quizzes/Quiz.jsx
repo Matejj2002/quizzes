@@ -145,7 +145,7 @@ const Quiz = () => {
 
                                             {quiz.quizzes.length > 0 && (
                                                 <details className="mb-3">
-                                                    <summary className="mb-1">Older attempts</summary>
+                                                    <summary className="mb-1">Older attempts ({quiz.quizzes.length})</summary>
                                                     {quiz.quizzes.map((qz, ind) => (
                                                             <div
                                                                 className="d-flex justify-content-between align-items-start border p-3">

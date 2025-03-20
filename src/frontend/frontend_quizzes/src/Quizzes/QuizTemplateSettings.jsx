@@ -1,7 +1,7 @@
 import React from "react";
 
-const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck, selectedFeedback, handleSelectedFeedbackChange}) =>{
-    console.log(selectedFeedback)
+const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck, selectedFeedback, handleSelectedFeedbackChange, selectedFeedbackAfterClose, handleSelectedFeedbackAfterCloseChange}) =>{
+    console.log(selectedFeedbackAfterClose)
     return (
         <div className="tab-content" id="myTabContent">
             <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
@@ -179,6 +179,63 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                             value="correctAnswers"
                             checked={selectedFeedback.includes("correctAnswers")}
                             onChange={handleSelectedFeedbackChange}
+                        />
+                        <label className="form-check-label" htmlFor="correctAnswer">
+                            Correct answers
+                        </label>
+                    </div>
+
+                    <h2>Show when closed</h2>
+                    <div className="form-check mb-3">
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="points"
+                            value="pointsReview"
+                            checked={selectedFeedbackAfterClose.includes("pointsReview")}
+                            onChange={handleSelectedFeedbackAfterCloseChange}
+                        />
+                        <label className="form-check-label" htmlFor="points">
+                            Points
+                        </label>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="questionFeedback"
+                            value="questionFeedback"
+                            checked={selectedFeedbackAfterClose.includes("questionFeedback")}
+                            onChange={handleSelectedFeedbackAfterCloseChange}
+                        />
+                        <label className="form-check-label" htmlFor="questionFeedback">
+                            Questions feedback
+                        </label>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="optionFeedback"
+                            value="optionsFeedback"
+                            checked={selectedFeedbackAfterClose.includes("optionsFeedback")}
+                            onChange={handleSelectedFeedbackAfterCloseChange}
+                        />
+                        <label className="form-check-label" htmlFor="optionFeedback">
+                            Options feedback
+                        </label>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="correctAnswer"
+                            value="correctAnswers"
+                            checked={selectedFeedbackAfterClose.includes("correctAnswers")}
+                            onChange={handleSelectedFeedbackAfterCloseChange}
                         />
                         <label className="form-check-label" htmlFor="correctAnswer">
                             Correct answers

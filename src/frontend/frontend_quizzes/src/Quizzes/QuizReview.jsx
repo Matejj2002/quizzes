@@ -147,45 +147,64 @@ const QuizReview = () =>{
                                     <hr/>
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
-                                            {questionsData[question.id]?.answers.map((ans, idx) => (
-                                                <div>
-                                                <div className="d-flex justify-content-between" key={idx}>
-                                                    <p>{ans["leftSide"]}</p>
-                                                    <div className="dropdown">
-                                                        <button
-                                                            className="btn dropdown-toggle"
-                                                            type="button"
-                                                            id={`dropdown-${idx}`}
-                                                            data-bs-toggle="dropdown"
-                                                            aria-expanded="false"
-                                                            disabled="true"
-                                                        >
-                                                            {ans.answer.length === 0 ? "Select Answer" : ans.answer}
-                                                        </button>
-                                                        <ul className="dropdown-menu"
-                                                            aria-labelledby={`dropdown-${idx}`}>
-                                                            {questionsData[question.id]?.answers.map((answ, optionIdx) => (
-                                                                <li key={optionIdx}>
-                                                                    <a
-                                                                        className="dropdown-item"
-                                                                        href="#"
-                                                                    >
-                                                                        {answ["rightSide"]}
-                                                                    </a>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && ans?.feedback !=="") && (
-                                                    <p className="border border-danger p-3 rounded"
-                                                       style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                        {ans?.feedback}
-                                                    </p>
-                                            )
-                                            }
-                                                </div>
+                                                    <table className="table table-striped">
+                                                        <thead>
+                                                        <tr>
+                                                            <th scope="col"><div className="d-flex justify-content-start">Left
+                                                                Side </div>
+                                                            </th>
+                                                            <th scope="col"><div className="d-flex justify-content-end">Right
+                                                                Side </div>
+                                                            </th>
+                                                        </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                    {questionsData[question.id].answers.map((ans, idx) => (
+                                                        <tr>
+                                                            <td><div className="d-flex justify-content-start">
+                                                                {ans["leftSide"]}
+                                                            </div></td>
+                                                            <td>
+                                                                <div className="d-flex justify-content-end">
+                                                                    <div className="dropdown">
+                                                                        <button
+                                                                            className="btn dropdown-toggle"
+                                                                            type="button"
+                                                                            id={`dropdown-${idx}`}
+                                                                            data-bs-toggle="dropdown"
+                                                                            aria-expanded="false"
+                                                                            disabled={true}
+                                                                        >
+                                                                            {ans.answer.length === 0 ? "Select Answer" : ans.answer}
+                                                                        </button>
+                                                                        <ul className="dropdown-menu"
+                                                                            aria-labelledby={`dropdown-${idx}`}>
+                                                                            {questionsData[question.id].answers.map((answ, optionIdx) => (
+                                                                                <li key={optionIdx}>
+                                                                                    <a
+                                                                                        className="dropdown-item"
+                                                                                    >
+                                                                                        {answ["rightSide"]}
+                                                                                    </a>
+                                                                                </li>
+                                                                            ))}
+                                                                        </ul>
+                                                                        {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && ans?.feedback !=="") && (
+                                                                                <p className="border border-danger p-3 rounded"
+                                                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                                                    {ans?.feedback}
+                                                                                </p>
+                                                                        )
+                                                                        }
+                                                                    </div>
+                                                                </div>
+
+                                                            </td>
+                                                        </tr>
                                             ))}
+                                                        </tbody>
+                                                    </table>
                                         </div>
                                     )}
 
