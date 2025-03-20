@@ -219,7 +219,7 @@ class QuizTemplate(db.Model):
     time_to_finish = db.Column(db.Integer)
     datetime_check = db.Column(db.DateTime)
 
-    feedback_type = db.Column(db.String)
+    feedback_type = db.Column(db.ARRAY(db.Text))
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')
@@ -302,6 +302,8 @@ class QuizItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     answer = db.Column(db.Text)  # Text - ako json, podla typu otazky
     score = db.Column(db.DECIMAL(10, 2))  # Decimal
+
+    #dorobit order
 
     students_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
     teachers_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))

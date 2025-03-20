@@ -1,6 +1,7 @@
 import React from "react";
 
-const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck, selectedFeedback, setSelectedFeedback}) =>{
+const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck, selectedFeedback, handleSelectedFeedbackChange}) =>{
+    console.log(selectedFeedback)
     return (
         <div className="tab-content" id="myTabContent">
             <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
@@ -58,8 +59,8 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                     <div className="form-check mb-3">
                         <input className="form-check-input" type="radio"
                                name="attemptsIndependentLabel"
-                               id="attemptsIndependent" value="option1"
-                               checked={selectedOption === "option1"}
+                               id="attemptsIndependent" value="indepedentAttempts"
+                               checked={selectedOption === "indepedentAttempts"}
                                onChange={(e) => setSelectedOption(e.target.value)}/>
                         <label className="form-check-label" htmlFor="attemptsIndependent">
                             Attempts are independent
@@ -68,8 +69,8 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                     <div className="form-check mb-3">
                         <input className="form-check-input" type="radio"
                                name="attemptsCorrectLabel"
-                               id="attemptsCorrect" value="option2"
-                               checked={selectedOption === "option2"}
+                               id="attemptsCorrect" value="correctionAttempts"
+                               checked={selectedOption === "correctionAttempts"}
                                onChange={(e) => setSelectedOption(e.target.value)}/>
                         <label className="form-check-label" htmlFor="attemptsCorrect">
                             Attempts are corrections of previous attempt
@@ -129,40 +130,56 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
 
                     <h2>Show in review</h2>
                     <div className="form-check mb-3">
-                        <input className="form-check-input" type="radio" name="feedbackType" value="pointsReview"
-                               id="points"
-                                checked={selectedFeedback === "pointsReview"}
-                               onChange={(e) => setSelectedFeedback(e.target.value)}
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="points"
+                            value="pointsReview"
+                            checked={selectedFeedback.includes("pointsReview")}
+                            onChange={handleSelectedFeedbackChange}
                         />
                         <label className="form-check-label" htmlFor="points">
                             Points
                         </label>
                     </div>
+
                     <div className="form-check mb-3">
-                        <input className="form-check-input" type="radio" name="feedbackType" id="questionFeedback" value="questionFeedback"
-                               checked={selectedFeedback === "questionFeedback"}
-                               onChange={(e) => setSelectedFeedback(e.target.value)}
-                               />
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="questionFeedback"
+                            value="questionFeedback"
+                            checked={selectedFeedback.includes("questionFeedback")}
+                            onChange={handleSelectedFeedbackChange}
+                        />
                         <label className="form-check-label" htmlFor="questionFeedback">
                             Questions feedback
                         </label>
                     </div>
 
                     <div className="form-check mb-3">
-                        <input className="form-check-input" type="radio" name="feedbackType" id="optionFeedback" value="optionsFeedback"
-                               checked={selectedFeedback === "optionsFeedback"}
-                               onChange={(e) => setSelectedFeedback(e.target.value)}
-                               />
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="optionFeedback"
+                            value="optionsFeedback"
+                            checked={selectedFeedback.includes("optionsFeedback")}
+                            onChange={handleSelectedFeedbackChange}
+                        />
                         <label className="form-check-label" htmlFor="optionFeedback">
                             Options feedback
                         </label>
                     </div>
 
                     <div className="form-check mb-3">
-                        <input className="form-check-input" type="radio" name="feedbackType" id="correctAnswer" value="correctAnswers"
-                               checked={selectedFeedback === "correctAnswers"}
-                               onChange={(e) => setSelectedFeedback(e.target.value)}
-                               />
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="correctAnswer"
+                            value="correctAnswers"
+                            checked={selectedFeedback.includes("correctAnswers")}
+                            onChange={handleSelectedFeedbackChange}
+                        />
                         <label className="form-check-label" htmlFor="correctAnswer">
                             Correct answers
                         </label>

@@ -37,11 +37,13 @@ const NewQuiz = () => {
     const [dateCheck, setDateCheck] = useState(formatDate(location.state?.dateCheck) || "");
     const [shuffleSections, setShuffleSections] = useState(Boolean(location.state?.shuffleSections) || false);
     const [checkSubmit, setCheckSubmit] = useState("");
-    const [selectedFeedback, setSelectedFeedback] = useState(location.state?.selectedFeedback || "pointsReview");
+    const [selectedFeedback, setSelectedFeedback] = useState(location.state?.selectedFeedback || ["pointsReview"]);
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
     const [quizId] = useState(location.state?.quizId || 0);
+
+    const [changeData, setChangeData] = useState(false);
 
     const [sections, setSections] = useState( location.state?.sections || [{
         sectionId: 1,
@@ -51,7 +53,14 @@ const NewQuiz = () => {
     }]);
 
 
-    const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "option1");
+    const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "indepedentAttempts");
+
+    const handleSelectedFeedbackChange = (e) => {
+        const { value, checked } = e.target;
+        setSelectedFeedback((prev) =>
+            checked ? [...prev, value] : prev.filter((item) => item !== value)
+        );
+    };
 
     const updateShuffle = () => {
         setSections((prevSections) => {
@@ -72,6 +81,7 @@ const NewQuiz = () => {
     };
 
     const addPage = (index) => {
+        setChangeData(true);
         setPageNum(index);
         setSections((prevSections) => [
             ...prevSections,
@@ -109,6 +119,7 @@ const NewQuiz = () => {
 
     }, []);
     const handleEvaluateChange = (questionIndex, newValue) => {
+        setChangeData(true);
         setSections((prevSections) =>
             prevSections.map((section, sectionIndex) => {
                 if (sectionIndex === pageNum - 2) {
@@ -127,6 +138,7 @@ const NewQuiz = () => {
     };
 
     const handleAddItemToSection = (newQuestions) => {
+        setChangeData(true);
         setSections((prevSections) =>
             prevSections.map((section) => {
                 if (section?.sectionId === pageNum - 1) {
@@ -161,6 +173,7 @@ const NewQuiz = () => {
     };
 
     const handleRemoveItem = (itemIndex) => {
+        setChangeData(true);
         setSections((prevSections) =>
             prevSections.map((section, sectionIndex) => {
                 if (sectionIndex === pageNum - 2) {
@@ -174,6 +187,7 @@ const NewQuiz = () => {
         );
     };
     const handleOrderChangeItem = (itemIndex, direction) => {
+        setChangeData(true);
         setSections((prevSections) =>
             prevSections.map((section, secIndex) => {
                 if (secIndex === pageNum - 2) {
@@ -206,7 +220,8 @@ const NewQuiz = () => {
             typeOfAttempts: selectedOption,
             shuffleSections: shuffleSections,
             quizId: quizId,
-            feedbackType: selectedFeedback
+            feedbackType: selectedFeedback,
+            changeData: changeData
 
         }
 
@@ -277,6 +292,7 @@ const NewQuiz = () => {
     }
 
     const handleDeleteSection = (sectionId) => {
+            setChangeData(true);
           const updatedSections = sections.filter((section) => section.sectionId !== sectionId);
           setSections(updatedSections);
           setPageCount(pageCount-1);
@@ -300,11 +316,7 @@ const NewQuiz = () => {
     return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                    <Navigation orderNav={[<a className="navbar-brand"  href="http://localhost:3000/quizzes">Quizzes</a>,
-                    <a className="nav-link"
-                       href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
-                    <a className="nav-link" aria-current="page"
-                       href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
+                    <Navigation active="Quizzes"></Navigation>
                 </header>
 
                 <div className="container-fluid" style={{ marginTop: "50px" }}>
@@ -353,8 +365,8 @@ const NewQuiz = () => {
                                 handleDateCloseChange={handleDateCloseChange}
                                 dateCheck={dateCheck}
                                 handleDateCheck={handleDateCheck}
-                                selectedFeedback={selectedFeedback}
-                                setSelectedFeedback={setSelectedFeedback}
+                                selectedFeedback = {selectedFeedback}
+                                handleSelectedFeedbackChange = {handleSelectedFeedbackChange}
 
                             ></QuizTemplateSettings>
 

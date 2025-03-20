@@ -22,6 +22,8 @@ const GeneratedQuiz = () => {
             return;
         }
 
+        console.log(quiz);
+
         axios.post(`http://127.0.0.1:5000/api/new-quiz-template-check`, quiz)
             .then(response => {
                 setRandomQuestions(response.data.result[0]);
@@ -86,7 +88,6 @@ const GeneratedQuiz = () => {
         }
     };
 
-
     useEffect(() => {
         if (!quiz?.sections) {
             return;
@@ -140,7 +141,7 @@ const GeneratedQuiz = () => {
 }, [questionsData]);
 
 
-    const handleSaveQuiz = async (finalSave , res) => {
+    const handleSaveQuiz = async (finalSave) => {
         setIsSaving(true);
         const updatedData = {
             "quiz": quiz,
@@ -166,7 +167,6 @@ const GeneratedQuiz = () => {
 
         return false;
     }
-
     const generateQuiz = () => {
         const updatedData = {
             "quiz": quiz,
@@ -186,7 +186,6 @@ const GeneratedQuiz = () => {
                                         }
                                     }
                                 )
-
                                 setQuiz(prevQuiz => ({
                                     ...prevQuiz,
                                     sections: result.data.sections,
@@ -209,7 +208,6 @@ const GeneratedQuiz = () => {
                                 const differenceInMilliseconds = endDate.getTime() - nowDate.getTime();
                                 const differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-
                                 if (now > endTime || (result.data.end_time !== null && now < finishTime) ){
                                     setCount(-1);
                                 }else{
@@ -219,6 +217,7 @@ const GeneratedQuiz = () => {
                                 setRandomQuestions([]);
                                 setQuestionsData([]);
                             }else{
+
                                 setCount(response.data.time_to_finish *60)
                             }
 
@@ -248,11 +247,7 @@ const GeneratedQuiz = () => {
     return (
         <div>
             <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                <Navigation orderNav={[<a className="navbar-brand" href="http://localhost:3000/quizzes">Quizzes</a>,
-                    <a className="nav-link"
-                       href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
-                    <a className="nav-link" aria-current="page"
-                       href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
+                <Navigation active="Quizzes"></Navigation>
             </header>
             <div className="container-fluid" style={{marginTop: "50px"}}>
                 <div className="row">
@@ -313,53 +308,74 @@ const GeneratedQuiz = () => {
                                     <hr/>
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
+                                                    <table className="table table-striped">
+                                                        <thead>
+                                                        <tr>
+                                                            <th scope="col"><div className="d-flex justify-content-start">Left
+                                                                Side </div>
+                                                            </th>
+                                                            <th scope="col"><div className="d-flex justify-content-end">Right
+                                                                Side </div>
+                                                            </th>
+                                                        </tr>
+                                                        </thead>
 
-                                            {questionsData[question.id].answers.map((ans, idx) => (
-                                                <div className="d-flex justify-content-between" key={idx}>
-                                                <p>{ans["leftSide"]}</p>
-                                                    <div className="dropdown">
-                                                        <button
-                                                            className="btn dropdown-toggle"
-                                                            type="button"
-                                                            id={`dropdown-${idx}`}
-                                                            data-bs-toggle="dropdown"
-                                                            aria-expanded="false"
-                                                        >
-                                                            {ans.answer.length === 0 ? "Select Answer" : ans.answer}
-                                                        </button>
-                                                        <ul className="dropdown-menu"
-                                                            aria-labelledby={`dropdown-${idx}`}>
-                                                            {questionsData[question.id].answers.map((answ, optionIdx) => (
-                                                                <li key={optionIdx}>
-                                                                    <a
-                                                                        className="dropdown-item"
-                                                                        href="#"
-                                                                        onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        setQuestionsData(prevData => ({
-                                                                            ...prevData,
-                                                                            [question.id]: {
-                                                                                ...prevData[question.id],
-                                                                                answers: prevData[question.id].answers.map((item, index) =>
-                                                                                    index === idx
-                                                                                        ? {
-                                                                                            ...item,
-                                                                                            answer: answ["rightSide"]
-                                                                                          }
-                                                                                        : item
-                                                                                )
-                                                                            }
-                                                                        }));
-                                                                    }}
-                                                                    >
-                                                                        {answ["rightSide"]}
-                                                                    </a>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                </div>
+                                                        <tbody>
+                                                    {questionsData[question.id].answers.map((ans, idx) => (
+                                                        <tr>
+                                                            <td><div className="d-flex justify-content-start">
+                                                                {ans["leftSide"]}
+                                                            </div></td>
+                                                            <td>
+                                                                <div className="d-flex justify-content-end">
+                                                                    <div className="dropdown">
+                                                                        <button
+                                                                            className="btn dropdown-toggle"
+                                                                            type="button"
+                                                                            id={`dropdown-${idx}`}
+                                                                            data-bs-toggle="dropdown"
+                                                                            aria-expanded="false"
+                                                                        >
+                                                                            {ans.answer.length === 0 ? "Select Answer" : ans.answer}
+                                                                        </button>
+                                                                        <ul className="dropdown-menu"
+                                                                            aria-labelledby={`dropdown-${idx}`}>
+                                                                            {questionsData[question.id].answers.map((answ, optionIdx) => (
+                                                                                <li key={optionIdx}>
+                                                                                    <a
+                                                                                        className="dropdown-item"
+                                                                                        href="#"
+                                                                                        onClick={(e) => {
+                                                                                            e.preventDefault();
+                                                                                            setQuestionsData(prevData => ({
+                                                                                                ...prevData,
+                                                                                                [question.id]: {
+                                                                                                    ...prevData[question.id],
+                                                                                                    answers: prevData[question.id].answers.map((item, index) =>
+                                                                                                        index === idx
+                                                                                                            ? {
+                                                                                                                ...item,
+                                                                                                                answer: answ["rightSide"]
+                                                                                                            }
+                                                                                                            : item
+                                                                                                    )
+                                                                                                }
+                                                                                            }));
+                                                                                        }}
+                                                                                    >
+                                                                                        {answ["rightSide"]}
+                                                                                    </a>
+                                                                                </li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+
+                                                            </td>
+                                                        </tr>
                                             ))}
+                                                        </tbody>
+                                                    </table>
                                         </div>
                                     )}
 
@@ -376,41 +392,44 @@ const GeneratedQuiz = () => {
 
                                                                setQuestionsData((prevData) => ({
                                                                    ...prevData,
-                                                                [question.id]: {
-                                                                  ...prevData[question.id],
-                                                                  answers: prevData[question.id].answers.map((item, index) =>
-                                                                    index === idx ? { ...item, answer: isChecked } : item
-                                                                  ),
-                                                                },
-                                                              }));
-                                                            }}
-                                                />
-                                                <label className="form-check-label">{ans.text}</label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                                                   [question.id]: {
+                                                                       ...prevData[question.id],
+                                                                       answers: prevData[question.id].answers.map((item, index) =>
+                                                                           index === idx ? {
+                                                                               ...item,
+                                                                               answer: isChecked
+                                                                           } : item
+                                                                       ),
+                                                                   },
+                                                               }));
+                                                           }}
+                                                    />
+                                                    <label className="form-check-label">{ans.text}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
 
-                                {questionsData[question.id]?.type === "short_answer_question" && (
-                                    <div className="mb-3">
-                                        <input type="text" className="form-control mt-3"
-                                               placeholder="Answer"
-                                                value={questionsData[question.id]?.answers[0]["answer"]}
-                                               onChange={(e) => {
-                                                    const newAnswer = e.target.value;
+                                    {questionsData[question.id]?.type === "short_answer_question" && (
+                                        <div className="mb-3">
+                                            <input type="text" className="form-control mt-3"
+                                                   placeholder="Answer"
+                                                   value={questionsData[question.id]?.answers[0]["answer"]}
+                                                   onChange={(e) => {
+                                                       const newAnswer = e.target.value;
 
-                                                    setQuestionsData((prevData) => ({
-                                                      ...prevData,
-                                                      [question.id]: {
-                                                        ...prevData[question.id],
-                                                        answers: [{ answer: newAnswer }],
-                                                      },
-                                                    }));
-                                                  }}
+                                                       setQuestionsData((prevData) => ({
+                                                           ...prevData,
+                                                           [question.id]: {
+                                                               ...prevData[question.id],
+                                                               answers: [{answer: newAnswer}],
+                                                           },
+                                                       }));
+                                                   }}
 
-                                        />
-                                    </div>
-                                )}
+                                            />
+                                        </div>
+                                    )}
                                 </li>
                             ))}
                         </ul>

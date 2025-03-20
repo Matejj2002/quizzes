@@ -1,3 +1,4 @@
+import datetime
 import random
 import json
 from flask import Flask, session, jsonify, request
@@ -10,7 +11,6 @@ from flask_session import Session
 import requests
 from dotenv import load_dotenv
 from sqlalchemy import desc
-import pytz
 import os
 
 load_dotenv()
@@ -627,6 +627,20 @@ def get_quiz_templates():
         if template.is_deleted:
             continue
 
+        if datetime.datetime.now() >= template.date_time_open and datetime.datetime.now() <= template.date_time_close:
+            is_opened = True
+        else:
+            is_opened = False
+
+        can_be_checked = False
+        if datetime.datetime.now() >= template.datetime_check:
+            can_be_checked = True
+
+        if template.feedback_type == None:
+            feedback_type = []
+        else:
+            feedback_type = template.feedback_type
+
         template_sub = {
             "id": template.id,
             "title": template.title,
@@ -638,16 +652,23 @@ def get_quiz_templates():
             "number_of_corrections": template.number_of_corrections,
             "datetime_check": template.datetime_check,
             "order": template.order,
-            "feedbackType": template.feedback_type,
+            "feedbackType": feedback_type,
             "quiz_id": 0,
             "sections": [],
+            "quizzes": [],
+            "is_opened": is_opened,
+            "can_be_checked": can_be_checked,
             "is_finished": False,
             "first_generation": False,
             "number_of_questions": 0
         }
+
         question_count = 0
         section_count = 1
-        for section in template.quiz_template_section:
+        for num in template.order:
+
+            section = QuizTemplateSection.query.filter(QuizTemplateSection.id == num).first()
+
             pom_section = {
                 "sectionId": section_count,
                 "title": section.title,
@@ -658,8 +679,13 @@ def get_quiz_templates():
             }
             section_count += 1
 
-            for question_item in section.quiz_template_section_items:
-                question = question_item.question
+            for number in section.order:
+                if section.order is not None:
+                    question_item = QuizTemplateItem.query.filter(QuizTemplateItem.id == number).first()
+                    question = question_item.question
+                else:
+                    question_item = None
+                    question = None
 
                 if question is not None:
                     latest_version = max(question.question_version, key=lambda v: v.dateCreated)
@@ -693,18 +719,31 @@ def get_quiz_templates():
         student_quizzes = Quiz.query.filter(
             Quiz.student_id == 3,
             Quiz.quiz_template_id == template.id
-        ).first()
+        ).order_by(desc(Quiz.date_time_started)).all()
 
-        if student_quizzes is not None:
-            template_sub["quiz_id"] = student_quizzes.id
+        if student_quizzes is not None and len(student_quizzes) > 0:
+            template_sub["quiz_id"] = student_quizzes[0].id
             # student_quizzes.date_time_finished is None or
-            time_end = student_quizzes.date_time_started + datetime.timedelta(minutes=template.time_to_finish)
-            if datetime.datetime.now() <= time_end and student_quizzes.date_time_finished is None:
+            time_end = student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish)
+            if datetime.datetime.now() < time_end and student_quizzes[0].date_time_finished is None:
                 template_sub["is_finished"] = False
             else:
                 template_sub["is_finished"] = True
-                student_quizzes.date_time_finished = time_end
-                db.session.commit()
+                if student_quizzes[0].date_time_finished is None:
+                    student_quizzes[0].date_time_finished = time_end
+                    db.session.commit()
+
+            quizzes = []
+            for i in student_quizzes[1:]:
+                quizzes.append({
+                    "quiz_id": i.id,
+                    "ended": i.date_time_finished
+                })
+
+            quizzes.sort(key=lambda x : x["ended"])
+
+            template_sub["quizzes"] = quizzes
+
         else:
             template_sub["is_finished"] = True
             template_sub["first_generation"] = True
@@ -721,10 +760,10 @@ def quiz_finish():
     student_quizzes = Quiz.query.filter(
         Quiz.student_id == data["student_id"],
         Quiz.quiz_template_id == data["quiz_template_id"]
-    ).first()
+    ).order_by(desc(Quiz.date_time_started)).first()
 
     if student_quizzes is not None:
-        student_quizzes.date_time_finished = datetime.datetime.now(pytz.utc)
+        student_quizzes.date_time_finished = datetime.datetime.now()
         db.session.add(student_quizzes)
         db.session.commit()
 
@@ -744,25 +783,11 @@ def archive_quiz():
 
 @app.route("/api/new-quiz-template-check", methods=["POST"])
 def check_new_quiz_template():
-    student_quizzes = []
     try:
         f_data = request.get_json()
         data = f_data["sections"]
-
-        student_quizzes = Quiz.query.filter(
-            Quiz.student_id == 3,
-            Quiz.quiz_template_id == f_data["id"]
-        ).all()
-
     except:
         data = request.get_json()
-
-    # if len(student_quizzes) > 0:
-    #     result = []
-    #     for section in student_quizzes[0].quiz_sections:
-    #         for item in section.quiz_items:
-    #             result.append(item.question_version_id)
-    #     return {"message": True, "result": result}
 
     questions_ids = []
     random_questions = []
@@ -859,10 +884,8 @@ def get_questions_quiz(index):
     review = request.args.get("review")
     item_id = request.args.get('item_id')
     feedback_type = request.args.get('feedbackType')
-    print(item_id)
 
     item = QuizItem.query.filter_by(id=item_id).first()
-
 
     if review == "false":
         review = False
@@ -881,15 +904,17 @@ def get_questions_quiz(index):
     is_correct_res = True
     points = 0
     max_points = 0
+    correct_answers = ""
 
     if newest_version.type == "matching_answer_question":
         if item is not None:
             matching_answs = json.loads(item.answer)
-
+            correct_answers = "\n"
             if len(matching_answs) != 0:
                 cnt = 0
 
                 for matching_pair in newest_version.matching_question:
+                    correct_answers+= matching_pair.leftSide + " -> " + matching_pair.rightSide + "\n"
                     if review:
                         if len(matching_answs) != 0:
                             max_points = matching_answs["evaluate"]
@@ -906,15 +931,19 @@ def get_questions_quiz(index):
 
                     answers.append(
                         {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
-                         "rightSide": matching_pair.rightSide, "answer": matching_answs["answer"][cnt]["answer"]})
+                         "rightSide": matching_pair.rightSide, "answer": matching_answs["answer"][cnt]["answer"],
+                         "feedback": matching_pair.negative_feedback
+                         })
                     cnt += 1
             else:
                 for matching_pair in newest_version.matching_question:
                     answers.append(
-                        {"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": []})
+                        {"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [] , "feedback": matching_pair.negative_feedback
+                         })
         else:
             for matching_pair in newest_version.matching_question:
-                answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": []})
+                answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [], "feedback": matching_pair.negative_feedback
+                                })
 
 
     elif newest_version.type == "multiple_answer_question":
@@ -923,8 +952,9 @@ def get_questions_quiz(index):
             multiple_answs = json.loads(item.answer)
 
         cnt = 0
-
+        correct_answers+="\n"
         for choice in newest_version.multiple_answers:
+            correct_answers += str(choice.is_correct) + "\n"
             try:
                 if multiple_answs["answer"][cnt][2] == "True":
                     res = True
@@ -953,14 +983,15 @@ def get_questions_quiz(index):
                     "choiceId": choice.id,
                     "text": choice.text,
                     "isSingle": choice.is_single,
-                    "answer": res
+                    "answer": res,
+                    "feedback": choice.negative_feedback,
                 }
             )
             cnt += 1
     else:
         if item is not None:
             item_answer = json.loads(item.answer)
-
+            correct_answers = newest_version.short_answers[0].text
             if review:
                 if len(item_answer) != 0:
                     max_points = item_answer["evaluate"]
@@ -976,7 +1007,7 @@ def get_questions_quiz(index):
                     max_points = 0
 
             answers.append(
-                {"answer": item_answer["answer"]}
+                {"answer": item_answer["answer"], "feedback": newest_version.short_answers[0].negative_feedback}
             )
         else:
             answers.append(
@@ -997,7 +1028,8 @@ def get_questions_quiz(index):
         "isCorrect": is_correct_res,
         "points": points,
         "max_points": max_points,
-        "feedback": feedback
+        "feedback": feedback,
+        "correct_answer": correct_answers
     }
 
 
@@ -1005,119 +1037,108 @@ def get_questions_quiz(index):
 def create_new_quiz_template():
     data = request.get_json()
 
-    if data["quizId"] != 0:
-        quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
-        quiz = Quiz.query.filter_by(quiz_template_id=data["quizId"]).all()
+    if data["changeData"]:
+        if data["quizId"] != 0:
+            quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
+            quiz = Quiz.query.filter_by(quiz_template_id=data["quizId"]).all()
 
-        for i in quiz:
-            db.session.delete(i)
-        db.session.delete(quiz_template)
-        db.session.commit()
+            for i in quiz:
+                db.session.delete(i)
+            db.session.delete(quiz_template)
+            db.session.commit()
 
-    quiz_template = QuizTemplate(
-        title=data["quizTitle"],
-        shuffle_sections=data['shuffleSections'],
-        correction_of_attempts=data["typeOfAttempts"],
-        number_of_corrections=data["numberOfCorrections"],
-        date_time_open=data["dateOpen"],
-        date_time_close=data["dateClose"],
-        time_to_finish=data["minutesToFinish"],
-        datetime_check=data["dateCheck"],
-        feedback_type=data["feedbackType"]
-    )
-
-    db.session.add(quiz_template)
-    db.session.commit()
-
-    quiz_template_id = quiz_template.id
-
-    sections = []
-    for section in data["sections"]:
-        section_added = QuizTemplateSection(
-            title=section["title"],
-            description="",
-            quiz_template_id=quiz_template_id,
-            shuffle=section["shuffle"]
+        quiz_template = QuizTemplate(
+            title=data["quizTitle"],
+            shuffle_sections=data['shuffleSections'],
+            correction_of_attempts=data["typeOfAttempts"],
+            number_of_corrections=data["numberOfCorrections"],
+            date_time_open=data["dateOpen"],
+            date_time_close=data["dateClose"],
+            time_to_finish=data["minutesToFinish"],
+            datetime_check=data["dateCheck"],
+            feedback_type=data["feedbackType"]
         )
-        db.session.add(section_added)
+
+        db.session.add(quiz_template)
         db.session.commit()
 
-        sections.append(section_added)
+        quiz_template_id = quiz_template.id
 
-        quiz_template_items = []
-        for question in section["questions"]:
-            if question["questionType"] == "questions":
-                question_item = QuizTemplateItem(
-                    question_id=question["id"],
-                    evaluate=question["evaluation"],
-                    item_section_id=section_added.id
-                )
+        sections = []
+        for section in data["sections"]:
+            section_added = QuizTemplateSection(
+                title=section["title"],
+                description="",
+                quiz_template_id=quiz_template_id,
+                shuffle=section["shuffle"]
+            )
+            db.session.add(section_added)
+            db.session.commit()
 
-                db.session.add(question_item)
-                db.session.commit()
-                quiz_template_items.append(question_item)
+            sections.append(section_added)
 
-            else:
-                question_item = QuizTemplateItem(
-                    item_section_id=section_added.id,
-                    category_id=question["categoryId"],
-                    evaluate=question["evaluation"],
-                    include_sub_categories=question["includeSubCategories"],
-                    question_type=question["questionAnswerType"]
+            quiz_template_items = []
+            for question in section["questions"]:
+                if question["questionType"] == "questions":
+                    question_item = QuizTemplateItem(
+                        question_id=question["id"],
+                        evaluate=question["evaluation"],
+                        item_section_id=section_added.id
+                    )
 
-                )
+                    db.session.add(question_item)
+                    db.session.commit()
+                    quiz_template_items.append(question_item)
 
-                db.session.add(question_item)
-                db.session.commit()
-                quiz_template_items.append(question_item)
+                else:
+                    question_item = QuizTemplateItem(
+                        item_section_id=section_added.id,
+                        category_id=question["categoryId"],
+                        evaluate=question["evaluation"],
+                        include_sub_categories=question["includeSubCategories"],
+                        question_type=question["questionAnswerType"]
 
-        ordered_items = []
-        for i in quiz_template_items:
-            ordered_items.append(i.id)
+                    )
 
-        section_added.order = ordered_items
+                    db.session.add(question_item)
+                    db.session.commit()
+                    quiz_template_items.append(question_item)
+
+            ordered_items = []
+            for i in quiz_template_items:
+                ordered_items.append(i.id)
+
+            section_added.order = ordered_items
+
+            db.session.commit()
+
+        ordered_sections_ids = []
+        for i in sections:
+            ordered_sections_ids.append(i.id)
+
+        quiz_template.order = ordered_sections_ids
 
         db.session.commit()
 
-    ordered_sections_ids = []
-    for i in sections:
-        ordered_sections_ids.append(i.id)
+    else:
+        quiz_template = QuizTemplate.query.filter(QuizTemplate.id == data["quizId"]).first()
+        quiz_template.title = data["quizTitle"]
+        quiz_template.shuffle_sections = data["shuffleSections"]
+        quiz_template.correction_of_attempts = data["typeOfAttempts"]
+        quiz_template.number_of_corrections = data["numberOfCorrections"]
+        quiz_template.date_time_open = data["dateOpen"]
+        quiz_template.date_time_close = data["dateClose"]
+        quiz_template.datetime_check = data["dateCheck"]
+        quiz_template.feedback_type = data["feedbackType"]
+        quiz_template.time_to_finish = data["minutesToFinish"]
 
-    quiz_template.order = ordered_sections_ids
-
-    db.session.commit()
+        db.session.add(quiz_template)
+        db.session.commit()
 
     return {}, 200
 
 
-@app.route("/api/new-quiz-student", methods=["PUT"])
-def new_quiz_student():
-    data = request.get_json()
-    quiz = data["quiz"]
-    questions = data["questions"]
-    student_id = data["student_id"]
-    refresh_quiz = data["refreshQuiz"]
-
-    student_quizzes = Quiz.query.filter(
-        Quiz.student_id == student_id,
-        Quiz.quiz_template_id == quiz["id"]
-    ).all()
-
-    if len(student_quizzes) == 1:
-        if refresh_quiz:
-            act_time = datetime.datetime.now()
-            res = Quiz.query.filter(Quiz.id == student_quizzes[0].id).first()
-            res.date_time_started = act_time
-            # res.date_time_finished = act_time + datetime.timedelta(minutes=quiz["time_to_finish"])
-            res.date_time_finished = None
-            # db.session.delete(res)
-            db.session.commit()
-
-        return {"created": False, "quiz_id": student_quizzes[0].id}
-
-    if len(student_quizzes) > 1:
-        return {}
-
+def generate_quiz(quiz, questions, student_id):
     time_now = datetime.datetime.now()
     new_quiz = Quiz(
         date_time_started=time_now,
@@ -1142,6 +1163,7 @@ def new_quiz_student():
         order_sections.append(section_added.id)
 
         order_questions = []
+
         for question in section["questions"]:
             new_item = QuizItem(
                 answer=json.dumps({"evaluate": question["evaluation"]}),
@@ -1159,6 +1181,79 @@ def new_quiz_student():
         new_quiz.order = order_sections
         db.session.commit()
 
+    return time_to_finish
+
+
+@app.route("/api/new-quiz-student", methods=["PUT"])
+def new_quiz_student():
+    data = request.get_json()
+    quiz = data["quiz"]
+    questions = data["questions"]
+    student_id = data["student_id"]
+    refresh_quiz = data["refreshQuiz"]
+
+    student_quizzes = Quiz.query.filter(
+        Quiz.student_id == student_id,
+        Quiz.quiz_template_id == quiz["id"]
+    ).order_by(desc(Quiz.date_time_started)).all()
+
+    if len(student_quizzes) >= 1:
+        act_quiz = student_quizzes[0]
+        if act_quiz.date_time_finished is None:
+            return {"created": False, "quiz_id": act_quiz.id}
+
+    time_to_finish = None
+    if quiz["correction_of_attempts"] == "indepedentAttempts":
+        time_to_finish = generate_quiz(quiz, questions, student_id)
+
+    else:
+        if len(student_quizzes) == 0:
+            time_to_finish = generate_quiz(quiz, questions, student_id)
+
+        else:
+            act_quiz = student_quizzes[0]
+
+            new_quiz = Quiz(
+                date_time_started=datetime.datetime.now(),
+                quiz_template_id=act_quiz.quiz_template_id,
+                student_id=act_quiz.student_id
+            )
+
+            time_to_finish = db.session.query(QuizTemplate.time_to_finish).filter(
+                QuizTemplate.id == quiz["id"]).first().time_to_finish
+
+            db.session.add(new_quiz)
+            db.session.commit()
+
+            order_sections = []
+            for i in act_quiz.quiz_sections:
+                new_section = QuizSection(
+                    quiz_id=new_quiz.id
+                )
+                db.session.add(new_section)
+                db.session.commit()
+                order_sections.append(new_section.id)
+
+                order_questions = []
+                for j in i.order:
+                    quiz_item = QuizItem.query.filter(QuizItem.id == j).first()
+                    new_item = QuizItem(
+                        answer=quiz_item.answer,
+                        score=quiz_item.score,
+                        question_version_id=quiz_item.question_version_id,
+                        quiz_section_id=new_section.id
+                    )
+
+                    db.session.add(new_item)
+                    db.session.commit()
+                    order_questions.append(new_item.id)
+
+                new_section.order = order_questions
+                new_quiz.order = order_sections
+                db.session.commit()
+
+            return {"created": False, "time_to_finish": time_to_finish, "quiz_id": new_quiz.id}
+
     return {"created": True, "time_to_finish": time_to_finish}
 
 
@@ -1170,21 +1265,23 @@ def get_quiz_student_load():
     quiz = Quiz.query.filter(
         Quiz.student_id == int(student_id),
         Quiz.id == int(quiz_id)
-    ).first()
+    ).order_by(desc(Quiz.date_time_started)).first()
 
     if quiz is None:
         quiz = Quiz.query.filter(
             Quiz.student_id == int(student_id),
-            Quiz.id == Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).first().id
-        ).first()
+            Quiz.id == Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).order_by(
+                desc(Quiz.date_time_started)).first().id
+        ).order_by(desc(Quiz.date_time_started)).first()
 
-        quiz_id = int(Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).first().id)
+        quiz_id = int(
+            Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).order_by(desc(Quiz.date_time_started)).first().id)
 
     result = {"sections": [], "start_time": quiz.date_time_started,
               "minutes_to_finish": quiz.quiz_template.time_to_finish,
               "end_time": quiz.date_time_finished, "now_check": datetime.datetime.now()}
 
-    quiz_templates = Quiz.query.filter(Quiz.id == int(quiz_id)).first()
+    quiz_templates = Quiz.query.filter(Quiz.id == int(quiz_id)).order_by(desc(Quiz.date_time_started)).first()
     quiz_templates_id = quiz_templates.quiz_template_id
     quiz_temp = QuizTemplate.query.filter(QuizTemplate.id == int(quiz_templates_id)).first()
     section_titles = []
@@ -1198,6 +1295,7 @@ def get_quiz_student_load():
 
         for item_id in QuizSection.query.filter(QuizSection.id == int(section)).first().order:
             item = QuizItem.query.filter(QuizItem.id == int(item_id)).first()
+
             add_section["questions"].append(
                 {
                     "id": item.question_version.question_id,
@@ -1222,7 +1320,8 @@ def update_quiz_answers():
     question_data = data["data"]
     final_save = data["finalSave"]
 
-    quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == 3).first()
+    quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == 3).order_by(
+        desc(Quiz.date_time_started)).first()
 
     for section in quiz.quiz_sections:
         for item in section.quiz_items:
@@ -1259,12 +1358,7 @@ def update_quiz_answers():
                 db.session.commit()
 
     if final_save:
-        current_time = datetime.datetime.now(pytz.utc)
-        print("-------")
-        print(current_time)
-        print(quiz)
-        print("--------")
-        quiz.date_time_finished = current_time
+        quiz.date_time_finished = datetime.datetime.now()
         db.session.add(quiz)
         db.session.commit()
 

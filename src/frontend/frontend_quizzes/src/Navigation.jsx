@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
-const Navigation = ({orderNav}) => {
+const Navigation = ({active}) => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({});
 
@@ -32,20 +32,26 @@ const Navigation = ({orderNav}) => {
     }, []);
 
     return (
-        <nav className="navbar fixed-top bg-body-tertiary">
+        <nav className="navbar bg-primary fixed-top" data-bs-theme="dark">
             <div className="container-fluid">
-                {orderNav[0]}
+                <a className="navbar-brand" href="#">Navbar</a>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
+                        data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
                         aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
-                <div className="collapse navbar-collapse" id="navbarScroll">
-                    <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                        {orderNav.slice(1).map((link) => (
-                            <li className="nav-item">{link}</li>
-                        ))}
-                    </ul>
+                <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div className="navbar-nav">
+                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""}`}
+                           href="http://localhost:3000/quizzes">Quizzes</a>
+
+                        <a className={`nav-link ${active === "Questions" ? "active" : ""}`}
+                           href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>
+
+                        <a className={`nav-link ${active === "Admin" ? "active" : ""}`} aria-current="page"
+                           href="http://127.0.0.1:5000/admin/">Admin</a>
+
+                    </div>
                 </div>
                 <div className="d-flex">
                     <img
@@ -60,10 +66,11 @@ const Navigation = ({orderNav}) => {
                         }}
                         data-bs-toggle="dropdown"
                     />
-                    <p data-bs-toggle="dropdown" className="me-1" style={{cursor: "pointer"}}>{userData.login}</p>
+                    <p data-bs-toggle="dropdown" className="me-1"
+                       style={{cursor: "pointer",  color:"white"}}>{userData.login}</p>
                     <div className="dropdown-toggle"></div>
 
-                    <ul className="dropdown-menu dropdown-menu-end">
+                    <ul className="dropdown-menu dropdown-menu-end" style={{ backgroundColor: "white" }}>
                         <li>
                             <button className="dropdown-item" onClick={handleLogout}>Logout</button>
                         </li>

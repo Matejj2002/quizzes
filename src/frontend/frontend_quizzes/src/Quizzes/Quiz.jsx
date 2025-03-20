@@ -78,11 +78,7 @@ const Quiz = () => {
     return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
-                    <Navigation orderNav={[<a className="navbar-brand"  href="http://localhost:3000/quizzes">Quizzes</a>,
-                    <a className="nav-link"
-                       href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>,
-                    <a className="nav-link" aria-current="page"
-                       href="http://127.0.0.1:5000/admin/">Admin</a>]}></Navigation>
+                    <Navigation active = {"Quizzes"}></Navigation>
                 </header>
                 <div className="container-fluid" style={{ marginTop: "50px" }}>
                     <div className="row">
@@ -138,18 +134,56 @@ const Quiz = () => {
 
                                             <p>{quiz.number_of_questions} questions, {quiz.sections.length} sections</p>
 
+                                            <div className="mb-3">
                                             <span
                                                 className="m-0 text-secondary text-truncate">Time to finish (Minutes): {quiz["time_to_finish"]}</span><br/>
                                             <span
-                                                className="m-0 text-secondary text-truncate">Opened from {quiz["date_time_close"]} to {quiz["date_time_open"]}</span><br/>
+                                                className="m-0 text-secondary text-truncate">Opened from {quiz["date_time_open"]} to {quiz["date_time_close"]}</span><br/>
                                             <span
                                                 className="m-0 text-secondary text-truncate">Check from {quiz["datetime_check"]}</span><br/>
+                                            </div>
+
+                                            {quiz.quizzes.length > 0 && (
+                                                <details className="mb-3">
+                                                    <summary className="mb-1">Older attempts</summary>
+                                                    {quiz.quizzes.map((qz, ind) => (
+                                                            <div
+                                                                className="d-flex justify-content-between align-items-start border p-3">
+                                                                <div>
+                                                                    <span>Attempt {ind + 1}</span>
+                                                                    <p className="text-secondary mb-0">Finished
+                                                                        at {qz.ended}</p>
+                                                                </div>
+
+                                                                <div>
+                                                                    <button
+                                                                        className="btn btn-outline-primary"
+                                                                        disabled={quiz.can_be_checked === false}
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            navigate("/review-quiz", {
+                                                                                state: {
+                                                                                    quiz: quiz,
+                                                                                    quizId: qz["quiz_id"]
+                                                                                }
+                                                                            });
+                                                                        }}
+                                                                    >
+                                                                        Review
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </details>
+                                            )}
 
 
                                             {quiz.is_finished ? (
                                                 <div>
                                                     <button
                                                         className="btn btn-outline-primary me-1"
+                                                        disabled={quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]}
                                                         onClick={(e) => {
                                                             e.preventDefault()
                                                             navigate("/generated-quiz", {
@@ -165,23 +199,20 @@ const Quiz = () => {
                                                     {!quiz.first_generation && (
                                                         <button
                                                             className="btn btn-outline-primary me-1"
+                                                            disabled={quiz.can_be_checked === false}
                                                             onClick={(e) => {
                                                                 e.preventDefault();
-                                                                // navigate("/generated-quiz", {
-                                                                //     state: {
-                                                                //         quiz: quiz,
-                                                                //         review: true
-                                                                //     }
-                                                                // });
                                                                 navigate("/review-quiz", {
                                                                     state: {
-                                                                        quiz: quiz
+                                                                        quiz: quiz,
+                                                                        quizId: quiz.id
                                                                     }
                                                                 })
                                                             }
                                                             }
                                                         >
-                                                            Review Attempt
+                                                            {quiz.quizzes.length === 0 ? (<span>Review attempt</span>): (
+                                                                <span>Review last attempt</span>)}
                                                         </button>
                                                     )}
 
@@ -199,7 +230,7 @@ const Quiz = () => {
                                                     }
                                                     }
                                                 >
-                                                Continue current attempt
+                                                    Continue current attempt
                                                 </button>
                                             )}
 
