@@ -139,7 +139,7 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                             onChange={handleSelectedFeedbackChange}
                         />
                         <label className="form-check-label" htmlFor="points">
-                            Points
+                            Marks
                         </label>
                     </div>
 
@@ -196,7 +196,7 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                             onChange={handleSelectedFeedbackAfterCloseChange}
                         />
                         <label className="form-check-label" htmlFor="points">
-                            Points
+                            Marks
                         </label>
                     </div>
 

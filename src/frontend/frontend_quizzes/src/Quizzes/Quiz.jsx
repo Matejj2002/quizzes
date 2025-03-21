@@ -17,19 +17,6 @@ const Quiz = () => {
        finally {}
     }
 
-  //   useEffect(() => {
-  //   const fetchAllData = async () => {
-  //     try {
-  //       await fetchQuizzes();
-  //     } catch (error) {
-  //       console.error("Error during fetch:", error);
-  //     }
-  //   };
-  //
-  //   fetchAllData().then(() => {});
-  //
-  // }, []);
-
     useEffect(() => {
         fetchQuizzes();
 
@@ -55,6 +42,7 @@ const Quiz = () => {
                 sections: quiz.sections,
                 newUpdateQuiz: "Update",
                 selectedFeedback: quiz["feedbackType"],
+                feedbackTypeAfterClose: quiz["feedbackTypeAfterClose"],
                 quizId : quiz.id
 
             }
@@ -178,7 +166,29 @@ const Quiz = () => {
                                                 </details>
                                             )}
 
+                                            {(quiz.time_limit_end && !quiz.first_generation ) && (
+                                                        <button
+                                                            className="btn btn-outline-primary me-1"
+                                                            disabled={quiz.can_be_checked === false}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                navigate("/review-quiz", {
+                                                                    state: {
+                                                                        quiz: quiz,
+                                                                        quizId: quiz.id,
+                                                                        feedback: quiz.feedbackTypeAfterClose,
+                                                                        conditionToRetake: false
+                                                                    }
+                                                                })
+                                                            }
+                                                            }
+                                                        >
+                                                            <span>Review quiz after close</span>
+                                                        </button>
+                                            )}
 
+                                            {!quiz.time_limit_end && (
+                                            <div>
                                             {quiz.is_finished ? (
                                                 <div>
                                                     <button
@@ -205,7 +215,9 @@ const Quiz = () => {
                                                                 navigate("/review-quiz", {
                                                                     state: {
                                                                         quiz: quiz,
-                                                                        quizId: quiz.id
+                                                                        quizId: quiz.id,
+                                                                        feedback: quiz.feedbackType,
+                                                                        conditionToRetake: !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"])
                                                                     }
                                                                 })
                                                             }
@@ -233,6 +245,8 @@ const Quiz = () => {
                                                     Continue current attempt
                                                 </button>
                                             )}
+                                                </div>
+                                                )}
 
                                         </div>
                                     )

@@ -12,6 +12,9 @@ import Categories from "../CategoriesTree/Categories";
 import Navigation from "../Navigation";
 import Login from "../Login";
 
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
+
 const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();
     const navigate = useNavigate();
@@ -52,7 +55,8 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
-    const [questionFeedback, setQuestionFeedback] = useState('')
+    const [questionFeedback, setQuestionFeedback] = useState('');
+    const [questionPositiveFeedback, setQuestionPositiveFeedback] = useState('')
 
     const [checkSubmit, setCheckSubmit] = useState("");
 
@@ -79,7 +83,8 @@ const NewQuestion = ({subButText="Submit"}) => {
             questionType: questionType,
             answers: answersSel,
             author: author,
-            feedback: questionFeedback
+            feedback: questionFeedback,
+            positiveFeedback: questionPositiveFeedback
         };
         if (subButText === "Submit" || subButText === "Copy") {
             if (title !=="" && text !=="") {
@@ -93,6 +98,8 @@ const NewQuestion = ({subButText="Submit"}) => {
                             setSelectedCategory(selectedCategory1);
                             setCategorySelect("");
                             setAnswers({});
+                            setQuestionFeedback("");
+                            setQuestionPositiveFeedback("");
                             setCheckSubmit([]);
 
 
@@ -188,6 +195,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             setTitle(response.data["title"]);
             setText(response.data["text"]);
             setQuestionFeedback(response.data["question_feedback"])
+            setQuestionPositiveFeedback(response.data["question_positive_feedback"])
 
             if (response.data["type"] === "matching_answer_question"){
                 setQuestionType("Matching Question")
@@ -237,6 +245,10 @@ const NewQuestion = ({subButText="Submit"}) => {
         setAnswers(newAnswers)
     };
 
+    function prepareTextForLatex(text){
+        return text?.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ");
+    }
+    console.log(text);
         return localStorage.getItem("accessToken") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
@@ -250,7 +262,6 @@ const NewQuestion = ({subButText="Submit"}) => {
                         </div>
                         <div className="col-8">
                             <h1>{titleText}</h1>
-
                             {
                                 checkSubmit.length !== 0 && (
                                     <div className="alert alert-danger" role="alert">
@@ -324,6 +335,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     <label htmlFor="questionText" className="form-label">
                                         Question Text
                                     </label>
+                                    <p>{<InlineMath>{prepareTextForLatex(text)}</InlineMath>}</p>
                                     <textarea
                                         className="form-control"
                                         id="questionText"
@@ -342,8 +354,10 @@ const NewQuestion = ({subButText="Submit"}) => {
 
                             <div className="mb-3">
                                 <label htmlFor="questionFeedback" className="form-label">
-                                    Question Feedback
+                                    Question negative feedback
                                 </label>
+
+                                <p>{<InlineMath>{prepareTextForLatex(questionFeedback)}</InlineMath>}</p>
                                 <textarea
                                     className="form-control"
                                     id="questionFeedback"
@@ -351,33 +365,48 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     placeholder="Question feedback"
                                     onChange={(e) => setQuestionFeedback(e.target.value)}
                                     rows={4}
-                                    />
+                                />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="questionPositiveFeedback" className="form-label">
+                                    Question positive feedback
+                                </label>
+                                <p>{<InlineMath>{prepareTextForLatex(questionPositiveFeedback)}</InlineMath>}</p>
+                                <textarea
+                                    className="form-control"
+                                    id="questionPositiveFeedback"
+                                    value={questionPositiveFeedback}
+                                    placeholder="Question positive feedback"
+                                    onChange={(e) => setQuestionPositiveFeedback(e.target.value)}
+                                    rows={4}
+                                />
+                            </div>
+
+                            {questionType === "Matching Question" && (
+                                <div>
+                                    <h2>{questionType}</h2>
+                                    <MatchingQuestion setAnswers={AnswerSetter}
+                                                      answers={answers}></MatchingQuestion>
+                                </div>
+                            )}
+
+                            {questionType === "Short Question" && (
+                                <div>
+                                    <h2>{questionType}</h2>
+                                    <ShortAnswerQuestion setAnswers={AnswerSetter}
+                                                         answers={answers} prepareTextForLatex={prepareTextForLatex}></ShortAnswerQuestion>
                                 </div>
 
-                                {questionType === "Matching Question" && (
-                                    <div>
-                                        <h2>{questionType}</h2>
-                                        <MatchingQuestion setAnswers={AnswerSetter}
-                                                          answers={answers}></MatchingQuestion>
-                                    </div>
-                                )}
+                            )}
 
-                                {questionType === "Short Question" && (
-                                    <div>
-                                        <h2>{questionType}</h2>
-                                        <ShortAnswerQuestion setAnswers={AnswerSetter}
-                                                             answers={answers}></ShortAnswerQuestion>
-                                    </div>
-
-                                )}
-
-                                {questionType === "Multiple Choice Question" && (
-                                    <div>
-                                        <h2>{questionType}</h2>
-                                        <MultipleChoiceQuestion setAnswers={AnswerSetter}
-                                                                answers={answers}></MultipleChoiceQuestion>
-                                    </div>
-                                )}
+                            {questionType === "Multiple Choice Question" && (
+                                <div>
+                                    <h2>{questionType}</h2>
+                                    <MultipleChoiceQuestion setAnswers={AnswerSetter}
+                                                            answers={answers}></MultipleChoiceQuestion>
+                                </div>
+                            )}
 
                             <div className='mb-3'>
                                 {subButText === "Submit" && (

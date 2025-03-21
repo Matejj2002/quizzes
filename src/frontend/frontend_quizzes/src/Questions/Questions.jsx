@@ -8,6 +8,8 @@ import Categories from "../CategoriesTree/Categories";
 import ReactPaginate from "react-paginate";
 import Login from "../Login";
 
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
 
 const Questions = () => {
     const { "*": category } = useParams();
@@ -385,12 +387,19 @@ const Questions = () => {
                                                     </div>
                                                     <div
                                                         className="d-flex justify-content-between align-items-center w-100">
-                                                        <p className="m-0 text-truncate">{question.versions.text}</p>
+                                                        <p
+                                                            className="m-0 text-truncate"
+                                                        >
+                                                            <InlineMath>
+                                                                {question.versions.text.replace(/ /g, " \\text{ } ")}
+                                                            </InlineMath>
+                                                        </p>
                                                         {questionFilter === "Active" && (
-                                                              <button className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
-                                                                      onClick={() => {
-                                                                        if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                          handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
+                                                            <button
+                                                                className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
+                                                                onClick={() => {
+                                                                    if (window.confirm("Are you sure you want to delete this question?")) {
+                                                                        handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
                                                                         }
                                                                       }}>
                                                                 Archive

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
 
-const ShortAnswerQuestion = ({setAnswers, answers}) => {
+const ShortAnswerQuestion = ({setAnswers, answers, prepareTextForLatex}) => {
     const [newAnswer, setNewAnswer] = useState({
         text: "",
         is_regex: false,
@@ -21,6 +23,7 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
 
     return (
         <div>
+            <p>{<InlineMath>{prepareTextForLatex(answers["text"])}</InlineMath>}</p>
             <div className="input-group">
                 <span className="input-group-text" id="inputGroup-sizing-default">Answer</span>
                 <input type="text" className="form-control" value={answers["text"]} aria-label="Sizing example input"
@@ -28,13 +31,14 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                        onChange={(e) => setNewAnswer({...newAnswer, text: e.target.value})}/>
             </div>
 
-            <details className="mt-3 mb-3"  style={{textAlign:"left"}}>
+            <details className="mt-3 mb-3" style={{textAlign: "left"}}>
                 <summary>
                     Feedback
                 </summary>
-                <div className="p-4 w-auto">
+                <div className="p-4 w-auto mb-3">
                     <form>
-                        <div className="d-flex align-items-center">
+                        <p>{<InlineMath>{prepareTextForLatex(answers["positive_feedback"])}</InlineMath>}</p>
+                        <div className="d-flex align-items-center mb-3">
                             <label className="form-label">Positive&nbsp;&nbsp;</label>
                             <input
                                 type="text"
@@ -46,6 +50,7 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                                 }
                             />
                         </div>
+                        <p>{<InlineMath>{prepareTextForLatex(answers["negative_feedback"])}</InlineMath>}</p>
                         <div className="d-flex align-items-center">
                             <label className="form-label">Negative</label>
                             <input

@@ -1,13 +1,20 @@
-import { useLocation } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../Navigation";
 import QuizReviewPoints from "./QuizReviewPoints";
 
+import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from 'react-katex';
+import "./MathText.css"
+
 const QuizReview = () =>{
     const location = useLocation();
+    const navigate = useNavigate();
     const [quiz] = useState(location.state?.quiz);
-    const [quizId] = useState(location.state?.quizId)
+    const [quizId] = useState(location.state?.quizId);
+    const [feedback] = useState(location.state?.feedback)
+    const [conditionToRetake] = useState(location.state?.conditionToRetake)
     const [data, setData] = useState([]);
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
@@ -18,7 +25,7 @@ const QuizReview = () =>{
                 params: {
                     item_id: itemId,
                     review: true,
-                    feedbackType: quiz["feedbackType"]
+                    feedbackType: feedback
                 }});
 
             setQuestionsData(prevData => ({
@@ -73,8 +80,6 @@ const QuizReview = () =>{
         );
     }
 
-    console.log(quiz["feedbackType"])
-
     return (
         <div>
             <header className="navbar navbar-expand-lg bd-navbar sticky-top">
@@ -88,7 +93,7 @@ const QuizReview = () =>{
                         <h1 className="mb-3">
                             Review {quiz.title}
                         </h1>
-                        {quiz["feedbackType"].includes("pointsReview") && (
+                        {feedback.includes("pointsReview") && (
                             <QuizReviewPoints questionsData={questionsData}></QuizReviewPoints>
                         )}
 
@@ -117,19 +122,25 @@ const QuizReview = () =>{
 
                         <ul className="list-group mb-3">
                             {data.sections[page]?.questions.map((question, index) => (
-                                <li className={`list-group-item ${!questionsData[question.id]?.isCorrect ? 'border-danger' : ''} 
-                                    ${questionsData[question.id]?.isCorrect ? 'border-success' : ''}`}
+                                <li className={`list-group-item ${(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") ) ? 'border-danger' : ''} 
+                                    ${(questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") ) ? 'border-success' : ''}`}
 
-                                    style={{
-                                        background: questionsData[question.id]?.isCorrect
-                                            ? "rgba(155,236,137,0.15)"
-                                            : "rgba(255, 0, 0, 0.04)"
-                                    }}
+                                    style={
+                                        feedback.includes("correctAnswers")
+                                          ? {
+                                              background: questionsData[question.id]?.isCorrect
+                                                ? "rgba(155,236,137,0.15)"
+                                                : "rgba(255, 0, 0, 0.04)",
+                                            }
+                                          : {}
+                                      }
 
                                     key={index}>
                                     <div className="d-flex justify-content-between align-items-center">
                                         <h2>{questionsData[question.id]?.title}</h2>
 
+                                        {feedback.includes("pointsReview") && (
+                                        <div>
                                         {questionsData[question.id]?.isCorrect ? (
                                             <div className="d-flex align-items-center">
                                                 <i className="bi bi-check-circle text-success fs-3"></i>
@@ -141,10 +152,15 @@ const QuizReview = () =>{
                                                 <p className="text-danger fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
                                             </div>
                                         )}
+                                            </div>
+                                            )}
                                     </div>
-                                    <p>{questionsData[question.id]?.text}</p>
-
-                                    <hr/>
+                                    <div>
+                                    <InlineMath
+                                    >
+                                      {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                    </InlineMath>
+                                    </div>
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
                                             <table className="table table-striped">
@@ -168,7 +184,7 @@ const QuizReview = () =>{
                                                             </div></td>
                                                             <td>
                                                                 <div className="d-flex justify-content-end">
-                                                                    {quiz["feedbackType"].includes("correctAnswers") ? (
+                                                                    {feedback.includes("correctAnswers") ? (
                                                                         ans.answer !== ans["rightSide"]  ? (
                                                                             <div>
                                                                                 <span
@@ -193,7 +209,7 @@ const QuizReview = () =>{
                                                                     <span>{ans.answer}</span>
                                                                 )}
 
-                                                                        {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && ans?.feedback !=="") && (
+                                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !=="") && (
                                                                                 <p className="border border-danger p-3 rounded"
                                                                                    style={{background: "rgba(255, 0, 0, 0.3)"}}>
                                                                                     {ans?.feedback}
@@ -220,13 +236,13 @@ const QuizReview = () =>{
                                                            checked={ans.answer === true}
                                                     />
                                                     <label className="form-check-label">{ans?.text}</label>
-                                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("correctAnswers")) && (
+                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
                                                         ans.answer
                                                             ? <span className="ms-2 text-danger">❌</span>
                                                             : <span className="ms-2 text-success">✅</span>
                                                     )}
 
-                                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && ans?.feedback !=="") && (
+                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !=="") && (
                                                         <p className="border border-danger p-3 rounded"
                                                            style={{background: "rgba(255, 0, 0, 0.3)"}}>
                                                             {ans?.feedback}
@@ -239,13 +255,14 @@ const QuizReview = () =>{
                                     )}
 
                                     {questionsData[question.id]?.type === "short_answer_question" && (
-                                        <div className="mb-3">
-                                            <input type="text" className="form-control mt-3"
-                                                   placeholder="Answer"
-                                                   disabled="true"
-                                                   value={questionsData[question.id]?.answers[0]["answer"]}
-                                            />
-                                            {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !=="") && (
+                                        <div className="mb-3 mt-3">
+                                            <div className="d-flex align-items-center mt-3 fw-bold">
+                                                <span className="me-2">Answer: </span>
+                                                <InlineMath>
+                                                    {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                </InlineMath>
+                                            </div>
+                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
                                                 <p className="border border-danger p-3 rounded"
                                                    style={{background: "rgba(255, 0, 0, 0.3)"}}>
                                                     {questionsData[question.id]?.answers[0].feedback}
@@ -255,7 +272,7 @@ const QuizReview = () =>{
                                         </div>
                                     )}
 
-                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("questionFeedback") && questionsData[question.id]?.feedback !=="") && (
+                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !=="") && (
                                         <p className="p-3 rounded"
                                            style={{
                                                background: "rgba(255, 0, 0, 0.3)"}}>
@@ -264,7 +281,17 @@ const QuizReview = () =>{
                                     )
                                     }
 
-                                    {(!questionsData[question.id]?.isCorrect && quiz["feedbackType"].includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
+                                    {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !=="") && (
+                                        <p className="p-3 rounded"
+                                           style={{
+                                               background: "rgba(155,236,137,0.15)"}}>
+                                                {questionsData[question.id]?.feedback}
+                                        </p>
+                                    )
+                                    }
+
+
+                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
                                         <p className="p-3 rounded"
                                            style={{
                                                background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"}}>
@@ -280,7 +307,8 @@ const QuizReview = () =>{
 
 
                         <div className="d-flex justify-content-between">
-                            <button type="button" className="btn btn-outline-secondary"
+                            <div>
+                            <button type="button" className="btn btn-outline-secondary me-1"
                                     onClick={() => {
                                         window.location.href = "/quizzes";
                                     }
@@ -288,6 +316,23 @@ const QuizReview = () =>{
                             >
                                 Back to Quizzes
                             </button>
+                                {conditionToRetake && (
+                                    <button
+                                        className="btn btn-outline-primary me-1"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            navigate("/generated-quiz", {
+                                                state: {
+                                                    quiz: quiz,
+                                                    refreshQuiz: true,
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        Try Again
+                                    </button>
+                                )}
+                            </div>
                             <div>
                                 {page === 0 ? (
                                     <div></div>

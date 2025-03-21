@@ -2,6 +2,8 @@ import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../Navigation";
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
 
 const GeneratedQuiz = () => {
     const location = useLocation();
@@ -303,15 +305,22 @@ const GeneratedQuiz = () => {
                             {quiz.sections[page]?.questions.map((question, index) => (
                                 <li className="list-group-item" key={index}>
                                     <h2>{questionsData[question.id]?.title}</h2>
-                                    <p>{questionsData[question.id]?.text}</p>
+                                    <div>
+                                        <InlineMath
+                                        >
+                                            {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                        </InlineMath>
+                                    </div>
+
 
                                     <hr/>
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
-                                                    <table className="table table-striped">
-                                                        <thead>
-                                                        <tr>
-                                                            <th scope="col"><div className="d-flex justify-content-start">Left
+                                            <table className="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">
+                                                        <div className="d-flex justify-content-start">Left
                                                                 Side </div>
                                                             </th>
                                                             <th scope="col"><div className="d-flex justify-content-end">Right
@@ -412,6 +421,10 @@ const GeneratedQuiz = () => {
 
                                     {questionsData[question.id]?.type === "short_answer_question" && (
                                         <div className="mb-3">
+                                            <InlineMath
+                                    >
+                                      {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                    </InlineMath>
                                             <input type="text" className="form-control mt-3"
                                                    placeholder="Answer"
                                                    value={questionsData[question.id]?.answers[0]["answer"]}

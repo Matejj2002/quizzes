@@ -38,7 +38,7 @@ const NewQuiz = () => {
     const [shuffleSections, setShuffleSections] = useState(Boolean(location.state?.shuffleSections) || false);
     const [checkSubmit, setCheckSubmit] = useState("");
     const [selectedFeedback, setSelectedFeedback] = useState(location.state?.selectedFeedback || ["pointsReview"]);
-    const [selectedFeedbackAfterClose, setSelectedFeedbackAfterClose] = useState(location.state?.selectedFeedback || ["pointsReview"]);
+    const [selectedFeedbackAfterClose, setSelectedFeedbackAfterClose] = useState(location.state?.feedbackTypeAfterClose || ["pointsReview"]);
 
     const [categorySelect, setCategorySelect] = useState([{id: "1", title: "All"}]);
 
@@ -229,7 +229,8 @@ const NewQuiz = () => {
             shuffleSections: shuffleSections,
             quizId: quizId,
             feedbackType: selectedFeedback,
-            changeData: changeData
+            changeData: changeData,
+            feedbackTypeAfterClose: selectedFeedbackAfterClose
 
         }
 
@@ -282,7 +283,7 @@ const NewQuiz = () => {
     const handleDateCloseChange = (e) => {
         const newDate = e.target.value;
 
-        if (newDate > dateClose  && dateOpen < newDate){
+        if (dateOpen < newDate){
             setDateClose(newDate);
         }else{
             alert("Close date cannot sooner than open date!");
