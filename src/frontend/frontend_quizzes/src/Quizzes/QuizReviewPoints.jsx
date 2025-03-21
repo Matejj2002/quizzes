@@ -8,7 +8,7 @@ const QuizReviewPoints = ({questionsData}) => {
       const totalPoints = Object.values(questionsData)
           .reduce((sum, item) => sum + parseFloat(item.max_points), 0);
 
-      const progressPercentage = (totalAchievedPoints / totalPoints) * 100;
+      const progressPercentage = Math.round((totalAchievedPoints / totalPoints) * 100);
 
     return (
         <div>
