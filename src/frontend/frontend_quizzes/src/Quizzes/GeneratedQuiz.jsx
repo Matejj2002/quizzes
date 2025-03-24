@@ -19,12 +19,12 @@ const GeneratedQuiz = () => {
     const [minutesToFinish, setMinutesToFinish] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
 
+    const [quizGenerated, setQuizGenerated] = useState(false);
+
     useEffect(() => {
         if (!quiz?.sections) {
             return;
         }
-
-        console.log(quiz);
 
         axios.post(`http://127.0.0.1:5000/api/new-quiz-template-check`, quiz)
             .then(response => {
@@ -72,14 +72,12 @@ const GeneratedQuiz = () => {
 
     }, [count]);
 
-
     const fetchQuestion = async (questionId, itemId) => {
-
         try {
             const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`, {
                 params: {
                     item_id: itemId,
-                    review: false
+                    review: false,
                 }});
             setQuestionsData(prevData => ({
                 ...prevData,
@@ -89,6 +87,7 @@ const GeneratedQuiz = () => {
             console.error('Error fetching question:', error);
         }
     };
+
 
     useEffect(() => {
         if (!quiz?.sections) {
@@ -102,6 +101,8 @@ const GeneratedQuiz = () => {
             quiz.sections.forEach((section) => {
                 section.questions.forEach((question) => {
                     if (!questionsData[question.id] && question.questionType === "questions") {
+                        console.log(questionsData[question.id])
+                        console.log(question.id, question.item_id);
                         fetchQuestions.push(fetchQuestion(question.id, question.item_id));
                     } else {
                         if (!question.id){
@@ -123,8 +124,6 @@ const GeneratedQuiz = () => {
         }
     }, [randomQuestions]);
 
-    const [quizGenerated, setQuizGenerated] = useState(false);
-
    useEffect(() => {
     if (quizGenerated || Object.keys(questionsData).length !== numberOfQuestions || numberOfQuestions === 0) {
         return;
@@ -133,7 +132,7 @@ const GeneratedQuiz = () => {
     const generateQuizWait = async () => {
         setLoading(true);
         await generateQuiz();
-        setLoading(false);
+        // setLoading(false);
         setQuizGenerated(true);
     };
 
@@ -218,12 +217,13 @@ const GeneratedQuiz = () => {
 
                                 setRandomQuestions([]);
                                 setQuestionsData([]);
+                                setLoading(false);
                             }else{
-
+                                window.location.reload();
                                 setCount(response.data.time_to_finish *60)
                             }
 
-                            setLoading(false);
+                            // setLoading(false);
                         }
                     )
                     .catch(error => {
@@ -231,7 +231,6 @@ const GeneratedQuiz = () => {
                     });
 
     }
-
 
     if (loading) {
         return (
@@ -307,13 +306,12 @@ const GeneratedQuiz = () => {
                                     <h2>{questionsData[question.id]?.title}</h2>
                                     <div>
                                         <InlineMath
+                                            options={{ strict: false }}
                                         >
                                             {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
                                         </InlineMath>
                                     </div>
 
-
-                                    <hr/>
                                     {questionsData[question.id]?.type === "matching_answer_question" && (
                                         <div className="mb-3">
                                             <table className="table table-striped">
@@ -330,33 +328,53 @@ const GeneratedQuiz = () => {
                                                         </thead>
 
                                                         <tbody>
+
                                                     {questionsData[question.id].answers.map((ans, idx) => (
                                                         <tr>
-                                                            <td><div className="d-flex justify-content-start">
-                                                                {ans["leftSide"]}
+                                                            <td style={{ borderRight: "1px solid black", paddingBottom: "2px" }}
+                                                            ><div className="d-flex justify-content-start">
+                                                                <InlineMath
+                                                                    options={{ strict: false }}
+                                                                >
+                                                                    {ans["leftSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                </InlineMath>
+                                                                {/*{ans["leftSide"]}*/}
                                                             </div></td>
-                                                            <td>
+                                                            <td style={{ borderLeft: "1px solid black", paddingBottom: "2px" }}>
                                                                 <div className="d-flex justify-content-end">
+                                                                    {ans.answer.length === 0 ? "Select Answer" :
+                                                                            <span>
+                                                                                <InlineMath
+                                                                                options={{ strict: false }}>
+                                                                                    {ans.answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                                </InlineMath>
+                                                                            </span>
+                                                                    }
+
                                                                     <div className="dropdown">
                                                                         <button
-                                                                            className="btn dropdown-toggle"
+                                                                            className="btn"
                                                                             type="button"
                                                                             id={`dropdown-${idx}`}
                                                                             data-bs-toggle="dropdown"
                                                                             aria-expanded="false"
                                                                         >
-                                                                            {ans.answer.length === 0 ? "Select Answer" : ans.answer}
+                                                                            <i className="bi bi-chevron-down"
+                                                                               style={{fontSize: '24px'}}></i>
                                                                         </button>
+
                                                                         <ul className="dropdown-menu"
+                                                                            style={{width:"25rem", wordWrap:"break-word"}}
                                                                             aria-labelledby={`dropdown-${idx}`}>
                                                                             {questionsData[question.id].answers.map((answ, optionIdx) => (
                                                                                 <li key={optionIdx}>
                                                                                     <a
                                                                                         className="dropdown-item"
+                                                                                        style={{whiteSpace:"normal"}}
                                                                                         href="#"
                                                                                         onClick={(e) => {
                                                                                             e.preventDefault();
-                                                                                            setQuestionsData(prevData => ({
+                                                                                            setQuestionsData((prevData) => ({
                                                                                                 ...prevData,
                                                                                                 [question.id]: {
                                                                                                     ...prevData[question.id],
@@ -364,27 +382,35 @@ const GeneratedQuiz = () => {
                                                                                                         index === idx
                                                                                                             ? {
                                                                                                                 ...item,
-                                                                                                                answer: answ["rightSide"]
+                                                                                                                answer: answ["showRightSide"],
                                                                                                             }
                                                                                                             : item
-                                                                                                    )
-                                                                                                }
+                                                                                                    ),
+                                                                                                },
                                                                                             }));
                                                                                         }}
                                                                                     >
-                                                                                        {answ["rightSide"]}
+                                                                                        <div
+                                                                                            className="d-flex justify-content-start">
+                                                                                                <span>
+                                                                                                  <InlineMath options={{ strict: false }}>
+                                                                                                    {answ["showRightSide"]
+                                                                                                        .replace(/ /g, " \\text{ } ")
+                                                                                                        .replace(/\n/g, " \\\\ ")}
+                                                                                                  </InlineMath>
+                                                                                                </span>
+                                                                                        </div>
                                                                                     </a>
                                                                                 </li>
                                                                             ))}
                                                                         </ul>
                                                                     </div>
                                                                 </div>
-
                                                             </td>
                                                         </tr>
-                                            ))}
+                                                    ))}
                                                         </tbody>
-                                                    </table>
+                                            </table>
                                         </div>
                                     )}
 
@@ -413,7 +439,9 @@ const GeneratedQuiz = () => {
                                                                }));
                                                            }}
                                                     />
-                                                    <label className="form-check-label">{ans.text}</label>
+                                                    <label className="form-check-label"><InlineMath>
+                                                {ans.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                            </InlineMath></label>
                                                 </div>
                                             ))}
                                         </div>
@@ -421,26 +449,37 @@ const GeneratedQuiz = () => {
 
                                     {questionsData[question.id]?.type === "short_answer_question" && (
                                         <div className="mb-3">
-                                            <InlineMath
-                                    >
-                                      {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                    </InlineMath>
-                                            <input type="text" className="form-control mt-3"
-                                                   placeholder="Answer"
-                                                   value={questionsData[question.id]?.answers[0]["answer"]}
-                                                   onChange={(e) => {
-                                                       const newAnswer = e.target.value;
+                                            <div className="container mt-3">
+                                                <div className="row">
+                                                    <div className="col-6">
+                                                      <textarea
+                                                          className="form-control h-100"
+                                                          placeholder="Answer"
+                                                          value={questionsData[question.id]?.answers[0]["answer"]}
+                                                          rows={4}
+                                                          onChange={(e) => {
+                                                              const newAnswer = e.target.value;
 
-                                                       setQuestionsData((prevData) => ({
-                                                           ...prevData,
-                                                           [question.id]: {
-                                                               ...prevData[question.id],
-                                                               answers: [{answer: newAnswer}],
-                                                           },
-                                                       }));
-                                                   }}
+                                                              setQuestionsData((prevData) => ({
+                                                                  ...prevData,
+                                                                  [question.id]: {
+                                                                      ...prevData[question.id],
+                                                                      answers: [{answer: newAnswer}],
+                                                                  },
+                                                              }));
+                                                          }}
+                                                      />
+                                                    </div>
+                                                    <div className="col-6 d-flex">
+                                                    <span>
+                                                        <InlineMath options={{ strict: false }}>
+                                                {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                            </InlineMath>
 
-                                            />
+                                                    </span>
+                                                        </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </li>
@@ -451,22 +490,23 @@ const GeneratedQuiz = () => {
                         <div className="d-flex justify-content-between">
                             <button type="button" className="btn btn-outline-secondary"
                                     onClick={() => {
-                                        if (count !==-1){
-                                        handleSaveQuiz(false);
+                                        if (count !== -1) {
+                                            handleSaveQuiz(false);
                                         }
-                                        window.location.href = "/quizzes";}
-                            }
+                                        window.location.href = "/quizzes";
+                                    }
+                                    }
                             >
                                 Back to Quizzes
                             </button>
-                                <div>
+                            <div>
                                 {page === 0 ? (
-                                <div></div>
+                                    <div></div>
                                 ) : (
                                     <button type="button" className="btn btn-primary" disabled={page === 0}
                                             style={{marginRight: '3px'}}
                                             onClick={() => setPage((prev) => prev - 1)}>
-                                        <i className="bi bi-caret-left"></i> Back to {quiz.sections[page - 1].title}
+                                    <i className="bi bi-caret-left"></i> Back to {quiz.sections[page - 1].title}
 
                                     </button>
                                 )}

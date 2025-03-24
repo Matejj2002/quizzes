@@ -1,6 +1,7 @@
-import React from "react";
-import {useEffect, useState} from "react";
-const Login = ({path = "/questions/1"}) =>{
+import React, {useEffect} from "react";
+import {useState} from "react";
+import Navigation from "./Navigation";
+const Login = ({path = "/login"}) =>{
     const [rerender, setReRender] = useState(false);
     const [userData, setUserData] = useState({});
 
@@ -24,30 +25,33 @@ const Login = ({path = "/questions/1"}) =>{
                     });
             }
 
-            getAccessToken().then(() => {});
+            getAccessToken().then((response) => {});
         }
-
     }, [])
-
-
-    async function getUSerData() {
-        await fetch("http://127.0.0.1:5000/getUserData", {
-                method: "GET",
-                headers: {
-                    "Authorization" : "Bearer " + localStorage.getItem("accessToken")
-                }
-            }
-
-        ).then((response) => {
-            return response.json();
-        }).then((data) => {
-            setUserData(data);
-        })
-    }
 
     function loginWithGithub(){
         window.location.assign("https://github.com/login/oauth/authorize?client_id="+ CLIENT_ID);
     }
+    async function getUserData() {
+        await fetch("http://127.0.0.1:5000/getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            localStorage.setItem("role", data["role"]);
+            localStorage.setItem("idUser", data["id_user"]);
+            setUserData(data);
+        })
+    }
+
+    useEffect(() => {
+        getUserData().then(() => {
+        });
+    }, [userData]);
 
     return (
         <div>
@@ -56,13 +60,16 @@ const Login = ({path = "/questions/1"}) =>{
                 localStorage.getItem("accessToken") ?
                     <>
                         <h3>Access Token here</h3>
-                        <button onClick={() => {localStorage.removeItem("accessToken"); setReRender(!rerender);}}>
+                        <button onClick={() => {
+                            localStorage.removeItem("accessToken");
+                            localStorage.removeItem("role");
+                            localStorage.removeItem("idUser");
+                            window.location.href = "https://github.com/logout";
+                            setReRender(!rerender);
+                        }}>
                             Log Out
                         </button>
 
-                        <button onClick={getUSerData}>
-                            Get Data
-                        </button>
                         {
                             Object.keys(userData).length !== 0 ?
                                 <>

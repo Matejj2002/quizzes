@@ -5,7 +5,7 @@ import Navigation from "../Navigation";
 import QuizReviewPoints from "./QuizReviewPoints";
 
 import 'katex/dist/katex.min.css';
-import { InlineMath, BlockMath } from 'react-katex';
+import { InlineMath } from 'react-katex';
 import "./MathText.css"
 
 const QuizReview = () =>{
@@ -122,200 +122,238 @@ const QuizReview = () =>{
 
                         <ul className="list-group mb-3">
                             {data.sections[page]?.questions.map((question, index) => (
-                                <li className={`list-group-item ${(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") ) ? 'border-danger' : ''} 
-                                    ${(questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") ) ? 'border-success' : ''}`}
+                                <li className={`list-group-item ${(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) ? 'border-danger' : ''} 
+                                    ${(questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) ? 'border-success' : ''}`}
+
 
                                     style={
                                         feedback.includes("correctAnswers")
-                                          ? {
-                                              background: questionsData[question.id]?.isCorrect
-                                                ? "rgba(155,236,137,0.15)"
-                                                : "rgba(255, 0, 0, 0.04)",
+                                            ? {
+                                                background: questionsData[question.id]?.isCorrect
+                                                    ? "rgba(155,236,137,0.15)"
+                                                    : "rgba(255, 0, 0, 0.04)",
                                             }
-                                          : {}
-                                      }
+                                            : {}
+                                    }
 
                                     key={index}>
                                     <div className="d-flex justify-content-between align-items-center">
                                         <h2>{questionsData[question.id]?.title}</h2>
 
                                         {feedback.includes("pointsReview") && (
-                                        <div>
-                                        {questionsData[question.id]?.isCorrect ? (
-                                            <div className="d-flex align-items-center">
-                                                <i className="bi bi-check-circle text-success fs-3"></i>
-                                                <p className="text-success fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
-                                            </div>
-                                        ) : (
-                                            <div className="d-flex align-items-center">
-                                                <i className="bi bi-x-circle text-danger fs-3"></i>
-                                                <p className="text-danger fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
+                                            <div>
+                                                {questionsData[question.id]?.isCorrect ? (
+                                                    <div className="d-flex align-items-center">
+                                                        <i className="bi bi-check-circle text-success fs-3"></i>
+                                                        <p className="text-success fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="d-flex align-items-center">
+                                                        <i className="bi bi-x-circle text-danger fs-3"></i>
+                                                        <p className="text-danger fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
-                                            </div>
-                                            )}
                                     </div>
-                                    <div>
-                                    <InlineMath
-                                    >
-                                      {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                    </InlineMath>
+
+                                    <div className="mb-1">
+                                        <InlineMath options={{ strict: false }}>
+                                            {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                        </InlineMath>
                                     </div>
-                                    {questionsData[question.id]?.type === "matching_answer_question" && (
-                                        <div className="mb-3">
-                                            <table className="table table-striped">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">
-                                                        <div className="d-flex justify-content-start">Left
-                                                            Side </div>
+
+                                            {questionsData[question.id]?.type === "matching_answer_question" && (
+                                                <div className="mb-3">
+                                                    <table className="table table-striped">
+                                                        <thead>
+                                                        <tr>
+                                                            <th scope="col">
+                                                                <div className="d-flex justify-content-start">Left
+                                                                    Side
+                                                                </div>
                                                             </th>
-                                                            <th scope="col"><div className="d-flex justify-content-end">Right
-                                                                Side </div>
+                                                            <th scope="col">
+                                                                <div className="d-flex justify-content-end">Right
+                                                                    Side
+                                                                </div>
                                                             </th>
                                                         </tr>
                                                         </thead>
 
                                                         <tbody>
-                                                    {questionsData[question.id].answers.map((ans, idx) => (
-                                                        <tr>
-                                                            <td><div className="d-flex justify-content-start">
-                                                                {ans["leftSide"]}
-                                                            </div></td>
-                                                            <td>
-                                                                <div className="d-flex justify-content-end">
-                                                                    {feedback.includes("correctAnswers") ? (
-                                                                        ans.answer !== ans["rightSide"]  ? (
-                                                                            <div>
+                                                        {questionsData[question.id].answers.map((ans, idx) => (
+                                                            <tr>
+                                                                <td style={{
+                                                                    borderRight: "1px solid black",
+                                                                    paddingBottom: "2px"
+                                                                }}>
+                                                                    <div className="d-flex justify-content-start w-100">
+                                                                        <InlineMath options={{ strict: false }}>
+                                                                            {ans["leftSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                        </InlineMath>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="d-flex justify-content-end w-100">
+                                                                        {feedback.includes("correctAnswers") ? (
+                                                                            ans.answer !== ans["rightSide"] ? (
+                                                                                <div>
                                                                                 <span
                                                                                     className="text-danger fw-bold me-1">
-                                                                                    {ans.answer.length === 0 ? "No answer" : ans.answer}
+                                                                                    {ans.answer.length === 0 ? "No answer" :
+                                                                                        <InlineMath options={{ strict: false }}>
+                                                                                            {ans.answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                                        </InlineMath>
+                                                                                    }
                                                                                 </span>
-                                                                                <span className="me-1">=></span>
-                                                                                <span className="text-success fw-bold">
-                                                                                    {ans["rightSide"]}
+                                                                                    <span className="me-1"><i
+                                                                                        className="bi bi-arrow-right"></i></span>
+                                                                                    <span
+                                                                                        className="text-success fw-bold">
+                                                                                    <InlineMath options={{ strict: false }}>
+                                                                                        {ans["rightSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                                    </InlineMath>
                                                                                 </span>
-                                                                                <span
-                                                                                    className="ms-2 text-danger">❌</span>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div>
+                                                                                    <span
+                                                                                        className="ms-2 text-danger">❌</span>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div>
                                                                             <span
-                                                                                className="ms-2 text-success fw-bold">{ans.answer}</span>
-                                                                        <span className="ms-2 text-success">✅</span>
-                                                                            </div>
-                                                                        )
-                                                                ) : (
-                                                                    <span>{ans.answer}</span>
-                                                                )}
+                                                                                className="ms-2 text-success fw-bold">
+                                                                                <InlineMath options={{ strict: false }}>
+                                                                                    {ans["rightSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                                </InlineMath>
+                                                                            </span>
 
-                                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !=="") && (
-                                                                                <p className="border border-danger p-3 rounded"
-                                                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                                                    {ans?.feedback}
-                                                                                </p>
+                                                                                    <span
+                                                                                        className="ms-2 text-success">✅</span>
+                                                                                </div>
+                                                                            )
+                                                                        ) : (
+                                                                            <span>{ans.answer}</span>
+                                                                        )}
+
+                                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
+                                                                            <p className="border border-danger p-3 rounded"
+                                                                               style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                                                {ans?.feedback}
+                                                                            </p>
                                                                         )
                                                                         }
-                                                                </div>
+                                                                    </div>
 
-                                                            </td>
-                                                        </tr>
-                                            ))}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
                                                         </tbody>
                                                     </table>
-                                        </div>
-                                    )}
+                                                </div>
+                                            )}
 
-                                    {questionsData[question.id]?.type === "multiple_answer_question" && (
-                                        <div className="mb-3">
-                                            {questionsData[question.id]?.answers.map((ans, idx) => (
-                                                <div className="form-check" key={idx}>
-                                                    <input className="form-check-input"
-                                                           type="checkbox"
-                                                           disabled="true"
-                                                           checked={ans.answer === true}
-                                                    />
-                                                    <label className="form-check-label">{ans?.text}</label>
-                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
-                                                        ans.answer
-                                                            ? <span className="ms-2 text-danger">❌</span>
-                                                            : <span className="ms-2 text-success">✅</span>
-                                                    )}
+                                            {questionsData[question.id]?.type === "multiple_answer_question" && (
+                                                <div className="mb-3">
+                                                    {questionsData[question.id]?.answers.map((ans, idx) => (
+                                                        <div className="form-check" key={idx}>
+                                                            <input className="form-check-input"
+                                                                   type="checkbox"
+                                                                   disabled="true"
+                                                                   checked={ans.answer === true}
+                                                            />
+                                                            <span className="form-check-label"><InlineMath options={{ strict: false }}
+                                                            >
+                                                        {ans?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                    </InlineMath>
+                                                    </span>
+                                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
+                                                                !ans.isCorrectOption
+                                                                    ? <span className="ms-2 text-danger">❌</span>
+                                                                    : <span className="ms-2 text-success">✅</span>
+                                                            )}
+                                                            {console.log(questionsData[question.id]?.isCorrect)}
 
-                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !=="") && (
+                                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
+                                                                <p className="border border-danger p-3 rounded"
+                                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                                    {ans?.feedback}
+                                                                </p>
+                                                            )
+                                                            }
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {questionsData[question.id]?.type === "short_answer_question" && (
+                                                <div className="mb-3 mt-3">
+                                                    <span className="me-2 mt-3 fw-bold">Answer: </span>
+                                                    <div className="d-flex fw-bold">
+                                                        <InlineMath options={{ strict: false }}>
+                                                            {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                        </InlineMath>
+                                                    </div>
+                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
                                                         <p className="border border-danger p-3 rounded"
                                                            style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                            {ans?.feedback}
+                                                            {questionsData[question.id]?.answers[0].feedback}
                                                         </p>
                                                     )
                                                     }
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                            )}
 
-                                    {questionsData[question.id]?.type === "short_answer_question" && (
-                                        <div className="mb-3 mt-3">
-                                            <div className="d-flex align-items-center mt-3 fw-bold">
-                                                <span className="me-2">Answer: </span>
-                                                <InlineMath>
-                                                    {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                </InlineMath>
-                                            </div>
-                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
-                                                <p className="border border-danger p-3 rounded"
-                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                    {questionsData[question.id]?.answers[0].feedback}
+                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "") && (
+                                                <p className="p-3 rounded"
+                                                   style={{
+                                                       background: "rgba(255, 0, 0, 0.3)"
+                                                   }}>
+                                                    {questionsData[question.id]?.feedback}
                                                 </p>
                                             )
                                             }
-                                        </div>
-                                    )}
 
-                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !=="") && (
-                                        <p className="p-3 rounded"
-                                           style={{
-                                               background: "rgba(255, 0, 0, 0.3)"}}>
-                                                {questionsData[question.id]?.feedback}
-                                        </p>
-                                    )
-                                    }
-
-                                    {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !=="") && (
-                                        <p className="p-3 rounded"
-                                           style={{
-                                               background: "rgba(155,236,137,0.15)"}}>
-                                                {questionsData[question.id]?.feedback}
-                                        </p>
-                                    )
-                                    }
+                                            {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "") && (
+                                                <p className="p-3 rounded"
+                                                   style={{
+                                                       background: "rgba(155,236,137,0.15)"
+                                                   }}>
+                                                    {questionsData[question.id]?.feedback}
+                                                </p>
+                                            )
+                                            }
 
 
-                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
-                                        <p className="p-3 rounded"
-                                           style={{
-                                               background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"}}>
-                                                Correct answer is {questionsData[question.id]?.correct_answer}
-                                        </p>
-                                    )
-                                    }
+                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
+                                                <p className="p-3 rounded"
+                                                   style={{
+                                                       background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
+                                                   }}>
+                                                    Correct answer is {
+                                                    <InlineMath options={{ strict: false }}>
+                                                        {questionsData[question.id]?.correct_answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                    </InlineMath>}
+
+                                                </p>
+                                            )
+                                            }
 
 
                                 </li>
-                            ))}
+                                ))}
                         </ul>
 
 
                         <div className="d-flex justify-content-between">
                             <div>
-                            <button type="button" className="btn btn-outline-secondary me-1"
-                                    onClick={() => {
-                                        window.location.href = "/quizzes";
-                                    }
-                                    }
-                            >
-                                Back to Quizzes
-                            </button>
+                                <button type="button" className="btn btn-outline-secondary me-1"
+                                        onClick={() => {
+                                            window.location.href = "/quizzes";
+                                        }
+                                        }
+                                >
+                                    Back to Quizzes
+                                </button>
                                 {conditionToRetake && (
                                     <button
                                         className="btn btn-outline-primary me-1"

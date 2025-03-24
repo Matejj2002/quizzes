@@ -111,9 +111,32 @@ def get_user_data():
 
     if response.ok:
         data = response.json()
+        user = User.query.filter(User.github_name == data["login"])
+        print(user.first())
+
+        if user.first() is None:
+            student = Student(
+                name = data["login"],
+                github_name = data["login"],
+                user_type = "student"
+            )
+            role = "student"
+
+            db.session.add(student)
+            db.session.commit()
+
+            id_user = student.id
+
+        else:
+            role = user.first().user_type
+            id_user = user.first().id
+
+        data["role"] = role
+        data["id_user"] = id_user
+
         return jsonify(data)
     else:
-        return jsonify({"error": "Failed to retrieve user data"}), response.status_code
+        return jsonify({"error": "Failed to retrieve user data"})
 
 
 @app.route('/logout', methods=['POST'])
@@ -342,11 +365,13 @@ def add_new_question():
     answers = data['answers']
     author = data['author']
     feedback = data["feedback"]
+    positive_feedback = data["positiveFeedback"]
 
     author_id = Teacher.query.filter_by(github_name=author).first()
 
     question = Question(category_id=category_id,
-                        question_feedback=feedback
+                        question_feedback=feedback,
+                        question_positive_feedback=positive_feedback
                         )
     db.session.add(question)
     db.session.commit()
@@ -441,6 +466,7 @@ def get_question_version_choice(question_id):
         "text": newest_version.text,
         "type": newest_version.type,
         "question_feedback": question.question_feedback,
+        "question_positive_feedback": question.question_positive_feedback,
         "feedback": [
 
         ],
@@ -511,6 +537,7 @@ def add_question_version(id):
 
     question = Question.query.get_or_404(id)
     question.question_feedback = data["feedback"]
+    question.question_positive_feedback = data["positiveFeedback"]
     db.session.commit()
 
     if data['questionType'] == 'Matching Question':
@@ -558,7 +585,6 @@ def add_question_version(id):
             short_answer_question_id=question_version_id,
             text=answer['text'],
             is_regex=answer['is_regex'],
-            is_correct=True,
             positive_feedback=answer["positive_feedback"],
             negative_feedback=answer["negative_feedback"],
             type='simple_answer'
@@ -619,27 +645,39 @@ def get_questions_from_category(index):
 
 @app.route("/api/get-quiz-templates", methods=["GET"])
 def get_quiz_templates():
+    student_id = request.args.get("studentId")
     quiz_templates = QuizTemplate.query.all()
 
     result = []
 
-    for template in quiz_templates:
+    actual_time = datetime.datetime.now()
+    cnt = 0
+    for template in sorted(quiz_templates, key=lambda x: x.date_time_open, reverse=True):
         if template.is_deleted:
             continue
 
-        if datetime.datetime.now() >= template.date_time_open and datetime.datetime.now() <= template.date_time_close:
+        if actual_time >= template.date_time_open and actual_time <= template.date_time_close:
             is_opened = True
         else:
             is_opened = False
 
+        time_limit_end = False
+        if actual_time > template.date_time_close:
+            time_limit_end = True
+
         can_be_checked = False
-        if datetime.datetime.now() >= template.datetime_check:
+        if actual_time >= template.datetime_check:
             can_be_checked = True
 
         if template.feedback_type == None:
             feedback_type = []
         else:
             feedback_type = template.feedback_type
+
+        if template.feedback_type_after_close == None:
+            feedback_type_after_close = []
+        else:
+            feedback_type_after_close = template.feedback_type_after_close
 
         template_sub = {
             "id": template.id,
@@ -653,15 +691,19 @@ def get_quiz_templates():
             "datetime_check": template.datetime_check,
             "order": template.order,
             "feedbackType": feedback_type,
+            "feedbackTypeAfterClose": feedback_type_after_close,
             "quiz_id": 0,
             "sections": [],
             "quizzes": [],
             "is_opened": is_opened,
+            "time_limit_end": time_limit_end,
             "can_be_checked": can_be_checked,
             "is_finished": False,
             "first_generation": False,
-            "number_of_questions": 0
+            "number_of_questions": 0,
+            "actual_quiz": cnt == 0
         }
+        cnt += 1
 
         question_count = 0
         section_count = 1
@@ -717,7 +759,7 @@ def get_quiz_templates():
             template_sub["number_of_questions"] = question_count
 
         student_quizzes = Quiz.query.filter(
-            Quiz.student_id == 3,
+            Quiz.student_id == student_id,
             Quiz.quiz_template_id == template.id
         ).order_by(desc(Quiz.date_time_started)).all()
 
@@ -725,7 +767,7 @@ def get_quiz_templates():
             template_sub["quiz_id"] = student_quizzes[0].id
             # student_quizzes.date_time_finished is None or
             time_end = student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish)
-            if datetime.datetime.now() < time_end and student_quizzes[0].date_time_finished is None:
+            if actual_time < time_end and student_quizzes[0].date_time_finished is None:
                 template_sub["is_finished"] = False
             else:
                 template_sub["is_finished"] = True
@@ -737,10 +779,11 @@ def get_quiz_templates():
             for i in student_quizzes[1:]:
                 quizzes.append({
                     "quiz_id": i.id,
-                    "ended": i.date_time_finished
+                    "ended": i.date_time_finished,
+                    "feedback": feedback_type
                 })
 
-            quizzes.sort(key=lambda x : x["ended"])
+            quizzes.sort(key=lambda x: x["ended"])
 
             template_sub["quizzes"] = quizzes
 
@@ -883,7 +926,6 @@ def check_new_quiz_template():
 def get_questions_quiz(index):
     review = request.args.get("review")
     item_id = request.args.get('item_id')
-    feedback_type = request.args.get('feedbackType')
 
     item = QuizItem.query.filter_by(id=item_id).first()
 
@@ -913,8 +955,12 @@ def get_questions_quiz(index):
             if len(matching_answs) != 0:
                 cnt = 0
 
+                right_sides = [i.rightSide for i in newest_version.matching_question]
+                from random import shuffle
+                shuffle(right_sides)
+
                 for matching_pair in newest_version.matching_question:
-                    correct_answers+= matching_pair.leftSide + " -> " + matching_pair.rightSide + "\n"
+                    correct_answers += matching_pair.leftSide + " -> " + matching_pair.rightSide + "\n"
                     if review:
                         if len(matching_answs) != 0:
                             max_points = matching_answs["evaluate"]
@@ -929,33 +975,54 @@ def get_questions_quiz(index):
                             is_correct_res = False
                             points = 0
 
+                    print(matching_answs)
                     answers.append(
                         {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
                          "rightSide": matching_pair.rightSide, "answer": matching_answs["answer"][cnt]["answer"],
-                         "feedback": matching_pair.negative_feedback
+                         "feedback": matching_pair.negative_feedback,
+                         "showRightSide": right_sides[cnt]
                          })
                     cnt += 1
             else:
                 for matching_pair in newest_version.matching_question:
                     answers.append(
-                        {"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [] , "feedback": matching_pair.negative_feedback
+                        {"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [],
+                         "feedback": matching_pair.negative_feedback
                          })
         else:
             for matching_pair in newest_version.matching_question:
-                answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [], "feedback": matching_pair.negative_feedback
+                answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [],
+                                "feedback": matching_pair.negative_feedback
                                 })
-
 
     elif newest_version.type == "multiple_answer_question":
         multiple_answs = []
+        ord_ids = []
         if item is not None:
             multiple_answs = json.loads(item.answer)
 
+            if item.order is None:
+                from random import shuffle
+                ord_ids = [i.id for i in newest_version.multiple_answers]
+                shuffle(ord_ids)
+                item.order = ord_ids
+                db.session.commit()
+            else:
+                ord_ids = item.order
+            # print(ord_ids)
+            # print("CCC",item.order)
+            # print("CCC", item)
+
         cnt = 0
-        correct_answers+="\n"
-        for choice in newest_version.multiple_answers:
+        correct_answers += "\n"
+        #
+        # print(item)
+
+        for choice_id in ord_ids:
+            choice = Choice.query.filter(Choice.id == choice_id).first()
             correct_answers += str(choice.is_correct) + "\n"
             try:
+                #print(multiple_answs, choice_id, multiple_answs["answer"][cnt][2], choice.is_correct)
                 if multiple_answs["answer"][cnt][2] == "True":
                     res = True
                 else:
@@ -985,6 +1052,7 @@ def get_questions_quiz(index):
                     "isSingle": choice.is_single,
                     "answer": res,
                     "feedback": choice.negative_feedback,
+                    "isCorrectOption": res == choice.is_correct
                 }
             )
             cnt += 1
@@ -1017,6 +1085,8 @@ def get_questions_quiz(index):
     feedback = ""
     if not is_correct_res:
         feedback = newest_version.questions.question_feedback
+    else:
+        feedback = newest_version.questions.question_positive_feedback
 
     return {
         "id": newest_version.id,
@@ -1056,7 +1126,8 @@ def create_new_quiz_template():
             date_time_close=data["dateClose"],
             time_to_finish=data["minutesToFinish"],
             datetime_check=data["dateCheck"],
-            feedback_type=data["feedbackType"]
+            feedback_type=data["feedbackType"],
+            feedback_type_after_close=data["feedbackTypeAfterClose"]
         )
 
         db.session.add(quiz_template)
@@ -1131,6 +1202,7 @@ def create_new_quiz_template():
         quiz_template.datetime_check = data["dateCheck"]
         quiz_template.feedback_type = data["feedbackType"]
         quiz_template.time_to_finish = data["minutesToFinish"]
+        quiz_template.feedback_type_after_close = data["feedbackTypeAfterClose"]
 
         db.session.add(quiz_template)
         db.session.commit()
@@ -1172,8 +1244,28 @@ def generate_quiz(quiz, questions, student_id):
                 quiz_section_id=section_added.id
             )
 
+            if question["questionType"] == "questions":
+                version = QuestionVersion.query.filter(
+                    QuestionVersion.id == questions[str(question["id"])]["id"]).first()
+                order_options = []
+                from random import shuffle
+
+                if question["type"] == "short_answer_question":
+                    order_options = [version.short_answers[0].id]
+                elif question["type"] == "multiple_answer_question":
+                    mult_opts = [i.id for i in version.multiple_answers]
+                    shuffle(mult_opts)
+                    order_options = mult_opts
+
+            # !! dorobit shufflovanie options otazok
+
             db.session.add(new_item)
             db.session.commit()
+
+            if question["questionType"] == "questions":
+                new_item.order = order_options
+                db.session.add(new_item)
+                db.session.commit()
 
             order_questions.append(new_item.id)
 
@@ -1241,7 +1333,8 @@ def new_quiz_student():
                         answer=quiz_item.answer,
                         score=quiz_item.score,
                         question_version_id=quiz_item.question_version_id,
-                        quiz_section_id=new_section.id
+                        quiz_section_id=new_section.id,
+                        order=quiz_item.order
                     )
 
                     db.session.add(new_item)

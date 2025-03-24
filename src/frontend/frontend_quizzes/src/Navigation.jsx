@@ -17,12 +17,16 @@ const Navigation = ({active}) => {
         ).then((response) => {
             return response.json();
         }).then((data) => {
+            localStorage.setItem("role", data["role"]);
+            localStorage.setItem("idUser", data["id_user"]);
             setUserData(data);
         })
     }
 
     const handleLogout = () => {
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("role");
+        localStorage.removeItem("idUser");
         navigate("/login");
     };
 

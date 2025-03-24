@@ -11,7 +11,7 @@ class Question(db.Model):
     # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
     category = db.relationship("Category", backref='category')
     question_feedback = db.Column(db.Text, default='') #premenovat na question_negative_feedback
-    # question_positive_feedback = db.Column(db.Text, default='')
+    question_positive_feedback = db.Column(db.Text, default='')
 
     question_version = db.relationship('QuestionVersion', back_populates='questions', cascade='all, delete-orphan')
 
@@ -221,6 +221,7 @@ class QuizTemplate(db.Model):
     datetime_check = db.Column(db.DateTime)
 
     feedback_type = db.Column(db.ARRAY(db.Text))
+    feedback_type_after_close = db.Column(db.ARRAY(db.Text))
 
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     teacher = db.relationship('Teacher')
@@ -305,6 +306,7 @@ class QuizItem(db.Model):
     score = db.Column(db.DECIMAL(10, 2))  # Decimal
 
     #dorobit order
+    order = db.Column(db.ARRAY(db.Integer))
 
     students_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
     teachers_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))

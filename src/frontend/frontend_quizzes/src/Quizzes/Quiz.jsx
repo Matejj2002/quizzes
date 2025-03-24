@@ -11,7 +11,11 @@ const Quiz = () => {
 
     const fetchQuizzes = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-quiz-templates`)
+            const response = await axios.get(`http://127.0.0.1:5000/api/get-quiz-templates` ,
+                {
+                    params: {"studentId": localStorage.getItem("idUser")}
+                }
+            )
             setQuizzes(response.data.result);
       }catch (error){}
        finally {}
@@ -62,8 +66,8 @@ const Quiz = () => {
                 console.error('Error saving changes:', error);
             });
     }
-
-    return localStorage.getItem("accessToken") ? (
+    console.log(localStorage.getItem("role"))
+    return localStorage.getItem("role") ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation active = {"Quizzes"}></Navigation>
@@ -74,36 +78,46 @@ const Quiz = () => {
 
                         <div className="col-8">
                             <h1>Quizzes</h1>
-                            <button className="btn btn-primary" onClick={() => {navigate('/new-quiz');}}>
-                                New Quiz
-                            </button>
+                            {localStorage.getItem("role") !== "student" && (
+                                <button className="btn btn-primary" onClick={() => {
+                                    navigate('/new-quiz');
+                                }}>
+                                    New Quiz
+                                </button>
+                            )}
+
 
                             {quizzes.map((quiz) => {
-                                    return (
-                                        <div className="border p-3 mb-3 mt-3 ">
+                                return (
+                                    <div className={`border p-3 mb-3 mt-3 ${quiz.actual_quiz ? 'border-success' : ''}`}>
                                             <div className="d-flex justify-content-between">
                                                 <div className="d-flex">
                                                     <h2 className="h5">
                                                         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                         <a href="#" className="text-decoration-none me-1"
-                                                           onClick={(e) => handleUpdateQuiz(e, quiz)}
+                                                          {...(localStorage.getItem("role") !== "student"
+                                                            ? { onClick: (e) => handleUpdateQuiz(e, quiz) }
+                                                            : {})}
                                                         >{quiz.title}</a>
                                                     </h2>
 
 
                                                 </div>
-                                                <button
-                                                    className="btn btn-outline-danger btn-xs p-0 px-1"
-                                                    style={{marginLeft: "25%"}}
-                                                    onClick={(e) => {
-                                                        if (window.confirm("Are you sure you want to archive this quiz?")) {
-                                                            handleArchiveQuiz(e, quiz)
+                                                {localStorage.getItem("role") !== "student" && (
+                                                    <button
+                                                        className="btn btn-outline-danger btn-xs p-0 px-1"
+                                                        style={{marginLeft: "25%"}}
+                                                        onClick={(e) => {
+                                                            if (window.confirm("Are you sure you want to archive this quiz?")) {
+                                                                handleArchiveQuiz(e, quiz)
+                                                            }
                                                         }
-                                                    }
-                                                    }
-                                                >
-                                                    <i className="bi bi-trash"></i>
-                                                </button>
+                                                        }
+                                                    >
+                                                        <i className="bi bi-trash"></i>
+                                                    </button>
+                                                )}
+
                                             </div>
 
                                             {quiz["shuffle_sections"] && (
@@ -131,7 +145,7 @@ const Quiz = () => {
                                                 className="m-0 text-secondary text-truncate">Check from {quiz["datetime_check"]}</span><br/>
                                             </div>
 
-                                            {quiz.quizzes.length > 0 && (
+                                            {quiz.quizzes.length > 0 && !quiz.time_limit_end &&  (
                                                 <details className="mb-3">
                                                     <summary className="mb-1">Older attempts ({quiz.quizzes.length})</summary>
                                                     {quiz.quizzes.map((qz, ind) => (
@@ -152,7 +166,8 @@ const Quiz = () => {
                                                                             navigate("/review-quiz", {
                                                                                 state: {
                                                                                     quiz: quiz,
-                                                                                    quizId: qz["quiz_id"]
+                                                                                    quizId: qz["quiz_id"],
+                                                                                    feedback: qz.feedback,
                                                                                 }
                                                                             });
                                                                         }}

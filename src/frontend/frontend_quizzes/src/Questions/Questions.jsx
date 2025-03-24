@@ -163,7 +163,7 @@ const Questions = () => {
             alert(text);
     }
 
-    return localStorage.getItem("accessToken") ? (
+    return localStorage.getItem("role") === "teacher" ? (
             <div>
                 <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation active="Questions"></Navigation>
@@ -390,13 +390,11 @@ const Questions = () => {
                                                         <p
                                                             className="m-0 text-truncate"
                                                         >
-                                                            <InlineMath>
-                                                                {question.versions.text.replace(/ /g, " \\text{ } ")}
-                                                            </InlineMath>
+                                                                {question.versions.text}
                                                         </p>
                                                         {questionFilter === "Active" && (
                                                             <button
-                                                                className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
+                                                                className="btn btn-outline-danger btn-xs p-0 px-2 ms-1 mb-1"
                                                                 onClick={() => {
                                                                     if (window.confirm("Are you sure you want to delete this question?")) {
                                                                         handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
@@ -508,7 +506,8 @@ const Questions = () => {
             </div>
         ) : (
         <div>
-            <Login></Login>
+            {navigate("/login")}
+            {/*<Login></Login>*/}
         </div>
     )
 }
