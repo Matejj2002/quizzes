@@ -248,12 +248,16 @@ const NewQuestion = ({subButText="Submit"}) => {
     function prepareTextForLatex(text){
         return text?.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ");
     }
-    console.log(text);
-        return localStorage.getItem("accessToken") ? (
+
+    if (localStorage.getItem("role") !=="teacher"){
+        navigate("/quizzes");
+    }
+
+        return (
             <div>
-                <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+
                     <Navigation active="Questions"></Navigation>
-                </header>
+
                 <div className="container-fluid" style={{marginTop: "50px"}}>
                     <div className="row">
                         <div className="col-2 sidebar"
@@ -447,10 +451,6 @@ const NewQuestion = ({subButText="Submit"}) => {
                         <div className="col-2"></div>
                     </div>
                 </div>
-            </div>
-        ) : (
-            <div>
-                <Login></Login>
             </div>
         )
 }

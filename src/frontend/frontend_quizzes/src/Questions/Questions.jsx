@@ -163,11 +163,14 @@ const Questions = () => {
             alert(text);
     }
 
-    return localStorage.getItem("role") === "teacher" ? (
+    if (localStorage.getItem("role") !=="teacher"){
+        navigate("/quizzes");
+    }
+
+    return (
             <div>
-                <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation active="Questions"></Navigation>
-                </header>
+
                 <div className="container-fluid text-center" style={{marginTop: "50px"}}>
                 <div className="row">
                         <div className="col-2 sidebar"
@@ -504,12 +507,8 @@ const Questions = () => {
 
                 </div>
             </div>
-        ) : (
-        <div>
-            {navigate("/login")}
-            {/*<Login></Login>*/}
-        </div>
     )
+
 }
 
 export default Questions;

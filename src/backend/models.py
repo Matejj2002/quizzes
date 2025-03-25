@@ -196,10 +196,8 @@ class Student(User):
         'polymorphic_identity': 'student',
     }
 
-
 # -------
 # Quizy
-
 
 class QuizTemplate(db.Model):
     __tablename__ = 'quiz_templates'
@@ -278,7 +276,7 @@ class Quiz(db.Model):
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     # quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     quiz_template = db.relationship('QuizTemplate', cascade="all, delete")
 
@@ -304,6 +302,7 @@ class QuizItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     answer = db.Column(db.Text)  # Text - ako json, podla typu otazky
     score = db.Column(db.DECIMAL(10, 2))  # Decimal
+    max_points = db.Column(db.DECIMAL(10, 2), default = 0)
 
     #dorobit order
     order = db.Column(db.ARRAY(db.Integer))
@@ -312,6 +311,7 @@ class QuizItem(db.Model):
     teachers_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
 
     quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
+
 
     # komentar - defaultne null ku otazke - studentske komentare
     # najviac jeden komentar - odkaz na komentar

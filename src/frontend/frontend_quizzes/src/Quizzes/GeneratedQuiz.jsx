@@ -8,6 +8,7 @@ import { InlineMath } from 'react-katex';
 const GeneratedQuiz = () => {
     const location = useLocation();
     const [quiz, setQuiz] = useState(location.state?.quiz);
+    const [oldQuiz] = useState(location.state?.quiz);
     const [refreshQuiz, setRefreshQuiz] = useState(location.state?.refreshQuiz || false);
     const [questionsData, setQuestionsData] = useState({});
     const [randomQuestions, setRandomQuestions] = useState([]);
@@ -18,6 +19,8 @@ const GeneratedQuiz = () => {
     const [count, setCount] = useState(-1);
     const [minutesToFinish, setMinutesToFinish] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
+
+    const [feedbackQuestion, setFeedbackQuestion] = useState([]);
 
     const [quizGenerated, setQuizGenerated] = useState(false);
 
@@ -101,8 +104,6 @@ const GeneratedQuiz = () => {
             quiz.sections.forEach((section) => {
                 section.questions.forEach((question) => {
                     if (!questionsData[question.id] && question.questionType === "questions") {
-                        console.log(questionsData[question.id])
-                        console.log(question.id, question.item_id);
                         fetchQuestions.push(fetchQuestion(question.id, question.item_id));
                     } else {
                         if (!question.id){
@@ -147,7 +148,8 @@ const GeneratedQuiz = () => {
         const updatedData = {
             "quiz": quiz,
             "data": questionsData,
-            "finalSave": finalSave
+            "finalSave": finalSave,
+            "studentId": localStorage.getItem("idUser")
         }
         axios.put(`http://127.0.0.1:5000/api/quiz_set_answers`, updatedData).then( () =>{
                 if (finalSave){
@@ -168,13 +170,15 @@ const GeneratedQuiz = () => {
 
         return false;
     }
+
     const generateQuiz = () => {
         const updatedData = {
             "quiz": quiz,
             "questions": questionsData,
-            "student_id": 3,
+            "student_id": localStorage.getItem("idUser"),
             "refreshQuiz": refreshQuiz
         }
+
         axios.put(`http://127.0.0.1:5000/api/new-quiz-student`, updatedData)
                     .then(
                         async (response) => {
@@ -182,7 +186,7 @@ const GeneratedQuiz = () => {
                                 const result = await axios.get("http://127.0.0.1:5000/api/quiz-student-load",
                                     {
                                         params: {
-                                            student_id: 3,
+                                            student_id: localStorage.getItem("idUser"),
                                             quiz_id: response.data["quiz_id"]
                                         }
                                     }
@@ -232,6 +236,21 @@ const GeneratedQuiz = () => {
 
     }
 
+    const saveFeedback = (feedback, itemId) =>{
+        const updatedData = {
+            "feedback": feedback,
+            "itemId": itemId,
+            "student_id": localStorage.getItem("idUser"),
+            "role": localStorage.getItem("role")
+        }
+        axios.put(`http://127.0.0.1:5000/api/save-feedback-to-item`, updatedData).then( () =>{
+            setFeedbackQuestion([...feedbackQuestion, itemId]);
+        }
+
+        ).catch( () => {
+        })
+    }
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center">
@@ -247,9 +266,9 @@ const GeneratedQuiz = () => {
 
     return (
         <div>
-            <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+
                 <Navigation active="Quizzes"></Navigation>
-            </header>
+
             <div className="container-fluid" style={{marginTop: "50px"}}>
                 <div className="row">
                     <div className="col-2 sidebar"></div>
@@ -271,21 +290,21 @@ const GeneratedQuiz = () => {
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
                                 <li className="nav-item" role="presentation">
-                                    <button
-                                        className={`nav-link ${index === page ? 'active' : ''}`}
-                                        id={`tab-${index}`}
-                                        data-bs-toggle="tab"
-                                        data-bs-target={`#tab-pane-${index}`}
-                                        type="button"
-                                        role="tab"
-                                        aria-controls={`tab-pane-${index}`}
-                                        aria-selected={index === page}
-                                        onClick={() => {
-                                            setPage(index)
-                                        }}
-                                    >
-                                        {sect.title || "Section " + (index + 1)}
-                                    </button>
+                                        <button
+                                            className={`nav-link ${index === page ? 'active' : ''}`}
+                                            id={`tab-${index}`}
+                                            data-bs-toggle="tab"
+                                            data-bs-target={`#tab-pane-${index}`}
+                                            type="button"
+                                            role="tab"
+                                            aria-controls={`tab-pane-${index}`}
+                                            aria-selected={index === page}
+                                            onClick={() => {
+                                                setPage(index)
+                                            }}
+                                        >
+                                            {sect.title || "Section " + (index + 1)}
+                                        </button>
                                 </li>
                             ))}
 
@@ -303,49 +322,87 @@ const GeneratedQuiz = () => {
                         <ul className="list-group mb-3">
                             {quiz.sections[page]?.questions.map((question, index) => (
                                 <li className="list-group-item" key={index}>
-                                    <h2>{questionsData[question.id]?.title}</h2>
+                                    <div className="d-flex justify-content-between">
+                                        <h2>{questionsData[question.id]?.title}</h2>
+                                        <div className="dropdown-center">
+                                          <button className="btn  dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                             <i className={`bi bi-flag ${feedbackQuestion.includes(question.item_id) ? "text-danger" : ""}`}></i>
+                                          </button>
+                                            <div className="dropdown-menu p-3" style={{minWidth: "300px"}}>
+                                                <label htmlFor="feedback" className="form-label">Feedback</label>
+                                                <textarea id={`feedback-${question.id}`} className="form-control" rows="3"
+                                                          placeholder="Why you flagged this question?"
+                                                ></textarea>
+
+                                                <button className="btn btn-primary w-100 mt-2"
+                                                        // disabled={document.getElementById("feedback-" + question.id.toString()).value === ""}
+                                                        onClick={() => {
+                                                            const feedbackValue = document.getElementById("feedback-" + question.id.toString()).value;
+                                                            saveFeedback(feedbackValue, question.item_id)
+                                                        }}
+                                                >
+                                                    {!feedbackQuestion.includes(question.item_id) ? (
+                                                        <span>Send feedback</span>
+                                                    ) : (
+                                                        <span>Update feedback</span>
+                                                    )}
+                                                    </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div>
                                         <InlineMath
-                                            options={{ strict: false }}
+                                            options={{strict: false}}
                                         >
-                                            {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                        </InlineMath>
-                                    </div>
+                                        {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                            </InlineMath>
+                                        </div>
 
-                                    {questionsData[question.id]?.type === "matching_answer_question" && (
-                                        <div className="mb-3">
-                                            <table className="table table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">
-                                                        <div className="d-flex justify-content-start">Left
-                                                                Side </div>
-                                                            </th>
-                                                            <th scope="col"><div className="d-flex justify-content-end">Right
-                                                                Side </div>
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
+                                        {questionsData[question.id]?.type === "matching_answer_question" && (
+                                            <div className="mb-3">
+                                                <table className="table table-striped">
+                                                    <thead>
+                                                    <tr>
+                                                        <th scope="col">
+                                                            <div className="d-flex justify-content-start">Left
+                                                                Side
+                                                            </div>
+                                                        </th>
+                                                        <th scope="col">
+                                                            <div className="d-flex justify-content-end">Right
+                                                                Side
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
 
-                                                        <tbody>
+                                                    <tbody>
 
                                                     {questionsData[question.id].answers.map((ans, idx) => (
                                                         <tr>
-                                                            <td style={{ borderRight: "1px solid black", paddingBottom: "2px" }}
-                                                            ><div className="d-flex justify-content-start">
-                                                                <InlineMath
-                                                                    options={{ strict: false }}
-                                                                >
-                                                                    {ans["leftSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                </InlineMath>
-                                                                {/*{ans["leftSide"]}*/}
-                                                            </div></td>
-                                                            <td style={{ borderLeft: "1px solid black", paddingBottom: "2px" }}>
+                                                            <td style={{
+                                                                borderRight: "1px solid black",
+                                                                paddingBottom: "2px"
+                                                            }}
+                                                            >
+                                                                <div className="d-flex justify-content-start">
+                                                                    <InlineMath
+                                                                        options={{strict: false}}
+                                                                    >
+                                                                        {ans["leftSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                                    </InlineMath>
+                                                                    {/*{ans["leftSide"]}*/}
+                                                                </div>
+                                                            </td>
+                                                            <td style={{
+                                                                borderLeft: "1px solid black",
+                                                                paddingBottom: "2px"
+                                                            }}>
                                                                 <div className="d-flex justify-content-end">
                                                                     {ans.answer.length === 0 ? "Select Answer" :
-                                                                            <span>
+                                                                        <span>
                                                                                 <InlineMath
-                                                                                options={{ strict: false }}>
+                                                                                    options={{strict: false}}>
                                                                                     {ans.answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
                                                                                 </InlineMath>
                                                                             </span>
@@ -364,13 +421,16 @@ const GeneratedQuiz = () => {
                                                                         </button>
 
                                                                         <ul className="dropdown-menu"
-                                                                            style={{width:"25rem", wordWrap:"break-word"}}
+                                                                            style={{
+                                                                                width: "25rem",
+                                                                                wordWrap: "break-word"
+                                                                            }}
                                                                             aria-labelledby={`dropdown-${idx}`}>
                                                                             {questionsData[question.id].answers.map((answ, optionIdx) => (
                                                                                 <li key={optionIdx}>
                                                                                     <a
                                                                                         className="dropdown-item"
-                                                                                        style={{whiteSpace:"normal"}}
+                                                                                        style={{whiteSpace: "normal"}}
                                                                                         href="#"
                                                                                         onClick={(e) => {
                                                                                             e.preventDefault();
@@ -393,7 +453,8 @@ const GeneratedQuiz = () => {
                                                                                         <div
                                                                                             className="d-flex justify-content-start">
                                                                                                 <span>
-                                                                                                  <InlineMath options={{ strict: false }}>
+                                                                                                  <InlineMath
+                                                                                                      options={{strict: false}}>
                                                                                                     {answ["showRightSide"]
                                                                                                         .replace(/ /g, " \\text{ } ")
                                                                                                         .replace(/\n/g, " \\\\ ")}
@@ -409,49 +470,49 @@ const GeneratedQuiz = () => {
                                                             </td>
                                                         </tr>
                                                     ))}
-                                                        </tbody>
-                                            </table>
-                                        </div>
-                                    )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
 
-                                    {questionsData[question.id]?.type === "multiple_answer_question" && (
-                                        <div className="mb-3">
-                                            {questionsData[question.id].answers.map((ans, idx) => (
-                                                <div className="form-check" key={idx}>
-                                                    <input className="form-check-input"
-                                                           type="checkbox"
-                                                           checked={ans.answer === true}
+                                        {questionsData[question.id]?.type === "multiple_answer_question" && (
+                                            <div className="mb-3">
+                                                {questionsData[question.id].answers.map((ans, idx) => (
+                                                    <div className="form-check" key={idx}>
+                                                        <input className="form-check-input"
+                                                               type="checkbox"
+                                                               checked={ans.answer === true}
 
-                                                           onChange={(e) => {
-                                                               const isChecked = e.target.checked;
+                                                               onChange={(e) => {
+                                                                   const isChecked = e.target.checked;
 
-                                                               setQuestionsData((prevData) => ({
-                                                                   ...prevData,
-                                                                   [question.id]: {
-                                                                       ...prevData[question.id],
-                                                                       answers: prevData[question.id].answers.map((item, index) =>
-                                                                           index === idx ? {
-                                                                               ...item,
-                                                                               answer: isChecked
-                                                                           } : item
-                                                                       ),
-                                                                   },
-                                                               }));
-                                                           }}
-                                                    />
-                                                    <label className="form-check-label"><InlineMath>
-                                                {ans.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                            </InlineMath></label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                                                   setQuestionsData((prevData) => ({
+                                                                       ...prevData,
+                                                                       [question.id]: {
+                                                                           ...prevData[question.id],
+                                                                           answers: prevData[question.id].answers.map((item, index) =>
+                                                                               index === idx ? {
+                                                                                   ...item,
+                                                                                   answer: isChecked
+                                                                               } : item
+                                                                           ),
+                                                                       },
+                                                                   }));
+                                                               }}
+                                                        />
+                                                        <label className="form-check-label"><InlineMath>
+                                                            {ans.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
+                                                        </InlineMath></label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
 
-                                    {questionsData[question.id]?.type === "short_answer_question" && (
-                                        <div className="mb-3">
-                                            <div className="container mt-3">
-                                                <div className="row">
-                                                    <div className="col-6">
+                                        {questionsData[question.id]?.type === "short_answer_question" && (
+                                            <div className="mb-3">
+                                                <div className="container mt-3">
+                                                    <div className="row">
+                                                        <div className="col-6">
                                                       <textarea
                                                           className="form-control h-100"
                                                           placeholder="Answer"
@@ -469,21 +530,21 @@ const GeneratedQuiz = () => {
                                                               }));
                                                           }}
                                                       />
-                                                    </div>
-                                                    <div className="col-6 d-flex">
+                                                        </div>
+                                                        <div className="col-6 d-flex">
                                                     <span>
-                                                        <InlineMath options={{ strict: false }}>
+                                                        <InlineMath options={{strict: false}}>
                                                 {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
                                             </InlineMath>
 
                                                     </span>
                                                         </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
                                 </li>
-                            ))}
+                                ))}
                         </ul>
 
                         <br></br>

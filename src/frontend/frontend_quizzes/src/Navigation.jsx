@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-
 const Navigation = ({active}) => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({});
@@ -27,7 +26,7 @@ const Navigation = ({active}) => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("role");
         localStorage.removeItem("idUser");
-        navigate("/login");
+        window.location.href = "/login"
     };
 
     useEffect(() => {
@@ -35,10 +34,12 @@ const Navigation = ({active}) => {
         });
     }, []);
 
+
     return (
-        <nav className="navbar bg-primary fixed-top" data-bs-theme="dark">
+        <nav className="navbar navbar-expand-sm bg-primary w-100" data-bs-theme="dark">
             <div className="container-fluid">
-                <a className="navbar-brand" href="#">Navbar</a>
+                <a className="navbar-brand" href="#">Quizzes</a>
+                {/*{localStorage.getItem("role")?.charAt(0).toUpperCase() + localStorage.getItem("role")?.slice(1)}*/}
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
                         aria-label="Toggle navigation">
@@ -46,40 +47,58 @@ const Navigation = ({active}) => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div className="navbar-nav">
-                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""}`}
+                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            href="http://localhost:3000/quizzes">Quizzes</a>
 
-                        <a className={`nav-link ${active === "Questions" ? "active" : ""}`}
+                        <a className={`nav-link ${active === "Questions" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={localStorage.getItem("role") !== "teacher"}
                            href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>
 
-                        <a className={`nav-link ${active === "Admin" ? "active" : ""}`} aria-current="page"
+                        <a className={`nav-link ${active === "Users" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={localStorage.getItem("role") !== "teacher"}
+                           href="http://localhost:3000/users">Users</a>
+
+                        <a className={`nav-link ${active === "Admin" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
+                           aria-current="page"
                            href="http://127.0.0.1:5000/admin/">Admin</a>
+
+
 
                     </div>
                 </div>
-                <div className="d-flex">
-                    <img
-                        src={userData.avatar_url}
-                        alt={`${userData.name}'s profile`}
-                        style={{
-                            width: "30px",
-                            height: "30px",
-                            borderRadius: "50%",
-                            cursor: "pointer",
-                            marginRight: "5px"
-                        }}
-                        data-bs-toggle="dropdown"
-                    />
-                    <p data-bs-toggle="dropdown" className="me-1"
-                       style={{cursor: "pointer",  color:"white"}}>{userData.login}</p>
-                    <div className="dropdown-toggle"></div>
+                {active !== "Login" ? (
+                    <div className="d-flex">
+                        <img
+                            src={userData.avatar_url}
+                            alt={`${userData.name}'s profile`}
+                            style={{
+                                width: "30px",
+                                height: "30px",
+                                borderRadius: "50%",
+                                cursor: "pointer",
+                                marginRight: "5px"
+                            }}
+                            data-bs-toggle="dropdown"
+                        />
+                        <p data-bs-toggle="dropdown" className="me-1"
+                           style={{cursor: "pointer", color: "white"}}>{userData.login}</p>
+                        <div className="dropdown-toggle"></div>
 
-                    <ul className="dropdown-menu dropdown-menu-end" style={{ backgroundColor: "white" }}>
-                        <li>
-                            <button className="dropdown-item" onClick={handleLogout}>Logout</button>
-                        </li>
-                    </ul>
-                </div>
+                        <ul className="dropdown-menu dropdown-menu-end bg-primary">
+                            <li>
+                                <button className="dropdown-item" onClick={handleLogout}>Logout</button>
+                            </li>
+                        </ul>
+                    </div>
+                ) : (
+                    <div className="d-flex">
+                    <a role="button" tabIndex="0"
+                       onClick={() => {window.location.assign("https://github.com/login/oauth/authorize?client_id=Ov23likPzKaEmFtQM7kn")}}
+                       className="w-100 btn">
+                        Login </a>
+                    </div>
+                )}
+
             </div>
         </nav>
     )

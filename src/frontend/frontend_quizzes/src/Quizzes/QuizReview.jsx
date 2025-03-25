@@ -44,7 +44,7 @@ const QuizReview = () =>{
             const result = await axios.get("http://127.0.0.1:5000/api/quiz-student-load",
                 {
                     params: {
-                        student_id: 3,
+                        student_id: localStorage.getItem("idUser"),
                         quiz_id: quizId
                     }
                 }
@@ -82,9 +82,9 @@ const QuizReview = () =>{
 
     return (
         <div>
-            <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+
                 <Navigation active="Quizzes"></Navigation>
-            </header>
+
             <div className="container-fluid" style={{marginTop: "50px"}}>
                 <div className="row">
                     <div className="col-2 sidebar"></div>

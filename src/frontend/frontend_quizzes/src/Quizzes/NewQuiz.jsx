@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import Navigation from "../Navigation";
 import QuestionModal from "./QuestionModal";
-import Login from "../Login";
 import axios from "axios";
 
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import QuizTemplateQuestionItem from "./QuizTemplateQuestionItem";
 import QuizTemplateTabs from "./QuizTemplateTabs";
 import QuizTemplateSettings from "./QuizTemplateSettings";
@@ -19,11 +18,13 @@ const formatDate = (actDate) => {
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
 
+
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 const NewQuiz = () => {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [pageNum, setPageNum] = useState(1);
     const [pageCount, setPageCount] = useState( location.state?.sections.length+2 || 3);
@@ -322,11 +323,13 @@ const NewQuiz = () => {
         return isValid;
     }
 
-    return localStorage.getItem("accessToken") ? (
+    if (localStorage.getItem("role") !=="teacher"){
+        navigate("/quizzes");
+    }
+
+    return (
             <div>
-                <header className="navbar navbar-expand-lg bd-navbar sticky-top">
                     <Navigation active="Quizzes"></Navigation>
-                </header>
 
                 <div className="container-fluid" style={{ marginTop: "50px" }}>
                     <div className="row">
@@ -473,10 +476,6 @@ const NewQuiz = () => {
                     </div>
                 </div>
             </div>
-    ) : (
-        <div>
-            <Login path={"/new-quiz"}></Login>
-        </div>
     )
 }
 

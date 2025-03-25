@@ -117,14 +117,17 @@ const NewCategory = () => {
         fetchCategory().then(() => {});
         fetchCategorySelect().then(() => {});
     }, []);
-    console.log(selectedCategoryId);
-    console.log(selectedCategory);
 
-      return localStorage.getItem("accessToken") ? (
+
+    if (localStorage.getItem("role") !=="teacher"){
+        navigate("/quizzes");
+    }
+
+      return (
           <div>
-              <header className="navbar navbar-expand-lg bd-navbar sticky-top">
+
                   <Navigation active="Questions"></Navigation>
-              </header>
+
 
               <div className="containter-fluid" style={{marginTop: "50px"}}>
                   <div className="row">
@@ -201,10 +204,6 @@ const NewCategory = () => {
                       <div className="col-2"></div>
                   </div>
               </div>
-          </div>
-      ) : (
-          <div>
-              <Login></Login>
           </div>
       )
 }
