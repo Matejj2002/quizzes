@@ -2,13 +2,16 @@ import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from "../Navigation";
+import io from "socket.io-client";
 import Login from "../Login";
 
+const socket = io("http://127.0.0.1:5000");
 const Quiz = () => {
     const navigate = useNavigate();
 
     const [quizzes, setQuizzes] = useState([]);
     const [nameFilter, setNameFilter] = useState("");
+    const [updateAt, setUpdateAt] = useState(null);
 
     const fetchQuizzes = async () => {
       try{
@@ -18,21 +21,33 @@ const Quiz = () => {
                 }
             )
             setQuizzes(response.data.result);
+            setUpdateAt(response.data.update_at);
       }catch (error){
-          navigate("/login")
+            console.error(error)
       }
        finally {}
     }
 
     useEffect(() => {
         fetchQuizzes();
+    }, []);
 
+    useEffect(() => {
+        if (!updateAt) return;
         const interval = setInterval(() => {
-            fetchQuizzes();
+            const updt = new Date(updateAt).getTime();
+            if (Date.now() + + 60 * 60000 >= updt){
+                fetchQuizzes();
+            }else{
+                console.log(updt, Date.now());
+            }
+
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [updateAt]);
+
+
 
     const handleUpdateQuiz = (e, quiz) => {
         e.preventDefault();

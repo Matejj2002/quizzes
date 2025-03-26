@@ -11,6 +11,7 @@ from flask_session import Session
 import requests
 from dotenv import load_dotenv
 from sqlalchemy import desc
+from flask_socketio import SocketIO
 import os
 
 load_dotenv()
@@ -28,6 +29,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = not app.debug
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 db.init_app(app)
 
@@ -644,14 +646,22 @@ def get_questions_from_category(index):
 
 
 def evaluate_quiz(quiz):
+    achieved_points = 0
+    max_points = 0
     for section in quiz.quiz_sections:
         for item in section.quiz_items:
             question_version = item.question_version
-            if question_version.type =='short_answer_question':
-                answer = json.loads(item.answer)
+            answer = json.loads(item.answer)
 
+            try:
+                answer["answer"]
+            except:
+                return
+
+            if question_version.type =='short_answer_question':
                 if answer["answer"] == question_version.short_answers[0].text:
                     item.score = answer["evaluate"]
+                    achieved_points += int(answer["evaluate"])
                     db.session.add(item)
                     db.session.commit()
                 else:
@@ -660,7 +670,6 @@ def evaluate_quiz(quiz):
                     db.session.commit()
 
             if question_version.type =="multiple_answer_question":
-                answer = json.loads(item.answer)
                 full_answer_correct = True
                 for i in answer["answer"]:
                     choice = Choice.query.filter_by(id = i[1]).first()
@@ -670,6 +679,7 @@ def evaluate_quiz(quiz):
 
                 if full_answer_correct:
                     item.score = answer["evaluate"]
+                    achieved_points += int(answer["evaluate"])
                     db.session.add(item)
                     db.session.commit()
                 else:
@@ -678,21 +688,27 @@ def evaluate_quiz(quiz):
                     db.session.commit()
 
             if question_version.type =="matching_answer_question":
-                answer = json.loads(item.answer)
                 full_answer_correct = True
                 for i in answer["answer"]:
-                    print(i["answer"])
                     if not i["answer"] == i["rightSide"]:
                         full_answer_correct = False
 
                 if full_answer_correct:
                     item.score = answer["evaluate"]
+                    achieved_points+= int(answer["evaluate"])
                     db.session.add(item)
                     db.session.commit()
                 else:
                     item.score = 0
                     db.session.add(item)
                     db.session.commit()
+
+            max_points += int(answer["evaluate"])
+
+    quiz.max_points = max_points
+    quiz.achieved_points = achieved_points
+    db.session.add(quiz)
+    db.session.commit()
 
 @app.route("/api/get-quiz-templates", methods=["GET"])
 def get_quiz_templates():
@@ -704,6 +720,9 @@ def get_quiz_templates():
 
     actual_time = datetime.datetime.now()
     cnt = 0
+
+    update_at = ""
+
     for template in sorted(quiz_templates, key=lambda x: x.date_time_open, reverse=True):
         if template.is_deleted:
             continue
@@ -823,6 +842,10 @@ def get_quiz_templates():
                 time_end = student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish)
                 if actual_time < time_end and student_quizzes[0].date_time_finished is None:
                     template_sub["is_finished"] = False
+                    if update_at == "":
+                        update_at = time_end
+                    elif time_end < update_at:
+                        update_at = time_end
                 else:
                     template_sub["is_finished"] = True
                     if student_quizzes[0].date_time_finished is None:
@@ -848,7 +871,7 @@ def get_quiz_templates():
 
             result.append(template_sub)
 
-    return {"result": result}, 200
+    return {"result": result, "update_at": update_at}, 200
 
 
 @app.route("/api/quiz-finish", methods=["PUT"])
@@ -1007,13 +1030,19 @@ def get_questions_quiz(index):
         if item is not None:
             matching_answs = json.loads(item.answer)
             correct_answers = "\n"
+
+            # error = False
+            # try:
+            #     matching_answs["asnwer"]
+            # except:
+            #     error = True
+
+            right_sides = [i.rightSide for i in newest_version.matching_question]
+            from random import shuffle
+            shuffle(right_sides)
+
             if len(matching_answs) != 0:
                 cnt = 0
-
-                right_sides = [i.rightSide for i in newest_version.matching_question]
-                from random import shuffle
-                shuffle(right_sides)
-
                 for matching_pair in newest_version.matching_question:
                     correct_answers += matching_pair.leftSide + " -> " + matching_pair.rightSide + "\n"
                     if review:
@@ -1023,7 +1052,7 @@ def get_questions_quiz(index):
                             max_points = 0
 
                         if matching_pair.rightSide == matching_answs["answer"][cnt][
-                            "answer"] and is_correct_res == True:
+                            "answer"] and is_correct_res:
                             is_correct_res = True
                             points = matching_answs["evaluate"]
                         else:
@@ -1031,6 +1060,7 @@ def get_questions_quiz(index):
                             points = 0
 
 
+                    # print(matching_answs)
 
                     answers.append(
                         {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
@@ -1040,11 +1070,14 @@ def get_questions_quiz(index):
                          })
                     cnt += 1
             else:
+                cnt = 0
                 for matching_pair in newest_version.matching_question:
                     answers.append(
                         {"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [],
-                         "feedback": matching_pair.negative_feedback
+                         "feedback": matching_pair.negative_feedback, "showRightSide":right_sides[cnt]
                          })
+                    cnt+=1
+
         else:
             for matching_pair in newest_version.matching_question:
                 answers.append({"leftSide": matching_pair.leftSide, "rightSide": matching_pair.rightSide, "answer": [],
@@ -1205,15 +1238,21 @@ def get_user_data_statistics():
     for i in quizzes_templates_student:
         max_points = 0
         achieved_points = 0
-        for j in Quiz.query.filter_by(quiz_template_id=i).order_by(desc(Quiz.date_time_started)).first().quiz_sections:
-            for n in j.quiz_items:
-                if n.score is not None:
-                    achieved_points += n.score
-                if n.max_points is not None:
-                    max_points += n.max_points
+        # for j in Quiz.query.filter_by(quiz_template_id=i).order_by(desc(Quiz.date_time_started)).first().quiz_sections:
+        #     for n in j.quiz_items:
+        #         if n.score is not None:
+        #             achieved_points += n.score
+        #         if n.max_points is not None:
+        #             max_points += n.max_points
 
-        all_achieved_points += achieved_points
-        all_max_points += max_points
+        j = Quiz.query.filter_by(quiz_template_id=i).order_by(desc(Quiz.date_time_started)).first()
+        max_points = j.max_points
+        achieved_points = j.achieved_points
+
+        if achieved_points is not None:
+            all_achieved_points += achieved_points
+            all_max_points += max_points
+
         template = QuizTemplate.query.filter_by(id=i).first()
         attempts = Quiz.query.filter_by(quiz_template_id=template.id, student_id=student_id).count()
         quiz_templates_student.append({
@@ -1395,6 +1434,7 @@ def generate_quiz(quiz, questions, student_id):
     db.session.commit()
 
     order_sections = []
+
     for section in quiz["sections"]:
         section_added = QuizSection(
             quiz_id=new_quiz.id
@@ -1407,9 +1447,10 @@ def generate_quiz(quiz, questions, student_id):
         order_questions = []
 
         for question in section["questions"]:
+            print(question)
             new_item = QuizItem(
                 answer=json.dumps({"evaluate": question["evaluation"]}),
-                score=question["evaluation"],
+                score=0, #question["evaluation"]
                 question_version_id=questions[str(question["id"])]["id"],
                 quiz_section_id=section_added.id,
                 max_points=0
@@ -1427,6 +1468,9 @@ def generate_quiz(quiz, questions, student_id):
                     mult_opts = [i.id for i in version.multiple_answers]
                     shuffle(mult_opts)
                     order_options = mult_opts
+
+                else:
+                    order_options = [i.id for i in version.matching_question]
 
             # !! dorobit shufflovanie options otazok
 
@@ -1489,7 +1533,9 @@ def new_quiz_student():
             db.session.commit()
 
             order_sections = []
-            for i in act_quiz.quiz_sections:
+            for sect in act_quiz.order:
+                i = QuizSection.query.filter_by(id=sect).first()
+
                 new_section = QuizSection(
                     quiz_id=new_quiz.id
                 )
