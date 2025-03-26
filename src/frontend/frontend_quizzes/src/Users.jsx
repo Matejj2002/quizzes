@@ -63,6 +63,31 @@ const Users = () =>{
         })
     }
 
+    const exportData = async () =>{
+        try {
+        const options = {
+            types: [
+                {
+                    description: "CSV Files",
+                    accept: { "text/csv": [".csv"] },
+                },
+            ],
+        };
+
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+
+        const response = await axios.get(`http://127.0.0.1:5000/api/get-results-students`)
+
+        await writable.write(response.data.result);
+        await writable.close();
+
+        alert("Súbor bol uložený!");
+    } catch (error) {
+        console.error("Chyba pri ukladaní:", error);
+    }
+    }
+
     if (localStorage.getItem("role") !=="teacher"){
         navigate("/quizzes");
     }
@@ -142,10 +167,15 @@ const Users = () =>{
                                     Back to Quizzes
                                 </button>
 
-                                <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#exampleModal">
-                                    Create Teacher
-                                </button>
+                                <div>
+                                    <button type="button" className="btn btn-primary me-3" data-bs-toggle="modal"
+                                            data-bs-target="#exampleModal">
+                                        Create Teacher
+                                    </button>
+                                    <button type="button" className="btn btn-success" onClick={exportData}>
+                                        Export Data
+                                    </button>
+                                </div>
                             </div>
 
 

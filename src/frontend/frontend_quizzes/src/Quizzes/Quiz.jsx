@@ -2,22 +2,18 @@ import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from "../Navigation";
-import io from "socket.io-client";
-import Login from "../Login";
 
-const socket = io("http://127.0.0.1:5000");
 const Quiz = () => {
     const navigate = useNavigate();
 
     const [quizzes, setQuizzes] = useState([]);
-    const [nameFilter, setNameFilter] = useState("");
     const [updateAt, setUpdateAt] = useState(null);
 
     const fetchQuizzes = async () => {
       try{
             const response = await axios.get(`http://127.0.0.1:5000/api/get-quiz-templates` ,
                 {
-                    params: {"studentId": localStorage.getItem("idUser"), "nameFilter": document.getElementById("search").value}
+                    params: {"studentId": localStorage.getItem("idUser")}
                 }
             )
             setQuizzes(response.data.result);
@@ -102,14 +98,6 @@ const Quiz = () => {
                                     New Quiz
                                 </button>
                             )}
-
-                            <input
-                                type="text"
-                                id="search"
-                                className="form-control"
-                                placeholder="Search quiz"
-                            />
-
 
                             {quizzes.map((quiz) => {
                                     return (
