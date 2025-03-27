@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const Users = () =>{
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
-    const [sort, setSort] = useState("id");
+    const [sort, setSort] = useState("github_name");
     const [sortDirection, setSortDirection] = useState("desc");
     const [filterForName,setFilterForName] = useState("");
     const name = useRef();
@@ -26,6 +26,11 @@ const Users = () =>{
       }
        finally {}
     }
+
+    useEffect(() => {
+        fetchUsers().then(() => {});
+    }, []);
+
     useEffect(() => {
         fetchUsers().then(() => {});
     }, [sort, sortDirection, filterForName]);
@@ -88,6 +93,18 @@ const Users = () =>{
     }
     }
 
+    const changeType =(userId, selectedType) => {
+        const data = {
+            userId: userId,
+            selectedType: selectedType
+        }
+        axios.put("http://127.0.0.1:5000/api/change-user-type", data).then( () => {
+            fetchUsers();
+                alert("User type changed");
+            }
+        )
+    }
+
     if (localStorage.getItem("role") !=="teacher"){
         navigate("/quizzes");
     }
@@ -118,13 +135,10 @@ const Users = () =>{
                                 <thead>
                                 <tr>
                                     <th scope="col" className="w-25"
-                                        onClick={() => sortUsers("id",filterForName)} style={{cursor: "pointer"}}
-                                    ># {sort === "id" ? (sortDirection === "asc" ? " 🔼" : " 🔽") : ""}</th>
-                                    <th scope="col" className="w-25"
                                         onClick={() => sortUsers("github_name", filterForName)}
                                         style={{cursor: "pointer"}}>Name {sort === "github_name" ? (sortDirection === "asc" ? " 🔼" : " 🔽") : ""}</th>
 
-                                    <th scope="col" className="w-25 text-end" onClick={() => sortUsers("user_type",filterForName)}
+                                    <th scope="col" className="text-end w-25" onClick={() => sortUsers("user_type",filterForName)}
                                         style={{cursor: "pointer"}}>Type {sort === "user_type" ? (sortDirection === "asc" ? " 🔼" : " 🔽") : ""}</th>
 
                                     <th scope="col" className="w-25 text-end">Statistics</th>
@@ -136,9 +150,18 @@ const Users = () =>{
 
                                     users.map((user) => (
                                             <tr>
-                                                <th scope="row">{user.id}</th>
                                                 <td>{user.github_name}</td>
-                                                <td className="text-end">{user.user_type}</td>
+                                                <td className="text-end">
+                                                    <div className="d-flex gap-2 text-align-center justify-content-end">
+                                                        <select id={`select-${user.id}`} value={user.user_type}
+                                                                onChange={(e) => changeType(user.id, e.target.value)}
+                                                                className="form-select w-auto">
+                                                            <option value="Teacher">Teacher</option>
+                                                            <option value="Student">Student</option>
+                                                        </select>
+                                                    </div>
+                                                    {/*{user.user_type}*/}
+                                                </td>
                                                 <td className="text-end">
                                                     <button type="button" className="btn btn-outline-primary"
                                                             onClick={() => {
