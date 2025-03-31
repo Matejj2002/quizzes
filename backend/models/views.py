@@ -6,7 +6,7 @@ from flask_admin.contrib.sqla import ModelView
 from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms.fields import SelectField
 from flask_dance.contrib.github import github
-from .models import *
+from models import *
 
 
 class PolymorphicModelView(ModelView):

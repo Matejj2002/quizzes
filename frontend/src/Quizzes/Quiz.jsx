@@ -32,10 +32,10 @@ const Quiz = () => {
         if (!updateAt) return;
         const interval = setInterval(() => {
             const updt = new Date(updateAt).getTime();
-            if (Date.now() + + 60 * 60000 >= updt){
+            if (Date.now() + 2*60 * 60000 >= updt){
                 fetchQuizzes();
             }else{
-                console.log(updt, Date.now());
+                console.log(updt, Date.now(), new Date().getTime());
             }
 
         }, 1000);
@@ -66,6 +66,17 @@ const Quiz = () => {
             }
         })
     }
+
+    const getDate = (time) =>{
+        const dt = new Date(time);
+        const da = new Date(dt);
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        return `${days[da.getDay()]} ${months[da.getMonth()]} ${da.getDate()} ${da.getFullYear()} ${da.getHours()}:${da.getMinutes().toString().padStart(2, '0')}:00`;
+    }
+
     const handleArchiveQuiz = (e, quiz) => {
         const updatedData = {
             quiz_template_id: quiz.id
@@ -148,20 +159,20 @@ const Quiz = () => {
 
                                             <p>{quiz.number_of_questions} questions, {quiz.sections.length} sections</p>
 
-                                            <div className="mb-3">
+                                            <div className="mb-3 text-truncate">
                                             <span
-                                                className="m-0 text-secondary text-truncate">Time to finish (Minutes): {quiz["time_to_finish"]}</span><br/>
+                                                className="m-0 text-secondary">Time to finish (Minutes): {quiz["time_to_finish"]}</span><br/>
                                                 <span
-                                                    className="m-0 text-secondary text-truncate">Opened from {quiz["date_time_open"]} to {quiz["date_time_close"]}</span><br/>
+                                                    className="m-0 text-secondary">Opened from {getDate(quiz["date_time_open"])} to {getDate(quiz["date_time_close"])}</span><br/>
                                                 <span
-                                                    className="m-0 text-secondary text-truncate">Check from {quiz["datetime_check"]}</span><br/>
+                                                    className="m-0 text-secondary">Check from {getDate(quiz["datetime_check"])}</span><br/>
                                             </div>
 
-                                            {quiz.quizzes.length > 0 && !quiz.time_limit_end && (
+                                            {quiz.quizzes.length > 1 && !quiz.time_limit_end && (
                                                 <details className="mb-3">
-                                                    <summary className="mb-1">Older attempts ({quiz.quizzes.length})
+                                                    <summary className="mb-1">Older attempts ({quiz.quizzes.length-1})
                                                     </summary>
-                                                    {quiz.quizzes.map((qz, ind) => (
+                                                    {quiz.quizzes.slice(1).map((qz, ind) => (
                                                             <div
                                                                 className="d-flex justify-content-between align-items-start border p-3">
                                                                 <div>
@@ -221,7 +232,7 @@ const Quiz = () => {
                                                         <div>
                                                             <button
                                                                 className="btn btn-outline-primary me-1"
-                                                                disabled={quiz.is_opened === false || quiz.quizzes.length + 1 > quiz["number_of_corrections"]}
+                                                                disabled={quiz.is_opened === false || (quiz.quizzes.length + 1 > quiz["number_of_corrections"])}
                                                                 onClick={(e) => {
                                                                     e.preventDefault()
                                                                     navigate("/generated-quiz", {

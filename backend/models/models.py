@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-
+import datetime
 db = SQLAlchemy()
 
 
@@ -46,9 +46,9 @@ class QuestionVersion(db.Model):
     dateCreated = db.Column(db.DateTime)
     text = db.Column(db.Text)
     type = db.Column(db.String)
-    author_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), default=1)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'), default=1)
 
-    author = db.relationship('Teacher', back_populates='question_version')
+    author = db.relationship('User', back_populates='question_version')
     questions = db.relationship('Question', back_populates='question_version')
 
     __mapper_args__ = {
@@ -168,6 +168,9 @@ class User(db.Model):
 
     user_type = db.Column(db.String(50), default='user')
 
+    question_version = db.relationship('QuestionVersion', back_populates='author')
+
+
     __mapper_args__ = {
         'polymorphic_identity': 'user',
         'polymorphic_on': user_type
@@ -177,8 +180,6 @@ class User(db.Model):
 class Teacher(User):
     __tablename__ = "teachers"
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True, autoincrement=True)
-
-    question_version = db.relationship('QuestionVersion', back_populates='author')
 
     __mapper_args__ = {
         'polymorphic_identity': 'teacher',
@@ -213,10 +214,10 @@ class QuizTemplate(db.Model):
 
     order = db.Column(db.ARRAY(db.Integer))  # usporiadanie sekcii
 
-    date_time_open = db.Column(db.DateTime)
-    date_time_close = db.Column(db.DateTime)
+    date_time_open = db.Column(db.DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    date_time_close = db.Column(db.DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
     time_to_finish = db.Column(db.Integer)
-    datetime_check = db.Column(db.DateTime)
+    datetime_check = db.Column(db.DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     feedback_type = db.Column(db.ARRAY(db.Text))
     feedback_type_after_close = db.Column(db.ARRAY(db.Text))

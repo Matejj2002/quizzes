@@ -1,12 +1,10 @@
-import datetime
-import random
 import json
 from flask import Flask, session, jsonify, request
 from flask_migrate import Migrate
 from flask_admin import Admin
 from flask_dance.contrib.github import make_github_blueprint
 from flask_cors import CORS
-from src.backend.api_functions import *
+from api.api_functions import *
 from flask_session import Session
 import requests
 from dotenv import load_dotenv
@@ -22,7 +20,14 @@ migrate = Migrate(app, db)
 CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/quizzes"
+
+if os.environ.get("IS_DOCKER") == 'true':
+    print("AAA")
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@bakalarka-postgres-1:5432/quizzes"
+else:
+    print("BBB")
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/quizzes"
+
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = not app.debug
@@ -111,24 +116,42 @@ def get_user_data():
 
     if response.ok:
         data = response.json()
-        user = User.query.filter(User.github_name == data["login"])
 
-        if user.first() is None:
-            student = Student(
+        users = User.query.all()
+        if len(users) == 0:
+            teacher = User(
                 name=data["login"],
                 github_name=data["login"],
-                user_type="student"
+                user_type="teacher"
             )
-            role = "student"
 
-            db.session.add(student)
+            role = "teacher"
+
+            db.session.add(teacher)
             db.session.commit()
 
-            id_user = student.id
+            id_user = teacher.id
 
         else:
-            role = user.first().user_type
-            id_user = user.first().id
+            user = User.query.filter(User.github_name == data["login"])
+
+
+            if user.first() is None:
+                student = User(
+                    name=data["login"],
+                    github_name=data["login"],
+                    user_type="student"
+                )
+                role = "student"
+
+                db.session.add(student)
+                db.session.commit()
+
+                id_user = student.id
+
+            else:
+                role = user.first().user_type
+                id_user = user.first().id
 
         data["role"] = role
         data["id_user"] = id_user
@@ -251,12 +274,12 @@ def get_questions():
 
 @app.route('/api/teachers', methods=['GET'])
 def get_teachers():
-    teachers = Teacher.query.all()
+    teachers = User.query.filter(User.user_type == 'teacher').all()
 
     all_teachers = []
     for i in teachers:
         teacher_dict = {
-            "name": i.name,
+            "name": i.github_name,
             "id": i.id
         }
 
@@ -363,11 +386,9 @@ def add_new_question():
     title = data['title']
     text = data['text']
     answers = data['answers']
-    author = data['author']
+    author_id = data['author']
     feedback = data["feedback"]
     positive_feedback = data["positiveFeedback"]
-
-    author_id = Teacher.query.filter_by(github_name=author).first()
 
     question = Question(category_id=category_id,
                         question_feedback=feedback,
@@ -390,8 +411,8 @@ def add_new_question():
     question_version = question_type(question_id=question_id,
                                      title=title,
                                      text=text,
-                                     dateCreated=datetime.datetime.now(),
-                                     author_id=author_id.id,
+                                     dateCreated=datetime.datetime.now(datetime.timezone.utc),
+                                     author_id=author_id,
                                      type=type_q
                                      )
 
@@ -553,7 +574,7 @@ def add_question_version(id):
     question_version = question_type(question_id=id,
                                      title=data['title'],
                                      text=data['text'],
-                                     dateCreated=datetime.datetime.now(),
+                                     dateCreated=datetime.datetime.now(datetime.timezone.utc),
                                      author_id=1,
                                      type=type_q
                                      )
@@ -711,13 +732,30 @@ def evaluate_quiz(quiz):
 
 @app.route("/api/get-quiz-templates", methods=["GET"])
 def get_quiz_templates():
+
+    # tempt = QuizTemplate.query.all()
+    #
+    # for i in tempt:
+    #     try:
+    #         print(i.date_time_open)
+    #         i.date_time_open = datetime.datetime.strptime(str(i.date_time_open), "%Y-%m-%d %H:%M:%S.%f").replace(tzinfo=datetime.timezone.utc)
+    #         i.date_time_open = datetime.datetime.strptime(str(i.date_time_close), "%Y-%m-%d %H:%M:%S.%f").replace(
+    #             tzinfo=datetime.timezone.utc)
+    #         i.datetime_check = datetime.datetime.strptime(str(i.datetime_check), "%Y-%m-%d %H:%M:%S.%f").replace(
+    #             tzinfo=datetime.timezone.utc)
+    #
+    #         db.session.add(i)
+    #         db.session.commit()
+    #     except:
+    #         pass
+
     student_id = request.args.get("studentId")
-    name = request.args.get("nameFilter")
     quiz_templates = QuizTemplate.query.all()
 
     result = []
 
-    actual_time = datetime.datetime.now()
+    actual_time = datetime.datetime.now(datetime.timezone.utc)
+
     cnt = 0
 
     update_at = ""
@@ -726,7 +764,8 @@ def get_quiz_templates():
         if template.is_deleted:
             continue
 
-        if actual_time >= template.date_time_open and actual_time <= template.date_time_close:
+        # print(template.title,actual_time, template.date_time_open)
+        if template.date_time_open <= actual_time <= template.date_time_close:
             is_opened = True
         else:
             is_opened = False
@@ -837,9 +876,10 @@ def get_quiz_templates():
         if student_quizzes is not None and len(student_quizzes) > 0:
             template_sub["quiz_id"] = student_quizzes[0].id
             # student_quizzes.date_time_finished is None or
-            time_end = student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish)
+            time_end = (student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish))
             if actual_time < time_end and student_quizzes[0].date_time_finished is None:
                 template_sub["is_finished"] = False
+
                 if update_at == "":
                     update_at = time_end
                 elif time_end < update_at:
@@ -847,19 +887,25 @@ def get_quiz_templates():
             else:
                 template_sub["is_finished"] = True
                 if student_quizzes[0].date_time_finished is None:
-                    evaluate_quiz(student_quizzes[0])
+                    try:
+                        evaluate_quiz(student_quizzes[0])
+                    except:
+                        pass
                     student_quizzes[0].date_time_finished = time_end
                     db.session.commit()
 
             quizzes = []
-            for i in student_quizzes[1:]:
+            for i in student_quizzes: #[1:]
                 quizzes.append({
                     "quiz_id": i.id,
                     "ended": i.date_time_finished,
                     "feedback": feedback_type
                 })
 
-            quizzes.sort(key=lambda x: x["ended"])
+            try:
+                quizzes.sort(key=lambda x: x["ended"])
+            except:
+                pass
 
             template_sub["quizzes"] = quizzes
 
@@ -882,7 +928,7 @@ def quiz_finish():
     ).order_by(desc(Quiz.date_time_started)).first()
 
     if student_quizzes is not None:
-        student_quizzes.date_time_finished = datetime.datetime.now()
+        student_quizzes.date_time_finished = datetime.datetime.now(datetime.timezone.utc)
         db.session.add(student_quizzes)
         db.session.commit()
 
@@ -1029,12 +1075,6 @@ def get_questions_quiz(index):
             matching_answs = json.loads(item.answer)
             correct_answers = "\n"
 
-            # error = False
-            # try:
-            #     matching_answs["asnwer"]
-            # except:
-            #     error = True
-
             right_sides = [i.rightSide for i in newest_version.matching_question]
             from random import shuffle
             shuffle(right_sides)
@@ -1045,19 +1085,17 @@ def get_questions_quiz(index):
                     correct_answers += matching_pair.leftSide + " -> " + matching_pair.rightSide + "\n"
                     if review:
                         if len(matching_answs) != 0:
-                            max_points = matching_answs["evaluate"]
+                            max_points = item.max_points
                         else:
                             max_points = 0
 
                         if matching_pair.rightSide == matching_answs["answer"][cnt][
                             "answer"] and is_correct_res:
                             is_correct_res = True
-                            points = matching_answs["evaluate"]
+                            points = item.score
                         else:
                             is_correct_res = False
                             points = 0
-
-                    # print(matching_answs)
 
                     answers.append(
                         {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
@@ -1112,17 +1150,16 @@ def get_questions_quiz(index):
 
             if review:
                 if len(multiple_answs) != 0:
-                    max_points = multiple_answs["evaluate"]
+                    max_points = item.max_points
 
                     if res == choice.is_correct and is_correct_res:
                         is_correct_res = True
-                        points = max_points
+                        points = item.score
                     else:
                         is_correct_res = False
                         points = 0
 
                 else:
-                    print(multiple_answs)
                     points = 0
                     max_points = 0
 
@@ -1140,13 +1177,14 @@ def get_questions_quiz(index):
     else:
         if item is not None:
             item_answer = json.loads(item.answer)
+
             correct_answers = newest_version.short_answers[0].text
             if review:
                 if len(item_answer) != 0:
-                    max_points = item_answer["evaluate"]
+                    max_points = item.max_points
                     if newest_version.short_answers[0].text == item_answer["answer"]:
                         is_correct_res = True
-                        points = max_points
+                        points = item.score
                     else:
                         is_correct_res = False
                         points = 0
@@ -1209,7 +1247,9 @@ def get_all_users():
                  "id": user.id
                  }
             )
-    user_table.sort(key=lambda x: x[sort], reverse=sort_dir == "asc")
+
+    print(sort)
+    user_table.sort(key=lambda x: x[sort], reverse= sort_dir == "asc")
     return {"result": user_table}, 200
 
 
@@ -1283,7 +1323,7 @@ def save_feedback_to_item():
     comment = Comment(
         author_id=data["student_id"],
         text=data["feedback"],
-        date_created=datetime.datetime.now(),
+        date_created=datetime.datetime.now(datetime.timezone.utc),
         question_version_id=item.question_version_id
     )
     db.session.add(comment)
@@ -1302,16 +1342,29 @@ def save_feedback_to_item():
 def create_teacher():
     data = request.get_json()
 
-    new_teacher = Teacher(name=data["name"], github_name=data["githubName"])
+    new_teacher = User(name=data["name"], github_name=data["githubName"], user_type="teacher")
     db.session.add(new_teacher)
     db.session.commit()
 
     return {}, 200
 
+@app.route("/api/change-user-type", methods = ["PUT"])
+def change_user_type():
+    data = request.get_json()
+
+    user = User.query.filter(User.id == data["userId"]).first()
+
+    user.user_type = data["selectedType"].lower()
+    db.session.add(user)
+    db.session.commit()
+
+
+    return {}, 200
 
 @app.route("/api/new-quiz-template", methods=["PUT"])
 def create_new_quiz_template():
     data = request.get_json()
+    print(data["dateOpen"])
 
     if data["changeData"]:
         if data["quizId"] != 0:
@@ -1328,10 +1381,10 @@ def create_new_quiz_template():
             shuffle_sections=data['shuffleSections'],
             correction_of_attempts=data["typeOfAttempts"],
             number_of_corrections=data["numberOfCorrections"],
-            date_time_open=data["dateOpen"],
-            date_time_close=data["dateClose"],
+            date_time_open=datetime.datetime.strptime(data['dateOpen'], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=datetime.timezone.utc),
+            date_time_close=datetime.datetime.strptime(data['dateClose'], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=datetime.timezone.utc),
             time_to_finish=data["minutesToFinish"],
-            datetime_check=data["dateCheck"],
+            datetime_check=datetime.datetime.strptime(data['dateCheck'], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=datetime.timezone.utc),
             feedback_type=data["feedbackType"],
             feedback_type_after_close=data["feedbackTypeAfterClose"]
         )
@@ -1417,7 +1470,8 @@ def create_new_quiz_template():
 
 
 def generate_quiz(quiz, questions, student_id):
-    time_now = datetime.datetime.now()
+    time_now = datetime.datetime.now(datetime.timezone.utc)
+    from random import shuffle
     new_quiz = Quiz(
         date_time_started=time_now,
         quiz_template_id=quiz["id"],
@@ -1456,7 +1510,6 @@ def generate_quiz(quiz, questions, student_id):
                 version = QuestionVersion.query.filter(
                     QuestionVersion.id == questions[str(question["id"])]["id"]).first()
                 order_options = []
-                from random import shuffle
 
                 if question["type"] == "short_answer_question":
                     order_options = [version.short_answers[0].id]
@@ -1480,9 +1533,16 @@ def generate_quiz(quiz, questions, student_id):
 
             order_questions.append(new_item.id)
 
+        # if section["shuffle"]:
+        #     shuffle(order_questions)
+
         section_added.order = order_questions
-        new_quiz.order = order_sections
         db.session.commit()
+
+    # if quiz["shuffle_sections"]:
+    #     shuffle(order_sections)
+    new_quiz.order = order_sections
+    db.session.commit()
 
     return time_to_finish
 
@@ -1517,7 +1577,7 @@ def new_quiz_student():
             act_quiz = student_quizzes[0]
 
             new_quiz = Quiz(
-                date_time_started=datetime.datetime.now(),
+                date_time_started=datetime.datetime.now(datetime.timezone.utc),
                 quiz_template_id=act_quiz.quiz_template_id,
                 student_id=act_quiz.student_id
             )
@@ -1587,7 +1647,7 @@ def get_quiz_student_load():
 
     result = {"sections": [], "start_time": quiz.date_time_started,
               "minutes_to_finish": quiz.quiz_template.time_to_finish,
-              "end_time": quiz.date_time_finished, "now_check": datetime.datetime.now()}
+              "end_time": quiz.date_time_finished, "now_check": datetime.datetime.now(datetime.timezone.utc)}
 
     quiz_templates = Quiz.query.filter(Quiz.id == int(quiz_id)).order_by(desc(Quiz.date_time_started)).first()
     quiz_templates_id = quiz_templates.quiz_template_id
@@ -1626,7 +1686,7 @@ def get_students_results():
 
     quiz_templates = [i for i in QuizTemplate.query.all() if not i.is_deleted]
 
-    titles = "id,name,"
+    titles = "name,"
     for i in quiz_templates[:-1]:
         titles += i.title + ","
 
@@ -1635,7 +1695,7 @@ def get_students_results():
     data = ""
     cnt = 1
     for student in students:
-        data += f"{cnt},{student.github_name},"
+        data += f"{student.github_name},"
         sum_points = 0
         for qt in quiz_templates:
             quizzes = Quiz.query.filter(Quiz.student_id == student.id, Quiz.quiz_template_id == qt.id).all()
@@ -1662,6 +1722,7 @@ def update_quiz_answers():
     question_data = data["data"]
     final_save = data["finalSave"]
     student_id = data["studentId"]
+
 
     quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == student_id).order_by(
         desc(Quiz.date_time_started)).first()
@@ -1706,8 +1767,11 @@ def update_quiz_answers():
                 db.session.commit()
 
     if final_save:
-        evaluate_quiz(quiz)
-        quiz.date_time_finished = datetime.datetime.now()
+        try:
+            evaluate_quiz(quiz)
+        except:
+            pass
+        quiz.date_time_finished = datetime.datetime.now(datetime.timezone.utc)
         db.session.add(quiz)
         db.session.commit()
 
@@ -1717,6 +1781,7 @@ def update_quiz_answers():
 if __name__ == '__main__':
     with app.app_context():
         # print('AA')
+        # db.drop_all()
         # db.create_all()
         # print('Database created and tables initialized!')
         # supercategory = Category(title="supercategory")
@@ -1729,4 +1794,4 @@ if __name__ == '__main__':
         # print("Teacher added.")
         pass
 
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

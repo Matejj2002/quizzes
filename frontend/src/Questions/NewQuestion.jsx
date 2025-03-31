@@ -10,10 +10,8 @@ import ShortAnswerQuestion from "../ShortAnswerQuestion/ShortAnswerQuestion";
 import MultipleChoiceQuestion from "../MultipleChoiceQuestions/MultipleChoiceQuestion";
 import Categories from "../CategoriesTree/Categories";
 import Navigation from "../Navigation";
-import Login from "../Login";
 
-import 'katex/dist/katex.min.css';
-import { InlineMath } from 'react-katex';
+import FormattedTextRenderer from "../components/FormattedTextRenderer";
 
 const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();
@@ -82,7 +80,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             category_id: selectedCategoryId,
             questionType: questionType,
             answers: answersSel,
-            author: author,
+            author: localStorage.getItem("idUser"),
             feedback: questionFeedback,
             positiveFeedback: questionPositiveFeedback
         };
@@ -245,10 +243,6 @@ const NewQuestion = ({subButText="Submit"}) => {
         setAnswers(newAnswers)
     };
 
-    function prepareTextForLatex(text){
-        return text?.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ");
-    }
-
     if (localStorage.getItem("role") !=="teacher"){
         navigate("/quizzes");
     }
@@ -339,7 +333,9 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     <label htmlFor="questionText" className="form-label">
                                         Question Text
                                     </label>
-                                    <p>{<InlineMath>{prepareTextForLatex(text)}</InlineMath>}</p>
+                                    <FormattedTextRenderer
+                                        text={text}
+                                      />
                                     <textarea
                                         className="form-control"
                                         id="questionText"
@@ -361,7 +357,9 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     Question negative feedback
                                 </label>
 
-                                <p>{<InlineMath>{prepareTextForLatex(questionFeedback)}</InlineMath>}</p>
+                                <FormattedTextRenderer
+                                        text={questionFeedback}
+                                      />
                                 <textarea
                                     className="form-control"
                                     id="questionFeedback"
@@ -376,7 +374,9 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <label htmlFor="questionPositiveFeedback" className="form-label">
                                     Question positive feedback
                                 </label>
-                                <p>{<InlineMath>{prepareTextForLatex(questionPositiveFeedback)}</InlineMath>}</p>
+                                <FormattedTextRenderer
+                                        text={questionPositiveFeedback}
+                                      />
                                 <textarea
                                     className="form-control"
                                     id="questionPositiveFeedback"
@@ -399,7 +399,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <div>
                                     <h2>{questionType}</h2>
                                     <ShortAnswerQuestion setAnswers={AnswerSetter}
-                                                         answers={answers} prepareTextForLatex={prepareTextForLatex}></ShortAnswerQuestion>
+                                                         answers={answers} ></ShortAnswerQuestion>
                                 </div>
 
                             )}

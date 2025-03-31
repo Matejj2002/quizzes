@@ -7,6 +7,7 @@ import QuizReviewPoints from "./QuizReviewPoints";
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import "./MathText.css"
+import FormattedTextRenderer from "../components/FormattedTextRenderer";
 
 const QuizReview = () =>{
     const location = useLocation();
@@ -145,12 +146,12 @@ const QuizReview = () =>{
                                                 {questionsData[question.id]?.isCorrect ? (
                                                     <div className="d-flex align-items-center">
                                                         <i className="bi bi-check-circle text-success fs-3"></i>
-                                                        <p className="text-success fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
+                                                        <p className="text-success fs-3 ms-2 mb-0">{questionsData[question.id]?.points}{questionsData[question.id]?.points === 1 ? "pt." : "pts."}</p>
                                                     </div>
                                                 ) : (
                                                     <div className="d-flex align-items-center">
                                                         <i className="bi bi-x-circle text-danger fs-3"></i>
-                                                        <p className="text-danger fs-3 ms-2 mb-0">{questionsData[question.id]?.points}b.</p>
+                                                        <p className="text-danger fs-3 ms-2 mb-0">{questionsData[question.id]?.points}{questionsData[question.id]?.points === 1 ? "pt." : "pts."}</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -158,9 +159,9 @@ const QuizReview = () =>{
                                     </div>
 
                                     <div className="mb-1">
-                                        <InlineMath options={{ strict: false }}>
-                                            {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                        </InlineMath>
+                                        <FormattedTextRenderer
+                                                                        text={questionsData[question.id]?.text}
+                                                                      />
                                     </div>
 
                                             {questionsData[question.id]?.type === "matching_answer_question" && (
@@ -189,46 +190,58 @@ const QuizReview = () =>{
                                                                     paddingBottom: "2px"
                                                                 }}>
                                                                     <div className="d-flex justify-content-start w-100">
-                                                                        <InlineMath options={{ strict: false }}>
-                                                                            {ans["leftSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                        </InlineMath>
+
+                                                                        <FormattedTextRenderer
+                                                                        text={ans["leftSide"]}
+                                                                      />
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    <div className="d-flex justify-content-end w-100">
+                                                                    <div className="d-flex justify-content-start w-100">
                                                                         {feedback.includes("correctAnswers") ? (
                                                                             ans.answer !== ans["rightSide"] ? (
-                                                                                <div>
-                                                                                <span
-                                                                                    className="text-danger fw-bold me-1">
+                                                                                <div className="w-100">
+                                                                                    <div
+                                                                                        className="d-flex justify-content-between w-100">
+                                                                                    <span
+                                                                                        className="fw-bold me-1">
                                                                                     {ans.answer.length === 0 ? "No answer" :
-                                                                                        <InlineMath options={{ strict: false }}>
-                                                                                            {ans.answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                                        </InlineMath>
+
+                                                                                        <FormattedTextRenderer
+                                                                                            text={ans.answer}
+                                                                                          />
                                                                                     }
-                                                                                </span>
-                                                                                    <span className="me-1"><i
-                                                                                        className="bi bi-arrow-right"></i></span>
-                                                                                    <span
-                                                                                        className="text-success fw-bold">
-                                                                                    <InlineMath options={{ strict: false }}>
-                                                                                        {ans["rightSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                                    </InlineMath>
-                                                                                </span>
-                                                                                    <span
-                                                                                        className="ms-2 text-danger">❌</span>
+                                                                                    </span>
+
+                                                                                        <span
+                                                                                            className="d-flex text-danger justify-content-end me-0">
+                                                                                            <i className="bi bi-x-circle-fill fs-5"></i>
+                                                                                        </span>
+
+                                                                                    </div>
+
+                                                                                    <p className="mb-0 fw-bold">Correct answer
+                                                                                        is</p>
+                                                                                    <p
+                                                                                        className="fw-bold m-0">
+                                                                                        <FormattedTextRenderer
+                                                                                            text={ans["rightSide"]}
+                                                                                          />
+                                                                                    </p>
                                                                                 </div>
                                                                             ) : (
-                                                                                <div>
-                                                                            <span
-                                                                                className="ms-2 text-success fw-bold">
-                                                                                <InlineMath options={{ strict: false }}>
-                                                                                    {ans["rightSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                                </InlineMath>
-                                                                            </span>
+                                                                                <div className="d-flex justify-content-between w-100">
+                                                                                        <span
+                                                                                            className="ms-2">
+                                                                                            <FormattedTextRenderer
+                                                                                            text={ans["rightSide"]}
+                                                                                          />
+                                                                                        </span>
 
-                                                                                    <span
-                                                                                        className="ms-2 text-success">✅</span>
+                                                                                        <span
+                                                                                            className="d-flex text-success justify-content-end me-0">
+                                                                                            <i className="bi bi-check-circle-fill fs-5"></i>
+                                                                                        </span>
                                                                                 </div>
                                                                             )
                                                                         ) : (
@@ -258,20 +271,23 @@ const QuizReview = () =>{
                                                         <div className="form-check" key={idx}>
                                                             <input className="form-check-input"
                                                                    type="checkbox"
-                                                                   disabled="true"
+                                                                   // disabled="true"
                                                                    checked={ans.answer === true}
                                                             />
-                                                            <span className="form-check-label"><InlineMath options={{ strict: false }}
-                                                            >
-                                                        {ans?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                    </InlineMath>
-                                                    </span>
+                                                            <span className="d-flex w-100 form-check-label">
+
+                                                                <FormattedTextRenderer
+                                                                    text={ans?.text}
+                                                                />
+
                                                             {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
                                                                 !ans.isCorrectOption
-                                                                    ? <span className="ms-2 text-danger">❌</span>
-                                                                    : <span className="ms-2 text-success">✅</span>
+                                                                    ? <span className="ms-2 text-danger"><i
+                                                                        className="bi bi-x-circle-fill fs-5"></i></span>
+                                                                    : <span className="ms-2 text-success"><i
+                                                                        className="bi bi-check-circle-fill fs-5"></i></span>
                                                             )}
-                                                            {console.log(questionsData[question.id]?.isCorrect)}
+                                                                </span>
 
                                                             {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
                                                                 <p className="border border-danger p-3 rounded"
@@ -289,9 +305,9 @@ const QuizReview = () =>{
                                                 <div className="mb-3 mt-3">
                                                     <span className="me-2 mt-3 fw-bold">Answer: </span>
                                                     <div className="d-flex fw-bold">
-                                                        <InlineMath options={{ strict: false }}>
-                                                            {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                        </InlineMath>
+                                                        <FormattedTextRenderer
+                                                            text={questionsData[question.id]?.answers[0]["answer"]}
+                                                        />
                                                     </div>
                                                     {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
                                                         <p className="border border-danger p-3 rounded"
@@ -330,9 +346,10 @@ const QuizReview = () =>{
                                                        background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
                                                    }}>
                                                     Correct answer is {
-                                                    <InlineMath options={{ strict: false }}>
-                                                        {questionsData[question.id]?.correct_answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                    </InlineMath>}
+                                                    <FormattedTextRenderer
+                                                        text={questionsData[question.id]?.correct_answer}
+                                                    />
+                                                }
 
                                                 </p>
                                             )

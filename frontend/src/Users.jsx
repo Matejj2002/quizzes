@@ -180,8 +180,8 @@ const Users = () =>{
                                 </tbody>
                             </table>
 
-                            <div className="d-flex justify-content-between">
-                                <button type="button" className="btn btn-outline-secondary"
+                            <div className="d-flex flex-wrap justify-content-between">
+                                <button type="button" className="btn btn-outline-secondary mb-3 mb-sm-0"
                                         onClick={() => {
                                             window.location.href = "/quizzes";
                                         }
@@ -190,10 +190,10 @@ const Users = () =>{
                                     Back to Quizzes
                                 </button>
 
-                                <div>
+                                <div className="d-flex justify-content-end">
                                     <button type="button" className="btn btn-primary me-3" data-bs-toggle="modal"
                                             data-bs-target="#exampleModal">
-                                        Create Teacher
+                                        Pre-register teacher
                                     </button>
                                     <button type="button" className="btn btn-success" onClick={exportData}>
                                         Export Data

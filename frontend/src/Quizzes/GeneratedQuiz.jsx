@@ -2,13 +2,11 @@ import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../Navigation";
-import 'katex/dist/katex.min.css';
-import { InlineMath } from 'react-katex';
+import FormattedTextRenderer from "../components/FormattedTextRenderer";
 
 const GeneratedQuiz = () => {
     const location = useLocation();
     const [quiz, setQuiz] = useState(location.state?.quiz);
-    const [oldQuiz] = useState(location.state?.quiz);
     const [refreshQuiz, setRefreshQuiz] = useState(location.state?.refreshQuiz || false);
     const [questionsData, setQuestionsData] = useState({});
     const [randomQuestions, setRandomQuestions] = useState([]);
@@ -198,22 +196,23 @@ const GeneratedQuiz = () => {
                                 }));
 
                                 const startTime = new Date(result.data.start_time);
+                                console.log(result.data);
 
                                 const finishTime = new Date(result.data.end_time).getTime();
 
                                 const startMilis = startTime.getTime()
                                 const timeToFinish = result.data.minutes_to_finish * 60 *1000
 
-                                const now = Date.now() + 60 * 60000;
+                                // const now = Date.now() + 2*60 * 60000;
                                 const endTime = startMilis + timeToFinish;
 
-                                const nowDate = new Date(now);
+                                const nowDate = new Date(result.data.now_check);
                                 const endDate = new Date(endTime)
 
                                 const differenceInMilliseconds = endDate.getTime() - nowDate.getTime();
                                 const differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-                                if (now > endTime || (result.data.end_time !== null && now < finishTime) ){
+                                if (nowDate > endTime || (result.data.end_time !== null && nowDate < finishTime) ){
                                     setCount(-1);
                                 }else{
                                     setCount(differenceInSeconds);
@@ -351,11 +350,9 @@ const GeneratedQuiz = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <InlineMath
-                                            options={{strict: false}}
-                                        >
-                                        {questionsData[question.id]?.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                            </InlineMath>
+                                        <FormattedTextRenderer
+                                            text={questionsData[question.id]?.text}
+                                        />
                                         </div>
 
                                         {questionsData[question.id]?.type === "matching_answer_question" && (
@@ -386,11 +383,9 @@ const GeneratedQuiz = () => {
                                                             }}
                                                             >
                                                                 <div className="d-flex justify-content-start">
-                                                                    <InlineMath
-                                                                        options={{strict: false}}
-                                                                    >
-                                                                        {ans["leftSide"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                    </InlineMath>
+                                                                    <FormattedTextRenderer
+                                                                        text={ans["leftSide"]}
+                                                                      />
                                                                     {/*{ans["leftSide"]}*/}
                                                                 </div>
                                                             </td>
@@ -401,10 +396,9 @@ const GeneratedQuiz = () => {
                                                                 <div className="d-flex justify-content-end">
                                                                     {ans.answer.length === 0 ? "Select Answer" :
                                                                         <span>
-                                                                                <InlineMath
-                                                                                    options={{strict: false}}>
-                                                                                    {ans.answer.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                                                </InlineMath>
+                                                                            <FormattedTextRenderer
+                                                                        text={ans.answer}
+                                                                      />
                                                                             </span>
                                                                     }
 
@@ -453,12 +447,9 @@ const GeneratedQuiz = () => {
                                                                                         <div
                                                                                             className="d-flex justify-content-start">
                                                                                                 <span>
-                                                                                                  <InlineMath
-                                                                                                      options={{strict: false}}>
-                                                                                                    {answ["showRightSide"]
-                                                                                                        .replace(/ /g, " \\text{ } ")
-                                                                                                        .replace(/\n/g, " \\\\ ")}
-                                                                                                  </InlineMath>
+                                                                                                    <FormattedTextRenderer
+                                                                        text={answ["showRightSide"]}
+                                                                      />
                                                                                                 </span>
                                                                                         </div>
                                                                                     </a>
@@ -500,9 +491,11 @@ const GeneratedQuiz = () => {
                                                                    }));
                                                                }}
                                                         />
-                                                        <label className="form-check-label"><InlineMath>
-                                                            {ans.text.replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                                        </InlineMath></label>
+                                                        <label className="form-check-label">
+                                                        <FormattedTextRenderer
+                                                                        text={ans.text}
+                                                                      />
+                                                        </label>
                                                     </div>
                                                 ))}
                                             </div>
@@ -533,9 +526,9 @@ const GeneratedQuiz = () => {
                                                         </div>
                                                         <div className="col-6 d-flex">
                                                     <span>
-                                                        <InlineMath options={{strict: false}}>
-                                                {questionsData[question.id]?.answers[0]["answer"].replace(/ /g, " \\text{ } ").replace(/\n/g, " \\\\ ")}
-                                            </InlineMath>
+                                                        <FormattedTextRenderer
+                                                                        text={questionsData[question.id]?.answers[0]["answer"]}
+                                                                      />
 
                                                     </span>
                                                         </div>

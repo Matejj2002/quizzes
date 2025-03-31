@@ -478,32 +478,34 @@ const Questions = () => {
                                 {showQuestionsErr()}
                             </div>
 
-                            <div className='col-4 mx-auto'>
-                                <ReactPaginate
-                                    pageCount={Math.ceil(numberOfQuestionsFilter / limit)}
-                                    pageRangeDisplayed={2}
-                                    marginPagesDisplayed={2}
-                                    onPageChange={handlePageChange}
-                                    containerClassName="pagination justify-content-center mt-4"
-                                    activeClassName="active"
-                                    pageClassName="page-item"
-                                    pageLinkClassName="page-link"
-                                    previousClassName="page-item"
-                                    previousLinkClassName="page-link"
-                                    nextClassName="page-item"
-                                    nextLinkClassName="page-link"
-                                    breakClassName="page-item"
-                                    breakLinkClassName="page-link"
-                                    previousLabel="Previous"
-                                    nextLabel="Next"
-                                ></ReactPaginate>
+                            {questions.length !==0 && (
+                                <div className='col-4 mx-auto'>
+                                    <ReactPaginate
+                                        pageCount={Math.ceil(numberOfQuestionsFilter / limit)}
+                                        pageRangeDisplayed={2}
+                                        marginPagesDisplayed={2}
+                                        onPageChange={handlePageChange}
+                                        containerClassName="pagination justify-content-center mt-4"
+                                        activeClassName="active"
+                                        pageClassName="page-item"
+                                        pageLinkClassName="page-link"
+                                        previousClassName="page-item"
+                                        previousLinkClassName="page-link"
+                                        nextClassName="page-item"
+                                        nextLinkClassName="page-link"
+                                        breakClassName="page-item"
+                                        breakLinkClassName="page-link"
+                                        previousLabel="Previous"
+                                        nextLabel="Next"
+                                    ></ReactPaginate>
 
-                            </div>
+                                </div>
+                            )}
                         </div>
-                        <div className="col-2">
+                    <div className="col-2">
 
-                        </div>
                     </div>
+                </div>
 
                 </div>
             </div>

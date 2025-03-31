@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    environment:
+      - IS_DOCKER=true
+      - DB_URL=postgresql://postgres:postgres@bakalarka-postgres-1:5432/quizzes
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./frontend
+    networks:
+      - app_network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: quizzes
+    networks:
+      - app_network
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,5 +1,10 @@
-from src.backend.views import *
-from src.backend.models import *
+import os
+if os.environ.get("IS_DOCKER") == 'true':
+    from models.views import *
+    from models.models import *
+else:
+    from backend.models.views import *
+    from backend.models.models import *
 
 
 def fetch_question_data(question_id):
@@ -13,7 +18,7 @@ def fetch_question_data(question_id):
             "title": version.title,
             "dateCreated": version.dateCreated.strftime('%Y-%m-%d %H:%M:%S') if version.dateCreated else None,
             "author_id": version.author_id,
-            "author_name": version.author.name,
+            "author_name": version.author.github_name,
             "text": version.text,
             "type": version.type
         }

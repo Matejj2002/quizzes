@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import 'katex/dist/katex.min.css';
-import { InlineMath } from 'react-katex';
+import FormattedTextRenderer from "../components/FormattedTextRenderer";
 
-const ShortAnswerQuestion = ({setAnswers, answers, prepareTextForLatex}) => {
+const ShortAnswerQuestion = ({setAnswers, answers}) => {
     const [newAnswer, setNewAnswer] = useState({
         text: "",
         is_regex: false,
@@ -23,7 +22,9 @@ const ShortAnswerQuestion = ({setAnswers, answers, prepareTextForLatex}) => {
 
     return (
         <div>
-            <p>{<InlineMath>{prepareTextForLatex(answers["text"])}</InlineMath>}</p>
+            <FormattedTextRenderer
+                                        text={answers["text"]}
+                                      />
             <div className="input-group">
                 <span className="input-group-text" id="inputGroup-sizing-default">Answer</span>
                 <input type="text" className="form-control" value={answers["text"]} aria-label="Sizing example input"
@@ -37,7 +38,9 @@ const ShortAnswerQuestion = ({setAnswers, answers, prepareTextForLatex}) => {
                 </summary>
                 <div className="p-4 w-auto mb-3">
                     <form>
-                        <p>{<InlineMath>{prepareTextForLatex(answers["positive_feedback"])}</InlineMath>}</p>
+                        <FormattedTextRenderer
+                                        text={answers["positive_feedback"]}
+                                      />
                         <div className="d-flex align-items-center mb-3">
                             <label className="form-label">Positive&nbsp;&nbsp;</label>
                             <input
@@ -50,7 +53,10 @@ const ShortAnswerQuestion = ({setAnswers, answers, prepareTextForLatex}) => {
                                 }
                             />
                         </div>
-                        <p>{<InlineMath>{prepareTextForLatex(answers["negative_feedback"])}</InlineMath>}</p>
+                        <FormattedTextRenderer
+                                        text={answers["negative_feedback"]}
+                                      />
+
                         <div className="d-flex align-items-center">
                             <label className="form-label">Negative</label>
                             <input
