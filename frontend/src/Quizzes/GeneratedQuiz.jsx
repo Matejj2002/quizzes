@@ -128,7 +128,9 @@ const GeneratedQuiz = () => {
         return;
     }
 
-    const generateQuizWait = async () => {
+    if (quiz.correction_of_attempts !== "correctionAttempts" && refreshQuiz){
+        handleSaveQuiz(false).then(()=>{
+        const generateQuizWait = async () => {
         setLoading(true);
         await generateQuiz();
         // setLoading(false);
@@ -137,6 +139,18 @@ const GeneratedQuiz = () => {
 
     generateQuizWait().then(() => {
     });
+    })
+    }else{
+        const generateQuizWait = async () => {
+        setLoading(true);
+        await generateQuiz();
+        // setLoading(false);
+        setQuizGenerated(true);
+        };
+
+        generateQuizWait().then(() => {
+        });
+    }
 
 }, [questionsData]);
 
@@ -196,14 +210,12 @@ const GeneratedQuiz = () => {
                                 }));
 
                                 const startTime = new Date(result.data.start_time);
-                                console.log(result.data);
 
                                 const finishTime = new Date(result.data.end_time).getTime();
 
                                 const startMilis = startTime.getTime()
                                 const timeToFinish = result.data.minutes_to_finish * 60 *1000
 
-                                // const now = Date.now() + 2*60 * 60000;
                                 const endTime = startMilis + timeToFinish;
 
                                 const nowDate = new Date(result.data.now_check);

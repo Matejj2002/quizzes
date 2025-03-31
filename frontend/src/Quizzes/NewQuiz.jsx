@@ -218,23 +218,14 @@ const NewQuiz = () => {
         );
     };
     const saveChanges = () => {
-        const localOpen = new Date(dateOpen);
-        const utcOpenDate =  new Date(localOpen.getTime());
-
-        const localClose = new Date(dateClose);
-        const utcCloseDate =  new Date(localClose.getTime());
-
-        const localCheck = new Date(dateCheck);
-        const utcCheckDate =  new Date(localCheck.getTime());
-
         const updatedData = {
             sections: sections,
             quizTitle: quizTitle,
             numberOfCorrections: numberOfCorrections,
             minutesToFinish: minutesToFinish,
-            dateOpen: utcOpenDate.toISOString(),
-            dateClose: utcCloseDate.toISOString(),
-            dateCheck: utcCheckDate.toISOString(),
+            dateOpen: dateOpen,
+            dateClose: dateClose,
+            dateCheck: dateCheck,
             typeOfAttempts: selectedOption,
             shuffleSections: shuffleSections,
             quizId: quizId,

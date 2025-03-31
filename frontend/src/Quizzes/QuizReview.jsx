@@ -203,15 +203,18 @@ const QuizReview = () =>{
                                                                                 <div className="w-100">
                                                                                     <div
                                                                                         className="d-flex justify-content-between w-100">
-                                                                                    <span
-                                                                                        className="fw-bold me-1">
-                                                                                    {ans.answer.length === 0 ? "No answer" :
+                                                                                        <div
+                                                                                            className="me-1">
+                                                                                            <p className="mb-0 fw-bold">Your
+                                                                                                answer
+                                                                                                is</p>
+                                                                                            {ans.answer.length === 0 ? "No answer" :
 
-                                                                                        <FormattedTextRenderer
-                                                                                            text={ans.answer}
-                                                                                          />
-                                                                                    }
-                                                                                    </span>
+                                                                                                <FormattedTextRenderer
+                                                                                                    text={ans.answer}
+                                                                                                />
+                                                                                            }
+                                                                                        </div>
 
                                                                                         <span
                                                                                             className="d-flex text-danger justify-content-end me-0">
@@ -223,7 +226,7 @@ const QuizReview = () =>{
                                                                                     <p className="mb-0 fw-bold">Correct answer
                                                                                         is</p>
                                                                                     <p
-                                                                                        className="fw-bold m-0">
+                                                                                        className=" m-0">
                                                                                         <FormattedTextRenderer
                                                                                             text={ans["rightSide"]}
                                                                                           />
