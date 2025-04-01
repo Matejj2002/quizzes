@@ -25,8 +25,8 @@ const QuizReview = () =>{
             const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`, {
                 params: {
                     item_id: itemId,
+                    quiz_id: quiz.id,
                     review: true,
-                    feedbackType: feedback
                 }});
 
             setQuestionsData(prevData => ({
@@ -141,7 +141,7 @@ const QuizReview = () =>{
                                     <div className="d-flex justify-content-between align-items-center">
                                         <h2>{questionsData[question.id]?.title}</h2>
 
-                                        {feedback.includes("pointsReview") && (
+                                        {feedback.includes("correctAnswers") && (
                                             <div>
                                                 {questionsData[question.id]?.isCorrect ? (
                                                     <div className="d-flex align-items-center">
