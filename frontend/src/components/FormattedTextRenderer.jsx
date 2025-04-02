@@ -8,14 +8,11 @@ import remarkDirectiveRehype from "remark-directive-rehype";
 import { remarkDefinitionList, defListHastHandlers } from "remark-definition-list";
 import remarkMath from "remark-math";
 import katex from "katex";
-import classNames from 'classnames/dedupe';
 
 import 'katex/dist/katex.min.css';
-// import styles from './FormattedTextRenderer.module.scss'
-// import mdDirectives from './md-directives';
 import {memo, useMemo} from "react";
 
-function FormattedTextRenderer({className, text, katexMacros}) {
+function FormattedTextRenderer({text, katexMacros}) {
   const rehypeSanitizeOptions = {
     ...defaultSchema,
     tagNames: [

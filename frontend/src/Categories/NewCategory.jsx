@@ -129,7 +129,7 @@ const NewCategory = () => {
                   <Navigation active="Questions"></Navigation>
 
 
-              <div className="containter-fluid" style={{marginTop: "50px"}}>
+              <div className="containter-fluid">
                   <div className="row">
                       <div className="col-2 sidebar"
                            style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>

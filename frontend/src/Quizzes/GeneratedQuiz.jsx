@@ -7,15 +7,15 @@ import FormattedTextRenderer from "../components/FormattedTextRenderer";
 const GeneratedQuiz = () => {
     const location = useLocation();
     const [quiz, setQuiz] = useState(location.state?.quiz);
-    const [refreshQuiz, setRefreshQuiz] = useState(location.state?.refreshQuiz || false);
+    const [refreshQuiz] = useState(location.state?.refreshQuiz || false);
     const [questionsData, setQuestionsData] = useState({});
     const [randomQuestions, setRandomQuestions] = useState([]);
     const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [numberOfQuestions, setNumberOfQuestions] = useState(0);
-    const [dateStart, setDateStart] = useState(0);
+    const [dateStart] = useState(0);
     const [count, setCount] = useState(-1);
-    const [minutesToFinish, setMinutesToFinish] = useState(0);
+    const [minutesToFinish] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
 
     const [feedbackQuestion, setFeedbackQuestion] = useState([]);
@@ -133,7 +133,6 @@ const GeneratedQuiz = () => {
         const generateQuizWait = async () => {
         setLoading(true);
         await generateQuiz();
-        // setLoading(false);
         setQuizGenerated(true);
     };
 
@@ -144,7 +143,6 @@ const GeneratedQuiz = () => {
         const generateQuizWait = async () => {
         setLoading(true);
         await generateQuiz();
-        // setLoading(false);
         setQuizGenerated(true);
         };
 
@@ -262,6 +260,15 @@ const GeneratedQuiz = () => {
         })
     }
 
+    function getTime(){
+        const hours = Math.floor(count / 3600);
+        const minutes = Math.floor((count % 3600) / 60);
+        const seconds = count % 60;
+
+
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center">
@@ -270,17 +277,12 @@ const GeneratedQuiz = () => {
         );
     }
 
-    const hours = Math.floor(count / 3600);
-  const minutes = Math.floor((count % 3600) / 60);
-  const seconds = count % 60;
-  const showTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-
     return (
         <div>
 
                 <Navigation active="Quizzes"></Navigation>
 
-            <div className="container-fluid" style={{marginTop: "50px"}}>
+            <div className="container-fluid">
                 <div className="row">
                     <div className="col-2 sidebar"></div>
                     <div className="col-8">
@@ -291,9 +293,9 @@ const GeneratedQuiz = () => {
                                         {
                                             count < 300 ? (
                                                     <span
-                                                        className="text-xl font-bold text-danger">{showTime}</span>
+                                                        className="text-xl font-bold text-danger">{getTime()}</span>
                                             ) : (
-                                                <span className="text-xl font-bold">{showTime}</span>
+                                                <span className="text-xl font-bold">{getTime()}</span>
                                             )
                                         }
                                     </div>
@@ -346,7 +348,6 @@ const GeneratedQuiz = () => {
                                                 ></textarea>
 
                                                 <button className="btn btn-primary w-100 mt-2"
-                                                        // disabled={document.getElementById("feedback-" + question.id.toString()).value === ""}
                                                         onClick={() => {
                                                             const feedbackValue = document.getElementById("feedback-" + question.id.toString()).value;
                                                             saveFeedback(feedbackValue, question.item_id)
@@ -361,7 +362,7 @@ const GeneratedQuiz = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div>
+                                        <div>
                                         <FormattedTextRenderer
                                             text={questionsData[question.id]?.text}
                                         />

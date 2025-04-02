@@ -58,10 +58,9 @@ const Navigation = ({active}) => {
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
                            href="http://localhost:3000/users">Users</a>
 
-                        <a className={`nav-link ${active === "Admin" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
-                           aria-current="page"
-                           href="http://127.0.0.1:5000/admin/">Admin</a>
-
+                        <a className={`nav-link ${active === "Analysis" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={localStorage.getItem("role") !== "teacher"}
+                           href="http://localhost:3000/quiz-analysis">Analysis</a>
 
 
                     </div>

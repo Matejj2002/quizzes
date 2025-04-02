@@ -13,6 +13,7 @@ import GeneratedQuiz from "./Quizzes/GeneratedQuiz";
 import QuizReview from "./Quizzes/QuizReview";
 import Users from "./Users";
 import UserStatistics from "./UserStatistics";
+import QuizAnalysis from "./QuizAnalysis";
 
 const Home = () => {
     window.location.href = "/quizzes";
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/quizzes" element={<Quiz />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="/user-statistics" element={<UserStatistics />} />
+                  <Route path="/quiz-analysis" element={<QuizAnalysis />} />
                   <Route path="/generated-quiz" element={<GeneratedQuiz />} />
                   <Route path="/review-quiz" element={<QuizReview/>}></Route>
               </Routes>

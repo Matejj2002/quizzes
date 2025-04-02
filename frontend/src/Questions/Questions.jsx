@@ -171,7 +171,7 @@ const Questions = () => {
             <div>
                     <Navigation active="Questions"></Navigation>
 
-                <div className="container-fluid text-center" style={{marginTop: "50px"}}>
+                <div className="container-fluid text-center">
                 <div className="row">
                         <div className="col-2 sidebar"
                              style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>

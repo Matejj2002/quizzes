@@ -113,7 +113,7 @@ const Users = () =>{
         <div>
                     <Navigation active = {"Users"}></Navigation>
 
-                <div className="container-fluid" style={{ marginTop: "50px" }}>
+                <div className="container-fluid">
                     <div className="row">
                         <div className="col-2 sidebar"></div>
 
@@ -154,13 +154,13 @@ const Users = () =>{
                                                 <td className="text-end">
                                                     <div className="d-flex gap-2 text-align-center justify-content-end">
                                                         <select id={`select-${user.id}`} value={user.user_type}
+                                                                disabled={user.id.toString() === localStorage.getItem("idUser") || user.id === 1 }
                                                                 onChange={(e) => changeType(user.id, e.target.value)}
                                                                 className="form-select w-auto">
                                                             <option value="Teacher">Teacher</option>
                                                             <option value="Student">Student</option>
                                                         </select>
                                                     </div>
-                                                    {/*{user.user_type}*/}
                                                 </td>
                                                 <td className="text-end">
                                                     <button type="button" className="btn btn-outline-primary"
@@ -235,7 +235,7 @@ const Users = () =>{
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         handleAddTeacher();
-                                                    }
+                                                        }
                                                     }
 
                                             >Create

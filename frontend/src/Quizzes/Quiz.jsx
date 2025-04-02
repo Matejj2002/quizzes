@@ -96,7 +96,7 @@ const Quiz = () => {
             <div>
                 <Navigation active = {"Quizzes"}></Navigation>
 
-                <div className="container-fluid" style={{ marginTop: "50px" }}>
+                <div className="container-fluid">
                     <div className="row">
                         <div className="col-2 sidebar"></div>
 
