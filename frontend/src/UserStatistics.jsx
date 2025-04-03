@@ -8,10 +8,11 @@ const UserStatistics = () =>{
     const navigate = useNavigate();
     const [userData, setUserData] = useState([]);
     const [studentId] = useState(location.state?.studentId);
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchUserData = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-user-data`, {
+            const response = await axios.get(apiUrl+`get-user-data`, {
                 params: {
                     "studentId": studentId
                 }

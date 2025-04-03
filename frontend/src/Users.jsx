@@ -12,9 +12,10 @@ const Users = () =>{
     const [filterForName,setFilterForName] = useState("");
     const name = useRef();
     const githubName=  useRef();
+    const apiUrl = process.env.REACT_APP_API_URL;
     const fetchUsers = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-users`, {
+            const response = await axios.get(apiUrl+`get-users`, {
                 params: {
                     "sort": sort,
                     "sortDirection": sortDirection,
@@ -40,7 +41,7 @@ const Users = () =>{
             name: name.current.value,
             githubName: githubName.current.value
         }
-        axios.put(`http://127.0.0.1:5000/api/create-teacher`, updatedData)
+        axios.put(apiUrl+`create-teacher`, updatedData)
             .then(
                 () => {
                     window.location.href = '/users';
@@ -82,7 +83,7 @@ const Users = () =>{
         const handle = await window.showSaveFilePicker(options);
         const writable = await handle.createWritable();
 
-        const response = await axios.get(`http://127.0.0.1:5000/api/get-results-students`)
+        const response = await axios.get(apiUrl+`get-results-students`)
 
         await writable.write(response.data.result);
         await writable.close();
@@ -98,7 +99,7 @@ const Users = () =>{
             userId: userId,
             selectedType: selectedType
         }
-        axios.put("http://127.0.0.1:5000/api/change-user-type", data).then( () => {
+        axios.put(apiUrl+"change-user-type", data).then( () => {
             fetchUsers();
                 alert("User type changed");
             }

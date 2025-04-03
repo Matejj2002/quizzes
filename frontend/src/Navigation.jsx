@@ -5,9 +5,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 const Navigation = ({active}) => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({});
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     async function getUserData() {
-        await fetch("http://127.0.0.1:5000/getUserData", {
+        await fetch(apiUrl+"getUserData", {
                 method: "GET",
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("accessToken")
@@ -49,18 +50,18 @@ const Navigation = ({active}) => {
                     <div className="navbar-nav">
                         <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            href="http://localhost:3000/quizzes">Quizzes</a>
-
+                        {/*    href="http://localhost:3000/"*/}
                         <a className={`nav-link ${active === "Questions" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
                            href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>
 
-                        <a className={`nav-link ${active === "Users" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
-                           aria-disabled={localStorage.getItem("role") !== "teacher"}
-                           href="http://localhost:3000/users">Users</a>
-
                         <a className={`nav-link ${active === "Analysis" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
                            href="http://localhost:3000/quiz-analysis">Analysis</a>
+
+                        <a className={`nav-link ${active === "Users" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={localStorage.getItem("role") !== "teacher"}
+                           href="http://localhost:3000/users">Users</a>
 
 
                     </div>

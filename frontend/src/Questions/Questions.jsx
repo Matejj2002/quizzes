@@ -49,6 +49,7 @@ const Questions = () => {
 
     const questionTypesHuman = {"matching_answer_question": "Matching Question", "short_answer_question" : "Short Question", "multiple_answer_question": "Multiple Choice"};
 
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         setPage(parseInt(searchParams.get("page") || "1", 10));
@@ -66,7 +67,7 @@ const Questions = () => {
 
     const fetchCategory = async (index) => {
         try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/questions/categories/get-path-to-supercategory/${index}`)
+            const response = await axios.get(apiUrl+`questions/categories/get-path-to-supercategory/${index}`)
             setCategoryPath(response.data);
 
         }catch (error){}
@@ -75,7 +76,7 @@ const Questions = () => {
 
     const fetchAllTeachers = async () => {
         try{
-            const response = await axios.get('http://127.0.0.1:5000/api/teachers');
+            const response = await axios.get(apiUrl+'teachers');
             setTeachers(response.data);
         }catch(error){}
         finally {}
@@ -85,7 +86,7 @@ const Questions = () => {
       try {
             const offset = (currentPage - 1) * limit;
             const authorFilterDec = decodeURIComponent(authorFilter);
-            const response = await axios.get('http://127.0.0.1:5000/api/questions/' , {
+            const response = await axios.get(apiUrl+'questions/' , {
             params: { limit, offset, sort, actualCategory, filterType, authorFilterDec, questionFilter },
             });
             setNumberOfQuestions(response.data[0]["number_of_all_questions"]);
@@ -152,7 +153,7 @@ const Questions = () => {
           "id" : questionId,
           "delete" : delRes,
       }
-        await axios.put(`http://127.0.0.1:5000/api/questions/delete`, data)
+        await axios.put(apiUrl+`questions/delete`, data)
             .then(() => {
                     window.location.reload();
                     })

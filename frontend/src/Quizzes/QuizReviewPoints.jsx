@@ -10,18 +10,23 @@ const QuizReviewPoints = ({questionsData}) => {
 
       const progressPercentage = Math.round((totalAchievedPoints / totalPoints) * 100);
 
-    return (
-        <div>
-            <h4>Achieved points: <span
-                className="badge bg-primary mb-3">{totalAchievedPoints} / {totalPoints}</span></h4>
+    // return (
+    //     <div>
+    //         <h4>Achieved points: <span
+    //             className="badge bg-primary mb-3">{totalAchievedPoints} / {totalPoints}</span></h4>
+    //
+    //         <div className="progress mb-3" role="progressbar" aria-valuenow="{progressPercentage}"
+    //              aria-valuemin="0" aria-valuemax="100">
+    //             <div className="progress-bar" style={{width: `${progressPercentage}%`}}>
+    //                 {progressPercentage}%
+    //             </div>
+    //         </div>
+    //     </div>
+    // )
 
-            <div className="progress mb-3" role="progressbar" aria-valuenow="{progressPercentage}"
-                 aria-valuemin="0" aria-valuemax="100">
-                <div className="progress-bar" style={{width: `${progressPercentage}%`}}>
-                    {progressPercentage}%
-                </div>
-            </div>
-        </div>
+    return (
+        <span
+                 className="badge bg-primary mb-3 fs-5 mt-2">{totalAchievedPoints} / {totalPoints} pts.</span>
     )
 }
 

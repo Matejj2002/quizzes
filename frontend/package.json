@@ -1,6 +1,7 @@
 {
   "name": "frontend_quizzes",
   "version": "0.1.0",
+  "homepage": "/static",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -12,6 +13,7 @@
     "bootstrap-icons": "^1.11.3",
     "classnames": "^2.5.1",
     "katex": "^0.16.21",
+    "micromark-core-commonmark": "^2.0.3",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^18.3.1",

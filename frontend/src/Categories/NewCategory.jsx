@@ -36,9 +36,11 @@ const NewCategory = () => {
     const [selectedCategoryId, setSelectedCategoryId] = useState(id);
     const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
 
+    const apiUrl = process.env.REACT_APP_API_URL;
+
     const fetchCategory = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/categories`)
+            const response = await axios.get(apiUrl+`categories`)
             setCategory(response.data);
       }catch (error){
       }finally {
@@ -48,7 +50,7 @@ const NewCategory = () => {
 
   const fetchCategorySelect = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
+            const response = await axios.get(apiUrl+`get-category-tree-array`)
             setCategorySelect([{id:1, title:"None (Create top-level category)"}, ...response.data]);
       }catch (error){
       }finally {
@@ -81,7 +83,7 @@ const NewCategory = () => {
         }
 
         if (canSave) {
-            axios.put(`http://127.0.0.1:5000/api/categories/new-category`, data)
+            axios.put(apiUrl+`categories/new-category`, data)
                 .then(() => {
                         navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category_id=${id}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
                     }

@@ -4,9 +4,10 @@ import CategorySelect from "./CategorySelect";
 
 const Categories = ({catPath, type= "SubCat"}) => {
   const [categories, setCategories] = useState('');
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {const fetchTreeData = async () => {
-      const response = await fetch("http://127.0.0.1:5000/api/get-category-tree");
+      const response = await fetch(apiUrl+"get-category-tree");
       const data = await response.json();
       setCategories(data);
     };

@@ -9,6 +9,7 @@ const QuestionModal = ({
     const [addedQuestions, setAddedQuestions] = useState({categoryId: 1, categoryName: "supercategory", type: "random", questionType:"Any Type", includeSubCategories: true, questions: []});
     const [questions, setQuestions] = useState([]);
     const [typeQuestionSelected, setTypeQuestionSelected] = useState(1);
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
     if (addedQuestions.type === "random") {
@@ -32,7 +33,7 @@ const QuestionModal = ({
         const fetchQuestions = async () => {
             try {
                 const response = await axios.get(
-                    `http://127.0.0.1:5000/api/get_questions_category/${addedQuestions.categoryId}`,
+                    apiUrl+`get_questions_category/${addedQuestions.categoryId}`,
                     { params: { includeSubCat: addedQuestions.includeSubCategories, typeQuestionSelected: typeQuestionSelected } }
                 );
                 setQuestions(response.data.questions);

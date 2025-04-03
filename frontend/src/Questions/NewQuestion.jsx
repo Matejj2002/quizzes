@@ -12,11 +12,14 @@ import Categories from "../CategoriesTree/Categories";
 import Navigation from "../Navigation";
 
 import FormattedTextRenderer from "../components/FormattedTextRenderer";
+import FormattedTextInput from "../components/FormattedTextInput";
 
 const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     let titleText = "";
     if (subButText === "Submit"){
@@ -86,7 +89,7 @@ const NewQuestion = ({subButText="Submit"}) => {
         };
         if (subButText === "Submit" || subButText === "Copy") {
             if (title !=="" && text !=="") {
-                axios.put(`http://127.0.0.1:5000/api/questions/new-question`, updatedData)
+                axios.put(apiUrl+`questions/new-question`, updatedData)
                     .then(response => {
                         if (createMoreQuestions){
                             setTitle("");
@@ -132,7 +135,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             }
         }else{
             if (title !=="" && text !=="") {
-                axios.put(`http://127.0.0.1:5000/api/questions/versions/${id}`, updatedData)
+                axios.put(apiUrl+`questions/versions/${id}`, updatedData)
                     .then(response => {
                         window.location.href = '/questions';
                     })
@@ -151,7 +154,7 @@ const NewQuestion = ({subButText="Submit"}) => {
     }
 
     async function getUSerData() {
-        await fetch("http://127.0.0.1:5000/getUserData", {
+        await fetch(apiUrl+"getUserData", {
                 method: "GET",
                 headers: {
                     "Authorization" : "Bearer " + localStorage.getItem("accessToken")
@@ -167,7 +170,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const fetchCategory = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/categories`)
+            const response = await axios.get(apiUrl+`categories`)
             setCategory(response.data);
       }catch (error){
       }finally {
@@ -177,7 +180,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
       const fetchCategorySelect = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
+            const response = await axios.get(apiUrl+`get-category-tree-array`)
             setCategorySelect(response.data);
       }catch (error){
       }finally {
@@ -187,7 +190,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const fetchData = async () => {
         try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/question-version-choice/${id}`)
+            const response = await axios.get(apiUrl+`question-version-choice/${id}`)
             setSelectedCategory(response.data["category_name"]);
             setSelectedCategoryId(response.data["category_id"]);
             setTitle(response.data["title"]);
@@ -333,19 +336,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     <label htmlFor="questionText" className="form-label">
                                         Question Text
                                     </label>
-                                    <FormattedTextRenderer
-                                        text={text}
-                                      />
-                                    <textarea
-                                        className="form-control"
-                                        id="questionText"
-                                        value={text}
-                                        placeholder="Question text"
-                                        onChange={(e) => setText(e.target.value)}
-                                        rows={4}
-                                        required
-                                    />
-
+                                    <FormattedTextInput text={text} handleFunction={setText}></FormattedTextInput>
                                     <div className="invalid-feedback">
                                         Please enter text of question
                                     </div>
@@ -356,35 +347,14 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <label htmlFor="questionFeedback" className="form-label">
                                     Question negative feedback
                                 </label>
-
-                                <FormattedTextRenderer
-                                        text={questionFeedback}
-                                      />
-                                <textarea
-                                    className="form-control"
-                                    id="questionFeedback"
-                                    value={questionFeedback}
-                                    placeholder="Question feedback"
-                                    onChange={(e) => setQuestionFeedback(e.target.value)}
-                                    rows={4}
-                                />
+                                <FormattedTextInput text={questionFeedback} handleFunction={setQuestionFeedback}></FormattedTextInput>
                             </div>
 
                             <div className="mb-3">
                                 <label htmlFor="questionPositiveFeedback" className="form-label">
                                     Question positive feedback
                                 </label>
-                                <FormattedTextRenderer
-                                        text={questionPositiveFeedback}
-                                      />
-                                <textarea
-                                    className="form-control"
-                                    id="questionPositiveFeedback"
-                                    value={questionPositiveFeedback}
-                                    placeholder="Question positive feedback"
-                                    onChange={(e) => setQuestionPositiveFeedback(e.target.value)}
-                                    rows={4}
-                                />
+                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback}></FormattedTextInput>
                             </div>
 
                             {questionType === "Matching Question" && (

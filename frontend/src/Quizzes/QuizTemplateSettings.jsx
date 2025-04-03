@@ -1,7 +1,6 @@
 import React from "react";
 
 const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuffleSections, numberOfCorrections, setNumberOfCorrections, selectedOption, setSelectedOption, minutesToFinish, setMinutesToFinish, dateOpen, handleDateOpenChange, dateClose, handleDateCloseChange, dateCheck, handleDateCheck, selectedFeedback, handleSelectedFeedbackChange, selectedFeedbackAfterClose, handleSelectedFeedbackAfterCloseChange}) =>{
-    console.log(selectedFeedbackAfterClose)
     return (
         <div className="tab-content" id="myTabContent">
             <div className="tab-pane fade show active" id="home-tab-pane" role="tabpanel"

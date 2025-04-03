@@ -9,28 +9,44 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
         negative_feedback: ""
     });
 
+
+    const [isValid, setIsValid] = useState(true);
+
     useEffect(() => {
+        if (newAnswer.is_regex){
+            try {
+              new RegExp(newAnswer.text);
+              setIsValid(true);
+            } catch (error) {
+              setIsValid(false);
+            }
+        }
         setAnswers(newAnswer);
       }, [newAnswer]);
 
     useEffect(() => {
         if(answers && answers.length > 0) {
-            const [text, is_regex, positive_feedback, negative_feedback] = answers[0];
-            setNewAnswer({text, is_regex, positive_feedback, negative_feedback});
+            try {
+                const [text, is_regex, positive_feedback, negative_feedback] = answers[0];
+                setNewAnswer({text, is_regex, positive_feedback, negative_feedback});
+            }catch{
+
+            }
         }
   }, [answers]);
 
     return (
         <div>
-            <FormattedTextRenderer
-                                        text={answers["text"]}
-                                      />
             <div className="input-group">
                 <span className="input-group-text" id="inputGroup-sizing-default">Answer</span>
-                <input type="text" className="form-control" value={answers["text"]} aria-label="Sizing example input"
+                <input type="text" className={`form-control ${newAnswer.is_regex ? (isValid ? 'is-valid' : 'is-invalid') : ''}`} value={answers["text"]} aria-label="Sizing example input"
                        aria-describedby="inputGroup-sizing-default"
                        onChange={(e) => setNewAnswer({...newAnswer, text: e.target.value})}/>
             </div>
+
+            <div className="invalid-feedback">
+          Not a valid regex
+        </div>
 
             <details className="mt-3 mb-3" style={{textAlign: "left"}}>
                 <summary>
@@ -38,9 +54,9 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                 </summary>
                 <div className="p-4 w-auto mb-3">
                     <form>
-                        <FormattedTextRenderer
-                                        text={answers["positive_feedback"]}
-                                      />
+                        {/*<FormattedTextRenderer*/}
+                        {/*                text={answers["positive_feedback"]}*/}
+                        {/*              />*/}
                         <div className="d-flex align-items-center mb-3">
                             <label className="form-label">Positive&nbsp;&nbsp;</label>
                             <input
@@ -53,9 +69,9 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                                 }
                             />
                         </div>
-                        <FormattedTextRenderer
-                                        text={answers["negative_feedback"]}
-                                      />
+                        {/*<FormattedTextRenderer*/}
+                        {/*                text={answers["negative_feedback"]}*/}
+                        {/*              />*/}
 
                         <div className="d-flex align-items-center">
                             <label className="form-label">Negative</label>

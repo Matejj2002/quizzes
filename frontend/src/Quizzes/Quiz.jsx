@@ -8,10 +8,11 @@ const Quiz = () => {
 
     const [quizzes, setQuizzes] = useState([]);
     const [updateAt, setUpdateAt] = useState(null);
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchQuizzes = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-quiz-templates` ,
+            const response = await axios.get(apiUrl+`get-quiz-templates` ,
                 {
                     params: {"studentId": localStorage.getItem("idUser")}
                 }
@@ -81,7 +82,7 @@ const Quiz = () => {
         const updatedData = {
             quiz_template_id: quiz.id
         }
-        axios.put(`http://127.0.0.1:5000/api/archive-quiz`, updatedData)
+        axios.put(apiUrl+`archive-quiz`, updatedData)
             .then(
                 () => {
                     window.location.href = '/quizzes';

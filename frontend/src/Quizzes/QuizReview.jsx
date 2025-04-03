@@ -19,10 +19,11 @@ const QuizReview = () =>{
     const [data, setData] = useState([]);
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchQuestion = async (questionId, itemId) => {
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`, {
+            const response = await axios.get(apiUrl+`questions-quiz/${questionId}`, {
                 params: {
                     item_id: itemId,
                     quiz_id: quiz.id,
@@ -42,7 +43,7 @@ const QuizReview = () =>{
     useEffect(() => {
 
         const getData = async () => {
-            const result = await axios.get("http://127.0.0.1:5000/api/quiz-student-load",
+            const result = await axios.get(apiUrl+"quiz-student-load",
                 {
                     params: {
                         student_id: localStorage.getItem("idUser"),
@@ -91,12 +92,18 @@ const QuizReview = () =>{
                     <div className="col-2 sidebar"></div>
 
                     <div className="col-8">
+                        <div className="d-flex justify-content-between">
                         <h1 className="mb-3">
                             Review {quiz.title}
                         </h1>
-                        {feedback.includes("pointsReview") && (
+                            <div>
+                            {feedback.includes("pointsReview") && (
                             <QuizReviewPoints questionsData={questionsData}></QuizReviewPoints>
                         )}
+                                </div>
+
+                        </div>
+
 
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
@@ -141,17 +148,17 @@ const QuizReview = () =>{
                                     <div className="d-flex justify-content-between align-items-center">
                                         <h2>{questionsData[question.id]?.title}</h2>
 
-                                        {feedback.includes("correctAnswers") && (
+                                        {feedback.includes("pointsReview") && (
                                             <div>
                                                 {questionsData[question.id]?.isCorrect ? (
                                                     <div className="d-flex align-items-center">
-                                                        <i className="bi bi-check-circle text-success fs-3"></i>
-                                                        <p className="text-success fs-3 ms-2 mb-0">{questionsData[question.id]?.points}{questionsData[question.id]?.points === 1 ? "pt." : "pts."}</p>
+                                                        {/*<i className="bi bi-check-circle text-success fs-3"></i>*/}
+                                                        <span className="badge bg-success fs-5 ms-2 mb-0">{questionsData[question.id]?.points}/{questionsData[question.id]?.max_points}{questionsData[question.id]?.points === '1.00' ? " pt." : " pts."}</span>
                                                     </div>
                                                 ) : (
                                                     <div className="d-flex align-items-center">
-                                                        <i className="bi bi-x-circle text-danger fs-3"></i>
-                                                        <p className="text-danger fs-3 ms-2 mb-0">{questionsData[question.id]?.points}{questionsData[question.id]?.points === 1 ? "pt." : "pts."}</p>
+                                                        {/*<i className="bi bi-x-circle text-danger fs-3"></i>*/}
+                                                        <span className="badge bg-danger fs-5 ms-2 mb-0">{questionsData[question.id]?.points}/{questionsData[question.id]?.max_points}{questionsData[question.id]?.points === '1.00' ? " pt." : " pts."}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -307,7 +314,15 @@ const QuizReview = () =>{
                                             {questionsData[question.id]?.type === "short_answer_question" && (
                                                 <div className="mb-3 mt-3">
                                                     <span className="me-2 mt-3 fw-bold">Answer: </span>
-                                                    <div className="d-flex fw-bold">
+                                                    <input
+                                                      type="text"
+                                                      value={questionsData[question.id]?.answers[0]["answer"]}
+                                                      disabled
+                                                      required
+
+                                                      className="form-control"
+                                                    />
+                                                    <div className="d-flex">
                                                         <FormattedTextRenderer
                                                             text={questionsData[question.id]?.answers[0]["answer"]}
                                                         />

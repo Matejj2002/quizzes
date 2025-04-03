@@ -6,6 +6,7 @@ const Login = ({path = "/login"}) =>{
     const [userData, setUserData] = useState({});
 
     const CLIENT_ID = "Ov23likPzKaEmFtQM7kn";
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         const queryString = window.location.search;
@@ -14,7 +15,7 @@ const Login = ({path = "/login"}) =>{
 
         if (codeParam && (localStorage.getItem("accessToken") === null)) {
             async function getAccessToken() {
-                await fetch("http://127.0.0.1:5000/getAccessToken?code=" + codeParam)
+                await fetch(apiUrl+"getAccessToken?code=" + codeParam)
                     .then((response) => {return response.json()})
                     .then((data) => {
                         if (data.access_token){
@@ -33,7 +34,7 @@ const Login = ({path = "/login"}) =>{
         window.location.assign("https://github.com/login/oauth/authorize?client_id="+ CLIENT_ID);
     }
     async function getUserData() {
-        await fetch("http://127.0.0.1:5000/getUserData", {
+        await fetch(apiUrl+"getUserData", {
                 method: "GET",
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("accessToken")

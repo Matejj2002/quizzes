@@ -22,12 +22,15 @@ const GeneratedQuiz = () => {
 
     const [quizGenerated, setQuizGenerated] = useState(false);
 
+    const apiUrl = process.env.REACT_APP_API_URL;
+
+
     useEffect(() => {
         if (!quiz?.sections) {
             return;
         }
 
-        axios.post(`http://127.0.0.1:5000/api/new-quiz-template-check`, quiz)
+        axios.post(apiUrl+`new-quiz-template-check`, quiz)
             .then(response => {
                 setRandomQuestions(response.data.result[0]);
                 setNumberOfQuestions(response.data.number_of_questions)
@@ -60,7 +63,7 @@ const GeneratedQuiz = () => {
                     student_id: 3
                 }
                 const setDateFinish = async () => {
-                    axios.put(`http://127.0.0.1:5000/api/quiz-finish`, updatedData).then(
+                    axios.put(apiUrl+`quiz-finish`, updatedData).then(
                         () => {
                             window.location.href = "/quizzes";
                         }
@@ -75,7 +78,7 @@ const GeneratedQuiz = () => {
 
     const fetchQuestion = async (questionId, itemId) => {
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/api/questions-quiz/${questionId}`, {
+            const response = await axios.get(apiUrl+`questions-quiz/${questionId}`, {
                 params: {
                     item_id: itemId,
                     review: false,
@@ -161,7 +164,7 @@ const GeneratedQuiz = () => {
             "finalSave": finalSave,
             "studentId": localStorage.getItem("idUser")
         }
-        axios.put(`http://127.0.0.1:5000/api/quiz_set_answers`, updatedData).then( () =>{
+        axios.put(apiUrl+`quiz_set_answers`, updatedData).then( () =>{
                 if (finalSave){
                     window.location.href = "/quizzes";
                 }
@@ -189,11 +192,11 @@ const GeneratedQuiz = () => {
             "refreshQuiz": refreshQuiz
         }
 
-        axios.put(`http://127.0.0.1:5000/api/new-quiz-student`, updatedData)
+        axios.put(apiUrl+`new-quiz-student`, updatedData)
                     .then(
                         async (response) => {
                             if (!response.data["created"]) {
-                                const result = await axios.get("http://127.0.0.1:5000/api/quiz-student-load",
+                                const result = await axios.get(apiUrl+"quiz-student-load",
                                     {
                                         params: {
                                             student_id: localStorage.getItem("idUser"),
@@ -252,7 +255,7 @@ const GeneratedQuiz = () => {
             "student_id": localStorage.getItem("idUser"),
             "role": localStorage.getItem("role")
         }
-        axios.put(`http://127.0.0.1:5000/api/save-feedback-to-item`, updatedData).then( () =>{
+        axios.put(apiUrl+`save-feedback-to-item`, updatedData).then( () =>{
             setFeedbackQuestion([...feedbackQuestion, itemId]);
         }
 
@@ -339,7 +342,9 @@ const GeneratedQuiz = () => {
                                         <h2>{questionsData[question.id]?.title}</h2>
                                         <div className="dropdown-center">
                                           <button className="btn  dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                             <i className={`bi bi-flag ${feedbackQuestion.includes(question.item_id) ? "text-danger" : ""}`}></i>
+                                             <i className={`bi ${feedbackQuestion.includes(question.item_id) ? "bi-flag-fill" : "bi-flag"}`}
+                                                style={{ color: feedbackQuestion.includes(question.item_id) ? 'red' : '' }}
+                                                ></i>
                                           </button>
                                             <div className="dropdown-menu p-3" style={{minWidth: "300px"}}>
                                                 <label htmlFor="feedback" className="form-label">Feedback</label>

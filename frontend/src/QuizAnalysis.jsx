@@ -8,9 +8,10 @@ const QuizAnalysis = () =>{
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
     const [filterForName,setFilterForName] = useState("");
+    const apiUrl = process.env.REACT_APP_API_URL;
     const fetchQuizzes = async () => {
       try{
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-quizzes-analysis`, {
+            const response = await axios.get(apiUrl+`get-quizzes-analysis`, {
                 params: {
                     "filterName": filterForName
                 }

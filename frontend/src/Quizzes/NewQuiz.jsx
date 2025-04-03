@@ -57,6 +57,8 @@ const NewQuiz = () => {
 
     const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "indepedentAttempts");
 
+    const apiUrl = process.env.REACT_APP_API_URL;
+
     const handleSelectedFeedbackChange = (e) => {
         const { value, checked } = e.target;
         setSelectedFeedback((prev) =>
@@ -104,7 +106,7 @@ const NewQuiz = () => {
 
     const fetchCategorySelect = async () => {
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/api/get-category-tree-array`)
+            const response = await axios.get(apiUrl+`get-category-tree-array`)
             setCategorySelect(() => [
                 {id: 1, title: "All"},
                 ...response.data
@@ -251,10 +253,10 @@ const NewQuiz = () => {
             return;
         }
 
-         axios.post(`http://127.0.0.1:5000/api/new-quiz-template-check`, sections)
+         axios.post(apiUrl+`new-quiz-template-check`, sections)
             .then(response => {
                 if (response.data["message"]){
-                    axios.put(`http://127.0.0.1:5000/api/new-quiz-template`, updatedData)
+                    axios.put(apiUrl+`new-quiz-template`, updatedData)
                     .then(
                         () => {
                             window.location.href = '/quizzes';
@@ -272,10 +274,6 @@ const NewQuiz = () => {
 
     const handleDateOpenChange = (e) => {
         const newDate = e.target.value;
-
-        const localDate = new Date(newDate);
-        const utcDate = new Date(localDate.getTime());
-        console.log("UTC Time:", utcDate.toISOString(), utcDate);
 
         if (newDate < dateClose || dateClose === ""){
             setDateOpen(newDate);
