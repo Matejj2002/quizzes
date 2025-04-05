@@ -16,10 +16,12 @@ const QuizReview = () =>{
     const [quizId] = useState(location.state?.quizId);
     const [feedback] = useState(location.state?.feedback)
     const [conditionToRetake] = useState(location.state?.conditionToRetake)
+    const [correctMode] = useState(location.state?.correctMode || false)
     const [data, setData] = useState([]);
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
+    const [changeEvalItem, setChangeEvalItem] = useState([]);
 
     const fetchQuestion = async (questionId, itemId) => {
         try {
@@ -73,6 +75,30 @@ const QuizReview = () =>{
             });
         }
     }, [data])
+
+    const handlePointsChange = (questionId, newValue) => {
+      setQuestionsData(prev => ({
+        ...prev,
+        [questionId]: {
+          ...prev[questionId],
+          points: newValue,
+        },
+      }));
+    };
+
+    const handleSaveEvaluation = () =>{
+        const updatedData = {
+            questionsData: questionsData,
+            id: quiz.quiz_id
+        }
+        axios.put(apiUrl+`quiz_change_evaluation`, updatedData).then( () =>{
+                navigate(-1);
+
+            }
+
+        ).catch( () => {
+        })
+    }
 
     if (data.length === 0) {
         return (
@@ -130,14 +156,13 @@ const QuizReview = () =>{
 
                         <ul className="list-group mb-3">
                             {data.sections[page]?.questions.map((question, index) => (
-                                <li className={`list-group-item ${(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) ? 'border-danger' : ''} 
-                                    ${(questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) ? 'border-success' : ''}`}
-
+                                <li className={`list-group-item ${(parseFloat(questionsData[question.id]?.points) ===0  && feedback.includes("correctAnswers")) ? 'border-danger' : ''} 
+                                    ${(parseFloat(questionsData[question.id]?.points) > 0 && feedback.includes("correctAnswers")) ? 'border-success' : ''}`}
 
                                     style={
                                         feedback.includes("correctAnswers")
                                             ? {
-                                                background: questionsData[question.id]?.isCorrect
+                                                background: questionsData[question.id]?.points>0
                                                     ? "rgba(155,236,137,0.15)"
                                                     : "rgba(255, 0, 0, 0.04)",
                                             }
@@ -150,32 +175,45 @@ const QuizReview = () =>{
 
                                         {feedback.includes("pointsReview") && (
                                             <div>
-                                                {questionsData[question.id]?.isCorrect ? (
-                                                    <div className="d-flex align-items-center">
-                                                        {/*<i className="bi bi-check-circle text-success fs-3"></i>*/}
-                                                        <span className="badge bg-success fs-5 ms-2 mb-0">{questionsData[question.id]?.points}/{questionsData[question.id]?.max_points}{questionsData[question.id]?.points === '1.00' ? " pt." : " pts."}</span>
-                                                    </div>
-                                                ) : (
-                                                    <div className="d-flex align-items-center">
-                                                        {/*<i className="bi bi-x-circle text-danger fs-3"></i>*/}
-                                                        <span className="badge bg-danger fs-5 ms-2 mb-0">{questionsData[question.id]?.points}/{questionsData[question.id]?.max_points}{questionsData[question.id]?.points === '1.00' ? " pt." : " pts."}</span>
-                                                    </div>
-                                                )}
+                                                <span
+                                                    className={`badge fs-5 ms-2 mb-0 ${
+                                                        Number(questionsData[question.id]?.points) === 0
+                                                            ? 'bg-danger'
+                                                            : 'bg-success'
+                                                    }`}
+                                                >
+                                                      {correctMode ? (
+                                                          <input
+                                                              type="number"
+                                                              step="0.1"
+                                                              min="0"
+                                                              max={questionsData[question.id]?.max_points}
+                                                              value={Number(questionsData[question.id]?.points).toFixed(2)}
+                                                              onChange={(e) => handlePointsChange(question.id, e.target.value)}
+                                                              className="form-control form-control-sm d-inline bg-transparent text-white border-0 p-0 fs-5"
+                                                              style={{width: '60px', textAlign: 'right'}}
+                                                          />
+                                                      ) : (
+                                                          Number(questionsData[question.id]?.points).toFixed(2)
+                                                      )}
+                                                    /{questionsData[question.id]?.max_points}
+                                                    {Number(questionsData[question.id]?.points) === 1 ? ' pt.' : ' pts.'}
+                                                    </span>
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="mb-1">
                                         <FormattedTextRenderer
-                                                                        text={questionsData[question.id]?.text}
-                                                                      />
+                                            text={questionsData[question.id]?.text}
+                                        />
                                     </div>
 
-                                            {questionsData[question.id]?.type === "matching_answer_question" && (
-                                                <div className="mb-3">
-                                                    <table className="table table-striped">
-                                                        <thead>
-                                                        <tr>
+                                    {questionsData[question.id]?.type === "matching_answer_question" && (
+                                        <div className="mb-3">
+                                            <table className="table table-striped">
+                                                <thead>
+                                                <tr>
                                                             <th scope="col">
                                                                 <div className="d-flex justify-content-start">Left
                                                                     Side
@@ -383,13 +421,17 @@ const QuizReview = () =>{
                             <div>
                                 <button type="button" className="btn btn-outline-secondary me-1"
                                         onClick={() => {
-                                            window.location.href = "/quizzes";
+                                            if (correctMode) {
+                                                navigate(-1);
+                                            }else {
+                                                window.location.href = "/quizzes";
+                                            }
                                         }
                                         }
                                 >
-                                    Back to Quizzes
+                                    {correctMode === false ? "Back to quizzes" : "Back to user statistics" }
                                 </button>
-                                {conditionToRetake && (
+                                {(conditionToRetake && correctMode === false) && (
                                     <button
                                         className="btn btn-outline-primary me-1"
                                         onClick={(e) => {
@@ -406,7 +448,16 @@ const QuizReview = () =>{
                                     </button>
                                 )}
                             </div>
-                            <div>
+                            <div className="d-flex">
+                                {correctMode && (
+                                    <button type="button" className="btn btn-primary"
+                                            style={{marginRight: '3px'}}
+                                            onClick={handleSaveEvaluation}>
+                                        Save evaluation
+                                    </button>
+                                )}
+
+
                                 {page === 0 ? (
                                     <div></div>
                                 ) : (

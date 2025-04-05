@@ -8,7 +8,6 @@ const QuizReviewPoints = ({questionsData}) => {
       const totalPoints = Object.values(questionsData)
           .reduce((sum, item) => sum + parseFloat(item.max_points), 0);
 
-      const progressPercentage = Math.round((totalAchievedPoints / totalPoints) * 100);
 
     // return (
     //     <div>
@@ -26,7 +25,7 @@ const QuizReviewPoints = ({questionsData}) => {
 
     return (
         <span
-                 className="badge bg-primary mb-3 fs-5 mt-2">{totalAchievedPoints} / {totalPoints} pts.</span>
+                 className="badge bg-primary mb-3 fs-5 mt-2">{totalAchievedPoints.toFixed(2)} / {totalPoints} pts.</span>
     )
 }
 

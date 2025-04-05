@@ -27,7 +27,7 @@ const UserStatistics = () =>{
         fetchUserData()
     }, []);
 
-    if (localStorage.getItem("role") !=="teacher"){
+    if (localStorage.getItem("role") !=="teacher") {
         navigate("/quizzes");
     }
 
@@ -46,9 +46,31 @@ const UserStatistics = () =>{
                                 of {userData["all_quizzes"]} Quizzes</h2>
                             <ul className="list-group list-group-flush">
                                 {userData["quizzes_attended"]?.map((quiz) => (
-                                        <li className="list-group-item"><strong>{quiz.title}</strong> needed
+                                        <li className="list-group-item">
+                                            <div className="d-flex justify-content-between">
+                                                <span>
+                                            <strong>{quiz.title}</strong> needed
                                             (<strong>{quiz.attempts}</strong>) attempts and
-                                            scored {quiz.achieved}/{quiz.max_points}</li>
+                                            scored {quiz.achieved}/{quiz.max_points}
+                                                </span>
+                                            <button
+                                                className="btn btn-outline-primary"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    navigate("/review-quiz", {
+                                                        state: {
+                                                            quiz: quiz.quizzes,
+                                                            quizId: quiz.id,
+                                                            feedback: quiz.quizzes.feedbackType,
+                                                            correctMode: true
+                                                        }
+                                                    });
+                                                }}
+                                            >
+                                                Review
+                                            </button>
+                                            </div>
+                                        </li>
                                     )
                                 )
 

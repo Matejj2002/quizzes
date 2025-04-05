@@ -47,6 +47,8 @@ const Questions = () => {
 
     const [questionFilter, setQuestionFilter] = useState("Active");
 
+    const [showFeedback, setShowFeedback] = useState(false);
+
     const questionTypesHuman = {"matching_answer_question": "Matching Question", "short_answer_question" : "Short Question", "multiple_answer_question": "Multiple Choice"};
 
     const apiUrl = process.env.REACT_APP_API_URL;
@@ -163,6 +165,15 @@ const Questions = () => {
 
             alert(text);
     }
+    const [actualFeedbacks, setActualFeedbacks]= useState([]);
+    const showFeedbacks = (question) =>{
+      setActualFeedbacks(question);
+      setShowFeedback(true);
+    }
+
+    const closeModal = () =>{
+      setShowFeedback(false);
+    }
 
     if (localStorage.getItem("role") !=="teacher"){
         navigate("/quizzes");
@@ -178,192 +189,193 @@ const Questions = () => {
                              style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>
                             <Categories catPath={categoryPath}/>
                         </div>
-                        <div className="col-8">
-                            <h2 className="mb-4">{actualCategoryString}</h2>
+                    <div className="col-8">
+                        <h2 className="mb-4">{actualCategoryString}</h2>
 
-                            <div>
-                                <div className='mb-3 d-flex justify-content-end'>
-                                    <div className="dropdown">
-                                        <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {questionFilter}
-                                        </button>
-                                        <ul className="dropdown-menu dropdown-menu-end">
-                                            <span className="d-flex justify-content-center fw-bold mb-2">Active</span>
-                                            {
-                                                showQuestionsFilter.map((name, index) => (
-                                                    <li key={index}>
-                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                                        <a className="dropdown-item fs-6" href=""
-                                                           onClick={(e) => {
-                                                               e.preventDefault();
-
-                                                               setQuestionFilter(name);
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
-                                                           }
-                                                           }
-
-                                                        >
-                                                            {name}
-                                                        </a>
-                                                    </li>
-
-                                                ))
-                                            }
-                                        </ul>
-                                    </div>
-
-                                    <div className="dropdown">
-                                        <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {filtersShow("Author", authorFilter)}
-                                        </button>
-                                        <ul className="dropdown-menu dropdown-menu-end">
-                                            <span className="d-flex justify-content-center fw-bold mb-2">Author</span>
-                                            {
-                                                teachers.map((teacher, index) => (
-                                                    <li key={index}>
-                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                                        <a className="dropdown-item fs-6" href=""
-                                                           onClick={(e) => {
-                                                               e.preventDefault();
-                                                               let teacher_name = teacher.name;
-                                                               if (teacher_name === authorFilter) {
-                                                                   teacher_name = "";
-                                                               }
-                                                               setAuthorFilter(teacher_name);
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
-                                                           }
-                                                           }
-
-                                                        >
-                                                            {authorFilter === teacher.name && (
-                                                                <i className="bi bi-check"></i>)} {teacher.name}
-                                                        </a>
-                                                    </li>
-
-                                                ))
-                                            }
-                                        </ul>
-                                    </div>
-
-
-                                    <div className="dropdown">
-                                        <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {filtersShow("Type", filterType)}
-                                        </button>
-                                        <ul className="dropdown-menu dropdown-menu-end">
-                                            <span className="d-flex justify-content-center fw-bold mb-2">Type</span>
-                                            {
-                                                filterTypes.map((name, index) => (
-                                                    <li key={index}>
-                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                                        <a className="dropdown-item fs-6" href=""
-                                                           onClick={(e) => {
-                                                               e.preventDefault();
-
-                                                               if (filterType === name) {
-                                                                   name = "";
-                                                               }
-                                                               setFilterType(name);
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
-                                                           }
-                                                           }
-
-                                                        >
-                                                            {filterType === name && (
-                                                                <i className="bi bi-check"></i>)} {name}
-                                                        </a>
-                                                    </li>
-
-                                                ))
-                                            }
-                                        </ul>
-                                    </div>
-
-
-                                    <div className="dropdown">
-                                        <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            {filtersShow("Sort", sort)}
-                                        </button>
-                                        <ul className="dropdown-menu dropdown-menu-end">
-                                            {
-                                                sortTable.map((name, index) => (
-                                                    <li key={index}>
-                                                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                                        <a className="dropdown-item fs-6" href=""
-                                                           onClick={(e) => {
-                                                               e.preventDefault();
-
-                                                               if (sort === name) {
-                                                                   name = "";
-                                                               }
-                                                               setSort(name)
-                                                               navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
-                                                           }
-                                                           }
-
-                                                        >
-                                                            {sort === name && (
-                                                                <i className="bi bi-check"></i>)} {name}
-                                                        </a>
-                                                    </li>
-
-                                                ))
-                                            }
-                                        </ul>
-                                    </div>
-
-                                    <button type="button" className="btn btn-success me-1" onClick={() => {
-                                        navigate(`/question/new-question`, {
-                                            state: {
-                                                catPath: category,
-                                                id: actualCategory,
-                                                selectedCategory: actualCategoryString,
-                                                limit: limit,
-                                                offset: offset,
-                                                sort: sort,
-                                                page: page,
-                                                filterType: filterType,
-                                                authorFilter: authorFilter,
-                                            }
-                                        });
-                                    }
-                                    }
-                                    >Add question
+                        <div>
+                            <div className='mb-3 d-flex justify-content-end'>
+                                <div className="dropdown">
+                                    <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {questionFilter}
                                     </button>
+                                    <ul className="dropdown-menu dropdown-menu-end">
+                                        <span className="d-flex justify-content-center fw-bold mb-2">Active</span>
+                                        {
+                                            showQuestionsFilter.map((name, index) => (
+                                                <li key={index}>
+                                                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                                                    <a className="dropdown-item fs-6" href=""
+                                                       onClick={(e) => {
+                                                           e.preventDefault();
 
-                                    <button type="button" className="btn btn-success" onClick={() => {
-                                        navigate(`/category/new-category`, {
-                                            state: {
-                                                catPath: category,
-                                                id: actualCategory,
-                                                selectedCategory: actualCategoryString,
-                                                limit: limit,
-                                                offset: offset,
-                                                sort: sort,
-                                                page: page,
-                                                filterType: filterType,
-                                                authorFilter: authorFilter,
-                                            }
-                                        });
-                                    }}>Add category
-                                    </button>
+                                                           setQuestionFilter(name);
+                                                           navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                       }
+                                                       }
+
+                                                    >
+                                                        {name}
+                                                    </a>
+                                                </li>
+
+                                            ))
+                                        }
+                                    </ul>
                                 </div>
-                            </div>
 
-                            <div>
-                                <ol className="list-group">
-                                    {
-                                        questions.map((question, index) => (
-                                            <li key={index}
-                                                className="list-group-item d-flex justify-content-between align-items-start">
-                                                <div className="ms-2 me-auto text-truncate text-start w-100">
-                                                    <div
-                                                        className="d-flex justify-content-between align-items-center w-100">
-                                                        <h2 className="h5 text-start text-truncate">
+                                <div className="dropdown">
+                                    <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {filtersShow("Author", authorFilter)}
+                                    </button>
+                                    <ul className="dropdown-menu dropdown-menu-end">
+                                        <span className="d-flex justify-content-center fw-bold mb-2">Author</span>
+                                        {
+                                            teachers.map((teacher, index) => (
+                                                <li key={index}>
+                                                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                                                    <a className="dropdown-item fs-6" href=""
+                                                       onClick={(e) => {
+                                                           e.preventDefault();
+                                                           let teacher_name = teacher.name;
+                                                           if (teacher_name === authorFilter) {
+                                                               teacher_name = "";
+                                                           }
+                                                           setAuthorFilter(teacher_name);
+                                                           navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${filterType}&category_id=${actualCategory}author-filter=${teacher_name}`);
+                                                       }
+                                                       }
+
+                                                    >
+                                                        {authorFilter === teacher.name && (
+                                                            <i className="bi bi-check"></i>)} {teacher.name}
+                                                    </a>
+                                                </li>
+
+                                            ))
+                                        }
+                                    </ul>
+                                </div>
+
+
+                                <div className="dropdown">
+                                    <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {filtersShow("Type", filterType)}
+                                    </button>
+                                    <ul className="dropdown-menu dropdown-menu-end">
+                                        <span className="d-flex justify-content-center fw-bold mb-2">Type</span>
+                                        {
+                                            filterTypes.map((name, index) => (
+                                                <li key={index}>
+                                                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                                                    <a className="dropdown-item fs-6" href=""
+                                                       onClick={(e) => {
+                                                           e.preventDefault();
+
+                                                           if (filterType === name) {
+                                                               name = "";
+                                                           }
+                                                           setFilterType(name);
+                                                           navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${sort}&filter-type=${name}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                       }
+                                                       }
+
+                                                    >
+                                                        {filterType === name && (
+                                                            <i className="bi bi-check"></i>)} {name}
+                                                    </a>
+                                                </li>
+
+                                            ))
+                                        }
+                                    </ul>
+                                </div>
+
+
+                                <div className="dropdown">
+                                    <button className="btn btn-secondary text-decoration-none me-2 dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {filtersShow("Sort", sort)}
+                                    </button>
+                                    <ul className="dropdown-menu dropdown-menu-end">
+                                        {
+                                            sortTable.map((name, index) => (
+                                                <li key={index}>
+                                                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                                                    <a className="dropdown-item fs-6" href=""
+                                                       onClick={(e) => {
+                                                           e.preventDefault();
+
+                                                           if (sort === name) {
+                                                               name = "";
+                                                           }
+                                                           setSort(name)
+                                                           navigate(`/questions/${category}?page=${page}&limit=${limit}&offset=${offset}&sort=${name}&filter-type=${filterType}&category_id=${actualCategory}&author-filter=${authorFilter}`);
+                                                       }
+                                                       }
+
+                                                    >
+                                                        {sort === name && (
+                                                            <i className="bi bi-check"></i>)} {name}
+                                                    </a>
+                                                </li>
+
+                                            ))
+                                        }
+                                    </ul>
+                                </div>
+
+                                <button type="button" className="btn btn-success me-1" onClick={() => {
+                                    navigate(`/question/new-question`, {
+                                        state: {
+                                            catPath: category,
+                                            id: actualCategory,
+                                            selectedCategory: actualCategoryString,
+                                            limit: limit,
+                                            offset: offset,
+                                            sort: sort,
+                                            page: page,
+                                            filterType: filterType,
+                                            authorFilter: authorFilter,
+                                        }
+                                    });
+                                }
+                                }
+                                >Add question
+                                </button>
+
+                                <button type="button" className="btn btn-success" onClick={() => {
+                                    navigate(`/category/new-category`, {
+                                        state: {
+                                            catPath: category,
+                                            id: actualCategory,
+                                            selectedCategory: actualCategoryString,
+                                            limit: limit,
+                                            offset: offset,
+                                            sort: sort,
+                                            page: page,
+                                            filterType: filterType,
+                                            authorFilter: authorFilter,
+                                        }
+                                    });
+                                }}>Add category
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <ol className="list-group">
+                                {
+                                    questions.map((question, index) => (
+                                        <li key={index}
+                                            className="list-group-item d-flex justify-content-between align-items-start">
+                                            <div className="ms-2 me-auto text-truncate text-start w-100">
+                                                <div
+                                                    className="d-flex justify-content-between align-items-center w-100">
+                                                    <div className="d-flex align-items-start">
+                                                        <p className="h5 text-start text-truncate flex-grow-1">
                                                             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                             <a href="" onClick={(e) => {
                                                                 e.preventDefault();
@@ -384,125 +396,177 @@ const Questions = () => {
                                                             } className="text-decoration-none">
                                                                 {question.versions.title || "No title available"}
                                                             </a>
-                                                        </h2>
+                                                        </p>
                                                         <span
-                                                            className="badge text-bg-primary rounded-pill flex-shrink-0">{questionTypesHuman[question.versions.type]}
+                                                            className="badge text-bg-primary rounded-pill flex-shrink-0"
+                                                            style={{cursor: "pointer"}}
+                                                            onClick={() => showFeedbacks(question)}>{question.comments.length}
                                                         </span>
                                                     </div>
-                                                    <div
-                                                        className="d-flex justify-content-between align-items-center w-100">
-                                                        <p
-                                                            className="m-0 text-truncate"
-                                                        >
-                                                                {question.versions.text}
-                                                        </p>
-                                                        {questionFilter === "Active" && (
-                                                            <button
-                                                                className="btn btn-outline-danger btn-xs p-0 px-2 ms-1 mb-1"
-                                                                onClick={() => {
-                                                                    if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                        handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
-                                                                        }
-                                                                      }}>
-                                                                Archive
-                                                              </button>
-                                                            )}
 
-                                                        {questionFilter === "Archived" && (
-                                                              <button className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
-                                                                      onClick={() => {
-                                                                        if (window.confirm("Are you sure you want to restore this question?")) {
-                                                                          handleQuestionDeleteRestore(question.id, false, "Question has been marked as active").then(() => {});
-                                                                        }
-                                                                      }}>
-                                                                Restore
-                                                              </button>
-                                                            )}
+                                                    <span
+                                                        className="badge text-bg-primary rounded-pill flex-shrink-0">{questionTypesHuman[question.versions.type]}
+                                                        </span>
+                                                </div>
+                                                <div
+                                                    className="d-flex justify-content-between align-items-center w-100">
+                                                    <p
+                                                        className="m-0 text-truncate"
+                                                    >
+                                                        {question.versions.text}
+                                                    </p>
+                                                    {questionFilter === "Active" && (
+                                                        <button
+                                                            className="btn btn-outline-danger btn-xs p-0 px-2 ms-1 mb-1"
+                                                            onClick={() => {
+                                                                if (window.confirm("Are you sure you want to delete this question?")) {
+                                                                    handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {
+                                                                    });
+                                                                }
+                                                            }}>
+                                                            Archive
+                                                        </button>
+                                                    )}
 
-                                                        {(questionFilter === "All" && !question["is_deleted"]) && (
-                                                            <button
-                                                                className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
-                                                                onClick={() => {
-                                                                    if (window.confirm("Are you sure you want to delete this question?")) {
-                                                                        handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {});
-                                                                    }
-                                                                }}>
-                                                                Archive
-                                                            </button>
-                                                        )
-                                                        }
+                                                    {questionFilter === "Archived" && (
+                                                        <button
+                                                            className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
+                                                            onClick={() => {
+                                                                if (window.confirm("Are you sure you want to restore this question?")) {
+                                                                    handleQuestionDeleteRestore(question.id, false, "Question has been marked as active").then(() => {
+                                                                    });
+                                                                }
+                                                            }}>
+                                                            Restore
+                                                        </button>
+                                                    )}
 
-                                                        {(questionFilter === "All" && question["is_deleted"]) && (
-                                                            <button
-                                                                className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
-                                                                onClick={() => {
-                                                                    if (window.confirm("Are you sure you want to restore this question?")) {
-                                                                        handleQuestionDeleteRestore(question.id, false, "Question has been marked as active").then(() => {});
-                                                                    }
-                                                                }}>
-                                                                Restore
-                                                            </button>
-                                                        )
-                                                        }
+                                                    {(questionFilter === "All" && !question["is_deleted"]) && (
+                                                        <button
+                                                            className="btn btn-outline-danger btn-xs p-0 px-1 ms-1 mb-1"
+                                                            onClick={() => {
+                                                                if (window.confirm("Are you sure you want to delete this question?")) {
+                                                                    handleQuestionDeleteRestore(question.id, true, "Question has been marked as archived").then(() => {
+                                                                    });
+                                                                }
+                                                            }}>
+                                                            Archive
+                                                        </button>
+                                                    )
+                                                    }
 
-                                                    </div>
-                                                    <div
-                                                        className="d-flex justify-content-between align-items-center w-100">
+                                                    {(questionFilter === "All" && question["is_deleted"]) && (
+                                                        <button
+                                                            className="btn btn-outline-primary btn-xs p-0 px-1 ms-1 mb-1"
+                                                            onClick={() => {
+                                                                if (window.confirm("Are you sure you want to restore this question?")) {
+                                                                    handleQuestionDeleteRestore(question.id, false, "Question has been marked as active").then(() => {
+                                                                    });
+                                                                }
+                                                            }}>
+                                                            Restore
+                                                        </button>
+                                                    )
+                                                    }
+
+                                                </div>
+                                                <div
+                                                    className="d-flex justify-content-between align-items-center w-100">
                                                         <span
                                                             className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
-                                                        <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
-                                                                onClick={() => {
-                                                                    navigate(`/question/copy-question/${question.id}`, {
+                                                    <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
+                                                            onClick={() => {
+                                                                navigate(`/question/copy-question/${question.id}`, {
                                                                     state: {
                                                                         questionTitle: question.versions.title,
-                                                                        catPath : category,
-                                                                        id : actualCategory,
-                                                                        selectedCategory : actualCategoryString,
-                                                                        limit : limit,
+                                                                        catPath: category,
+                                                                        id: actualCategory,
+                                                                        selectedCategory: actualCategoryString,
+                                                                        limit: limit,
                                                                         offset: offset,
-                                                                        sort : sort,
-                                                                        page : page,
-                                                                        filterType : filterType,
-                                                                        authorFilter : authorFilter,
+                                                                        sort: sort,
+                                                                        page: page,
+                                                                        filterType: filterType,
+                                                                        authorFilter: authorFilter,
                                                                     }
                                                                 });
 
-                                                                }}>
-                                                            Copy
-                                                        </button>
-                                                    </div>
+                                                            }}>
+                                                        Copy
+                                                    </button>
                                                 </div>
-                                            </li>
-                                        ))
-                                    }
-                                </ol>
-                                {showQuestionsErr()}
-                            </div>
-
-                            {questions.length !==0 && (
-                                <div className='col-4 mx-auto'>
-                                    <ReactPaginate
-                                        pageCount={Math.ceil(numberOfQuestionsFilter / limit)}
-                                        pageRangeDisplayed={2}
-                                        marginPagesDisplayed={2}
-                                        onPageChange={handlePageChange}
-                                        containerClassName="pagination justify-content-center mt-4"
-                                        activeClassName="active"
-                                        pageClassName="page-item"
-                                        pageLinkClassName="page-link"
-                                        previousClassName="page-item"
-                                        previousLinkClassName="page-link"
-                                        nextClassName="page-item"
-                                        nextLinkClassName="page-link"
-                                        breakClassName="page-item"
-                                        breakLinkClassName="page-link"
-                                        previousLabel="Previous"
-                                        nextLabel="Next"
-                                    ></ReactPaginate>
-
-                                </div>
-                            )}
+                                            </div>
+                                        </li>
+                                    ))
+                                }
+                            </ol>
+                            {showQuestionsErr()}
                         </div>
+
+                        {questions.length !== 0 && (
+                            <div className='col-4 mx-auto'>
+                                <ReactPaginate
+                                    pageCount={Math.ceil(numberOfQuestionsFilter / limit)}
+                                    pageRangeDisplayed={2}
+                                    marginPagesDisplayed={2}
+                                    onPageChange={handlePageChange}
+                                    containerClassName="pagination justify-content-center mt-4"
+                                    activeClassName="active"
+                                    pageClassName="page-item"
+                                    pageLinkClassName="page-link"
+                                    previousClassName="page-item"
+                                    previousLinkClassName="page-link"
+                                    nextClassName="page-item"
+                                    nextLinkClassName="page-link"
+                                    breakClassName="page-item"
+                                    breakLinkClassName="page-link"
+                                    previousLabel="Previous"
+                                    nextLabel="Next"
+                                ></ReactPaginate>
+
+                            </div>
+                        )}
+
+                        <div className={`modal fade ${showFeedback ? 'show' : ''}`} tabIndex="-1"
+                             aria-labelledby="feedbackModalLabel" aria-hidden="true"
+                             style={{display: showFeedback ? 'block' : 'none'}}>
+                            <div className="modal-dialog">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h5 className="modal-title" id="feedbackModalLabel">Fedbacks for {actualFeedbacks.versions.title}</h5>
+                                        <button type="button" className="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close" onClick={closeModal}></button>
+                                    </div>
+                                    <div className="modal-body">
+                                        <table className="table table-striped table-hover table-fixed">
+                                            <thead>
+                                            <tr>
+                                                <th scope="col" className="w-50 text-start">Author</th>
+                                                <th scope="col" className="w-50 text-start">Text</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {actualFeedbacks.comments.map((feedback, ind) => (
+                                                    <tr>
+                                                        <td className="text-start">{feedback.author}</td>
+                                                        <td className="text-start">{feedback.text}</td>
+                                                    </tr>
+                                                )
+                                            )
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"
+                                                onClick={closeModal}>
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div className="col-2">
 
                     </div>

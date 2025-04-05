@@ -50,7 +50,7 @@ const Navigation = ({active}) => {
                     <div className="navbar-nav">
                         <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            href="http://localhost:3000/quizzes">Quizzes</a>
-                        {/*    href="http://localhost:3000/"*/}
+                        {/*    href="http://localhost:5000/"*/}
                         <a className={`nav-link ${active === "Questions" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
                            href="http://localhost:3000/questions/supercategory?limit=10&offset=0">Questions</a>
