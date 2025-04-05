@@ -533,7 +533,7 @@ const Questions = () => {
                             <div className="modal-dialog">
                                 <div className="modal-content">
                                     <div className="modal-header">
-                                        <h5 className="modal-title" id="feedbackModalLabel">Fedbacks for {actualFeedbacks.versions.title}</h5>
+                                        <h5 className="modal-title" id="feedbackModalLabel">Fedbacks for {actualFeedbacks.versions?.title}</h5>
                                         <button type="button" className="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close" onClick={closeModal}></button>
                                     </div>
@@ -546,10 +546,10 @@ const Questions = () => {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {actualFeedbacks.comments.map((feedback, ind) => (
+                                            {actualFeedbacks.comments && actualFeedbacks.comments.map((feedback, ind) => (
                                                     <tr>
-                                                        <td className="text-start">{feedback.author}</td>
-                                                        <td className="text-start">{feedback.text}</td>
+                                                        <td className="text-start">{feedback?.author}</td>
+                                                        <td className="text-start">{feedback?.text}</td>
                                                     </tr>
                                                 )
                                             )

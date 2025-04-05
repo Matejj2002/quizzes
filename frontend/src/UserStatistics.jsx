@@ -44,38 +44,53 @@ const UserStatistics = () =>{
 
                             <h2>Attended {userData["quizzes_attended"]?.length} out
                                 of {userData["all_quizzes"]} Quizzes</h2>
-                            <ul className="list-group list-group-flush">
-                                {userData["quizzes_attended"]?.map((quiz) => (
-                                        <li className="list-group-item">
-                                            <div className="d-flex justify-content-between">
-                                                <span>
-                                            <strong>{quiz.title}</strong> needed
-                                            (<strong>{quiz.attempts}</strong>) attempts and
-                                            scored {quiz.achieved}/{quiz.max_points}
-                                                </span>
-                                            <button
-                                                className="btn btn-outline-primary"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    navigate("/review-quiz", {
-                                                        state: {
-                                                            quiz: quiz.quizzes,
-                                                            quizId: quiz.id,
-                                                            feedback: quiz.quizzes.feedbackType,
-                                                            correctMode: true
-                                                        }
-                                                    });
-                                                }}
-                                            >
-                                                Review
-                                            </button>
-                                            </div>
-                                        </li>
-                                    )
-                                )
 
-                                }
-                            </ul>
+                             <table className="table table-striped table-hover table-fixed align-middle">
+                                <thead>
+                                <tr>
+                                    <th scope="col" className="w-25">Title</th>
+
+                                    <th scope="col" className="w-25 text-end">Attempts</th>
+
+                                    <th scope="col" className="w-25 text-end">Points</th>
+                                    <th scope="col" className="w-25 text-end">Review</th>
+
+                                </tr>
+                                </thead>
+                                 <tbody>
+                                    {userData["quizzes_attended"]?.map((quiz) => (
+                                            <tr>
+                                                <td className="w-25">{quiz.title}</td>
+                                                <td className="w-25 text-end">{quiz.attempts}</td>
+                                                <td className="w-25 text-end">{quiz.achieved}/{quiz.max_points}</td>
+                                                <td className="w-25 text-end">
+                                                    <button
+                                                        className="btn btn-outline-primary"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            navigate("/review-quiz", {
+                                                                state: {
+                                                                    quiz: quiz.quizzes,
+                                                                    quizId: quiz.id,
+                                                                    feedback: quiz.quizzes.feedbackType,
+                                                                    correctMode: true
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        Review
+                                                    </button>
+
+                                                </td>
+                                            </tr>
+
+                                        )
+                                    )
+                                    }
+
+                                 </tbody>
+                             </table>
+
                             <div
                                 className="d-flex justify-content-end">{userData["all_achieved_points"]}/{userData["all_max_points"]} b
                             </div>

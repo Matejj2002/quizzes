@@ -3,8 +3,12 @@ if os.environ.get("IS_DOCKER") == 'true':
     from models.views import *
     from models.models import *
 else:
-    from backend.models.views import *
-    from backend.models.models import *
+    try:
+        from backend.models.views import *
+        from backend.models.models import *
+    except:
+        from models.views import *
+        from models.models import *
 
 
 def fetch_question_data(question_id):
@@ -140,7 +144,7 @@ def get_questions_from_category_helper(subcat, question_type, index):
         latest_version = max(i.question_version, key=lambda v: v.dateCreated)
 
         if latest_version.type in type_sel and not i.is_deleted:
-            author = Teacher.query.get_or_404(latest_version.author_id).name
+            author = User.query.get_or_404(latest_version.author_id).github_name
             version = {
                 "id": i.id,  # Question.id
                 "title": latest_version.title,

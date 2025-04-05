@@ -214,10 +214,10 @@ class QuizTemplate(db.Model):
 
     order = db.Column(db.ARRAY(db.Integer))  # usporiadanie sekcii
 
-    date_time_open = db.Column(db.DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
-    date_time_close = db.Column(db.DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    date_time_open = db.Column(db.DateTime)
+    date_time_close = db.Column(db.DateTime)
     time_to_finish = db.Column(db.Integer)
-    datetime_check = db.Column(db.DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    datetime_check = db.Column(db.DateTime)
 
     feedback_type = db.Column(db.ARRAY(db.Text))
     feedback_type_after_close = db.Column(db.ARRAY(db.Text))

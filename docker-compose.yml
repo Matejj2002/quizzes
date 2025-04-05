@@ -1,26 +1,18 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
-    build: ./backend
+    build: .
     environment:
       - IS_DOCKER=true
-      - DB_URL=postgresql://postgres:postgres@bakalarka-postgres-1:5432/quizzes
+      - DB_URL=postgresql://postgres:postgres@postgres:5432/quizzes
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - app_network
     ports:
       - "5000:5000"
-
-  frontend:
-    build: ./frontend
-    networks:
-      - app_network
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
 
   postgres:
     image: postgres:latest
@@ -34,7 +26,10 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
 
 networks:
   app_network:
