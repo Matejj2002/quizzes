@@ -21,7 +21,6 @@ const QuizReview = () =>{
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
-    const [changeEvalItem, setChangeEvalItem] = useState([]);
 
     const fetchQuestion = async (questionId, itemId) => {
         try {
@@ -360,11 +359,11 @@ const QuizReview = () =>{
 
                                                       className="form-control"
                                                     />
-                                                    <div className="d-flex">
-                                                        <FormattedTextRenderer
-                                                            text={questionsData[question.id]?.answers[0]["answer"]}
-                                                        />
-                                                    </div>
+                                                    {/*<div className="d-flex">*/}
+                                                    {/*    <FormattedTextRenderer*/}
+                                                    {/*        text={questionsData[question.id]?.answers[0]["answer"]}*/}
+                                                    {/*    />*/}
+                                                    {/*</div>*/}
                                                     {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
                                                         <p className="border border-danger p-3 rounded"
                                                            style={{background: "rgba(255, 0, 0, 0.3)"}}>

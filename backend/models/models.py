@@ -212,6 +212,8 @@ class QuizTemplate(db.Model):
 
     is_deleted = db.Column(db.Boolean, default=False)
 
+    version = db.Column(db.Integer, default = 0)
+
     order = db.Column(db.ARRAY(db.Integer))  # usporiadanie sekcii
 
     date_time_open = db.Column(db.DateTime)
@@ -325,5 +327,7 @@ class QuizItem(db.Model):
 
     items = db.relationship("QuizSection")
 
+    quiz_template_item_id = db.Column(db.Integer, db.ForeignKey('quiz_template_items.id', ondelete='SET NULL'), nullable=True)
     question_version_id = db.Column(db.Integer, db.ForeignKey('question_versions.id'))
     question_version = db.relationship('QuestionVersion')
+

@@ -6,6 +6,10 @@ const Navigation = ({active}) => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({});
     const apiUrl = process.env.REACT_APP_API_URL;
+    const host = process.env.REACT_APP_HOST;
+    const port = process.env.REACT_APP_PORT;
+    const quizzesUrl = `http://${host}:${port}`;
+    const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 
     async function getUserData() {
         await fetch(apiUrl+"getUserData", {
@@ -49,19 +53,20 @@ const Navigation = ({active}) => {
                 <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div className="navbar-nav">
                         <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
-                           href="http://localhost:5000/quizzes">Quizzes</a>
+                           href={`${quizzesUrl}/quizzes`}>Quizzes</a>
                         {/*    href="http://localhost:5000/"*/}
                         <a className={`nav-link ${active === "Questions" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
-                           href="http://localhost:5000/questions/supercategory?limit=10&offset=0">Questions</a>
+                           href={`${quizzesUrl}/questions/supercategory?limit=10&offset=0`}>Questions</a>
+
 
                         <a className={`nav-link ${active === "Analysis" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
-                           href="http://localhost:5000/quiz-analysis">Analysis</a>
+                           href={`${quizzesUrl}/quiz-analysis`}>Analysis</a>
 
                         <a className={`nav-link ${active === "Users" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={localStorage.getItem("role") !== "teacher"}
-                           href="http://localhost:5000/users">Users</a>
+                           href={`${quizzesUrl}/users`}>Users</a>
 
 
                     </div>
@@ -93,7 +98,7 @@ const Navigation = ({active}) => {
                 ) : (
                     <div className="d-flex">
                     <a role="button" tabIndex="0"
-                       onClick={() => {window.location.assign("https://github.com/login/oauth/authorize?client_id=Ov23likPzKaEmFtQM7kn")}}
+                       onClick={() => {window.location.assign("https://github.com/login/oauth/authorize?client_id="+CLIENT_ID)}}
                        className="w-100 btn">
                         Login </a>
                     </div>

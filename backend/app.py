@@ -5,14 +5,17 @@ from flask_cors import CORS
 from api.api_functions import *
 from flask_session import Session
 import requests
-from dotenv import load_dotenv
 from sqlalchemy import desc
 import os
 import psycopg2
 from psycopg2 import sql
 import re
-
-load_dotenv()
+from dotenv import load_dotenv
+import subprocess
+import sys
+from pathlib import Path
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -51,8 +54,10 @@ def serve(path):
 
 @app.route('/api/getAccessToken', methods=['GET'])
 def get_access_token():
-    CLIENT_ID = "Ov23likPzKaEmFtQM7kn"
-    CLIENT_SECRET = "a75b4914df0b956f87bf79d9dfaba76d5b64a96b"
+    CLIENT_ID = os.getenv('CLIENT_ID')
+    CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+
+
     code = request.args.get('code')
 
     params = {
@@ -185,7 +190,6 @@ def get_questions():
                         "text": i.text,
                         "author": user.github_name
                     })
-
 
             if question_filter == "Active" or question_filter == "Archived":
                 condition = question['is_deleted'] == cond
@@ -729,7 +733,8 @@ def evaluate_quiz(quiz):
     db.session.add(quiz)
     db.session.commit()
 
-def get_quiz_template(student_id, quiz_template_id, actual_time = datetime.datetime.now(), cnt = 0, update_at = ""):
+
+def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetime.now(), cnt=0, update_at=""):
     template = QuizTemplate.query.filter(QuizTemplate.id == quiz_template_id).first()
 
     if template.is_deleted:
@@ -885,9 +890,14 @@ def get_quiz_template(student_id, quiz_template_id, actual_time = datetime.datet
 
     return template_sub
 
+
 @app.route("/api/get-quiz-templates", methods=["GET"])
 def get_quiz_templates():
     student_id = request.args.get("studentId")
+    try:
+        int(student_id)
+    except:
+        return {}, 404
     quiz_templates = QuizTemplate.query.all()
 
     result = []
@@ -1031,12 +1041,13 @@ def check_new_quiz_template():
         return {"message": True, "result": result,
                 "number_of_questions": len(questions_ids) + len(random_questions_ids)}
 
+
 @app.route("/api/quiz_change_evaluation", methods=["PUT"])
 def quiz_change_evaluation():
     data_pom = request.get_json()
     data = data_pom["questionsData"]
 
-    id_quiz =  data_pom["id"]
+    id_quiz = data_pom["id"]
 
     quiz = Quiz.query.get(id_quiz)
 
@@ -1050,12 +1061,13 @@ def quiz_change_evaluation():
         db.session.add(quiz_item)
         db.session.commit()
 
-        sum_points+= float(points)
+        sum_points += float(points)
 
     quiz.achieved_points = sum_points
     db.session.commit()
 
-    return {},200
+    return {}, 200
+
 
 @app.route("/api/questions-quiz/<int:index>", methods=["GET"])
 def get_questions_quiz(index):
@@ -1132,6 +1144,7 @@ def get_questions_quiz(index):
         else:
             for matching_pair in newest_version.matching_question:
                 answers.append({"leftSide": matching_pair.leftSide, "answer": [],
+                                "pairId": matching_pair.id
                                 })
 
     elif newest_version.type == "multiple_answer_question":
@@ -1292,6 +1305,7 @@ def get_all_quizzes_analysis():
     for qt in quiz_templates:
         if qt.title.startswith(filter):
             data = {
+                "quiz_template_id": qt.id,
                 "title": qt.title,
                 "attendance": 0,
                 "number_of_students": len(students)
@@ -1415,13 +1429,20 @@ def create_new_quiz_template():
     data = request.get_json()
 
     if data["changeData"]:
+        vers = 0
         if data["quizId"] != 0:
             quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
-            quiz = Quiz.query.filter_by(quiz_template_id=data["quizId"]).all()
+            #quiz = Quiz.query.filter_by(quiz_template_id=data["quizId"]).all()
 
-            for i in quiz:
-                db.session.delete(i)
-            db.session.delete(quiz_template)
+            # for i in quiz:
+            #     print(i)
+            #     db.session.delete(i)
+            # db.session.delete(quiz_template)
+            new_title = quiz_template.title.split("_version")
+            vers = quiz_template.version
+            quiz_template.title = new_title[0] + "_version" + str(vers+1)
+            #quiz_template.is_deleted = True
+            quiz_template.version = vers+1
             db.session.commit()
 
         quiz_template = QuizTemplate(
@@ -1434,7 +1455,9 @@ def create_new_quiz_template():
             time_to_finish=data["minutesToFinish"],
             datetime_check=data['dateCheck'],
             feedback_type=data["feedbackType"],
-            feedback_type_after_close=data["feedbackTypeAfterClose"]
+            feedback_type_after_close=data["feedbackTypeAfterClose"],
+            version = vers
+
         )
 
         db.session.add(quiz_template)
@@ -1551,7 +1574,8 @@ def generate_quiz(quiz, questions, student_id):
                 score=0,
                 question_version_id=questions[str(question["id"])]["id"],
                 quiz_section_id=section_added.id,
-                max_points=0
+                max_points=0,
+                quiz_template_item_id=question["item_id"]
             )
 
             if question["questionType"] == "questions":
@@ -1827,7 +1851,116 @@ def update_quiz_answers():
 
     return {}
 
-import subprocess
+
+@app.route("/api/quiz-statistics", methods=["GET"])
+def quiz_statistics():
+    template_id = request.args.get("template_id")
+
+    template = get_quiz_template(0, template_id)
+
+    question_analysis = {}
+    quiz_items = {}
+    for section in template["sections"]:
+        for item in section["questions"]:
+            item_score = 0
+            item_max_score = 0
+            data = QuizItem.query.filter(QuizItem.quiz_template_item_id == item["item_id"]).all()
+            student_id = data[0].items.quiz.student_id
+
+            item_full_score = data[0].max_points
+
+            student_answers = []
+            comments = []
+            for i in data:
+
+                if i.students_comment_id is not None:
+                    comment = Comment.query.get(i.students_comment_id)
+                    comments.append(["student", comment.text])
+
+                if i.teachers_comment_id is not None:
+                    comment = Comment.query.get(i.teachers_comment_id)
+                    comments.append(["teacher",comment.text])
+
+                item_score += i.score
+                item_max_score+=i.max_points
+
+                if i.score==0:
+                    answer = json.loads(i.answer)
+                    student_answers.append(answer["answer"])
+
+                if item["item_id"] in quiz_items:
+                    if student_id not in quiz_items[item["item_id"]] and i.score > 0:
+                            quiz_items[item["item_id"]].append(student_id)
+                else:
+                    quiz_items[item["item_id"]] = []
+
+            correct_answer = ""
+            if item["questionType"] == "questions":
+                if item["type"] == "short_answer_question":
+                    correct_answer = data[0].question_version.short_answers[0].text
+                    student_answers = list(set(student_answers))
+
+                elif item["type"] == "multiple_answer_question":
+                    answs = []
+                    multiple_answers_stat = {}
+                    for i in data[0].question_version.multiple_answers:
+                        answs.append([i.id, i.text, i.is_correct])
+                        multiple_answers_stat[i.id] = {"correct": 0, "incorrect": 0, "value": i.is_correct, "sum" : 0}
+
+                    for i in student_answers:
+                        for j in i:
+                            val_j = True
+                            if j[2]=="False":
+                                val_j = False
+
+                            if multiple_answers_stat[j[1]]["value"] == val_j:
+                                multiple_answers_stat[j[1]]["correct"]+=1
+                            else:
+                                multiple_answers_stat[j[1]]["incorrect"] += 1
+                            multiple_answers_stat[j[1]]["sum"] += 1
+
+                    correct_answer = answs
+                    student_answers = multiple_answers_stat
+
+                else:
+                    answs = []
+                    pair_data = {}
+                    for pair in data[0].question_version.matching_question:
+                        answs.append([pair.leftSide, pair.rightSide])
+                        pair_data[pair.id] = pair.rightSide
+
+                    changed_correct = {}
+                    for i in student_answers:
+                        for ans in i:
+                            correct_answer = pair_data.get(ans["pairId"])
+                            student_answer = ans["answer"]
+                            if student_answer == []:
+                                student_answer = "No answer"
+                            merged_corr_stud = correct_answer+"->"+student_answer
+
+                            changed_correct[merged_corr_stud] = changed_correct.get(merged_corr_stud, 0) + 1
+
+
+                    changed_to_list = []
+                    for key, val in changed_correct.items():
+                        corr, incorr = key.split("->")
+                        changed_to_list.append([corr, incorr, val])
+
+                    student_answers = changed_to_list
+                    correct_answer = answs
+
+                    # print(data[0].question_version)
+            question_analysis[item["item_id"]] = {
+                "item_score": item_score,
+                "item_max_score": item_max_score,
+                "item_average_score": round(item_score / len(data), 2),
+                "correct_answer": correct_answer,
+                "wrong_answers": student_answers,
+                "item_full_score": item_full_score,
+                "comments": comments,
+            }
+
+    return {"result": template, "evals": question_analysis, "correct_students": quiz_items}, 200
 
 def check_database_exists():
     DB_NAME = "quizzes"
@@ -1847,18 +1980,31 @@ def check_database_exists():
     if exists:
         print(f"Database '{DB_NAME}' already existing")
 
-        print("Migrating DB...")
-        subprocess.run([".venv\\Scripts\\flask.exe", "db", "upgrade"], cwd="backend", check=True)
-        subprocess.run([".venv\\Scripts\\flask.exe", "db", "migrate", "-m", "Auto migration"], cwd="backend",
-                       check=True)
+        try:
+            pass
+            print("Migrating DB...")
+            # os.environ["FLASK_APP"] = "backend/app.py"
+            # subprocess.run([".venv\\Scripts\\flask.exe", "db", "upgrade"], cwd="backend", check=True)
+            # subprocess.run([".venv\\Scripts\\flask.exe", "db", "migrate", "-m", "Auto migration"], cwd="backend",
+            #                check=True)
+            subprocess.run([sys.executable, "-m", "flask", "db", "upgrade"], cwd=".", check=True)
+            subprocess.run([sys.executable, "-m", "flask", "db", "migrate", "-m", "Auto migration"], cwd=".",
+                           check=True)
 
-        print("DB migration done.")
+            print("DB migration done.")
+
+        except:
+            pass
 
     else:
         cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(DB_NAME)))
         from create_database import create_database
         create_database()
-        subprocess.run([".venv\\Scripts\\flask.exe", "db", "init"], cwd="backend", check=True)
+        try:
+            subprocess.run(["sh", 'run_migrations.sh'], check=True)
+            print("Migrácie boli úspešne aplikované.")
+        except Exception as e:
+            print(e)
         print(f"Database '{DB_NAME}' was created")
 
     cursor.close()

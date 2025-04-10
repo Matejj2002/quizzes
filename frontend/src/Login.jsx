@@ -5,7 +5,7 @@ const Login = ({path = "/login"}) =>{
     const [rerender, setReRender] = useState(false);
     const [userData, setUserData] = useState({});
 
-    const CLIENT_ID = "Ov23likPzKaEmFtQM7kn";
+    const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
     const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {

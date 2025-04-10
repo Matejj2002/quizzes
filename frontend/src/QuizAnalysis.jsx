@@ -1,7 +1,6 @@
 import Navigation from "./Navigation";
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
-import { useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 
 const QuizAnalysis = () =>{
@@ -84,8 +83,13 @@ const QuizAnalysis = () =>{
                                                 </td>
                                                 <td className="text-end">
                                                     <button type="button" className="btn btn-outline-primary"
-                                                            onClick={() => {
-
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                navigate("/quiz-statistics", {
+                                                                state: {
+                                                                    quiz: quiz,
+                                                                }
+                                                            });
                                                             }
                                                             }
                                                     >

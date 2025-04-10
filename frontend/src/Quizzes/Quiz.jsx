@@ -20,7 +20,8 @@ const Quiz = () => {
             setQuizzes(response.data.result);
             setUpdateAt(response.data.update_at);
       }catch (error){
-            console.error(error)
+            console.error(error);
+            window.location.href="/login";
       }
        finally {}
     }
