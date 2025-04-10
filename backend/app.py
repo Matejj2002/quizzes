@@ -1963,10 +1963,10 @@ def quiz_statistics():
     return {"result": template, "evals": question_analysis, "correct_students": quiz_items}, 200
 
 def check_database_exists():
-    DB_NAME = "quizzes"
-    DB_USER = "postgres"
-    DB_PASSWORD = "postgres"
-    DB_PORT = "5432"
+    DB_NAME = os.getenv('DB_NAME')
+    DB_USER = os.getenv('DB_USER')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_PORT = os.getenv('DB_PORT')
 
     conn = psycopg2.connect(
         dbname="postgres", user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT
@@ -2001,8 +2001,11 @@ def check_database_exists():
         from create_database import create_database
         create_database()
         try:
-            subprocess.run(["sh", 'run_migrations.sh'], check=True)
-            print("Migrácie boli úspešne aplikované.")
+            if os.environ.get("IS_DOCKER") == 'true':
+                subprocess.run(["sh", 'run_migrations.sh'], check=True)
+                print("Migrácie boli úspešne aplikované.")
+            else:
+                pass
         except Exception as e:
             print(e)
         print(f"Database '{DB_NAME}' was created")
