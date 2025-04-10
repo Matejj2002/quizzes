@@ -2,6 +2,9 @@
 
 This project was created with [Create React App](https://github.com/facebook/create-react-app).
 
+## Clone repository
+Run `git clone https://github.com/Matejj2002/quizzes.git`
+
 ## Starting Project
 - ### How to start backend on local machine
   In project directory run:
