@@ -3,6 +3,7 @@ import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import FormattedTextRenderer from "./components/FormattedTextRenderer";
+import MatchingQuestionStatisticsWrong from "./MatchingQuestionStatisticsWrong";
 const QuizStatistics = () =>{
     const location = useLocation();
     const navigate = useNavigate();
@@ -131,23 +132,25 @@ const QuizStatistics = () =>{
                                                                  aria-label="Segment one" aria-valuenow="0"
                                                                  aria-valuemin="0" aria-valuemax="100" style={{
                                                                 width:
-                                                                    `${(evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100}%`
+                                                                    `${Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) *100)}%`
                                                             }}
                                                             >
                                                                 <div
-                                                                    className="progress-bar bg-success">{Math.round(evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100}%</div>
+                                                                    className="progress-bar bg-success">{Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%
+                                                                </div>
                                                             </div>
                                                             <div className="progress" role="progressbar"
                                                                  aria-label="Segment two" aria-valuenow="30"
                                                                  aria-valuemin="0" aria-valuemax="100" style={{
                                                                 width:
 
-                                                                    `${(evals[question["item_id"]].wrong_answers[ans[0]].incorrect / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100}%`
+                                                                    `${100-Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%`
                                                             }}
 
                                                             >
                                                                 <div
-                                                                    className="progress-bar bg-danger">{Math.round(evals[question["item_id"]].wrong_answers[ans[0]].incorrect / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100}%</div>
+                                                                    className="progress-bar bg-danger">{100-Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -168,16 +171,20 @@ const QuizStatistics = () =>{
                                                         </div>
                                                     </th>
                                                     <th scope="col">
-                                                        <div className="d-flex justify-content-end">Right
+                                                        <div className="d-flex justify-content-center">Right
                                                             Side
+                                                        </div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div className="d-flex justify-content-end text-end">Success
                                                         </div>
                                                     </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 {evals[question["item_id"]].correct_answer.map((ans, ind) => (
-                                                        <tr>
-                                                            <td style={{
+                                                    <tr>
+                                                    <td style={{
                                                                 borderRight: "1px solid black",
                                                                 paddingBottom: "2px"
                                                             }}>
@@ -189,51 +196,30 @@ const QuizStatistics = () =>{
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <div className="d-flex justify-content-start w-100">
+                                                                {/*<div className="d-flex justify-content-start w-100">*/}
 
-                                                                    <FormattedTextRenderer
-                                                                        text={ans[1]}
-                                                                    />
+                                                                {/*    <FormattedTextRenderer*/}
+                                                                {/*        text={ans[1]}*/}
+                                                                {/*    />*/}
+                                                                {/*</div>*/}
+                                                                <div
+                                                                    className="d-flex justify-content-between w-100">
+                                                                    <div
+                                                                        className="me-1">
+                                                                            <FormattedTextRenderer
+                                                                                text={ans[1]}
+                                                                            />
+
+                                                                    </div>
                                                                 </div>
                                                             </td>
+                                                            <td className="text-end">{ans[2] + "/" +  ans[4]}</td>
                                                         </tr>
                                                     )
                                                 )
                                                 }
                                                 </tbody>
                                             </table>
-
-                                            <details>
-                                                <summary>Wrong answers</summary>
-                                                <table className="table table-striped">
-                                                    <thead>
-                                                    <tr>
-                                                        <th scope="col" className="w-50">Left Side</th>
-                                                        <th scope="col" className="w-50">Right Side</th>
-                                                        <th scope="col" className="w-25">Occurencies</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {evals[question["item_id"]].wrong_answers.map((answ, ind) => (
-                                                        <tr>
-                                                            <td className="w-50">
-                                                                <FormattedTextRenderer
-                                                                        text={answ[0]}
-                                                                    />
-
-                                                            </td>
-                                                            <td className="w-50">
-                                                            <FormattedTextRenderer
-                                                                        text={answ[1]}
-                                                                    />
-                                                            </td>
-                                                            <td className="w-25">{answ[2]}</td>
-                                                        </tr>
-                                                    ))}
-
-                                                    </tbody>
-                                                </table>
-                                            </details>
                                         </div>
                                     )
                                     }
@@ -244,18 +230,30 @@ const QuizStatistics = () =>{
                                     <span>Average points: {evals[question["item_id"]].item_average_score}/ {evals[question["item_id"]].item_full_score}</span>
                                     <br/>
                                     <span>{studentsCorrect[question["item_id"]].length} / {quiz.attendance} students has this question correct.</span>
+
                                     {question.type === "short_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
                                         <details>
                                             <summary>List of wrong answers</summary>
-                                            <ul className="list-group">
-                                                {evals[question["item_id"]].wrong_answers.map((wrAns, ind) => (
-                                                    <li className="list-group-item">{ind + 1}. {wrAns}</li>
-                                                ))}
-                                            </ul>
+                                            <MatchingQuestionStatisticsWrong
+                                                wrongAnswers={evals[question["item_id"]].wrong_answers}
+                                                tableCols={["Answer", "Occurencies"]} colsSize={["w-50", "w-50"]}
+                                                colsType={["string", "int"]}></MatchingQuestionStatisticsWrong>
                                         </details>
                                     )}
+                                    {question.type === "matching_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
+                                        <details>
+                                            <summary>List of wrong answers</summary>
+                                            <MatchingQuestionStatisticsWrong
+                                                wrongAnswers={evals[question["item_id"]].wrong_answers}
+                                                tableCols={["Left Side", "Right Side", "Occurencies"]}
+                                                colsSize={["w-50", "w-50", "w-25"]}
+                                                colsType={["string", "string", "int"]}></MatchingQuestionStatisticsWrong>
+                                        </details>
+                                    )
+                                    }
 
-                                    {evals[question["item_id"]].comments.length >0 && (
+
+                                    {evals[question["item_id"]].comments.length > 0 && (
                                         <details>
                                             <summary>Feedbacks</summary>
                                             <table className="table table-striped">
