@@ -94,6 +94,7 @@ const QuizStatistics = () =>{
                                         (
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <h2>Random question</h2>
+                                                {console.log(evals[question["item_id"]])}
                                                 <span
                                                     className="badge text-bg-primary rounded-pill flex-shrink-0"
                                                 >{question.questionAnswerType}
