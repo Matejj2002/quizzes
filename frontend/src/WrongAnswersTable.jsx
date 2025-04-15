@@ -2,7 +2,7 @@ import FormattedTextRenderer from "./components/FormattedTextRenderer";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 
-const MatchingQuestionStatisticsWrong = ({wrongAnswers, tableCols, colsSize, colsType}) =>{
+const WrongAnswersTable = ({wrongAnswers, tableCols, colsSize, colsType}) =>{
     const [showData, setShowData] = useState(wrongAnswers);
     const apiUrl = process.env.REACT_APP_API_URL;
     const [sortArray, setSortArray] = useState(
@@ -80,18 +80,6 @@ const MatchingQuestionStatisticsWrong = ({wrongAnswers, tableCols, colsSize, col
                             </td>
                         )
                     )}
-                    {/*<td className="w-50">*/}
-                    {/*    <FormattedTextRenderer*/}
-                    {/*        text={answ[0]}*/}
-                    {/*    />*/}
-
-                    {/*</td>*/}
-                    {/*<td className="w-50">*/}
-                    {/*<FormattedTextRenderer*/}
-                    {/*        text={answ[1]}*/}
-                    {/*    />*/}
-                    {/*</td>*/}
-                    {/*<td className="w-25">{answ[2]}</td>*/}
                 </tr>
             ))}
 
@@ -100,4 +88,4 @@ const MatchingQuestionStatisticsWrong = ({wrongAnswers, tableCols, colsSize, col
     )
 }
 
-export default MatchingQuestionStatisticsWrong;
+export default WrongAnswersTable;

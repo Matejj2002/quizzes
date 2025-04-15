@@ -339,6 +339,7 @@ const Questions = () => {
                                             page: page,
                                             filterType: filterType,
                                             authorFilter: authorFilter,
+                                            back:false,
                                         }
                                     });
                                 }
@@ -390,6 +391,7 @@ const Questions = () => {
                                                                         page: page,
                                                                         filterType: filterType,
                                                                         authorFilter: authorFilter,
+                                                                        back:false,
                                                                     }
                                                                 });
                                                             }
@@ -488,6 +490,7 @@ const Questions = () => {
                                                                         page: page,
                                                                         filterType: filterType,
                                                                         authorFilter: authorFilter,
+                                                                        back:false,
                                                                     }
                                                                 });
 

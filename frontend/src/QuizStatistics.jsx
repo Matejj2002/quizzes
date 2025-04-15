@@ -3,7 +3,7 @@ import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import FormattedTextRenderer from "./components/FormattedTextRenderer";
-import MatchingQuestionStatisticsWrong from "./MatchingQuestionStatisticsWrong";
+import WrongAnswersTable from "./WrongAnswersTable";
 const QuizStatistics = () =>{
     const location = useLocation();
     const navigate = useNavigate();
@@ -94,11 +94,10 @@ const QuizStatistics = () =>{
                                         (
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <h2>Random question</h2>
-                                                {console.log(evals[question["item_id"]])}
-                                                <span
-                                                    className="badge text-bg-primary rounded-pill flex-shrink-0"
-                                                >{question.questionAnswerType}
-                                        </span>
+                                                    <span
+                                                        className="badge text-bg-primary rounded-pill flex-shrink-0"
+                                                    >{question.questionAnswerType}
+                                            </span>
                                             </div>
                                         )
 
@@ -235,28 +234,84 @@ const QuizStatistics = () =>{
                                     {question.type === "short_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
                                         <details>
                                             <summary>List of wrong answers</summary>
-                                            <MatchingQuestionStatisticsWrong
+                                            <WrongAnswersTable
                                                 wrongAnswers={evals[question["item_id"]].wrong_answers}
-                                                tableCols={["Answer", "Occurencies"]} colsSize={["w-50", "w-50"]}
-                                                colsType={["string", "int"]}></MatchingQuestionStatisticsWrong>
+                                                tableCols={["Answer", "Occurencies"]} colsSize={["w-75", "w-50 text-center"]}
+                                                colsType={["string", "int"]}></WrongAnswersTable>
                                         </details>
                                     )}
                                     {question.type === "matching_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
                                         <details>
                                             <summary>List of wrong answers</summary>
-                                            <MatchingQuestionStatisticsWrong
+                                            <WrongAnswersTable
                                                 wrongAnswers={evals[question["item_id"]].wrong_answers}
                                                 tableCols={["Left Side", "Right Side", "Occurencies"]}
                                                 colsSize={["w-50", "w-50", "w-25"]}
-                                                colsType={["string", "string", "int"]}></MatchingQuestionStatisticsWrong>
+                                                colsType={["string", "string", "int"]}></WrongAnswersTable>
                                         </details>
                                     )
                                     }
 
 
+                                    {question.questionType === "random" && (
+                                        <div>
+                                                <details>
+                                                    <summary>List of questions</summary>
+                                                    <ol className="list-group">
+                                                        {evals[question["item_id"]].questions.map((question, index) => (
+                                                                <li className="list-group-item">
+                                                                    <div
+                                                                        className="d-flex justify-content-between align-items-center w-100">
+
+                                                                        {/*<span*/}
+                                                                        {/*    className="fw-bold h5">{question.question_title}</span>*/}
+                                                                        <p className="h5 text-start text-truncate flex-grow-1">
+                                                                        <a href="" onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            navigate(`/question/${question.question_version_id}`, {
+                                                                            state: {
+                                                                                catPath: "",
+                                                                                id: "",
+                                                                                selectedCategory: "",
+                                                                                limit: "",
+                                                                                offset: "",
+                                                                                sort: "",
+                                                                                page: "",
+                                                                                filterType: "",
+                                                                                authorFilter: "",
+                                                                                back:true,
+                                                                        }
+                                                                    });
+                                                                        }
+                                                                        } className="text-decoration-none">
+                                                                            {question.question_title || "No title available"}
+                                                                        </a>
+                                                                            </p>
+                                                                        <span
+                                                                            className="badge text-bg-primary rounded-pill flex-shrink-0">{questionTypes[question.question_type]}</span>
+                                                                    </div>
+
+                                                                    <div className="d-flex justify-content-start">
+                                                                        <span>Item score {question.item_score} / {question.item_max_score}</span>
+                                                                    </div>
+                                                                    <div className="d-flex justify-content-start">
+                                                                        <span>Average score {(question.sum_points) / (question.item_max_score * question.number_attempts)} / {question.item_max_score}</span>
+                                                                    </div>
+                                                                    <div className="d-flex justify-content-start">
+                                                                        <span>Times in quiz: {question.number_attempts}</span>
+                                                                    </div>
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ol>
+                                                </details>
+                                        </div>
+                                    )}
+
+
                                     {evals[question["item_id"]].comments.length > 0 && (
                                         <details>
-                                            <summary>Feedbacks</summary>
+                                        <summary>Feedbacks</summary>
                                             <table className="table table-striped">
                                                 <thead>
                                                 <tr>

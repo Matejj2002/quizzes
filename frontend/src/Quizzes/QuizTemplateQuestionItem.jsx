@@ -21,7 +21,6 @@ const QuizTemplateQuestionItem = ({ type ,indexQuestion, handleOrderChangeItem, 
         return (
             <li key={indexQuestion} className="list-group-item">
                 <div className="row align-items-center w-100">
-                    {/* Tlačidlá na posun hore/dole */}
                     <div className="col-auto d-flex flex-column align-items-center">
                         <button
                             className="btn btn-outline-secondary btn-sm p-0"
@@ -41,10 +40,8 @@ const QuizTemplateQuestionItem = ({ type ,indexQuestion, handleOrderChangeItem, 
                         </button>
                     </div>
 
-                    {/* Obsah otázky */}
                     <div className="col w-100">
                         <div className="row align-items-center">
-                            {/* Názov otázky a typ */}
                             <div className="col-md-6 d-flex align-items-center">
                                 <h2 className="h5 text-start text-truncate mb-0">
                                     <a href="#" className="text-decoration-none me-1">
@@ -56,7 +53,6 @@ const QuizTemplateQuestionItem = ({ type ,indexQuestion, handleOrderChangeItem, 
                     </span>
                             </div>
 
-                            {/* Hodnotenie */}
                             <div className="col-md-1 offset-md-2">
                                 <input
                                     type="number"

@@ -45,6 +45,7 @@ const NewQuestion = ({subButText="Submit"}) => {
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter'];
     const newQuestions = location.state["newQuestions"];
+    const back = location.state["back"];
 
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
@@ -400,14 +401,19 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <div className="d-flex justify-content-between">
                                     <button type="button" className="btn btn-outline-primary mb-3"
                                             onClick={() => {
-                                                navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory1}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
-                                            }
+                                                if (back) {
+                                                    navigate(-1);
+                                                }
+                                                else {
+                                                    navigate(`/questions/${catPath}?page=${page}&limit=${limit}&offset=${offset}&category=${selectedCategory1}&category_id=${idQ}&sort=${sort}&filter-type=${filters}&author-filter=${authorFilter}`);
+                                                }
+                                                }
                                             }
                                     >Back
                                     </button>
 
                                     <button type="button" className="btn btn-success mb-3"
-                                            disabled={title.length === 0 || text.length === 0}
+                                            disabled={title.length === 0 || text.length === 0 || back}
                                             onClick={() => {
                                                 saveChanges();
                                             }

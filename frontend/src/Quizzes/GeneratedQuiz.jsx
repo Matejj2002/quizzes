@@ -395,7 +395,7 @@ const GeneratedQuiz = () => {
 
                                                     {questionsData[question.id].answers.map((ans, idx) => (
                                                         <tr>
-                                                            <td style={{
+                                                            <td className="w-50" style={{
                                                                 borderRight: "1px solid black",
                                                                 paddingBottom: "2px"
                                                             }}
