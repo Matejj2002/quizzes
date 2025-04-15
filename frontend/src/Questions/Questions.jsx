@@ -3,10 +3,10 @@ import axios from 'axios';
 import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import Navigation from "../Navigation";
+import Navigation from "../components/Navigation";
 import Categories from "../CategoriesTree/Categories";
 import ReactPaginate from "react-paginate";
-import Login from "../Login";
+import Login from "../components/Login";
 
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
@@ -375,7 +375,7 @@ const Questions = () => {
                                             <div className="ms-2 me-auto text-truncate text-start w-100">
                                                 <div
                                                     className="d-flex justify-content-between align-items-center w-100">
-                                                    <div className="d-flex align-items-start">
+                                                    <div className="d-flex align-items-start text-truncate">
                                                         <p className="h5 text-start text-truncate flex-grow-1">
                                                             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                             <a href="" onClick={(e) => {
@@ -391,7 +391,7 @@ const Questions = () => {
                                                                         page: page,
                                                                         filterType: filterType,
                                                                         authorFilter: authorFilter,
-                                                                        back:false,
+                                                                        back: false,
                                                                     }
                                                                 });
                                                             }
@@ -399,11 +399,11 @@ const Questions = () => {
                                                                 {question.versions.title || "No title available"}
                                                             </a>
                                                         </p>
-                                                        <span
-                                                            className="badge text-bg-primary rounded-pill flex-shrink-0"
-                                                            style={{cursor: "pointer"}}
-                                                            onClick={() => showFeedbacks(question)}>{question.comments.length}
-                                                        </span>
+                                                        {/*<span*/}
+                                                        {/*    className="badge text-bg-primary rounded-pill flex-shrink-0"*/}
+                                                        {/*    style={{cursor: "pointer"}}*/}
+                                                        {/*    onClick={() => showFeedbacks(question)}>{question.comments.length}*/}
+                                                        {/*</span>*/}
                                                     </div>
 
                                                     <span
@@ -476,6 +476,7 @@ const Questions = () => {
                                                     className="d-flex justify-content-between align-items-center w-100">
                                                         <span
                                                             className="m-0 text-secondary text-truncate">Last updated {question.versions.dateCreated} by {question.versions.author_name}</span><br/>
+
                                                     <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
                                                             onClick={() => {
                                                                 navigate(`/question/copy-question/${question.id}`, {
@@ -490,13 +491,21 @@ const Questions = () => {
                                                                         page: page,
                                                                         filterType: filterType,
                                                                         authorFilter: authorFilter,
-                                                                        back:false,
+                                                                        back: false,
                                                                     }
                                                                 });
 
                                                             }}>
                                                         Copy
                                                     </button>
+                                                </div>
+                                                <div className="d-flex justify-content-between align-items-center w-100 mt-1">
+                                                    <div>
+                                                </div>
+                                                <button
+                                                    className="btn btn-outline-primary btn-xs p-0 px-1 ms-1"
+                                                    onClick={() => showFeedbacks(question)}>Feedbacks: {question.comments.length}
+                                                        </button>
                                                 </div>
                                             </div>
                                         </li>

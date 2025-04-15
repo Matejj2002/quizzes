@@ -55,7 +55,7 @@ const MatchingQuestion = ({setAnswers , answers}) => {
     return (
         <div>
             {questions.map((question, index) => (
-                    <div>
+                    <div key={index}>
                     <div className="input-group mt-3" key={index}>
                         <input type="text" className="form-control" value={question.left} placeholder="Left Side"
                                onChange={(e) => handleInputChange(index, 'left', e.target.value)}/>

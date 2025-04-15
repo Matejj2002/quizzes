@@ -1,6 +1,6 @@
 import {useLocation, useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import Navigation from "./Navigation";
+import Navigation from "../components/Navigation";
 import axios from "axios";
 
 const UserStatistics = () =>{
@@ -58,8 +58,8 @@ const UserStatistics = () =>{
                                 </tr>
                                 </thead>
                                  <tbody>
-                                    {userData["quizzes_attended"]?.map((quiz) => (
-                                            <tr>
+                                    {userData["quizzes_attended"]?.map((quiz, ind) => (
+                                            <tr key = {ind}>
                                                 <td className="w-25">{quiz.title}</td>
                                                 <td className="w-25 text-end">{quiz.attempts}</td>
                                                 <td className="w-25 text-end">{quiz.achieved}/{quiz.max_points}</td>

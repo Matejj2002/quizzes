@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navigation from "../Navigation";
+import Navigation from "../components/Navigation";
 
 const Quiz = () => {
     const navigate = useNavigate();
@@ -112,9 +112,9 @@ const Quiz = () => {
                                 </button>
                             )}
 
-                            {quizzes.map((quiz) => {
+                            {quizzes.map((quiz, ind) => {
                                     return (
-                                        <div className={`border p-3 mb-3 mt-3 ${quiz.actual_quiz ? 'border-success' : ''}`}>
+                                        <div className={`border p-3 mb-3 mt-3 ${quiz.actual_quiz ? 'border-success' : ''}`} key={ind}>
                                             <div className="d-flex justify-content-between">
                                                 <div className="d-flex">
                                                     <h2 className="h5">
@@ -176,7 +176,7 @@ const Quiz = () => {
                                                     </summary>
                                                     {quiz.quizzes.slice(1).map((qz, ind) => (
                                                             <div
-                                                                className="d-flex justify-content-between align-items-start border p-3">
+                                                                className="d-flex justify-content-between align-items-start border p-3" key={"rew-"+ind.toString()}>
                                                                 <div>
                                                                     <span>Attempt {ind + 1}</span>
                                                                     <p className="text-secondary mb-0">Finished

@@ -1,9 +1,9 @@
-import Navigation from "./Navigation";
+import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const QuizAnalysis = () =>{
+const QuizzesTableAnalysis = () =>{
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
     const [filterForName,setFilterForName] = useState("");
@@ -70,8 +70,8 @@ const QuizAnalysis = () =>{
                                 <tbody>
                                 {
 
-                                    quizzes.map((quiz) => (
-                                            <tr>
+                                    quizzes.map((quiz, ind) => (
+                                            <tr key={ind}>
                                                 <td>{quiz.title}</td>
                                                 <td>
                                                     <div className="d-flex justify-content-end align-items-center">
@@ -121,4 +121,4 @@ const QuizAnalysis = () =>{
     )
 }
 
-export default QuizAnalysis;
+export default QuizzesTableAnalysis;

@@ -9,7 +9,7 @@ import MatchingQuestion from "../MatchingAnswerQuestions/MatchingQuestion";
 import ShortAnswerQuestion from "../ShortAnswerQuestion/ShortAnswerQuestion";
 import MultipleChoiceQuestion from "../MultipleChoiceQuestions/MultipleChoiceQuestion";
 import Categories from "../CategoriesTree/Categories";
-import Navigation from "../Navigation";
+import Navigation from "../components/Navigation";
 
 import FormattedTextRenderer from "../components/FormattedTextRenderer";
 import FormattedTextInput from "../components/FormattedTextInput";

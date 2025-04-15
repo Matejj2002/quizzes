@@ -54,9 +54,6 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                 </summary>
                 <div className="p-4 w-auto mb-3">
                     <form>
-                        {/*<FormattedTextRenderer*/}
-                        {/*                text={answers["positive_feedback"]}*/}
-                        {/*              />*/}
                         <div className="d-flex align-items-center mb-3">
                             <label className="form-label">Positive&nbsp;&nbsp;</label>
                             <input
@@ -69,9 +66,6 @@ const ShortAnswerQuestion = ({setAnswers, answers}) => {
                                 }
                             />
                         </div>
-                        {/*<FormattedTextRenderer*/}
-                        {/*                text={answers["negative_feedback"]}*/}
-                        {/*              />*/}
 
                         <div className="d-flex align-items-center">
                             <label className="form-label">Negative</label>

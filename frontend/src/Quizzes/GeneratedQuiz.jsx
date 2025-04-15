@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Navigation from "../Navigation";
+import Navigation from "../components/Navigation";
 import FormattedTextRenderer from "../components/FormattedTextRenderer";
 
 const GeneratedQuiz = () => {
@@ -305,7 +305,7 @@ const GeneratedQuiz = () => {
                                 </div>
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
-                                <li className="nav-item" role="presentation">
+                                <li className="nav-item" role="presentation" key={index}>
                                         <button
                                             className={`nav-link ${index === page ? 'active' : ''}`}
                                             id={`tab-${index}`}
@@ -394,7 +394,7 @@ const GeneratedQuiz = () => {
                                                     <tbody>
 
                                                     {questionsData[question.id].answers.map((ans, idx) => (
-                                                        <tr>
+                                                        <tr key={"tr-"+idx.toString()}>
                                                             <td className="w-50" style={{
                                                                 borderRight: "1px solid black",
                                                                 paddingBottom: "2px"

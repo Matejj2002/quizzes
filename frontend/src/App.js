@@ -5,16 +5,16 @@ import NewCategory from "./Categories/NewCategory";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import NewQuestion from "./Questions/NewQuestion";
 import QuestionDetail from "./Questions/QuestionDetail";
-import Login from "./Login";
+import Login from "./components/Login";
 import QuestionCopy from "./Questions/QuestionCopy";
 import NewQuiz from "./Quizzes/NewQuiz";
 import Quiz from "./Quizzes/Quiz";
 import GeneratedQuiz from "./Quizzes/GeneratedQuiz";
 import QuizReview from "./Quizzes/QuizReview";
-import Users from "./Users";
-import UserStatistics from "./UserStatistics";
-import QuizAnalysis from "./QuizAnalysis";
-import QuizStatistics from "./QuizStatistics";
+import Users from "./Users/Users";
+import UserStatistics from "./Users/UserStatistics";
+import QuizzesTableAnalysis from "./Quizzes/QuizzesTableAnalysis";
+import QuizStatistics from "./Quizzes/QuizStatistics";
 
 const Home = () => {
     window.location.href = "/quizzes";
@@ -37,7 +37,7 @@ function App() {
                   <Route path="/quizzes" element={<Quiz />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="/user-statistics" element={<UserStatistics />} />
-                  <Route path="/quiz-analysis" element={<QuizAnalysis />} />
+                  <Route path="/quiz-analysis" element={<QuizzesTableAnalysis />} />
                   <Route path="/generated-quiz" element={<GeneratedQuiz />} />
                   <Route path="/review-quiz" element={<QuizReview/>}></Route>
                   <Route path="/quiz-statistics" element={<QuizStatistics/>}></Route>

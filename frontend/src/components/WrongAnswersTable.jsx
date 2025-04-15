@@ -1,8 +1,8 @@
-import FormattedTextRenderer from "./components/FormattedTextRenderer";
+import FormattedTextRenderer from "./FormattedTextRenderer";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 
-const WrongAnswersTable = ({wrongAnswers, tableCols, colsSize, colsType}) =>{
+const WrongAnswersTable = ({wrongAnswers, tableCols, colsSize, colsType, title}) =>{
     const [showData, setShowData] = useState(wrongAnswers);
     const apiUrl = process.env.REACT_APP_API_URL;
     const [sortArray, setSortArray] = useState(
@@ -51,6 +51,7 @@ const WrongAnswersTable = ({wrongAnswers, tableCols, colsSize, colsType}) =>{
                 {tableCols.map((col, ind) => (
                         <th
                             scope="col"
+                            key={title+"head"+ind.toString()}
                             className={colsSize[ind]}
                             style={{cursor: "pointer", whiteSpace: "nowrap"}}
                             onClick={() => handleSort(ind)}
@@ -70,9 +71,9 @@ const WrongAnswersTable = ({wrongAnswers, tableCols, colsSize, colsType}) =>{
             </thead>
             <tbody>
             {showData.map((answ, ind) => (
-                <tr>
+                <tr key={title+ind.toString()}>
                     {tableCols.map((col, inds) => (
-                            <td className={colsSize[inds]}>
+                            <td className={colsSize[inds]} key={title+"-answs-"+inds.toString()}>
                                 <FormattedTextRenderer
                                     text={answ[inds].toString() || "No answer"}
                                 />

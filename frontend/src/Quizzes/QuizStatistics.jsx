@@ -1,9 +1,9 @@
-import Navigation from "./Navigation";
+import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
-import FormattedTextRenderer from "./components/FormattedTextRenderer";
-import WrongAnswersTable from "./WrongAnswersTable";
+import FormattedTextRenderer from "../components/FormattedTextRenderer";
+import WrongAnswersTable from "../components/WrongAnswersTable";
 const QuizStatistics = () =>{
     const location = useLocation();
     const navigate = useNavigate();
@@ -55,7 +55,7 @@ const QuizStatistics = () =>{
 
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {data.sections && data.sections.map((sect, index) => (
-                                <li className="nav-item" role="presentation">
+                                <li className="nav-item" role="presentation" key={"section-" + index.toString()}>
                                     <button
                                         className={`nav-link ${index === page ? 'active' : ''}`}
                                         id={`tab-${index}`}
@@ -118,7 +118,7 @@ const QuizStatistics = () =>{
                                                 <div className="form-check" key={ind}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
-                                                           checked={ans[2] === true}
+                                                           defaultChecked={ans[2] === true}
                                                     />
                                                     <div className="d-flex justify-content-between">
                                                     <span className="form-check-label w-50">
@@ -183,7 +183,7 @@ const QuizStatistics = () =>{
                                                 </thead>
                                                 <tbody>
                                                 {evals[question["item_id"]].correct_answer.map((ans, ind) => (
-                                                    <tr>
+                                                    <tr key ={"match-q-"+ind.toString()}>
                                                     <td style={{
                                                                 borderRight: "1px solid black",
                                                                 paddingBottom: "2px"
@@ -237,7 +237,8 @@ const QuizStatistics = () =>{
                                             <WrongAnswersTable
                                                 wrongAnswers={evals[question["item_id"]].wrong_answers}
                                                 tableCols={["Answer", "Occurencies"]} colsSize={["w-75", "w-50 text-center"]}
-                                                colsType={["string", "int"]}></WrongAnswersTable>
+                                                colsType={["string", "int"]}
+                                            title={"AA"}></WrongAnswersTable>
                                         </details>
                                     )}
                                     {question.type === "matching_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
@@ -247,7 +248,8 @@ const QuizStatistics = () =>{
                                                 wrongAnswers={evals[question["item_id"]].wrong_answers}
                                                 tableCols={["Left Side", "Right Side", "Occurencies"]}
                                                 colsSize={["w-50", "w-50", "w-25"]}
-                                                colsType={["string", "string", "int"]}></WrongAnswersTable>
+                                                colsType={["string", "string", "int"]}
+                                            title={"BB"}></WrongAnswersTable>
                                         </details>
                                     )
                                     }
@@ -259,7 +261,7 @@ const QuizStatistics = () =>{
                                                     <summary>List of questions</summary>
                                                     <ol className="list-group">
                                                         {evals[question["item_id"]].questions.map((question, index) => (
-                                                                <li className="list-group-item">
+                                                                <li className="list-group-item" key={"random-"+index.toString()}>
                                                                     <div
                                                                         className="d-flex justify-content-between align-items-center w-100">
 

@@ -1,7 +1,7 @@
 import {useLocation, useNavigate} from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Navigation from "../Navigation";
+import Navigation from "../components/Navigation";
 import QuizReviewPoints from "./QuizReviewPoints";
 
 import 'katex/dist/katex.min.css';
@@ -29,6 +29,7 @@ const QuizReview = () =>{
                     item_id: itemId,
                     quiz_id: quiz.id,
                     review: true,
+                    correctMode: correctMode
                 }});
 
             setQuestionsData(prevData => ({
@@ -132,7 +133,7 @@ const QuizReview = () =>{
 
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
-                                <li className="nav-item" role="presentation">
+                                <li className="nav-item" role="presentation" key={index}>
                                     <button
                                         className={`nav-link ${index === page ? 'active' : ''}`}
                                         id={`tab-${index}`}
@@ -228,7 +229,7 @@ const QuizReview = () =>{
 
                                                         <tbody>
                                                         {questionsData[question.id].answers.map((ans, idx) => (
-                                                            <tr>
+                                                            <tr key={"table-" + idx.toString()}>
                                                                 <td style={{
                                                                     borderRight: "1px solid black",
                                                                     paddingBottom: "2px"
@@ -269,12 +270,12 @@ const QuizReview = () =>{
 
                                                                                     <p className="mb-0 fw-bold">Correct answer
                                                                                         is</p>
-                                                                                    <p
+                                                                                    <div
                                                                                         className=" m-0">
                                                                                         <FormattedTextRenderer
                                                                                             text={ans["rightSide"]}
                                                                                           />
-                                                                                    </p>
+                                                                                    </div>
                                                                                 </div>
                                                                             ) : (
                                                                                 <div className="d-flex justify-content-between w-100">
@@ -295,7 +296,7 @@ const QuizReview = () =>{
                                                                             <span>{ans.answer}</span>
                                                                         )}
 
-                                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
+                                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "" && ans.feedback !== null) && (
                                                                             <p className="border border-danger p-3 rounded"
                                                                                style={{background: "rgba(255, 0, 0, 0.3)"}}>
                                                                                 {ans?.feedback}
@@ -319,7 +320,7 @@ const QuizReview = () =>{
                                                             <input className="form-check-input"
                                                                    type="checkbox"
                                                                    // disabled="true"
-                                                                   checked={ans.answer === true}
+                                                                   defaultChecked={ans.answer === true}
                                                             />
                                                             <span className="d-flex w-100 form-check-label">
 
@@ -374,7 +375,7 @@ const QuizReview = () =>{
                                                 </div>
                                             )}
 
-                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "") && (
+                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !==null) && (
                                                 <p className="p-3 rounded"
                                                    style={{
                                                        background: "rgba(255, 0, 0, 0.3)"
@@ -384,7 +385,7 @@ const QuizReview = () =>{
                                             )
                                             }
 
-                                            {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "") && (
+                                            {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !==null) && (
                                                 <p className="p-3 rounded"
                                                    style={{
                                                        background: "rgba(155,236,137,0.15)"
@@ -396,7 +397,7 @@ const QuizReview = () =>{
 
 
                                             {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
-                                                <p className="p-3 rounded"
+                                                <div className="p-3 rounded"
                                                    style={{
                                                        background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
                                                    }}>
@@ -406,7 +407,7 @@ const QuizReview = () =>{
                                                     />
                                                 }
 
-                                                </p>
+                                                </div>
                                             )
                                             }
 

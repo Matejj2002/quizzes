@@ -6,9 +6,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import {useNavigate} from "react-router-dom";
 import { useLocation } from 'react-router-dom';
-import Navigation from "../Navigation";
+import Navigation from "../components/Navigation";
 import Categories from "../CategoriesTree/Categories";
-import Login from "../Login";
+import Login from "../components/Login";
 
 const NewCategory = () => {
     const location = useLocation();

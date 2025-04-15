@@ -1,4 +1,4 @@
-import Navigation from "./Navigation";
+import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import { useRef } from "react";
@@ -149,8 +149,8 @@ const Users = () =>{
                                 <tbody>
                                 {
 
-                                    users.map((user) => (
-                                            <tr>
+                                    users.map((user, ind) => (
+                                            <tr key={ind}>
                                                 <td>{user.github_name}</td>
                                                 <td className="text-end">
                                                     <div className="d-flex gap-2 text-align-center justify-content-end">

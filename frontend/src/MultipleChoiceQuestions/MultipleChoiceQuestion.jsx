@@ -53,7 +53,7 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
                 <label className="form-check-label" htmlFor="inlineCheckbox1">Is single answer</label>
             </div>
             {questions.map((question, index) => (
-                <div>
+                <div key = {index}>
                 <div className="input-group">
                     <div className="input-group-text">
                         <input className="form-check-input mt-0" type="checkbox" checked={correctAnswers[index]}
