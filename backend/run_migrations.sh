@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Odstraňujem staré migrácie..."
-rm -rf migrations
+#echo "Odstraňujem staré migrácie..."
+#rm -rf migrations
 
 echo "Inicializujem migrácie..."
 flask db init

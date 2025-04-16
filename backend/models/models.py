@@ -8,9 +8,8 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     is_deleted = db.Column(db.Boolean, default=False)
-    # versions = db.relationship('QuestionVersion', backref='question', cascade='all, delete-orphan')
     category = db.relationship("Category", backref='category')
-    question_feedback = db.Column(db.Text, default='') #premenovat na question_negative_feedback
+    question_feedback = db.Column(db.Text, default='')
     question_positive_feedback = db.Column(db.Text, default='')
 
     question_version = db.relationship('QuestionVersion', back_populates='questions', cascade='all, delete-orphan')
