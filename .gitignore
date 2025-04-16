@@ -5,3 +5,4 @@ __pycache__/
 .env
 /frontend/.env
 flask_session
+/backend/flask_session
