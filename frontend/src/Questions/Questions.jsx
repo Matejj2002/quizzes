@@ -4,7 +4,7 @@ import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navigation from "../components/Navigation";
-import Categories from "../CategoriesTree/Categories";
+import Categories from "../Categories/CategoriesTree/Categories";
 import ReactPaginate from "react-paginate";
 import Login from "../components/Login";
 

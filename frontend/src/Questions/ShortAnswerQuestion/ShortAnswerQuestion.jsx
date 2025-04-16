@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import FormattedTextRenderer from "../components/FormattedTextRenderer";
+import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 
 const ShortAnswerQuestion = ({setAnswers, answers}) => {
     const [newAnswer, setNewAnswer] = useState({

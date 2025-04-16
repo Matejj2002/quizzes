@@ -5,8 +5,6 @@ import Navigation from "../components/Navigation";
 import QuizReviewPoints from "./QuizReviewPoints";
 
 import 'katex/dist/katex.min.css';
-import { InlineMath } from 'react-katex';
-import "./MathText.css"
 import FormattedTextRenderer from "../components/FormattedTextRenderer";
 
 const QuizReview = () =>{

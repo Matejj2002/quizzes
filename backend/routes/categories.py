@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 import requests
 try:
-    from backend.api.api_functions import *
+    from backend.functions.api_functions import *
 except:
-    from api.api_functions import *
+    from functions.api_functions import *
 
 categories_bp = Blueprint('categories', __name__, url_prefix='/api/')
 

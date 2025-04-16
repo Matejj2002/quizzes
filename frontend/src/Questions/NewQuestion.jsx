@@ -5,10 +5,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { useLocation } from 'react-router-dom';
-import MatchingQuestion from "../MatchingAnswerQuestions/MatchingQuestion";
-import ShortAnswerQuestion from "../ShortAnswerQuestion/ShortAnswerQuestion";
-import MultipleChoiceQuestion from "../MultipleChoiceQuestions/MultipleChoiceQuestion";
-import Categories from "../CategoriesTree/Categories";
+import MatchingQuestion from "./MatchingAnswerQuestions/MatchingQuestion";
+import ShortAnswerQuestion from "./ShortAnswerQuestion/ShortAnswerQuestion";
+import MultipleChoiceQuestion from "./MultipleChoiceQuestions/MultipleChoiceQuestion";
+import Categories from "../Categories/CategoriesTree/Categories";
 import Navigation from "../components/Navigation";
 
 import FormattedTextRenderer from "../components/FormattedTextRenderer";

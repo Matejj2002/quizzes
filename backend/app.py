@@ -1,7 +1,7 @@
 from flask import Flask, send_from_directory
 from flask_migrate import Migrate
 from flask_cors import CORS
-from api.api_functions import *
+from functions.api_functions import *
 from flask_session import Session
 import os
 import psycopg2
