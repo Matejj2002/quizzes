@@ -19,6 +19,8 @@ const NewQuestion = ({subButText="Submit"}) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // const subButText = location.state.subButText;
+
     const apiUrl = process.env.REACT_APP_API_URL;
 
     let titleText = "";

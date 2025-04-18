@@ -309,7 +309,9 @@ const Quiz = () => {
                                                                 e.preventDefault();
                                                                 navigate("/generated-quiz", {
                                                                     state: {
-                                                                        quiz: quiz
+                                                                        quiz: quiz,
+                                                                        userId: userData["id_user"],
+                                                                        userRole: userData["role"]
                                                                     }
                                                                 });
                                                             }

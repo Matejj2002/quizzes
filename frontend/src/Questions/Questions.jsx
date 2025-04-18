@@ -414,6 +414,8 @@ const Questions = () => {
                                                                         filterType: filterType,
                                                                         authorFilter: authorFilter,
                                                                         back: false,
+                                                                        userId: userData["id_user"],
+                                                                        userRole: userData["role"],
                                                                     }
                                                                 });
                                                             }
@@ -514,6 +516,8 @@ const Questions = () => {
                                                                         filterType: filterType,
                                                                         authorFilter: authorFilter,
                                                                         back: false,
+                                                                        userId: userData["id_user"],
+                                                                        userRole: userData["role"],
                                                                     }
                                                                 });
 
