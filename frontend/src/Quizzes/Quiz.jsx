@@ -220,7 +220,8 @@ const Quiz = () => {
                                                                                     quiz: quiz,
                                                                                     quizId: qz["quiz_id"],
                                                                                     feedback: qz.feedback,
-                                                                                    userId: userData["id_user"]
+                                                                                    userId: userData["id_user"],
+                                                                                    userRole: userData["role"],
                                                                                 }
                                                                             });
                                                                         }}
@@ -246,7 +247,8 @@ const Quiz = () => {
                                                                 quizId: quiz.id,
                                                                 feedback: quiz.feedbackTypeAfterClose,
                                                                 conditionToRetake: false,
-                                                                userId: userData["id_user"]
+                                                                userId: userData["id_user"],
+                                                                userRole: userData["role"],
                                                             }
                                                         })
                                                     }
@@ -289,7 +291,8 @@ const Quiz = () => {
                                                                                 quizId: quiz.id,
                                                                                 feedback: quiz.feedbackType,
                                                                                 conditionToRetake: !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
-                                                                                userId: userData["id_user"]
+                                                                                userId: userData["id_user"],
+                                                                                userRole: userData["role"],
                                                                             }
                                                                         })
                                                                     }

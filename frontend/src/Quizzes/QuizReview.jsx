@@ -13,14 +13,15 @@ const QuizReview = () =>{
     const [quiz] = useState(location.state?.quiz);
     const [userId] = useState(location.state?.userId);
     const [quizId] = useState(location.state?.quizId);
-    const [feedback] = useState(location.state?.feedback)
+    const [feedback] = useState(location.state?.feedback);
+    const [userRole] = useState(location.state?.userRole);
     const [conditionToRetake] = useState(location.state?.conditionToRetake)
     const [correctMode] = useState(location.state?.correctMode || false)
     const [data, setData] = useState([]);
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
-    console.log(userId);
+
     const fetchQuestion = async (questionId, itemId) => {
         try {
             const response = await axios.get(apiUrl+`questions-quiz/${questionId}`, {
@@ -439,6 +440,8 @@ const QuizReview = () =>{
                                                 state: {
                                                     quiz: quiz,
                                                     refreshQuiz: true,
+                                                    userId: userId,
+                                                    userRole: userRole
                                                 }
                                             });
                                         }}
