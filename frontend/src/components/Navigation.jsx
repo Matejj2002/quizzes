@@ -21,16 +21,12 @@ const Navigation = ({active}) => {
         ).then((response) => {
             return response.json();
         }).then((data) => {
-            localStorage.setItem("role", data["role"]);
-            localStorage.setItem("idUser", data["id_user"]);
             setUserData(data);
         })
     }
 
     const handleLogout = () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("role");
-        localStorage.removeItem("idUser");
+        localStorage.clear();
         window.location.href = "/login"
     };
 
@@ -44,7 +40,6 @@ const Navigation = ({active}) => {
         <nav className="navbar navbar-expand-sm bg-primary w-100" data-bs-theme="dark">
             <div className="container-fluid">
                 <a className="navbar-brand" href="#">Quizzes</a>
-                {/*{localStorage.getItem("role")?.charAt(0).toUpperCase() + localStorage.getItem("role")?.slice(1)}*/}
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
                         aria-label="Toggle navigation">
@@ -52,20 +47,19 @@ const Navigation = ({active}) => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div className="navbar-nav">
-                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
+                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
                            href={`${quizzesUrl}/quizzes`}>Quizzes</a>
-                        {/*    href="http://localhost:5000/"*/}
-                        <a className={`nav-link ${active === "Questions" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
-                           aria-disabled={localStorage.getItem("role") !== "teacher"}
+                        <a className={`nav-link ${active === "Questions" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={userData["role"] !== "teacher"}
                            href={`${quizzesUrl}/questions/supercategory?limit=10&offset=0`}>Questions</a>
 
 
-                        <a className={`nav-link ${active === "Analysis" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
-                           aria-disabled={localStorage.getItem("role") !== "teacher"}
+                        <a className={`nav-link ${active === "Analysis" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={userData["role"] !== "teacher"}
                            href={`${quizzesUrl}/quiz-analysis`}>Analysis</a>
 
-                        <a className={`nav-link ${active === "Users" ? "active" : ""} ${localStorage.getItem("role") !== "teacher" ? "disabled" : ""}`}
-                           aria-disabled={localStorage.getItem("role") !== "teacher"}
+                        <a className={`nav-link ${active === "Users" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={userData["role"] !== "teacher"}
                            href={`${quizzesUrl}/users`}>Users</a>
 
 

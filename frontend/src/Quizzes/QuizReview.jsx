@@ -11,6 +11,7 @@ const QuizReview = () =>{
     const location = useLocation();
     const navigate = useNavigate();
     const [quiz] = useState(location.state?.quiz);
+    const [userId] = useState(location.state?.userId);
     const [quizId] = useState(location.state?.quizId);
     const [feedback] = useState(location.state?.feedback)
     const [conditionToRetake] = useState(location.state?.conditionToRetake)
@@ -19,7 +20,7 @@ const QuizReview = () =>{
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
-
+    console.log(userId);
     const fetchQuestion = async (questionId, itemId) => {
         try {
             const response = await axios.get(apiUrl+`questions-quiz/${questionId}`, {
@@ -46,7 +47,7 @@ const QuizReview = () =>{
             const result = await axios.get(apiUrl+"quiz-student-load",
                 {
                     params: {
-                        student_id: localStorage.getItem("idUser"),
+                        student_id: userId,
                         quiz_id: quizId
                     }
                 }

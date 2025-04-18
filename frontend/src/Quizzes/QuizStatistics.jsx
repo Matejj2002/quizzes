@@ -8,6 +8,7 @@ const QuizStatistics = () =>{
     const location = useLocation();
     const navigate = useNavigate();
     const [quiz] = useState(location.state?.quiz);
+    const [userRole] = useState(location.state?.userRole)
     const [data, setData] = useState([]);
     const [evals, setEvals] = useState([]);
     const [studentsCorrect, setStudentsCorrect] = useState([]);
@@ -37,7 +38,7 @@ const QuizStatistics = () =>{
         fetchData();
     }, []);
 
-    if (localStorage.getItem("role") !=="teacher"){
+    if (userRole !=="teacher"){
         navigate("/quizzes");
     }
 

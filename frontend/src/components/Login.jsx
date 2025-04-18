@@ -43,8 +43,6 @@ const Login = ({path = "/login"}) =>{
         ).then((response) => {
             return response.json();
         }).then((data) => {
-            localStorage.setItem("role", data["role"]);
-            localStorage.setItem("idUser", data["id_user"]);
             setUserData(data);
         })
     }

@@ -27,8 +27,9 @@ const NewQuiz = () => {
     const navigate = useNavigate();
 
     const [pageNum, setPageNum] = useState(1);
-    const [pageCount, setPageCount] = useState( location.state?.sections.length+2 || 3);
-    const [newUpdateQuiz] = useState(location.state?.newUpdateQuiz || "Submit")
+    const [pageCount, setPageCount] = useState( location.state?.sections?.length+2 || 3);
+    const [newUpdateQuiz] = useState(location.state?.newUpdateQuiz || "Submit");
+    const [userRole] = useState(location.state?.userRole);
 
     const [quizTitle, setQuizTitle] = useState(location.state?.title ?? "");
     const [numberOfCorrections, setNumberOfCorrections] = useState(parseInt(location.state?.numberOfCorrections) || 1);
@@ -53,7 +54,6 @@ const NewQuiz = () => {
         questions: [],
         title: "Section 1",
     }]);
-
 
     const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "indepedentAttempts");
 
@@ -324,7 +324,7 @@ const NewQuiz = () => {
         return isValid;
     }
 
-    if (localStorage.getItem("role") !=="teacher"){
+    if (userRole !=="teacher"){
         navigate("/quizzes");
     }
 

@@ -19,6 +19,7 @@ const Questions = () => {
     const showQuestionsFilter = ["Active", "Archived", "All"]
 
     const categoryList = category ? category.split("/") : [];
+    const [userData, setUserData]= useState([]);
 
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -115,6 +116,27 @@ const Questions = () => {
 
     }, [actualCategory]);
 
+    async function getUserData() {
+        await fetch(apiUrl+"getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            setUserData(data);
+            if (data["role"] !=="teacher"){
+                navigate("/quizzes");
+            }
+        })
+    }
+
+    useEffect(() => {
+        getUserData().then(() => {
+        });
+    }, []);
 
     useEffect(() => {
         fetchAllTeachers().then(() => {});
@@ -173,10 +195,6 @@ const Questions = () => {
 
     const closeModal = () =>{
       setShowFeedback(false);
-    }
-
-    if (localStorage.getItem("role") !=="teacher"){
-        navigate("/quizzes");
     }
 
     return (
@@ -340,6 +358,9 @@ const Questions = () => {
                                             filterType: filterType,
                                             authorFilter: authorFilter,
                                             back:false,
+                                            userId: userData["id_user"],
+                                            userRole: userData["role"],
+                                            author: userData["login"],
                                         }
                                     });
                                 }
@@ -359,6 +380,7 @@ const Questions = () => {
                                             page: page,
                                             filterType: filterType,
                                             authorFilter: authorFilter,
+                                            userRole: userData["role"],
                                         }
                                     });
                                 }}>Add category

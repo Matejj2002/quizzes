@@ -7,6 +7,8 @@ import FormattedTextRenderer from "../components/FormattedTextRenderer";
 const GeneratedQuiz = () => {
     const location = useLocation();
     const [quiz, setQuiz] = useState(location.state?.quiz);
+    const [userId] = useState(location.state?.userId);
+    const [userRole] = useState(location.state?.userRole);
     const [refreshQuiz] = useState(location.state?.refreshQuiz || false);
     const [questionsData, setQuestionsData] = useState({});
     const [randomQuestions, setRandomQuestions] = useState([]);
@@ -162,7 +164,7 @@ const GeneratedQuiz = () => {
             "quiz": quiz,
             "data": questionsData,
             "finalSave": finalSave,
-            "studentId": localStorage.getItem("idUser")
+            "studentId": userId
         }
         axios.put(apiUrl+`quiz_set_answers`, updatedData).then( () =>{
                 if (finalSave){
@@ -188,7 +190,7 @@ const GeneratedQuiz = () => {
         const updatedData = {
             "quiz": quiz,
             "questions": questionsData,
-            "student_id": localStorage.getItem("idUser"),
+            "student_id": userId,
             "refreshQuiz": refreshQuiz
         }
 
@@ -199,7 +201,7 @@ const GeneratedQuiz = () => {
                                 const result = await axios.get(apiUrl+"quiz-student-load",
                                     {
                                         params: {
-                                            student_id: localStorage.getItem("idUser"),
+                                            student_id: userId,
                                             quiz_id: response.data["quiz_id"]
                                         }
                                     }
@@ -252,8 +254,8 @@ const GeneratedQuiz = () => {
         const updatedData = {
             "feedback": feedback,
             "itemId": itemId,
-            "student_id": localStorage.getItem("idUser"),
-            "role": localStorage.getItem("role")
+            "student_id": userId,
+            "role": userRole
         }
         axios.put(apiUrl+`save-feedback-to-item`, updatedData).then( () =>{
             setFeedbackQuestion([...feedbackQuestion, itemId]);

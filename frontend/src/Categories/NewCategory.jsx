@@ -17,6 +17,7 @@ const NewCategory = () => {
     const page = location.state['page'];
     const limit = location.state['limit'];
     const offset = location.state['offset'];
+    const userRole = location.state.userRole;
     const sort = location.state['sort'];
     const selectedCategory1 = location.state['selectedCategory'];
     const id = location.state['id'];
@@ -120,8 +121,7 @@ const NewCategory = () => {
         fetchCategorySelect().then(() => {});
     }, []);
 
-
-    if (localStorage.getItem("role") !=="teacher"){
+    if (userRole !=="teacher"){
         navigate("/quizzes");
     }
 

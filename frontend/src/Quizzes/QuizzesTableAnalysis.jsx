@@ -7,6 +7,7 @@ const QuizzesTableAnalysis = () =>{
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
     const [filterForName,setFilterForName] = useState("");
+    const [userData, setUserData]= useState([]);
     const apiUrl = process.env.REACT_APP_API_URL;
     const fetchQuizzes = async () => {
       try{
@@ -21,18 +22,38 @@ const QuizzesTableAnalysis = () =>{
        finally {}
     }
 
+    async function getUserData() {
+        await fetch(apiUrl+"getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            setUserData(data);
+            if (data["role"] !=="teacher"){
+                navigate("/quizzes");
+            }
+        })
+    }
+
     useEffect(() => {
-        fetchQuizzes().then(() => {});
+        getUserData().then(() => {
+        });
     }, []);
+
+    useEffect(() => {
+    if (userData && Object.keys(userData).length > 0) {
+        fetchQuizzes();
+    }
+}, [userData]);
 
     useEffect(() => {
         fetchQuizzes().then(() => {});
     }, [filterForName]);
 
-
-    if (localStorage.getItem("role") !=="teacher"){
-        navigate("/quizzes");
-    }
 
     return (
         <div>
@@ -88,6 +109,7 @@ const QuizzesTableAnalysis = () =>{
                                                                 navigate("/quiz-statistics", {
                                                                 state: {
                                                                     quiz: quiz,
+                                                                    userRole: userData["role"],
                                                                 }
                                                             });
                                                             }

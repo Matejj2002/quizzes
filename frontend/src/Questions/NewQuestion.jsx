@@ -41,12 +41,13 @@ const NewQuestion = ({subButText="Submit"}) => {
     const offset = location.state['offset'];
     const sort = location.state['sort'];
     const selectedCategory1 = location.state['selectedCategory'];
+    const userId = location.state.userId;
+    const userRole = location.state.userRole;
     const idQ = location.state['id'];
     const filters = location.state['filterType'];
     const authorFilter = location.state['authorFilter'];
     const newQuestions = location.state["newQuestions"];
     const back = location.state["back"];
-
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
 
@@ -61,8 +62,6 @@ const NewQuestion = ({subButText="Submit"}) => {
     const [questionPositiveFeedback, setQuestionPositiveFeedback] = useState('')
 
     const [checkSubmit, setCheckSubmit] = useState("");
-
-    const [author, setAuthor] = useState("");
 
     const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions || false);
 
@@ -84,7 +83,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             category_id: selectedCategoryId,
             questionType: questionType,
             answers: answersSel,
-            author: localStorage.getItem("idUser"),
+            author: userId,
             feedback: questionFeedback,
             positiveFeedback: questionPositiveFeedback
         };
@@ -154,20 +153,6 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     }
 
-    async function getUSerData() {
-        await fetch(apiUrl+"getUserData", {
-                method: "GET",
-                headers: {
-                    "Authorization" : "Bearer " + localStorage.getItem("accessToken")
-                }
-            }
-
-        ).then((response) => {
-            return response.json();
-        }).then((data) => {
-            setAuthor(data.login);
-        })
-    }
 
     const fetchCategory = async () => {
       try{
@@ -229,7 +214,6 @@ const NewQuestion = ({subButText="Submit"}) => {
       try {
         fetchCategory();
         fetchCategorySelect();
-        getUSerData();
 
         if (subButText !== "Submit") {
           fetchData();
@@ -247,7 +231,7 @@ const NewQuestion = ({subButText="Submit"}) => {
         setAnswers(newAnswers)
     };
 
-    if (localStorage.getItem("role") !=="teacher"){
+    if (userRole !=="teacher"){
         navigate("/quizzes");
     }
 

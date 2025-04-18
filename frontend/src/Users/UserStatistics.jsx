@@ -8,6 +8,8 @@ const UserStatistics = () =>{
     const navigate = useNavigate();
     const [userData, setUserData] = useState([]);
     const [studentId] = useState(location.state?.studentId);
+    const [userRole] = useState(location.state?.userRole);
+    const [userId] = useState(location.state?.userId);
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchUserData = async () => {
@@ -27,7 +29,7 @@ const UserStatistics = () =>{
         fetchUserData()
     }, []);
 
-    if (localStorage.getItem("role") !=="teacher") {
+    if (userRole !=="teacher") {
         navigate("/quizzes");
     }
 
@@ -73,7 +75,8 @@ const UserStatistics = () =>{
                                                                     quiz: quiz.quizzes,
                                                                     quizId: quiz.id,
                                                                     feedback: quiz.quizzes.feedbackType,
-                                                                    correctMode: true
+                                                                    correctMode: true,
+                                                                    userId: userId,
                                                                 }
                                                             });
                                                         }}

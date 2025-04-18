@@ -8,6 +8,7 @@ const Users = () =>{
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [sort, setSort] = useState("github_name");
+    const [userData, setUserData]= useState([]);
     const [sortDirection, setSortDirection] = useState("desc");
     const [filterForName,setFilterForName] = useState("");
     const name = useRef();
@@ -28,9 +29,34 @@ const Users = () =>{
        finally {}
     }
 
+    async function getUserData() {
+        await fetch(apiUrl+"getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            setUserData(data);
+            if (data["role"] !=="teacher"){
+                navigate("/quizzes");
+            }
+        })
+    }
+
     useEffect(() => {
-        fetchUsers().then(() => {});
+        getUserData().then(() => {
+        });
     }, []);
+
+
+    useEffect(() => {
+    if (userData && Object.keys(userData).length > 0) {
+        fetchUsers();
+    }
+}, [userData]);
 
     useEffect(() => {
         fetchUsers().then(() => {});
@@ -64,7 +90,9 @@ const Users = () =>{
     const showStudentStatistics = (studentId) =>{
         navigate("/user-statistics", {
             state: {
-                studentId: studentId
+                studentId: studentId,
+                userRole: userData["role"],
+                userId: userData["id_user"],
             }
         })
     }
@@ -104,10 +132,6 @@ const Users = () =>{
                 alert("User type changed");
             }
         )
-    }
-
-    if (localStorage.getItem("role") !=="teacher"){
-        navigate("/quizzes");
     }
 
     return (
@@ -155,7 +179,7 @@ const Users = () =>{
                                                 <td className="text-end">
                                                     <div className="d-flex gap-2 text-align-center justify-content-end">
                                                         <select id={`select-${user.id}`} value={user.user_type}
-                                                                disabled={user.id.toString() === localStorage.getItem("idUser") || user.id === 1 }
+                                                                disabled={user.id.toString() === userData["user-id"] || user.id === 1 }
                                                                 onChange={(e) => changeType(user.id, e.target.value)}
                                                                 className="form-select w-auto">
                                                             <option value="Teacher">Teacher</option>

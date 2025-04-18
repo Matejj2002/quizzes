@@ -8,13 +8,14 @@ const Quiz = () => {
 
     const [quizzes, setQuizzes] = useState([]);
     const [updateAt, setUpdateAt] = useState(null);
+    const [userData, setUserData] = useState([]);
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchQuizzes = async () => {
       try{
             const response = await axios.get(apiUrl+`get-quiz-templates` ,
                 {
-                    params: {"studentId": localStorage.getItem("idUser")}
+                    params: {"studentId": userData["id_user"]}
                 }
             )
             setQuizzes(response.data.result);
@@ -26,9 +27,31 @@ const Quiz = () => {
        finally {}
     }
 
+    async function getUserData() {
+        await fetch(apiUrl+"getUserData", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+        ).then((response) => {
+            return response.json();
+        }).then((data) => {
+            setUserData(data);
+
+        })
+    }
+
     useEffect(() => {
-        fetchQuizzes();
+        getUserData().then(() => {
+        });
     }, []);
+
+    useEffect(() => {
+    if (userData && Object.keys(userData).length > 0) {
+        fetchQuizzes();
+    }
+}, [userData]);
 
     useEffect(() => {
         if (!updateAt) return;
@@ -44,7 +67,6 @@ const Quiz = () => {
 
         return () => clearInterval(interval);
     }, [updateAt]);
-
 
 
     const handleUpdateQuiz = (e, quiz) => {
@@ -104,9 +126,13 @@ const Quiz = () => {
 
                         <div className="col-8">
                             <h1>Quizzes</h1>
-                            {localStorage.getItem("role") !== "student" && (
+                            {userData["role"] !== "student" && (
                                 <button className="btn btn-primary mb-3" onClick={() => {
-                                    navigate('/new-quiz');
+                                    navigate('/new-quiz', {
+                                        state:{
+                                            userRole: userData["role"]
+                                        }
+                                    });
                                 }}>
                                     New Quiz
                                 </button>
@@ -120,7 +146,7 @@ const Quiz = () => {
                                                     <h2 className="h5">
                                                         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                         <a href="#" className="text-decoration-none me-1"
-                                                           {...(localStorage.getItem("role") !== "student"
+                                                           {...(userData["role"] !== "student"
                                                                ? {onClick: (e) => handleUpdateQuiz(e, quiz)}
                                                                : {})}
                                                         >{quiz.title}</a>
@@ -128,7 +154,7 @@ const Quiz = () => {
 
 
                                                 </div>
-                                                {localStorage.getItem("role") !== "student" && (
+                                                {userData["role"] !== "student" && (
                                                     <button
                                                         className="btn btn-outline-danger btn-xs p-0 px-1"
                                                         style={{marginLeft: "25%"}}
@@ -194,6 +220,7 @@ const Quiz = () => {
                                                                                     quiz: quiz,
                                                                                     quizId: qz["quiz_id"],
                                                                                     feedback: qz.feedback,
+                                                                                    userId: userData["id_user"]
                                                                                 }
                                                                             });
                                                                         }}
@@ -218,7 +245,8 @@ const Quiz = () => {
                                                                 quiz: quiz,
                                                                 quizId: quiz.id,
                                                                 feedback: quiz.feedbackTypeAfterClose,
-                                                                conditionToRetake: false
+                                                                conditionToRetake: false,
+                                                                userId: userData["id_user"]
                                                             }
                                                         })
                                                     }
@@ -241,6 +269,8 @@ const Quiz = () => {
                                                                         state: {
                                                                             quiz: quiz,
                                                                             refreshQuiz: true,
+                                                                            userId: userData["id_user"],
+                                                                            userRole: userData["role"]
                                                                         }
                                                                     });
                                                                 }}
@@ -258,7 +288,8 @@ const Quiz = () => {
                                                                                 quiz: quiz,
                                                                                 quizId: quiz.id,
                                                                                 feedback: quiz.feedbackType,
-                                                                                conditionToRetake: !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"])
+                                                                                conditionToRetake: !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
+                                                                                userId: userData["id_user"]
                                                                             }
                                                                         })
                                                                     }
