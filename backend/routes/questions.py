@@ -424,7 +424,7 @@ def add_question_version(id):
 
     return jsonify(question_version_dict), 200
 
-@questions_bp.route("/api/get_questions_category/<int:index>", methods=["GET"])
+@questions_bp.route("/get_questions_category/<int:index>", methods=["GET"])
 def get_questions_from_category(index):
     subcat = request.args.get('includeSubCat')
     question_type = int(request.args.get("typeQuestionSelected"))
