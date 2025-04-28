@@ -15,7 +15,8 @@ const QuizReview = () =>{
     const [quizId] = useState(location.state?.quizId);
     const [feedback] = useState(location.state?.feedback);
     const [userRole] = useState(location.state?.userRole);
-    const [conditionToRetake] = useState(location.state?.conditionToRetake)
+    const [conditionToRetake] = useState(location.state?.conditionToRetake);
+    const [userName] = useState(location.state?.userName || "");
     const [correctMode] = useState(location.state?.correctMode || false)
     const [data, setData] = useState([]);
     const [questionsData, setQuestionsData] = useState({});
@@ -119,19 +120,20 @@ const QuizReview = () =>{
 
                     <div className="col-8">
                         <div className="d-flex justify-content-between">
-                        <h1 className="mb-3">
-                            Review {quiz.title}
-                        </h1>
+                            <h1 className="mb-3">
+                                Review {quiz.title}
+                            </h1>
                             <div>
-                            {feedback.includes("pointsReview") && (
-                            <QuizReviewPoints questionsData={questionsData}></QuizReviewPoints>
-                        )}
-                                </div>
+                                {feedback.includes("pointsReview") && (
+                                    <QuizReviewPoints questionsData={questionsData}></QuizReviewPoints>
+                                )}
+                            </div>
 
                         </div>
+                        <span className="text-secondary">Attended by {userName}</span>
 
 
-                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                        <ul className="nav nav-tabs mt-3" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
                                 <li className="nav-item" role="presentation" key={index}>
                                     <button
@@ -156,13 +158,13 @@ const QuizReview = () =>{
 
                         <ul className="list-group mb-3">
                             {data.sections[page]?.questions.map((question, index) => (
-                                <li className={`list-group-item ${(parseFloat(questionsData[question.id]?.points) ===0  && feedback.includes("correctAnswers")) ? 'border-danger' : ''} 
+                                <li className={`list-group-item ${(parseFloat(questionsData[question.id]?.points) === 0 && feedback.includes("correctAnswers")) ? 'border-danger' : ''} 
                                     ${(parseFloat(questionsData[question.id]?.points) > 0 && feedback.includes("correctAnswers")) ? 'border-success' : ''}`}
 
                                     style={
                                         feedback.includes("correctAnswers")
                                             ? {
-                                                background: questionsData[question.id]?.points>0
+                                                background: questionsData[question.id]?.points > 0
                                                     ? "rgba(155,236,137,0.15)"
                                                     : "rgba(255, 0, 0, 0.04)",
                                             }
@@ -214,206 +216,207 @@ const QuizReview = () =>{
                                             <table className="table table-striped">
                                                 <thead>
                                                 <tr>
-                                                            <th scope="col">
-                                                                <div className="d-flex justify-content-start">Left
-                                                                    Side
-                                                                </div>
-                                                            </th>
-                                                            <th scope="col">
-                                                                <div className="d-flex justify-content-end">Right
-                                                                    Side
-                                                                </div>
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
+                                                    <th scope="col">
+                                                        <div className="d-flex justify-content-start">Left
+                                                            Side
+                                                        </div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div className="d-flex justify-content-end">Right
+                                                            Side
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                                </thead>
 
-                                                        <tbody>
-                                                        {questionsData[question.id].answers.map((ans, idx) => (
-                                                            <tr key={"table-" + idx.toString()}>
-                                                                <td style={{
-                                                                    borderRight: "1px solid black",
-                                                                    paddingBottom: "2px"
-                                                                }}>
-                                                                    <div className="d-flex justify-content-start w-100">
+                                                <tbody>
+                                                {questionsData[question.id].answers.map((ans, idx) => (
+                                                    <tr key={"table-" + idx.toString()}>
+                                                        <td style={{
+                                                            borderRight: "1px solid black",
+                                                            paddingBottom: "2px"
+                                                        }}>
+                                                            <div className="d-flex justify-content-start w-100">
 
-                                                                        <FormattedTextRenderer
-                                                                        text={ans["leftSide"]}
-                                                                      />
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <div className="d-flex justify-content-start w-100">
-                                                                        {feedback.includes("correctAnswers") ? (
-                                                                            ans.answer !== ans["rightSide"] ? (
-                                                                                <div className="w-100">
-                                                                                    <div
-                                                                                        className="d-flex justify-content-between w-100">
-                                                                                        <div
-                                                                                            className="me-1">
-                                                                                            <p className="mb-0 fw-bold">Your
-                                                                                                answer
-                                                                                                is</p>
-                                                                                            {ans.answer.length === 0 ? "No answer" :
+                                                                <FormattedTextRenderer
+                                                                    text={ans["leftSide"]}
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div className="d-flex justify-content-start w-100">
+                                                                {feedback.includes("correctAnswers") ? (
+                                                                    ans.answer !== ans["rightSide"] ? (
+                                                                        <div className="w-100">
+                                                                            <div
+                                                                                className="d-flex justify-content-between w-100">
+                                                                                <div
+                                                                                    className="me-1">
+                                                                                    <p className="mb-0 fw-bold">Your
+                                                                                        answer
+                                                                                        is</p>
+                                                                                    {ans.answer.length === 0 ? "No answer" :
 
-                                                                                                <FormattedTextRenderer
-                                                                                                    text={ans.answer}
-                                                                                                />
-                                                                                            }
-                                                                                        </div>
+                                                                                        <FormattedTextRenderer
+                                                                                            text={ans.answer}
+                                                                                        />
+                                                                                    }
+                                                                                </div>
 
-                                                                                        <span
-                                                                                            className="d-flex text-danger justify-content-end me-0">
+                                                                                <span
+                                                                                    className="d-flex text-danger justify-content-end me-0">
                                                                                             <i className="bi bi-x-circle-fill fs-5"></i>
                                                                                         </span>
 
-                                                                                    </div>
+                                                                            </div>
 
-                                                                                    <p className="mb-0 fw-bold">Correct answer
-                                                                                        is</p>
-                                                                                    <div
-                                                                                        className=" m-0">
-                                                                                        <FormattedTextRenderer
-                                                                                            text={ans["rightSide"]}
-                                                                                          />
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="d-flex justify-content-between w-100">
+                                                                            <p className="mb-0 fw-bold">Correct answer
+                                                                                is</p>
+                                                                            <div
+                                                                                className=" m-0">
+                                                                                <FormattedTextRenderer
+                                                                                    text={ans["rightSide"]}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div
+                                                                            className="d-flex justify-content-between w-100">
                                                                                         <span
                                                                                             className="ms-2">
                                                                                             <FormattedTextRenderer
-                                                                                            text={ans["rightSide"]}
-                                                                                          />
+                                                                                                text={ans["rightSide"]}
+                                                                                            />
                                                                                         </span>
 
-                                                                                        <span
-                                                                                            className="d-flex text-success justify-content-end me-0">
+                                                                            <span
+                                                                                className="d-flex text-success justify-content-end me-0">
                                                                                             <i className="bi bi-check-circle-fill fs-5"></i>
                                                                                         </span>
-                                                                                </div>
-                                                                            )
-                                                                        ) : (
-                                                                            <span>{ans.answer}</span>
-                                                                        )}
+                                                                        </div>
+                                                                    )
+                                                                ) : (
+                                                                    <span>{ans.answer}</span>
+                                                                )}
 
-                                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "" && ans.feedback !== null) && (
-                                                                            <p className="border border-danger p-3 rounded"
-                                                                               style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                                                {ans?.feedback}
-                                                                            </p>
-                                                                        )
-                                                                        }
-                                                                    </div>
+                                                                {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "" && ans.feedback !== null) && (
+                                                                    <p className="border border-danger p-3 rounded"
+                                                                       style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                                        {ans?.feedback}
+                                                                    </p>
+                                                                )
+                                                                }
+                                                            </div>
 
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
 
-                                            {questionsData[question.id]?.type === "multiple_answer_question" && (
-                                                <div className="mb-3">
-                                                    {questionsData[question.id]?.answers.map((ans, idx) => (
-                                                        <div className="form-check" key={idx}>
-                                                            <input className="form-check-input"
-                                                                   type="checkbox"
-                                                                   // disabled="true"
-                                                                   defaultChecked={ans.answer === true}
-                                                            />
-                                                            <span className="d-flex w-100 form-check-label">
+                                    {questionsData[question.id]?.type === "multiple_answer_question" && (
+                                        <div className="mb-3">
+                                            {questionsData[question.id]?.answers.map((ans, idx) => (
+                                                <div className="form-check" key={idx}>
+                                                    <input className="form-check-input"
+                                                           type="checkbox"
+                                                        // disabled="true"
+                                                           defaultChecked={ans.answer === true}
+                                                    />
+                                                    <span className="d-flex w-100 form-check-label">
 
                                                                 <FormattedTextRenderer
                                                                     text={ans?.text}
                                                                 />
 
-                                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
-                                                                !ans.isCorrectOption
-                                                                    ? <span className="ms-2 text-danger"><i
-                                                                        className="bi bi-x-circle-fill fs-5"></i></span>
-                                                                    : <span className="ms-2 text-success"><i
-                                                                        className="bi bi-check-circle-fill fs-5"></i></span>
-                                                            )}
+                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
+                                                            !ans.isCorrectOption
+                                                                ? <span className="ms-2 text-danger"><i
+                                                                    className="bi bi-x-circle-fill fs-5"></i></span>
+                                                                : <span className="ms-2 text-success"><i
+                                                                    className="bi bi-check-circle-fill fs-5"></i></span>
+                                                        )}
                                                                 </span>
 
-                                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
-                                                                <p className="border border-danger p-3 rounded"
-                                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                                    {ans?.feedback}
-                                                                </p>
-                                                            )
-                                                            }
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {questionsData[question.id]?.type === "short_answer_question" && (
-                                                <div className="mb-3 mt-3">
-                                                    <span className="me-2 mt-3 fw-bold">Answer: </span>
-                                                    <input
-                                                      type="text"
-                                                      value={questionsData[question.id]?.answers[0]["answer"]}
-                                                      disabled
-                                                      required
-
-                                                      className="form-control"
-                                                    />
-                                                    {/*<div className="d-flex">*/}
-                                                    {/*    <FormattedTextRenderer*/}
-                                                    {/*        text={questionsData[question.id]?.answers[0]["answer"]}*/}
-                                                    {/*    />*/}
-                                                    {/*</div>*/}
-                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
+                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
                                                         <p className="border border-danger p-3 rounded"
                                                            style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                            {questionsData[question.id]?.answers[0].feedback}
+                                                            {ans?.feedback}
                                                         </p>
                                                     )
                                                     }
                                                 </div>
-                                            )}
+                                            ))}
+                                        </div>
+                                    )}
 
-                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !==null) && (
-                                                <p className="p-3 rounded"
-                                                   style={{
-                                                       background: "rgba(255, 0, 0, 0.3)"
-                                                   }}>
-                                                    {questionsData[question.id]?.feedback}
+                                    {questionsData[question.id]?.type === "short_answer_question" && (
+                                        <div className="mb-3 mt-3">
+                                            <span className="me-2 mt-3 fw-bold">Answer: </span>
+                                            <input
+                                                type="text"
+                                                value={questionsData[question.id]?.answers[0]["answer"]}
+                                                disabled
+                                                required
+
+                                                className="form-control"
+                                            />
+                                            {/*<div className="d-flex">*/}
+                                            {/*    <FormattedTextRenderer*/}
+                                            {/*        text={questionsData[question.id]?.answers[0]["answer"]}*/}
+                                            {/*    />*/}
+                                            {/*</div>*/}
+                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
+                                                <p className="border border-danger p-3 rounded"
+                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                    {questionsData[question.id]?.answers[0].feedback}
                                                 </p>
                                             )
                                             }
+                                        </div>
+                                    )}
 
-                                            {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !==null) && (
-                                                <p className="p-3 rounded"
-                                                   style={{
-                                                       background: "rgba(155,236,137,0.15)"
-                                                   }}>
-                                                    {questionsData[question.id]?.feedback}
-                                                </p>
-                                            )
-                                            }
+                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
+                                        <p className="p-3 rounded"
+                                           style={{
+                                               background: "rgba(255, 0, 0, 0.3)"
+                                           }}>
+                                            {questionsData[question.id]?.feedback}
+                                        </p>
+                                    )
+                                    }
+
+                                    {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
+                                        <p className="p-3 rounded"
+                                           style={{
+                                               background: "rgba(155,236,137,0.15)"
+                                           }}>
+                                            {questionsData[question.id]?.feedback}
+                                        </p>
+                                    )
+                                    }
 
 
-                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
-                                                <div className="p-3 rounded"
-                                                   style={{
-                                                       background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
-                                                   }}>
-                                                    Correct answer is {
-                                                    <FormattedTextRenderer
-                                                        text={questionsData[question.id]?.correct_answer}
-                                                    />
-                                                }
+                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
+                                        <div className="p-3 rounded"
+                                             style={{
+                                                 background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
+                                             }}>
+                                            Correct answer is {
+                                            <FormattedTextRenderer
+                                                text={questionsData[question.id]?.correct_answer}
+                                            />
+                                        }
 
-                                                </div>
-                                            )
-                                            }
+                                        </div>
+                                    )
+                                    }
 
 
                                 </li>
-                                ))}
+                            ))}
                         </ul>
 
 
@@ -423,13 +426,13 @@ const QuizReview = () =>{
                                         onClick={() => {
                                             if (correctMode) {
                                                 navigate(-1);
-                                            }else {
+                                            } else {
                                                 window.location.href = "/quizzes";
                                             }
                                         }
                                         }
                                 >
-                                    {correctMode === false ? "Back to quizzes" : "Back to user statistics" }
+                                    {correctMode === false ? "Back to quizzes" : "Back to user statistics"}
                                 </button>
                                 {(conditionToRetake && correctMode === false) && (
                                     <button

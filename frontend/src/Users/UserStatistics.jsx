@@ -77,6 +77,8 @@ const UserStatistics = () =>{
                                                                     feedback: quiz.quizzes.feedbackType,
                                                                     correctMode: true,
                                                                     userId: userId,
+                                                                    userName: userData["github_name"]
+
                                                                 }
                                                             });
                                                         }}
