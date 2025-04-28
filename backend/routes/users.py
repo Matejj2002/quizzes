@@ -51,7 +51,7 @@ def get_all_users():
     user_table.sort(key=lambda x: x[sort], reverse=sort_dir == "asc")
     return {"result": user_table}, 200
 
-@users_bp.route("/api/create-teacher", methods=["PUT"])
+@users_bp.route("/create-teacher", methods=["PUT"])
 def create_teacher():
     data = request.get_json()
 
@@ -61,7 +61,7 @@ def create_teacher():
 
     return {}, 200
 
-@users_bp.route("/api/change-user-type", methods=["PUT"])
+@users_bp.route("/change-user-type", methods=["PUT"])
 def change_user_type():
     data = request.get_json()
 

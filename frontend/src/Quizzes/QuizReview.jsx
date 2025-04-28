@@ -130,7 +130,9 @@ const QuizReview = () =>{
                             </div>
 
                         </div>
-                        <span className="text-secondary">Attended by {userName}</span>
+                        {correctMode === true && (
+                            <span className="text-secondary">Attended by {userName}</span>
+                        )}
 
 
                         <ul className="nav nav-tabs mt-3" id="myTab" role="tablist">
