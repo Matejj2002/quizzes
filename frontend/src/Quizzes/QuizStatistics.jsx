@@ -283,6 +283,7 @@ const QuizStatistics = () =>{
                                                                                 filterType: "",
                                                                                 authorFilter: "",
                                                                                 back:true,
+                                                                                userRole: "teacher"
                                                                         }
                                                                     });
                                                                         }
