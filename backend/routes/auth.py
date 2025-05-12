@@ -88,4 +88,11 @@ def get_user_data():
         return jsonify(data)
     else:
         return jsonify({"error": "Failed to retrieve user data"})
+@auth_bp.route('/get-user-id', methods=['GET'])
+def get_user_id():
+    user_name = request.args.get("userName")
+    print(user_name)
 
+    user = User.query.filter(User.github_name == user_name).first()
+
+    return {"result": user.id}

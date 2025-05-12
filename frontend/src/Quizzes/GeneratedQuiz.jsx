@@ -19,6 +19,7 @@ const GeneratedQuiz = () => {
     const [count, setCount] = useState(-1);
     const [minutesToFinish] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
+    const [loadQuestions, setLoadQuestions] = useState(false);
 
     const [feedbackQuestion, setFeedbackQuestion] = useState([]);
 
@@ -53,10 +54,10 @@ const GeneratedQuiz = () => {
         return () => clearInterval(interval);
     }, [dateStart, minutesToFinish]);
 
-
     useEffect(() => {
             if (count % 60 === 0 && count !== -1) {
             handleSaveQuiz(false);
+            setLoadQuestions(true);
         }
 
             if (count === 0 ) {
@@ -126,7 +127,7 @@ const GeneratedQuiz = () => {
                 );
             });
         }
-    }, [randomQuestions]);
+    }, [randomQuestions, questionsData, loadQuestions]);
 
    useEffect(() => {
     if (quizGenerated || Object.keys(questionsData).length !== numberOfQuestions || numberOfQuestions === 0) {
@@ -141,7 +142,7 @@ const GeneratedQuiz = () => {
         setQuizGenerated(true);
     };
 
-    generateQuizWait().then(() => {
+        generateQuizWait().then(() => {
     });
     })
     }else{
@@ -186,6 +187,7 @@ const GeneratedQuiz = () => {
         return false;
     }
 
+
     const generateQuiz = () => {
         const updatedData = {
             "quiz": quiz,
@@ -197,7 +199,7 @@ const GeneratedQuiz = () => {
         axios.put(apiUrl+`new-quiz-student`, updatedData)
                     .then(
                         async (response) => {
-                            if (!response.data["created"]) {
+                            if (!response.data["created"] || response.data["created"]) {
                                 const result = await axios.get(apiUrl+"quiz-student-load",
                                     {
                                         params: {
@@ -233,9 +235,11 @@ const GeneratedQuiz = () => {
                                     setCount(differenceInSeconds);
                                 }
 
+
                                 setRandomQuestions([]);
                                 setQuestionsData([]);
                                 setLoading(false);
+
                             }else{
                                 window.location.reload();
                                 setCount(response.data.time_to_finish *60)

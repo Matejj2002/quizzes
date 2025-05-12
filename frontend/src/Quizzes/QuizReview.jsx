@@ -130,6 +130,7 @@ const QuizReview = () =>{
                             </div>
 
                         </div>
+
                         {correctMode === true && (
                             <span className="text-secondary">Attended by {userName}</span>
                         )}

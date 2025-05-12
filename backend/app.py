@@ -38,8 +38,8 @@ app.debug = False
 
 if os.environ.get("IS_DOCKER") == 'true':
     print("Opened in docker")
-    DB_HOST = os.getenv('ROOT_NAME')+"-postgres-1"
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@"+os.getenv('ROOT_NAME')+"-postgres-1:5432/quizzes"
+    DB_HOST = os.getenv('DB_HOST')
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@bakalarka-postgres-1:5432/quizzes"
 else:
     print("Opened in localhost")
     DB_HOST = "localhost"

@@ -245,6 +245,8 @@ def evaluate_quiz(quiz):
 
 def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetime.now(), cnt=0, update_at=""):
     template = QuizTemplate.query.filter(QuizTemplate.id == quiz_template_id).first()
+    if template is None:
+        return None
 
     if template.is_deleted:
         return None
@@ -471,5 +473,5 @@ def generate_quiz(quiz, questions, student_id):
         new_quiz.order = order_sections
         db.session.commit()
 
-    return time_to_finish
+    return time_to_finish, new_quiz.id
 
