@@ -37,15 +37,15 @@ app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
 
 DB_PORT = os.getenv('DB_PORT')
+APP_BASENAME = os.getenv("APP_BASENAME")
 
 if os.environ.get("IS_DOCKER") == 'true':
-    print("Opened in docker")
     DB_HOST = os.getenv('DB_HOST')
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@"+DB_HOST+":"+DB_PORT+"/quizzes"
+
 else:
-    print("Opened in localhost")
     DB_HOST = "localhost"
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:"+DB_PORT+"/quizzes"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@"+DB_HOST+":"+DB_PORT+"/quizzes"
 
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -58,9 +58,14 @@ db.init_app(app)
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    if APP_BASENAME in path:
+        path = path.split(APP_BASENAME)[1]
+
     if path != "" and os.path.exists(app.static_folder + '/' + path):
+        print("A")
         return send_from_directory(app.static_folder, path)
     else:
+        print("B")
         return send_from_directory(app.static_folder, 'index.html')
 
 def check_database_exists():

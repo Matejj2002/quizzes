@@ -16,6 +16,9 @@ import UserStatistics from "./Users/UserStatistics";
 import QuizzesTableAnalysis from "./Quizzes/QuizzesTableAnalysis";
 import QuizStatistics from "./Quizzes/QuizStatistics";
 
+
+console.log('BASENAME:', process.env.REACT_APP_BASENAME);
+console.log('HOST URL:', process.env.REACT_APP_HOST_URL);
 function App() {
   return (
       <div>

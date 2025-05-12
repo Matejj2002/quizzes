@@ -18,7 +18,7 @@ if (basename === undefined){
 }
 // Use ReactDOM.render instead of createRoot for React 17
 ReactDOM.render(
-   <BrowserRouter basename={basename}  >
+   <BrowserRouter basename={basename}>
      <App />
   </BrowserRouter>,
   rootElement
