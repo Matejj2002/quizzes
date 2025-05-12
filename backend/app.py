@@ -62,10 +62,8 @@ def serve(path):
         path = path.split(APP_BASENAME)[1]
 
     if path != "" and os.path.exists(app.static_folder + '/' + path):
-        print("A")
         return send_from_directory(app.static_folder, path)
     else:
-        print("B")
         return send_from_directory(app.static_folder, 'index.html')
 
 def check_database_exists():
