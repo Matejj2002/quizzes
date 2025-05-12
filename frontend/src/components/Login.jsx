@@ -7,6 +7,7 @@ const Login = ({path = "/login"}) =>{
 
     const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
     const apiUrl = process.env.REACT_APP_API_URL;
+    const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
 
     useEffect(() => {
         const queryString = window.location.search;
@@ -21,7 +22,7 @@ const Login = ({path = "/login"}) =>{
                         if (data.access_token){
                             localStorage.setItem("accessToken", data.access_token);
                             setReRender(!rerender);
-                            window.location.assign(path);
+                            window.location.assign(quizzesUrl+path);
                         }
                     });
             }
@@ -54,7 +55,7 @@ const Login = ({path = "/login"}) =>{
 
 
     if (userData["error"] === "no error"){
-        window.location.href = "/quizzes";
+        window.location.href = quizzesUrl+"/quizzes";
     }
 
     return (

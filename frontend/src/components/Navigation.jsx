@@ -24,7 +24,7 @@ const Navigation = ({active}) => {
 
     const handleLogout = () => {
         localStorage.clear();
-        window.location.href = "/login"
+        window.location.href = quizzesUrl+"/login"
     };
 
     useEffect(() => {

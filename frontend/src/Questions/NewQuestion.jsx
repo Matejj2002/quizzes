@@ -18,6 +18,7 @@ const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
 
     // const subButText = location.state.subButText;
 
@@ -122,7 +123,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                         });
                              window.location.reload();
                         }else {
-                            window.location.href = '/questions';
+                            window.location.href = quizzesUrl+'/questions';
                         }
                     })
                     .catch(error => {
@@ -139,7 +140,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             if (title !=="" && text !=="") {
                 axios.put(apiUrl+`questions/versions/${id}`, updatedData)
                     .then(response => {
-                        window.location.href = '/questions';
+                        window.location.href = quizzesUrl+'/questions';
                     })
                     .catch(error => {
                         console.error('Error saving changes:', error);

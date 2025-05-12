@@ -10,6 +10,7 @@ const Quiz = () => {
     const [updateAt, setUpdateAt] = useState(null);
     const [userData, setUserData] = useState([]);
     const apiUrl = process.env.REACT_APP_API_URL;
+    const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
 
     const fetchQuizzes = async () => {
       try{
@@ -22,7 +23,7 @@ const Quiz = () => {
             setUpdateAt(response.data.update_at);
       }catch (error){
             console.error(error);
-            window.location.href="/login";
+            window.location.href=quizzesUrl+"/login";
       }
        finally {}
     }
@@ -109,7 +110,7 @@ const Quiz = () => {
         axios.put(apiUrl+`archive-quiz`, updatedData)
             .then(
                 () => {
-                    window.location.href = '/quizzes';
+                    window.location.href = quizzesUrl+'/quizzes';
                 }
             )
             .catch(error => {

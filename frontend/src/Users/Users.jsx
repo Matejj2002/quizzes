@@ -14,6 +14,7 @@ const Users = () =>{
     const name = useRef();
     const githubName=  useRef();
     const apiUrl = process.env.REACT_APP_API_URL;
+    const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
     const fetchUsers = async () => {
       try{
             const response = await axios.get(apiUrl+`get-users`, {
@@ -70,7 +71,7 @@ const Users = () =>{
         axios.put(apiUrl+`create-teacher`, updatedData)
             .then(
                 () => {
-                    window.location.href = '/users';
+                    window.location.href = quizzesUrl+'/users';
                 }
             )
             .catch(error => {
@@ -208,7 +209,7 @@ const Users = () =>{
                             <div className="d-flex flex-wrap justify-content-between">
                                 <button type="button" className="btn btn-outline-secondary mb-3 mb-sm-0"
                                         onClick={() => {
-                                            window.location.href = "/quizzes";
+                                            window.location.href = quizzesUrl+"/quizzes";
                                         }
                                         }
                                 >

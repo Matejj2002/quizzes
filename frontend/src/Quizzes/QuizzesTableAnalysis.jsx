@@ -9,6 +9,7 @@ const QuizzesTableAnalysis = () =>{
     const [filterForName,setFilterForName] = useState("");
     const [userData, setUserData]= useState([]);
     const apiUrl = process.env.REACT_APP_API_URL;
+    const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
     const fetchQuizzes = async () => {
       try{
             const response = await axios.get(apiUrl+`get-quizzes-analysis`, {
@@ -128,7 +129,7 @@ const QuizzesTableAnalysis = () =>{
 
                                 <button type="button" className="btn btn-outline-secondary mb-3 mb-sm-0"
                                         onClick={() => {
-                                            window.location.href = "/quizzes";
+                                            window.location.href = quizzesUrl+"/quizzes";
                                         }
                                         }
                                 >

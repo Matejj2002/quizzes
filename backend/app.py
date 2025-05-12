@@ -121,5 +121,4 @@ def check_database_exists():
 if __name__ == '__main__':
     check_database_exists()
     APP_PORT = os.getenv('APP_PORT')
-
     app.run(debug=True, host='0.0.0.0', port=APP_PORT)
