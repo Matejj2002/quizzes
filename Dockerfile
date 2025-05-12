@@ -1,4 +1,3 @@
-# 1. Postavíme React frontend
 FROM node:18 AS builder
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
@@ -16,8 +15,7 @@ RUN pip install -r requirements.txt
 
 COPY backend ./
 
-RUN mkdir -p backend/static
-COPY --from=builder /app/build backend/static/
+COPY --from=builder app/build static/
 COPY .env .env
 
 CMD ["python", "app.py"]
