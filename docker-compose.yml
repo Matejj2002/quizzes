@@ -5,14 +5,14 @@ services:
     build: .
     environment:
       - IS_DOCKER=true
-      - DB_URL=postgresql://postgres:postgres@postgres:5432/quizzes
+      - DB_URL=postgresql://postgres:postgres@postgres:${DB_PORT}/quizzes
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - app_network
     ports:
-      - "5000:5000"
+      - "${APP_PORT}:${APP_PORT}"
 
   postgres:
     image: postgres:latest
@@ -23,13 +23,14 @@ services:
     networks:
       - app_network
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: ["CMD", "pg_isready", "-U", "postgres", "-p", "${DB_PORT}"]
       interval: 5s
       retries: 5
+    command: ["postgres", "-p", "${DB_PORT}"]
 
 networks:
   app_network:

@@ -3,12 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const Navigation = ({active}) => {
-    const navigate = useNavigate();
     const [userData, setUserData] = useState({});
     const apiUrl = process.env.REACT_APP_API_URL;
-    const host = process.env.REACT_APP_HOST;
-    const port = process.env.REACT_APP_PORT;
-    const quizzesUrl = `http://${host}:${port}`;
+    const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
     const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 
     async function getUserData() {

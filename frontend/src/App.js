@@ -16,15 +16,11 @@ import UserStatistics from "./Users/UserStatistics";
 import QuizzesTableAnalysis from "./Quizzes/QuizzesTableAnalysis";
 import QuizStatistics from "./Quizzes/QuizStatistics";
 
-const Home = () => {
-    window.location.href = "/quizzes";
-};
-
 function App() {
   return (
       <div>
               <Routes>
-                  <Route path="/" element={<Home/>}/>
+                  <Route path="/" element={<Navigate to="/quizzes" />}/>
                   <Route path="/login" element={<Login/>}></Route>
                   <Route path="/questions" element={<Navigate to="/questions/supercategory?limit=10&offset=0" />} />
                   <Route path="/question/:id" element={<QuestionDetail />} />

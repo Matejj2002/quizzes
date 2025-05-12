@@ -36,14 +36,16 @@ CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = False
 
+DB_PORT = os.getenv('DB_PORT')
+
 if os.environ.get("IS_DOCKER") == 'true':
     print("Opened in docker")
     DB_HOST = os.getenv('DB_HOST')
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@bakalarka-postgres-1:5432/quizzes"
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@"+DB_HOST+":"+DB_PORT+"/quizzes"
 else:
     print("Opened in localhost")
     DB_HOST = "localhost"
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/quizzes"
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:"+DB_PORT+"/quizzes"
 
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -65,7 +67,6 @@ def check_database_exists():
     DB_NAME = os.getenv('DB_NAME')
     DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
-    DB_PORT = os.getenv('DB_PORT')
 
     conn = psycopg2.connect(
         dbname="postgres", user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT
@@ -116,4 +117,6 @@ def check_database_exists():
 
 if __name__ == '__main__':
     check_database_exists()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    APP_PORT = os.getenv('APP_PORT')
+
+    app.run(debug=True, host='0.0.0.0', port=APP_PORT)

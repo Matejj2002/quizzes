@@ -1,7 +1,7 @@
 {
   "name": "@matejj2002/frontend_quizzes",
   "version": "0.2.57",
-  "homepage": "/static",
+  "homepage": "/quizzes",
   "main": "lib/dist/AppComponent.js",
   "types": "lib/types/types.d.ts",
   "files": [
