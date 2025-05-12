@@ -284,7 +284,6 @@ const QuizStatistics = () =>{
                                                                                 authorFilter: "",
                                                                                 back:true,
                                                                                 userRole: "teacher"
-
                                                                         }
                                                                     });
                                                                         }

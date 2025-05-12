@@ -18,7 +18,10 @@ def move_build():
     shutil.move(src, dest)
 
 def start_up():
-    subprocess.run([".venv\\Scripts\\python.exe", "backend\\app.py "])
+    try:
+        subprocess.run([".venv\\Scripts\\python.exe", "backend\\app.py "])
+    except:
+        subprocess.run(["C:\\Users\\matej\\Desktop\\quizzes-bakalarka\\bakalarka\\.venv\\Scripts\\python.exe", "backend\\app.py "])
 
 if __name__ == "__main__":
     print("Running migrations")

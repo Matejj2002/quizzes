@@ -142,6 +142,7 @@ const Quiz = () => {
                             {quizzes.map((quiz, ind) => {
                                     return (
                                         <div className={`border p-3 mb-3 mt-3 ${quiz.actual_quiz ? 'border-success' : ''}`} key={ind}>
+                                            {console.log(quiz.actual_quiz)}
                                             <div className="d-flex justify-content-between">
                                                 <div className="d-flex">
                                                     <h2 className="h5">
