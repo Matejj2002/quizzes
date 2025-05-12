@@ -74,11 +74,11 @@ def new_quiz_student():
             return {"created": False, "quiz_id": act_quiz.id}
 
     if quiz["correction_of_attempts"] == "indepedentAttempts":
-        time_to_finish = generate_quiz(quiz, questions, student_id)
+        time_to_finish, quiz_id = generate_quiz(quiz, questions, student_id)
 
     else:
         if len(student_quizzes) == 0:
-            time_to_finish = generate_quiz(quiz, questions, student_id)
+            time_to_finish, quiz_id = generate_quiz(quiz, questions, student_id)
 
         else:
             act_quiz = student_quizzes[0]
@@ -128,7 +128,7 @@ def new_quiz_student():
 
             return {"created": False, "time_to_finish": time_to_finish, "quiz_id": new_quiz.id}
 
-    return {"created": True, "time_to_finish": time_to_finish}
+    return {"created": True, "time_to_finish": time_to_finish, "quiz_id":quiz_id}
 
 
 @quiz_bp.route("/quiz-student-load", methods=["GET"])
@@ -296,6 +296,7 @@ def get_questions_quiz(index):
     correct_answers = ""
 
     if newest_version.type == "matching_answer_question":
+        print(item)
         if item is not None:
             matching_answs = json.loads(item.answer)
             correct_answers = "\n"
@@ -326,11 +327,18 @@ def get_questions_quiz(index):
                              })
 
                     else:
-                        answers.append(
-                            {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
-                             "answer": matching_answs["answer"][cnt]["answer"],
-                             "showRightSide": right_sides[cnt]
-                             })
+                        try:
+                            answers.append(
+                                {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
+                                 "answer": matching_answs["answer"][cnt]["answer"],
+                                 "showRightSide": right_sides[cnt]
+                                 })
+                        except Exception as e:
+                            answers.append(
+                                {"leftSide": matching_pair.leftSide, "pairId": matching_pair.id,
+                                 "answer": "",
+                                 "showRightSide": right_sides[cnt]
+                                 })
                     cnt += 1
         else:
             for matching_pair in newest_version.matching_question:
@@ -414,9 +422,12 @@ def get_questions_quiz(index):
                 )
 
             else:
-                answers.append(
-                    {"answer": item_answer["answer"]}
-                )
+                try:
+                    answers.append(
+                        {"answer": item_answer["answer"]}
+                    )
+                except Exception as e:
+                    answers.append({"answer": ""})
         else:
             answers.append(
                 {"answer": ""}

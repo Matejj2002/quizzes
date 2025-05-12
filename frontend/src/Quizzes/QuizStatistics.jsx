@@ -108,14 +108,14 @@ const QuizStatistics = () =>{
                                         <div className="mb-1">
                                             <span className="fw-bold">Correct Answer</span>
                                             <FormattedTextRenderer
-                                                text={evals[question["item_id"]].correct_answer}
+                                                text={evals[question["item_id"]]?.correct_answer}
                                             />
                                         </div>
                                     )}
 
                                     {question.type === "multiple_answer_question" && (
                                         <div>
-                                            {evals[question["item_id"]].correct_answer.map((ans, ind) => (
+                                            {evals[question["item_id"]]?.correct_answer.map((ans, ind) => (
                                                 <div className="form-check" key={ind}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
@@ -226,27 +226,27 @@ const QuizStatistics = () =>{
                                     }
 
 
-                                    <span>{evals[question["item_id"]].item_score}/ {evals[question["item_id"]].item_max_score}</span>
+                                    <span>{evals[question["item_id"]]?.item_score}/ {evals[question["item_id"]]?.item_max_score}</span>
                                     <br/>
-                                    <span>Average points: {evals[question["item_id"]].item_average_score}/ {evals[question["item_id"]].item_full_score}</span>
+                                    <span>Average points: {evals[question["item_id"]]?.item_average_score}/ {evals[question["item_id"]]?.item_full_score}</span>
                                     <br/>
-                                    <span>{studentsCorrect[question["item_id"]].length} / {quiz.attendance} students has this question correct.</span>
+                                    <span>{studentsCorrect[question["item_id"]]?.length} / {quiz.attendance} students has this question correct.</span>
 
-                                    {question.type === "short_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
+                                    {question.type === "short_answer_question" && evals[question["item_id"]]?.wrong_answers.length > 0 && (
                                         <details>
                                             <summary>List of wrong answers</summary>
                                             <WrongAnswersTable
-                                                wrongAnswers={evals[question["item_id"]].wrong_answers}
+                                                wrongAnswers={evals[question["item_id"]]?.wrong_answers}
                                                 tableCols={["Answer", "Occurencies"]} colsSize={["w-75", "w-50 text-center"]}
                                                 colsType={["string", "int"]}
                                             title={"AA"}></WrongAnswersTable>
                                         </details>
                                     )}
-                                    {question.type === "matching_answer_question" && evals[question["item_id"]].wrong_answers.length > 0 && (
+                                    {question.type === "matching_answer_question" && evals[question["item_id"]]?.wrong_answers.length > 0 && (
                                         <details>
                                             <summary>List of wrong answers</summary>
                                             <WrongAnswersTable
-                                                wrongAnswers={evals[question["item_id"]].wrong_answers}
+                                                wrongAnswers={evals[question["item_id"]]?.wrong_answers}
                                                 tableCols={["Left Side", "Right Side", "Occurencies"]}
                                                 colsSize={["w-50", "w-50", "w-25"]}
                                                 colsType={["string", "string", "int"]}
@@ -261,7 +261,7 @@ const QuizStatistics = () =>{
                                                 <details>
                                                     <summary>List of questions</summary>
                                                     <ol className="list-group">
-                                                        {evals[question["item_id"]].questions.map((question, index) => (
+                                                        {evals[question["item_id"]]?.questions.map((question, index) => (
                                                                 <li className="list-group-item" key={"random-"+index.toString()}>
                                                                     <div
                                                                         className="d-flex justify-content-between align-items-center w-100">
@@ -283,6 +283,8 @@ const QuizStatistics = () =>{
                                                                                 filterType: "",
                                                                                 authorFilter: "",
                                                                                 back:true,
+                                                                                userRole: "teacher"
+
                                                                         }
                                                                     });
                                                                         }
@@ -312,7 +314,7 @@ const QuizStatistics = () =>{
                                     )}
 
 
-                                    {evals[question["item_id"]].comments.length > 0 && (
+                                    {evals[question["item_id"]]?.comments.length > 0 && (
                                         <details>
                                         <summary>Feedbacks</summary>
                                             <table className="table table-striped">

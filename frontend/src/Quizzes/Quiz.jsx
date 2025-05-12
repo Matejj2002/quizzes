@@ -85,7 +85,8 @@ const Quiz = () => {
                 newUpdateQuiz: "Update",
                 selectedFeedback: quiz["feedbackType"],
                 feedbackTypeAfterClose: quiz["feedbackTypeAfterClose"],
-                quizId : quiz.id
+                quizId : quiz.id,
+                userRole: "teacher"
 
             }
         })
