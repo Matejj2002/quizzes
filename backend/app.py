@@ -58,8 +58,8 @@ db.init_app(app)
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if APP_BASENAME in path:
-        path = path.split(APP_BASENAME)[1]
+    if "quizzes/" in path:
+        path = path.split("quizzes/")[1]
 
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
