@@ -5,7 +5,8 @@ try:
 except:
     from functions.api_functions import *
 
-quiz_bp = Blueprint('quiz', __name__, url_prefix='/api/')
+API_URL = os.getenv('API_URL')
+quiz_bp = Blueprint('quiz', __name__, url_prefix=API_URL)
 
 @quiz_bp.route("/quiz-finish", methods=["PUT"])
 def quiz_finish():

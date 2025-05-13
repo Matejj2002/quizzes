@@ -5,7 +5,9 @@ try:
 except:
     from functions.api_functions import *
 
-categories_bp = Blueprint('categories', __name__, url_prefix='/api/')
+API_URL = os.getenv('API_URL')
+
+categories_bp = Blueprint('categories', __name__, url_prefix=API_URL)
 
 @categories_bp.route('/categories_show/<int:category_id>')
 def categories_show(category_id):

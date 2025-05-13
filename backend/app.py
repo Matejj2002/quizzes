@@ -16,6 +16,7 @@ from routes.categories import categories_bp
 from routes.quiz_template import quiz_template_bp
 from routes.quiz_statistics import quiz_statistics_bp
 from routes.quiz import quiz_bp
+from flask import abort
 
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -38,14 +39,17 @@ app.debug = False
 
 DB_PORT = os.getenv('DB_PORT')
 APP_BASENAME = os.getenv("APP_BASENAME")
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+API_URL = os.getenv('API_URL')
 
+DB_HOST = "localhost"
 if os.environ.get("IS_DOCKER") == 'true':
     DB_HOST = os.getenv('DB_HOST')
 
-else:
-    DB_HOST = "localhost"
-
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@"+DB_HOST+":"+DB_PORT+"/quizzes"
+db_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -58,6 +62,10 @@ db.init_app(app)
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    print(path)
+    if API_URL in path:
+        abort(404)
+
     if "quizzes/" in path:
         path = path.split("quizzes/")[1]
 
@@ -67,13 +75,7 @@ def serve(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 def check_database_exists():
-    DB_NAME = os.getenv('DB_NAME')
-    DB_USER = os.getenv('DB_USER')
-    DB_PASSWORD = os.getenv('DB_PASSWORD')
-
-    conn = psycopg2.connect(
-        dbname="postgres", user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT
-    )
+    conn = psycopg2.connect(db_url)
     conn.autocommit = True
     cursor = conn.cursor()
 

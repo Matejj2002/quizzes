@@ -5,7 +5,8 @@ try:
 except:
     from functions.api_functions import *
 
-quiz_statistics_bp = Blueprint('quiz_statistics', __name__, url_prefix='/api/')
+API_URL = os.getenv('API_URL')
+quiz_statistics_bp = Blueprint('quiz_statistics', __name__, url_prefix=API_URL)
 
 @quiz_statistics_bp.route("/sort-matching-questions-statistics", methods=["POST"])
 def sort_matching_questions_statistics():

@@ -5,7 +5,8 @@ try:
 except:
     from functions.api_functions import *
 
-users_bp = Blueprint('users', __name__, url_prefix='/api/')
+API_URL = os.getenv('API_URL')
+users_bp = Blueprint('users', __name__, url_prefix=API_URL)
 
 @users_bp.route('/teachers', methods=['GET'])
 def get_teachers():

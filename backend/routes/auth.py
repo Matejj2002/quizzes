@@ -5,7 +5,9 @@ try:
 except:
     from functions.api_functions import *
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/api/')
+API_URL = os.getenv('API_URL')
+
+auth_bp = Blueprint('auth', __name__, url_prefix=API_URL)
 
 @auth_bp.route('/getAccessToken', methods=['GET'])
 def get_access_token():
@@ -91,7 +93,6 @@ def get_user_data():
 @auth_bp.route('/get-user-id', methods=['GET'])
 def get_user_id():
     user_name = request.args.get("userName")
-    print(user_name)
 
     user = User.query.filter(User.github_name == user_name).first()
 

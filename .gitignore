@@ -4,5 +4,7 @@ __pycache__/
 *.pyd
 .env
 /frontend/.env
+/frontend/.env.production
 flask_session
 /backend/flask_session
+/backend/static
