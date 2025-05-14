@@ -44,6 +44,12 @@ const Login = ({path = "/login"}) =>{
         ).then((response) => {
             return response.json();
         }).then((data) => {
+            console.log(data);
+            const lcl = {
+                "avatar_url": data["avatar_url"],
+                "login": data["login"]
+            };
+            localStorage.setItem("data", JSON.stringify(lcl));
             setUserData(data);
         })
     }

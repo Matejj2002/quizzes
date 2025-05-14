@@ -29,24 +29,27 @@ const Quiz = () => {
        finally {}
     }
 
-    async function getUserData() {
-        await fetch(apiUrl+"getUserData", {
-                method: "GET",
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
-                }
-            }
-        ).then((response) => {
-            return response.json();
-        }).then((data) => {
-            setUserData(data);
+    async function getUserLogged(){
 
-        })
+        const data = JSON.parse(localStorage.getItem("data"));
+        try{
+            const response = await axios.get(apiUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": data["login"],
+                            "avatarUrl": data["avatar_url"]
+                    }
+                }
+            )
+            setUserData(response.data.result);
+      }catch (error){
+            console.error(error);
+      }
+       finally {}
     }
 
     useEffect(() => {
-        getUserData().then(() => {
-            setLoading(false);
+        getUserLogged().then(() => {
+           setLoading(false);
         });
     }, []);
 
