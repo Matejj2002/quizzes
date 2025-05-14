@@ -59,10 +59,10 @@ Session(app)
 
 db.init_app(app)
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    print(path)
     if API_URL in path:
         abort(404)
 
@@ -73,6 +73,7 @@ def serve(path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, 'index.html')
+
 
 def check_database_exists():
     conn = psycopg2.connect(db_url)

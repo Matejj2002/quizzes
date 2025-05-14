@@ -47,7 +47,6 @@ def get_quiz_templates():
 
 @quiz_template_bp.route("/new-quiz-template-check", methods=["POST"])
 def check_new_quiz_template():
-    print("---START---")
     try:
         f_data = request.get_json()
         data = f_data["sections"]
@@ -149,17 +148,11 @@ def create_new_quiz_template():
         vers = 0
         if data["quizId"] != 0:
             quiz_template = QuizTemplate.query.filter_by(id=data["quizId"]).first()
-            # quiz = Quiz.query.filter_by(quiz_template_id=data["quizId"]).all()
-
-            # for i in quiz:
-            #     print(i)
-            #     db.session.delete(i)
-            # db.session.delete(quiz_template)
             new_title = quiz_template.title.split("_version")
             vers = quiz_template.version
             quiz_template.title = new_title[0] + "_version" + str(vers + 1)
-            # quiz_template.is_deleted = True
             quiz_template.version = vers + 1
+
             db.session.commit()
 
         quiz_template = QuizTemplate(
@@ -173,7 +166,7 @@ def create_new_quiz_template():
             datetime_check=data['dateCheck'],
             feedback_type=data["feedbackType"],
             feedback_type_after_close=data["feedbackTypeAfterClose"],
-            version=vers
+            version=vers+1
 
         )
 
