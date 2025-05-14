@@ -152,7 +152,7 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                 .reverse()
                                 .map((q, index, arr) => (
                                     <option key={q.quiz_id} value={q.quiz_id}>
-                                        Quiz Attempt {arr.length - index}
+                                        Review attempt {arr.length - index}
                                     </option>
                                 ))}
                         </select>
