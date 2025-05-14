@@ -43,31 +43,52 @@ DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 API_URL = os.getenv('API_URL')
+APP_PORT = os.getenv('APP_PORT')
 
-DB_HOST = "localhost"
-if os.environ.get("IS_DOCKER") == 'true':
-    DB_HOST = os.getenv('DB_HOST')
+envs = {
+    "DB_PORT": DB_PORT,
+    "APP_BASENAME": APP_BASENAME,
+    "DB_NAME": DB_NAME,
+    "DB_USER": DB_USER,
+    "DB_PASSWORD": DB_PASSWORD,
+    "API_URL": API_URL,
+    "APP_PORT": APP_PORT
+}
+check_start_env = []
+for key, val in envs.items():
+    if val is None:
+        check_start_env.append(key)
 
-db_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
-app.config['SQLALCHEMY_ECHO'] = False
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_COOKIE_SECURE'] = not app.debug
-app.config['SESSION_TYPE'] = 'filesystem'
-Session(app)
+if len(check_start_env) == 0:
+    DB_HOST = "localhost"
+    if os.environ.get("IS_DOCKER") == 'true':
+        DB_HOST = os.getenv('DB_HOST')
 
-db.init_app(app)
+    db_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+
+    app.config['SQLALCHEMY_ECHO'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SESSION_COOKIE_SECURE'] = not app.debug
+    app.config['SESSION_TYPE'] = 'filesystem'
+    Session(app)
+
+    db.init_app(app)
 
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if API_URL in path:
+    print(path)
+    if path.startswith(API_URL):
         abort(404)
 
-    if "quizzes/" in path:
-        path = path.split("quizzes/")[1]
+    if path.startswith("quizzes/"):
+        #print(path.split("quizzes/"))
+        #path = path.split("quizzes/")[-1]
+        path = path.replace("quizzes/", "",1)
+
 
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
@@ -122,6 +143,11 @@ def check_database_exists():
 
 
 if __name__ == '__main__':
-    check_database_exists()
-    APP_PORT = os.getenv('APP_PORT')
-    app.run(debug=True, host='0.0.0.0', port=APP_PORT)
+    if len(check_start_env) == 0:
+        check_database_exists()
+        app.run(debug=True, host='0.0.0.0', port=APP_PORT)
+    else:
+        print("---Missing variables in .env file.---")
+        for i in check_start_env:
+            print(i," can't be empty in .env file")
+        print("-------------------------------------")
