@@ -59,7 +59,6 @@ for key, val in envs.items():
     if val is None:
         check_start_env.append(key)
 
-
 if len(check_start_env) == 0:
     DB_HOST = "localhost"
     if os.environ.get("IS_DOCKER") == 'true':
@@ -85,10 +84,9 @@ def serve(path):
         abort(404)
 
     if path.startswith("quizzes/"):
-        #print(path.split("quizzes/"))
-        #path = path.split("quizzes/")[-1]
-        path = path.replace("quizzes/", "",1)
-
+        # print(path.split("quizzes/"))
+        # path = path.split("quizzes/")[-1]
+        path = path.replace("quizzes/", "", 1)
 
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
@@ -149,5 +147,5 @@ if __name__ == '__main__':
     else:
         print("---Missing variables in .env file.---")
         for i in check_start_env:
-            print(i," can't be empty in .env file")
+            print(i, " can't be empty in .env file")
         print("-------------------------------------")
