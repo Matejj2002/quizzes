@@ -11,6 +11,7 @@ const SubCategories = ({ category, catPath,  level = 0 }) => {
         return false;
     }
 
+    const quizzesUrl = process.env.REACT_APP_BASENAME;
   return (
     <div style={{ marginLeft: `${level * 10}px` }}>
         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
@@ -20,11 +21,12 @@ const SubCategories = ({ category, catPath,  level = 0 }) => {
 
 
           const url = new URL(window.location);
-          url.pathname = `/questions/${catPathFull}`;
+          url.pathname = quizzesUrl+`/questions${catPathFull}`;
           url.searchParams.set("category_id", category.id);
           url.searchParams.set("category", category.title);
           url.searchParams.set("limit", "10");
           url.searchParams.set("offset", "0");
+          console.log(url);
           window.history.pushState({}, "", url);
       }
       }

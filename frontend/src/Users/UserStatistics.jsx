@@ -104,7 +104,7 @@ const UserStatistics = () =>{
                             </div>
                             <button type="button" className="btn btn-outline-secondary"
                                     onClick={() => {
-                                        window.location.href = "/users";
+                                       navigate("/users");
                                     }
                                     }
                             >
