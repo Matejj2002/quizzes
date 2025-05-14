@@ -14,6 +14,8 @@ import { InlineMath } from 'react-katex';
 const Questions = () => {
     const { "*": category } = useParams();
 
+    const [loading, setLoading] = useState(true);
+
     const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"];
     const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"];
     const showQuestionsFilter = ["Active", "Archived", "All"]
@@ -135,6 +137,7 @@ const Questions = () => {
 
     useEffect(() => {
         getUserData().then(() => {
+            setLoading(false);
         });
     }, []);
 
@@ -197,11 +200,19 @@ const Questions = () => {
       setShowFeedback(false);
     }
 
-    return (
-            <div>
-                    <Navigation active="Questions"></Navigation>
+    if (loading){
+        return (
+            <div className="d-flex justify-content-center align-items-center">
+                <h2>Loading...</h2>
+            </div>
+        )
+    }
 
-                <div className="container-fluid text-center">
+    return (
+        <div>
+            <Navigation active="Questions"></Navigation>
+
+            <div className="container-fluid text-center">
                 <div className="row">
                         <div className="col-2 sidebar"
                              style={{position: "sticky", textAlign: "left", top: "50px", height: "calc(100vh - 60px)"}}>

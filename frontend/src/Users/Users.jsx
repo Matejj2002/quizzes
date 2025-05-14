@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Users = () =>{
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState([]);
     const [sort, setSort] = useState("github_name");
     const [userData, setUserData]= useState([]);
@@ -49,6 +50,7 @@ const Users = () =>{
 
     useEffect(() => {
         getUserData().then(() => {
+            setLoading(false);
         });
     }, []);
 
@@ -132,6 +134,14 @@ const Users = () =>{
             fetchUsers();
                 alert("User type changed");
             }
+        )
+    }
+
+    if (loading){
+        return (
+            <div className="d-flex justify-content-center align-items-center">
+                <h2>Loading...</h2>
+            </div>
         )
     }
 

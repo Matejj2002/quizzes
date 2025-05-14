@@ -7,6 +7,7 @@ const Quiz = () => {
     const navigate = useNavigate();
 
     const [quizzes, setQuizzes] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [updateAt, setUpdateAt] = useState(null);
     const [userData, setUserData] = useState([]);
     const apiUrl = process.env.REACT_APP_API_URL;
@@ -45,6 +46,7 @@ const Quiz = () => {
 
     useEffect(() => {
         getUserData().then(() => {
+            setLoading(false);
         });
     }, []);
 
@@ -116,6 +118,14 @@ const Quiz = () => {
             .catch(error => {
                 console.error('Error saving changes:', error);
             });
+    }
+
+    if (loading){
+        return (
+            <div className="d-flex justify-content-center align-items-center">
+                <h2>Loading...</h2>
+            </div>
+        )
     }
 
     return (

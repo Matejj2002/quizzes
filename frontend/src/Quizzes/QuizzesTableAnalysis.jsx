@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const QuizzesTableAnalysis = () =>{
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filterForName,setFilterForName] = useState("");
     const [userData, setUserData]= useState([]);
     const apiUrl = process.env.REACT_APP_API_URL;
@@ -42,6 +43,7 @@ const QuizzesTableAnalysis = () =>{
 
     useEffect(() => {
         getUserData().then(() => {
+            setLoading(false);
         });
     }, []);
 
@@ -55,6 +57,13 @@ const QuizzesTableAnalysis = () =>{
         fetchQuizzes().then(() => {});
     }, [filterForName]);
 
+    if (loading){
+        return (
+            <div className="d-flex justify-content-center align-items-center">
+                <h2>Loading...</h2>
+            </div>
+        )
+    }
 
     return (
         <div>
