@@ -22,6 +22,7 @@ const Quiz = () => {
             )
             setQuizzes(response.data.result);
             setUpdateAt(response.data.update_at);
+
       }catch (error){
             console.error(error);
             window.location.href=quizzesUrl+"/login";
@@ -105,8 +106,7 @@ const Quiz = () => {
 
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        return `${days[da.getDay()]} ${months[da.getMonth()]} ${da.getDate()} ${da.getFullYear()} ${da.getHours()}:${da.getMinutes().toString().padStart(2, '0')}:00`;
-    }
+return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} ${dt.getUTCFullYear()} ${dt.getUTCHours()}:${dt.getUTCMinutes().toString().padStart(2, '0')}:00`;    }
 
     const handleArchiveQuiz = (e, quiz) => {
         const updatedData = {

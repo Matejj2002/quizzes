@@ -47,6 +47,7 @@ const NewQuiz = () => {
   }]);
   const [selectedOption, setSelectedOption] = useState(location.state?.selectedOption ?? "indepedentAttempts");
   const apiUrl = process.env.REACT_APP_API_URL;
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   const handleSelectedFeedbackChange = e => {
     const {
       value,
@@ -219,7 +220,7 @@ const NewQuiz = () => {
     axios.post(apiUrl + `new-quiz-template-check`, sections).then(response => {
       if (response.data["message"]) {
         axios.put(apiUrl + `new-quiz-template`, updatedData).then(() => {
-          window.location.href = '/quizzes';
+          window.location.href = quizzesUrl + '/quizzes';
         }).catch(error => {
           console.error('Error saving changes:', error);
         });

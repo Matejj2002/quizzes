@@ -8,7 +8,7 @@ const QuizStatistics = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [quiz] = useState(location.state?.quiz);
-  const [userRole] = useState(location.state?.userRole);
+  const [userRole] = useState(location.state?.userRole || undefined);
   const [data, setData] = useState([]);
   const [evals, setEvals] = useState([]);
   const [studentsCorrect, setStudentsCorrect] = useState([]);
@@ -34,7 +34,7 @@ const QuizStatistics = () => {
   useEffect(() => {
     fetchData();
   }, []);
-  if (userRole !== "teacher") {
+  if (userRole !== "teacher" || userRole === undefined) {
     navigate("/quizzes");
   }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {

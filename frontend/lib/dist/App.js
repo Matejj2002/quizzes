@@ -15,13 +15,14 @@ import Users from "./Users/Users";
 import UserStatistics from "./Users/UserStatistics";
 import QuizzesTableAnalysis from "./Quizzes/QuizzesTableAnalysis";
 import QuizStatistics from "./Quizzes/QuizStatistics";
-const Home = () => {
-  window.location.href = "/quizzes";
-};
+console.log('BASENAME:', process.env.REACT_APP_BASENAME);
+console.log('HOST URL:', process.env.REACT_APP_HOST_URL);
 function App() {
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Routes, null, /*#__PURE__*/React.createElement(Route, {
     path: "/",
-    element: /*#__PURE__*/React.createElement(Home, null)
+    element: /*#__PURE__*/React.createElement(Navigate, {
+      to: "/quizzes"
+    })
   }), /*#__PURE__*/React.createElement(Route, {
     path: "/login",
     element: /*#__PURE__*/React.createElement(Login, null)

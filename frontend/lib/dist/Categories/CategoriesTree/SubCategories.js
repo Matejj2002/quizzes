@@ -13,6 +13,7 @@ const SubCategories = ({
     }
     return false;
   };
+  const quizzesUrl = process.env.REACT_APP_BASENAME;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       marginLeft: `${level * 10}px`
@@ -24,11 +25,12 @@ const SubCategories = ({
     onClick: () => {
       const catPathFull = catPath.slice(0, -1).map(item => item[0]).reverse().join('/') + "/" + category['title'];
       const url = new URL(window.location);
-      url.pathname = `/questions/${catPathFull}`;
+      url.pathname = quizzesUrl + `/questions${catPathFull}`;
       url.searchParams.set("category_id", category.id);
       url.searchParams.set("category", category.title);
       url.searchParams.set("limit", "10");
       url.searchParams.set("offset", "0");
+      console.log(url);
       window.history.pushState({}, "", url);
     }
   }, includesP() ? /*#__PURE__*/React.createElement("strong", null, category.title) : category.title), category.children && category.children.length > 0 && /*#__PURE__*/React.createElement("div", null, category.children.map((subCat, index) => /*#__PURE__*/React.createElement(SubCategories, {

@@ -151,7 +151,7 @@ def get_students_results():
 def quiz_statistics():
     template_id = request.args.get("template_id")
 
-    template = get_quiz_template(0, template_id)
+    template = get_quiz_template(0, template_id)[0]
 
     question_analysis = {}
     quiz_items = {}
@@ -160,6 +160,8 @@ def quiz_statistics():
             item_score = 0
             item_max_score = 0
             data = QuizItem.query.filter(QuizItem.quiz_template_item_id == item["item_id"]).all()
+            if len(data)==0:
+                break
             student_id = data[0].items.quiz.student_id
 
             item_full_score = data[0].max_points

@@ -125,7 +125,7 @@ const QuizReviewEmbedded = ({
   }, quiz.quizzes.slice().reverse().map((q, index, arr) => /*#__PURE__*/React.createElement("option", {
     key: q.quiz_id,
     value: q.quiz_id
-  }, "Quiz Attempt ", arr.length - index))), /*#__PURE__*/React.createElement("ul", {
+  }, "Review attempt ", arr.length - index))), /*#__PURE__*/React.createElement("ul", {
     className: "nav nav-tabs mt-3",
     id: "myTab",
     role: "tablist"

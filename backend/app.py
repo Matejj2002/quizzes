@@ -89,11 +89,13 @@ def shutdown_session(exception=None):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    print(path)
     if path.startswith(API_URL):
         abort(404)
 
     if path.startswith("quizzes/"):
         path = path.replace("quizzes/", "", 1)
+
 
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
@@ -108,29 +110,26 @@ def check_database_exists():
 
     try:
         cursor.execute(sql.SQL("SELECT 1 FROM pg_database WHERE datname = %s"), [DB_NAME])
-        exists = cursor.fetchone()
+        exists_db = cursor.fetchone()
 
-        if exists:
+        if exists_db:
+            cursor.execute(
+                sql.SQL("SELECT * FROM categories WHERE title = %s"),
+                ["supercategory"]
+            )
+            exists_cat = cursor.fetchone()
+        else:
+            exists_cat = False
+
+        if exists_cat:
             print(f"Database '{DB_NAME}' already existing")
 
+        else:
             try:
-                pass
-                # print("Migrating DB...")
-                # os.environ["FLASK_APP"] = "backend/app.py"
-                # subprocess.run([".venv\\Scripts\\flask.exe", "db", "upgrade"], cwd="backend", check=True)
-                # subprocess.run([".venv\\Scripts\\flask.exe", "db", "migrate", "-m", "Auto migration"], cwd="backend",
-                #                check=True)
-                # subprocess.run([sys.executable, "-m", "flask", "db", "upgrade"], cwd=".", check=True)
-                # subprocess.run([sys.executable, "-m", "flask", "db", "migrate", "-m", "Auto migration"], cwd=".",
-                #                check=True)
-                #
-                # print("DB migration done.")
-
+                cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(DB_NAME)))
             except:
                 pass
 
-        else:
-            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(DB_NAME)))
             from create_database import create_database
             create_database()
             print(f"Database '{DB_NAME}' was created")

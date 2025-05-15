@@ -246,10 +246,10 @@ def evaluate_quiz(quiz):
 def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetime.now(), cnt=0, update_at=""):
     template = QuizTemplate.query.filter(QuizTemplate.id == quiz_template_id).first()
     if template is None:
-        return None
+        return None, None
 
     if template.is_deleted:
-        return None
+        return None, None
 
     if template.date_time_open <= actual_time <= template.date_time_close:
         is_opened = True
@@ -399,7 +399,7 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
         template_sub["is_finished"] = True
         template_sub["first_generation"] = True
 
-    return template_sub
+    return template_sub, update_at
 
 def generate_quiz(quiz, questions, student_id):
     time_now = datetime.datetime.now()

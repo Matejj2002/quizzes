@@ -40,6 +40,7 @@ export default function configure(backendUrl) {
 }
 
 function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
+    console.log(instance);
   const [quizId, setQuizId] = useState(instance.syncedState.quizId);
   const [quiz, setQuiz] = useState(instance.syncedState.quiz);
   const [attempt, setAttempt] = useState(undefined);
@@ -85,7 +86,7 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
           quiz.id,
           quiz.feedbackTypeAfterClose,
           !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
-          1,
+          userData["id_user"],
           "student"
         );
       }
@@ -115,11 +116,11 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
 
   const fetchStudent = async () =>{
         try{
-            const response = await axios.get(backendUrl+'get-user-id', {
+            const response = await axios.get(backendUrl+'get-user-data_logged', {
                 params : {"userName": userDt.login}
             })
 
-            fetchQuizzes(response.data.result)
+            fetchQuizzes(response.data.result.id_user)
 
         }catch (error){
             console.error(error);
@@ -144,7 +145,6 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
     }
 
     useEffect(() => {
-        console.log(attempt);
         if (attempt === "review") {
             setAttempt(undefined);
             fetchStudent().then(
@@ -153,7 +153,7 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
                       quiz.id,
                       quiz.feedbackTypeAfterClose,
                       !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
-                      1,
+                      userData["id_user"],
                       "student"
                     )
             );

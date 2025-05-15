@@ -11,19 +11,18 @@ const QuizList = ({
   const [quizzes, setQuizzes] = useState([]);
   const fetchStudent = async () => {
     try {
-      const response = await axios.get(backendUrl + 'get-user-id', {
+      const response = await axios.get(backendUrl + 'get-user-data_logged', {
         params: {
           "userName": userName
         }
       });
-      fetchQuizzes(response.data.result);
+      fetchQuizzes(response.data.result.id_user);
     } catch (error) {
       console.error(error);
     } finally {}
   };
   const fetchQuizzes = async studentId => {
     try {
-      console.log(studentId);
       const response = await axios.get(backendUrl + `get-quiz-templates`, {
         params: {
           "studentId": studentId

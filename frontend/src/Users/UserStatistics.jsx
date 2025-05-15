@@ -66,18 +66,20 @@ const UserStatistics = () =>{
                                                 <td className="w-25 text-end">{quiz.attempts}</td>
                                                 <td className="w-25 text-end">{quiz.achieved}/{quiz.max_points}</td>
                                                 <td className="w-25 text-end">
+                                                    {console.log(quiz)}
                                                     <button
                                                         className="btn btn-outline-primary"
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             navigate("/review-quiz", {
                                                                 state: {
-                                                                    quiz: quiz.quizzes,
+                                                                    quiz: quiz.quizzes[0],
                                                                     quizId: quiz.id,
-                                                                    feedback: quiz.quizzes.feedbackType,
+                                                                    feedback: quiz.quizzes[0].feedbackType,
                                                                     correctMode: true,
                                                                     userId: userId,
-                                                                    userName: userData["github_name"]
+                                                                    userName: userData["github_name"],
+                                                                    userRole:"teacher"
 
                                                                 }
                                                             });

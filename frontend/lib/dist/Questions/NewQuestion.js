@@ -19,6 +19,7 @@ const NewQuestion = ({
   } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
 
   // const subButText = location.state.subButText;
 
@@ -43,7 +44,7 @@ const NewQuestion = ({
   const selectedCategory1 = location.state['selectedCategory'];
   const userId = location.state.userId;
   const userRole = location.state.userRole;
-  const idQ = location.state['id'];
+  const idQ = location.state['id'] === 1 ? 2 : location.state['id'];
   const filters = location.state['filterType'];
   const authorFilter = location.state['authorFilter'];
   const newQuestions = location.state["newQuestions"];
@@ -100,6 +101,7 @@ const NewQuestion = ({
             setQuestionFeedback("");
             setQuestionPositiveFeedback("");
             setCheckSubmit([]);
+            sessionStorage.setItem("scrollToTop", "true");
             navigate(`/question/new-question`, {
               state: {
                 catPath: category,
@@ -111,12 +113,15 @@ const NewQuestion = ({
                 page: page,
                 filterType: filters,
                 authorFilter: authorFilter,
-                newQuestions: createMoreQuestions
+                newQuestions: createMoreQuestions,
+                userRole: userRole,
+                userId: userId,
+                scrollTop: true
               }
             });
             window.location.reload();
           } else {
-            window.location.href = '/questions';
+            window.location.href = quizzesUrl + '/questions';
           }
         }).catch(error => {
           console.error('Error saving changes:', error);
@@ -131,7 +136,7 @@ const NewQuestion = ({
     } else {
       if (title !== "" && text !== "") {
         axios.put(apiUrl + `questions/versions/${id}`, updatedData).then(response => {
-          window.location.href = '/questions';
+          window.location.href = quizzesUrl + '/questions';
         }).catch(error => {
           console.error('Error saving changes:', error);
         });
@@ -171,33 +176,41 @@ const NewQuestion = ({
       setQuestionPositiveFeedback(response.data["question_positive_feedback"]);
       if (response.data["type"] === "matching_answer_question") {
         setQuestionType("Matching Question");
-        setAnswers(response.data["answers"]);
       }
       if (response.data["type"] === "multiple_answer_question") {
         setQuestionType("Multiple Choice Question");
-        setAnswers(response.data["answers"]);
       }
       if (response.data["type"] === "short_answer_question") {
         setQuestionType("Short Question");
-        setAnswers(response.data["answers"]);
       }
+      await AnswerSetter(response.data["answers"]);
+      setAnswers(response.data["answers"]);
     } catch (error) {} finally {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    const fetchAllData = async () => {
-      setLoading(true);
-      try {
-        fetchCategory();
-        fetchCategorySelect();
-        if (subButText !== "Submit") {
-          fetchData();
-        }
-      } catch (error) {
-        console.error("Error during fetch:", error);
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      fetchCategory();
+      fetchCategorySelect();
+      if (subButText !== "Submit") {
+        await fetchData().then(() => {
+          setLoading(false);
+        });
       }
-    };
+    } catch (error) {
+      console.error("Error during fetch:", error);
+    }
+  };
+  console.log(sessionStorage.getItem("scrollToTop"));
+  useEffect(() => {
+    if (sessionStorage.getItem("scrollToTop") === "true") {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        sessionStorage.removeItem("scrollToTop");
+      }, 50);
+    }
     fetchAllData();
   }, []);
   const AnswerSetter = async newAnswers => {

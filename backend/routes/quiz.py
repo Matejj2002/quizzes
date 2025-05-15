@@ -189,6 +189,24 @@ def get_quiz_student_load():
     return result
 
 
+@quiz_bp.route("/evaluate_all_quizzes", methods = ["GET"])
+def evaluate_all_quizzes():
+    users = User.query.all()
+    quiz_templates = QuizTemplate.query.filter(QuizTemplate.is_deleted !=True).all()
+    for i in users:
+        for j in quiz_templates:
+            quiz = Quiz.query.filter(Quiz.quiz_template_id == j.id, Quiz.student_id == i.id).order_by(
+                desc(Quiz.date_time_started)).first()
+
+            if quiz is None:
+                continue
+
+            if quiz.date_time_finished is None:
+                if (quiz.date_time_started + datetime.timedelta(minutes=j.time_to_finish) < datetime.datetime.now()):
+                    evaluate_quiz(quiz)
+
+    return {},200
+
 @quiz_bp.route("/quiz_set_answers", methods=["PUT"])
 def update_quiz_answers():
     data = request.get_json()

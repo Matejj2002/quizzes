@@ -31,6 +31,14 @@ const Users = () =>{
        finally {}
     }
 
+    const evaluateAllQuizzes = async () => {
+      try{
+            const response = await axios.get(apiUrl+`evaluate_all_quizzes`)
+      }catch (error){
+      }
+       finally {}
+    }
+
     if (localStorage.getItem("data") === null || localStorage.getItem("data")==='{}' ){
         navigate("/login");
     }
@@ -62,6 +70,7 @@ const Users = () =>{
         getUserLogged().then(() => {
             setLoading(false);
         });
+        evaluateAllQuizzes();
     }, []);
 
 

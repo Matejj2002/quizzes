@@ -22,6 +22,7 @@ const GeneratedQuiz = () => {
   const [feedbackQuestion, setFeedbackQuestion] = useState([]);
   const [quizGenerated, setQuizGenerated] = useState(false);
   const apiUrl = process.env.REACT_APP_API_URL;
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   useEffect(() => {
     if (!quiz?.sections) {
       return;
@@ -51,7 +52,7 @@ const GeneratedQuiz = () => {
       };
       const setDateFinish = async () => {
         axios.put(apiUrl + `quiz-finish`, updatedData).then(() => {
-          window.location.href = "/quizzes";
+          window.location.href = quizzesUrl + "/quizzes";
         });
       };
       setCount(-1);
@@ -135,7 +136,7 @@ const GeneratedQuiz = () => {
     };
     axios.put(apiUrl + `quiz_set_answers`, updatedData).then(() => {
       if (finalSave) {
-        window.location.href = "/quizzes";
+        window.location.href = quizzesUrl + "/quizzes";
       }
       setTimeout(() => {
         setIsSaving(false);
@@ -449,7 +450,7 @@ const GeneratedQuiz = () => {
       if (count !== -1) {
         handleSaveQuiz(false);
       }
-      window.location.href = "/quizzes";
+      window.location.href = quizzesUrl + "/quizzes";
     }
   }, "Back to Quizzes"), /*#__PURE__*/React.createElement("div", null, page === 0 ? /*#__PURE__*/React.createElement("div", null) : /*#__PURE__*/React.createElement("button", {
     type: "button",

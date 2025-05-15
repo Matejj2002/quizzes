@@ -24,6 +24,14 @@ const QuizzesTableAnalysis = () =>{
        finally {}
     }
 
+    const evaluateAllQuizzes = async () => {
+      try{
+            const response = await axios.get(apiUrl+`evaluate_all_quizzes`)
+      }catch (error){
+      }
+       finally {}
+    }
+
     async function getUserLogged(){
 
         const data = JSON.parse(localStorage.getItem("data"));
@@ -55,6 +63,8 @@ const QuizzesTableAnalysis = () =>{
         getUserLogged().then(() => {
             setLoading(false);
         });
+
+        evaluateAllQuizzes();
     }, []);
 
     useEffect(() => {

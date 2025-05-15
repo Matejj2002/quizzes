@@ -20,6 +20,7 @@ const QuizReview = () => {
   const [questionsData, setQuestionsData] = useState({});
   const [page, setPage] = useState(0);
   const apiUrl = process.env.REACT_APP_API_URL;
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   const fetchQuestion = async (questionId, itemId) => {
     try {
       const response = await axios.get(apiUrl + `questions-quiz/${questionId}`, {
@@ -281,7 +282,7 @@ const QuizReview = () => {
       if (correctMode) {
         navigate(-1);
       } else {
-        window.location.href = "/quizzes";
+        window.location.href = quizzesUrl + "/quizzes";
       }
     }
   }, correctMode === false ? "Back to quizzes" : "Back to user statistics"), conditionToRetake && correctMode === false && /*#__PURE__*/React.createElement("button", {

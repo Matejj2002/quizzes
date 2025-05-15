@@ -36,7 +36,11 @@ def get_quiz_templates():
     update_at = ""
 
     for template in sorted(quiz_templates, key=lambda x: x.date_time_open, reverse=True):
-        template_sub = get_quiz_template(student_id, template.id, actual_time, cnt, update_at)
+        template_sub, update_at_pom = get_quiz_template(student_id, template.id, actual_time, cnt, update_at)
+
+        if update_at_pom is not None:
+            if update_at == "":
+                print(update_at_pom)
 
         if template_sub is not None:
             result.append(template_sub)
@@ -237,9 +241,9 @@ def create_new_quiz_template():
         quiz_template.shuffle_sections = data["shuffleSections"]
         quiz_template.correction_of_attempts = data["typeOfAttempts"]
         quiz_template.number_of_corrections = data["numberOfCorrections"]
-        quiz_template.date_time_open = data["dateOpen"]
-        quiz_template.date_time_close = data["dateClose"]
-        quiz_template.datetime_check = data["dateCheck"]
+        quiz_template.date_time_open = datetime.datetime.strptime(data["dateOpen"], "%Y-%m-%dT%H:%M")
+        quiz_template.date_time_close = datetime.datetime.strptime(data["dateClose"], "%Y-%m-%dT%H:%M")
+        quiz_template.datetime_check = datetime.datetime.strptime(data["dateCheck"], "%Y-%m-%dT%H:%M")
         quiz_template.feedback_type = data["feedbackType"]
         quiz_template.time_to_finish = data["minutesToFinish"]
         quiz_template.feedback_type_after_close = data["feedbackTypeAfterClose"]

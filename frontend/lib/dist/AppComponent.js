@@ -41,6 +41,7 @@ function AppComponent({
   isEdited,
   backendUrl
 }) {
+  console.log(instance);
   const [quizId, setQuizId] = useState(instance.syncedState.quizId);
   const [quiz, setQuiz] = useState(instance.syncedState.quiz);
   const [attempt, setAttempt] = useState(undefined);
@@ -74,7 +75,7 @@ function AppComponent({
   };
   useEffect(() => {
     if (quiz) {
-      handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), 1, "student");
+      handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student");
     }
   }, [quiz, attempt]);
   async function getUserData() {
@@ -97,12 +98,12 @@ function AppComponent({
   const userDt = JSON.parse(localStorage.getItem('user'));
   const fetchStudent = async () => {
     try {
-      const response = await axios.get(backendUrl + 'get-user-id', {
+      const response = await axios.get(backendUrl + 'get-user-data_logged', {
         params: {
           "userName": userDt.login
         }
       });
-      fetchQuizzes(response.data.result);
+      fetchQuizzes(response.data.result.id_user);
     } catch (error) {
       console.error(error);
     } finally {}
@@ -122,10 +123,9 @@ function AppComponent({
     } finally {}
   };
   useEffect(() => {
-    console.log(attempt);
     if (attempt === "review") {
       setAttempt(undefined);
-      fetchStudent().then(handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), 1, "student"));
+      fetchStudent().then(handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student"));
     }
   }, [attempt]);
   return /*#__PURE__*/React.createElement(React.Fragment, null, quizId === undefined && /*#__PURE__*/React.createElement(QuizList, {

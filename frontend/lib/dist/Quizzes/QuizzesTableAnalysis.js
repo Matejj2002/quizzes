@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 const QuizzesTableAnalysis = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterForName, setFilterForName] = useState("");
   const [userData, setUserData] = useState([]);
   const apiUrl = process.env.REACT_APP_API_URL;
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   const fetchQuizzes = async () => {
     try {
       const response = await axios.get(apiUrl + `get-quizzes-analysis`, {
@@ -18,23 +20,30 @@ const QuizzesTableAnalysis = () => {
       setQuizzes(response.data.result);
     } catch (error) {} finally {}
   };
-  async function getUserData() {
-    await fetch(apiUrl + "getUserData", {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + localStorage.getItem("accessToken")
-      }
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      setUserData(data);
-      if (data["role"] !== "teacher") {
+  async function getUserLogged() {
+    const data = JSON.parse(localStorage.getItem("data"));
+    try {
+      const response = await axios.get(apiUrl + `get-user-data_logged`, {
+        params: {
+          "userName": data["login"],
+          "avatarUrl": data["avatar_url"]
+        }
+      });
+      setUserData(response.data.result);
+      if (response.data.result.role !== "teacher") {
         navigate("/quizzes");
       }
-    });
+    } catch (error) {
+      console.error(error);
+    } finally {}
+  }
+  if (localStorage.getItem("data") === null || localStorage.getItem("data") === '{}') {
+    navigate("/login");
   }
   useEffect(() => {
-    getUserData().then(() => {});
+    getUserLogged().then(() => {
+      setLoading(false);
+    });
   }, []);
   useEffect(() => {
     if (userData && Object.keys(userData).length > 0) {
@@ -44,6 +53,11 @@ const QuizzesTableAnalysis = () => {
   useEffect(() => {
     fetchQuizzes().then(() => {});
   }, [filterForName]);
+  if (loading) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "d-flex justify-content-center align-items-center"
+    }, /*#__PURE__*/React.createElement("h2", null, "Loading..."));
+  }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {
     active: "Analysis"
   }), /*#__PURE__*/React.createElement("div", {
@@ -100,7 +114,7 @@ const QuizzesTableAnalysis = () => {
     type: "button",
     className: "btn btn-outline-secondary mb-3 mb-sm-0",
     onClick: () => {
-      window.location.href = "/quizzes";
+      window.location.href = quizzesUrl + "/quizzes";
     }
   }, "Back to Quizzes")), /*#__PURE__*/React.createElement("div", {
     className: "col-2 sidebar"

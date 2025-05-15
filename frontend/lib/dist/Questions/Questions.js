@@ -13,6 +13,7 @@ const Questions = () => {
   const {
     "*": category
   } = useParams();
+  const [loading, setLoading] = useState(true);
   const sortTable = ["Newest", "Oldest", "Alphabetic", "Reverse Alphabetic"];
   const filterTypes = ["Matching Question", "Multiple Choice Question", "Short Question"];
   const showQuestionsFilter = ["Active", "Archived", "All"];
@@ -98,23 +99,30 @@ const Questions = () => {
     setPage(1);
     fetchCategory(actualCategory).then(() => {});
   }, [actualCategory]);
-  async function getUserData() {
-    await fetch(apiUrl + "getUserData", {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + localStorage.getItem("accessToken")
-      }
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      setUserData(data);
-      if (data["role"] !== "teacher") {
+  async function getUserLogged() {
+    const data = JSON.parse(localStorage.getItem("data"));
+    try {
+      const response = await axios.get(apiUrl + `get-user-data_logged`, {
+        params: {
+          "userName": data["login"],
+          "avatarUrl": data["avatar_url"]
+        }
+      });
+      setUserData(response.data.result);
+      if (response.data.result.role !== "teacher") {
         navigate("/quizzes");
       }
-    });
+    } catch (error) {
+      console.error(error);
+    } finally {}
+  }
+  if (localStorage.getItem("data") === null || localStorage.getItem("data") === '{}') {
+    navigate("/login");
   }
   useEffect(() => {
-    getUserData().then(() => {});
+    getUserLogged().then(() => {
+      setLoading(false);
+    });
   }, []);
   useEffect(() => {
     fetchAllTeachers().then(() => {});
@@ -162,6 +170,11 @@ const Questions = () => {
   const closeModal = () => {
     setShowFeedback(false);
   };
+  if (loading) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "d-flex justify-content-center align-items-center"
+    }, /*#__PURE__*/React.createElement("h2", null, "Loading..."));
+  }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {
     active: "Questions"
   }), /*#__PURE__*/React.createElement("div", {

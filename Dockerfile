@@ -17,5 +17,8 @@ COPY backend ./
 
 COPY --from=builder app/build static/
 COPY .env .env
+#COPY frontend/.env.production .env.production
+#
+#RUN cat .env.production >> .env
 
 CMD ["python", "app.py"]

@@ -1,34 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import axios from "axios";
 const Navigation = ({
   active
 }) => {
-  const navigate = useNavigate();
   const [userData, setUserData] = useState({});
   const apiUrl = process.env.REACT_APP_API_URL;
-  const host = process.env.REACT_APP_HOST;
-  const port = process.env.REACT_APP_PORT;
-  const quizzesUrl = `http://${host}:${port}`;
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-  async function getUserData() {
-    await fetch(apiUrl + "getUserData", {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + localStorage.getItem("accessToken")
-      }
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      setUserData(data);
-    });
+  async function getUserLogged() {
+    const data = JSON.parse(localStorage.getItem("data"));
+    try {
+      const response = await axios.get(apiUrl + `get-user-data_logged`, {
+        params: {
+          "userName": data["login"],
+          "avatarUrl": data["avatar_url"]
+        }
+      });
+      setUserData(response.data.result);
+    } catch (error) {
+      console.error(error);
+    } finally {}
   }
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/login";
+    window.location.href = quizzesUrl + "/login";
   };
   useEffect(() => {
-    getUserData().then(() => {});
+    if ((localStorage.getItem("data") === null || localStorage.getItem("data") === '{}') && active !== "Login") {
+      window.location.href = quizzesUrl + "/login";
+    }
+    getUserLogged().then(() => {});
   }, []);
   return /*#__PURE__*/React.createElement("nav", {
     className: "navbar navbar-expand-sm bg-primary w-100",

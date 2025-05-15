@@ -8,6 +8,7 @@ const Login = ({
   const [userData, setUserData] = useState({});
   const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
   const apiUrl = process.env.REACT_APP_API_URL;
+  const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   useEffect(() => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -20,7 +21,7 @@ const Login = ({
           if (data.access_token) {
             localStorage.setItem("accessToken", data.access_token);
             setReRender(!rerender);
-            window.location.assign(path);
+            window.location.assign(quizzesUrl + path);
           }
         });
       }
@@ -39,6 +40,12 @@ const Login = ({
     }).then(response => {
       return response.json();
     }).then(data => {
+      console.log(data);
+      const lcl = {
+        "avatar_url": data["avatar_url"],
+        "login": data["login"]
+      };
+      localStorage.setItem("data", JSON.stringify(lcl));
       setUserData(data);
     });
   }
@@ -46,7 +53,7 @@ const Login = ({
     getUserData().then(() => {});
   }, []);
   if (userData["error"] === "no error") {
-    window.location.href = "/quizzes";
+    window.location.href = quizzesUrl + "/quizzes";
   }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {
     active: "Login"

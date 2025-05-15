@@ -83,7 +83,7 @@ const UserStatistics = () => {
     type: "button",
     className: "btn btn-outline-secondary",
     onClick: () => {
-      window.location.href = "/users";
+      navigate("/users");
     }
   }, "Back to Users")), /*#__PURE__*/React.createElement("div", {
     className: "col-2 sidebar"
