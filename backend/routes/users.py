@@ -66,11 +66,16 @@ def create_teacher():
 def change_user_type():
     data = request.get_json()
 
-    user = User.query.filter(User.id == data["userId"]).first()
+    try:
+        user = User.query.filter(User.id == data["userId"]).first()
 
-    user.user_type = data["selectedType"].lower()
-    db.session.add(user)
-    db.session.commit()
+        user.user_type = data["selectedType"].lower()
+        db.session.add(user)
+        db.session.commit()
 
-    return {}, 200
+        return {}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 

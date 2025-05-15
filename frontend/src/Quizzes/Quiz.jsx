@@ -131,6 +131,10 @@ const Quiz = () => {
         )
     }
 
+    if (localStorage.getItem("data") === null || localStorage.getItem("data")==='{}' ){
+        window.location.href = quizzesUrl+"/login";
+    }
+
     return (
             <div>
                 <Navigation active = {"Quizzes"}></Navigation>

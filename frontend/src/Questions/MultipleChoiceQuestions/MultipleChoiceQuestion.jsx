@@ -6,7 +6,6 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
     const [correctAnswers, setCorrectAnswers] = useState([false]);
     const [feedback, setFeedback] = useState([{"positive":"", "negative":""}]);
 
-
     useEffect(() => {
         if (answers["texts"] && answers["texts"].length > 0) {
             setQuestions([...answers["texts"], ""]);

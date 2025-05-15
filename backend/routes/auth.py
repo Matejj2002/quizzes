@@ -64,9 +64,9 @@ def get_user_data():
             id_user = teacher.id
 
         else:
-            user = User.query.filter(User.github_name == data["login"])
+            user = User.query.filter(User.github_name == data["login"]).first()
 
-            if user.first() is None:
+            if user is None:
                 student = User(
                     name=data["login"],
                     github_name=data["login"],
@@ -80,8 +80,8 @@ def get_user_data():
                 id_user = student.id
 
             else:
-                role = user.first().user_type
-                id_user = user.first().id
+                role = user.user_type
+                id_user = user.id
 
         data["role"] = role
         data["id_user"] = id_user
@@ -90,10 +90,11 @@ def get_user_data():
         return jsonify(data)
     else:
         return jsonify({"error": "Failed to retrieve user data"})
-@auth_bp.route('/get-user-id', methods=['GET'])
-def get_user_id():
+@auth_bp.route('/get-user-data_logged', methods=['GET'])
+def get_user_data_logged():
     user_name = request.args.get("userName")
+    avatar_url = request.args.get("avatarUrl")
 
     user = User.query.filter(User.github_name == user_name).first()
 
-    return {"result": user.id}
+    return {"result": {"id_user": user.id, "login": user_name, "avatar_url": avatar_url, "role": user.user_type}}

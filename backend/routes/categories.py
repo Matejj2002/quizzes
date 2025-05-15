@@ -22,16 +22,21 @@ def new_category():
     if data["supercategory"] == 0:
         data["supercategory"] = None
 
-    new_categor = Category(
-        supercategory_id=data['supercategory'],
-        title=data['title'],
-        stug=data['slug']
-    )
+    try:
+        new_categor = Category(
+            supercategory_id=data['supercategory'],
+            title=data['title'],
+            stug=data['slug']
+        )
 
-    db.session.add(new_categor)
-    db.session.commit()
+        db.session.add(new_categor)
+        db.session.commit()
 
-    return jsonify({}), 200
+        return jsonify({}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @categories_bp.route('/categories', methods=['GET'])
 def get_categories():

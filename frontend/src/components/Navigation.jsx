@@ -33,6 +33,11 @@ const Navigation = ({active}) => {
     }, []);
 
 
+    if ((localStorage.getItem("data") === null || localStorage.getItem("data")==='{}') && active !== "Login" ){
+        window.location.href = quizzesUrl+"/login";
+    }
+
+
     return (
         <nav className="navbar navbar-expand-sm bg-primary w-100" data-bs-theme="dark">
             <div className="container-fluid">

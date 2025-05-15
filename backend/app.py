@@ -67,6 +67,13 @@ if len(check_start_env) == 0:
     db_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
+    # app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    #     'pool_size': 20,
+    #     'max_overflow': 10,
+    #     'pool_timeout': 30,
+    #     'pool_recycle': 1800
+    # }
+
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_COOKIE_SECURE'] = not app.debug
@@ -75,17 +82,17 @@ if len(check_start_env) == 0:
 
     db.init_app(app)
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    print(path)
     if path.startswith(API_URL):
         abort(404)
 
     if path.startswith("quizzes/"):
-        # print(path.split("quizzes/"))
-        # path = path.split("quizzes/")[-1]
         path = path.replace("quizzes/", "", 1)
 
     if path != "" and os.path.exists(app.static_folder + '/' + path):
@@ -99,45 +106,46 @@ def check_database_exists():
     conn.autocommit = True
     cursor = conn.cursor()
 
-    cursor.execute(sql.SQL("SELECT 1 FROM pg_database WHERE datname = %s"), [DB_NAME])
-    exists = cursor.fetchone()
+    try:
+        cursor.execute(sql.SQL("SELECT 1 FROM pg_database WHERE datname = %s"), [DB_NAME])
+        exists = cursor.fetchone()
 
-    if exists:
-        print(f"Database '{DB_NAME}' already existing")
+        if exists:
+            print(f"Database '{DB_NAME}' already existing")
+
+            try:
+                pass
+                # print("Migrating DB...")
+                # os.environ["FLASK_APP"] = "backend/app.py"
+                # subprocess.run([".venv\\Scripts\\flask.exe", "db", "upgrade"], cwd="backend", check=True)
+                # subprocess.run([".venv\\Scripts\\flask.exe", "db", "migrate", "-m", "Auto migration"], cwd="backend",
+                #                check=True)
+                # subprocess.run([sys.executable, "-m", "flask", "db", "upgrade"], cwd=".", check=True)
+                # subprocess.run([sys.executable, "-m", "flask", "db", "migrate", "-m", "Auto migration"], cwd=".",
+                #                check=True)
+                #
+                # print("DB migration done.")
+
+            except:
+                pass
+
+        else:
+            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(DB_NAME)))
+            from create_database import create_database
+            create_database()
+            print(f"Database '{DB_NAME}' was created")
 
         try:
-            pass
-            # print("Migrating DB...")
-            # os.environ["FLASK_APP"] = "backend/app.py"
-            # subprocess.run([".venv\\Scripts\\flask.exe", "db", "upgrade"], cwd="backend", check=True)
-            # subprocess.run([".venv\\Scripts\\flask.exe", "db", "migrate", "-m", "Auto migration"], cwd="backend",
-            #                check=True)
-            # subprocess.run([sys.executable, "-m", "flask", "db", "upgrade"], cwd=".", check=True)
-            # subprocess.run([sys.executable, "-m", "flask", "db", "migrate", "-m", "Auto migration"], cwd=".",
-            #                check=True)
-            #
-            # print("DB migration done.")
-
-        except:
-            pass
-
-    else:
-        cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(DB_NAME)))
-        from create_database import create_database
-        create_database()
-        print(f"Database '{DB_NAME}' was created")
-
-    try:
-        if os.environ.get("IS_DOCKER") == 'true':
-            subprocess.run(["sh", 'run_migrations.sh'], check=True)
-            print("Migrácie boli úspešne aplikované.")
-        else:
-            pass
-    except Exception as e:
-        print(e)
-
-    cursor.close()
-    conn.close()
+            if os.environ.get("IS_DOCKER") == 'true':
+                subprocess.run(["sh", 'run_migrations.sh'], check=True)
+                print("Migrácie boli úspešne aplikované.")
+            else:
+                pass
+        except Exception as e:
+            print(e)
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':

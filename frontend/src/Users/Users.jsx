@@ -31,25 +31,35 @@ const Users = () =>{
        finally {}
     }
 
-    async function getUserData() {
-        await fetch(apiUrl+"getUserData", {
-                method: "GET",
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
+    if (localStorage.getItem("data") === null || localStorage.getItem("data")==='{}' ){
+        navigate("/login");
+    }
+
+    async function getUserLogged(){
+
+        const data = JSON.parse(localStorage.getItem("data"));
+        try{
+            const response = await axios.get(apiUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": data["login"],
+                            "avatarUrl": data["avatar_url"]
+                    }
                 }
-            }
-        ).then((response) => {
-            return response.json();
-        }).then((data) => {
-            setUserData(data);
-            if (data["role"] !=="teacher"){
+            )
+            setUserData(response.data.result);
+
+            if (response.data.result.role !== "teacher"){
                 navigate("/quizzes");
             }
-        })
+
+      }catch (error){
+            console.error(error);
+      }
+       finally {}
     }
 
     useEffect(() => {
-        getUserData().then(() => {
+        getUserLogged().then(() => {
             setLoading(false);
         });
     }, []);
