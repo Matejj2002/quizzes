@@ -32,7 +32,7 @@ const UserStatistics = () =>{
     if (userRole !=="teacher") {
         navigate("/quizzes");
     }
-
+    console.log(userData);
     return (
         <div>
             <Navigation active = {"Users"}></Navigation>
@@ -66,7 +66,6 @@ const UserStatistics = () =>{
                                                 <td className="w-25 text-end">{quiz.attempts}</td>
                                                 <td className="w-25 text-end">{quiz.achieved}/{quiz.max_points}</td>
                                                 <td className="w-25 text-end">
-                                                    {console.log(quiz)}
                                                     <button
                                                         className="btn btn-outline-primary"
                                                         onClick={(e) => {
@@ -77,7 +76,7 @@ const UserStatistics = () =>{
                                                                     quizId: quiz.id,
                                                                     feedback: quiz.quizzes[0].feedbackType,
                                                                     correctMode: true,
-                                                                    userId: userId,
+                                                                    userId: studentId,
                                                                     userName: userData["github_name"],
                                                                     userRole:"teacher"
 

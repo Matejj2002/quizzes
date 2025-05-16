@@ -56,7 +56,7 @@ const GeneratedQuiz = () => {
     }, [dateStart, minutesToFinish]);
 
     useEffect(() => {
-            if (count % 60 === 0 && count !== -1) {
+            if (count % 55 === 0 && count !== -1) {
             handleSaveQuiz(false);
             setLoadQuestions(true);
         }
