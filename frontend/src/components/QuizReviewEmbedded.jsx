@@ -335,7 +335,7 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                                 <div className="form-check" key={idx}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
-                                                        // disabled="true"
+                                                            style={{ pointerEvents: 'none' }}
                                                            defaultChecked={ans.answer === true}
                                                     />
                                                     <span className="d-flex w-100 form-check-label">
@@ -396,7 +396,9 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                            style={{
                                                background: "rgba(255, 0, 0, 0.3)"
                                            }}>
-                                            {questionsData[question.id]?.feedback}
+                                            <FormattedTextRenderer
+                                            text = {questionsData[question.id]?.feedback}
+                                                />
                                         </p>
                                     )
                                     }
@@ -406,7 +408,9 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                            style={{
                                                background: "rgba(155,236,137,0.15)"
                                            }}>
-                                            {questionsData[question.id]?.feedback}
+                                            <FormattedTextRenderer
+                                            text = {questionsData[question.id]?.feedback}
+                                                />
                                         </p>
                                     )
                                     }

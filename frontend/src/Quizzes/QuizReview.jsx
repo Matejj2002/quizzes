@@ -326,9 +326,10 @@ const QuizReview = () =>{
                                                 <div className="form-check" key={idx}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
-                                                        // disabled="true"
+                                                           style={{ pointerEvents: 'none' }}
                                                            defaultChecked={ans.answer === true}
                                                     />
+
                                                     <span className="d-flex w-100 form-check-label">
 
                                                                 <FormattedTextRenderer
@@ -387,7 +388,9 @@ const QuizReview = () =>{
                                            style={{
                                                background: "rgba(255, 0, 0, 0.3)"
                                            }}>
-                                            {questionsData[question.id]?.feedback}
+                                            <FormattedTextRenderer
+                                            text = {questionsData[question.id]?.feedback}
+                                                />
                                         </p>
                                     )
                                     }
@@ -397,7 +400,9 @@ const QuizReview = () =>{
                                            style={{
                                                background: "rgba(155,236,137,0.15)"
                                            }}>
-                                            {questionsData[question.id]?.feedback}
+                                            <FormattedTextRenderer
+                                            text = {questionsData[question.id]?.feedback}
+                                                />
                                         </p>
                                     )
                                     }
