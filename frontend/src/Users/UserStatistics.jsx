@@ -67,7 +67,6 @@ const UserStatistics = () =>{
                                                 <td className="w-25 text-end">{quiz.attempts}</td>
                                                 <td className="w-25 text-end">{quiz.achieved}/{quiz.max_points}</td>
                                                 <td className="w-25 text-end">
-                                                    {console.log(quiz.quizzes[0].feedbackType)}
                                                     <button
                                                         className="btn btn-outline-primary"
                                                         onClick={(e) => {
