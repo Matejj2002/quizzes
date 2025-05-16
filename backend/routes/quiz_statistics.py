@@ -59,6 +59,7 @@ def get_all_quizzes_analysis():
 @quiz_statistics_bp.route("/get-user-data", methods=["GET"])
 def get_user_data_statistics():
     student_id = request.args.get("studentId")
+    print(student_id)
     quizzes = Quiz.query.filter_by(student_id=student_id).all()
     quizzes_templates_student = set()
     for i in quizzes:
@@ -74,7 +75,8 @@ def get_user_data_statistics():
     all_achieved_points = 0
 
     for i in quizzes_templates_student:
-        j = Quiz.query.filter_by(quiz_template_id=i).order_by(desc(Quiz.date_time_started)).first()
+        j = Quiz.query.filter_by(quiz_template_id=i, student_id = student_id).order_by(desc(Quiz.date_time_started)).first()
+
         max_points = j.max_points
         achieved_points = j.achieved_points
 
@@ -93,7 +95,6 @@ def get_user_data_statistics():
             "quizzes": get_quiz_template(student_id, template.id)
 
         })
-        print(achieved_points)
 
     try:
         percentage = round(all_achieved_points / all_max_points, 2) * 100

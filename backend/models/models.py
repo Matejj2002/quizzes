@@ -163,7 +163,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
-    github_name = db.Column(db.String)
+    github_name = db.Column(db.String, unique=True)
 
     user_type = db.Column(db.String(50), default='user')
 

@@ -14,6 +14,7 @@ const UserStatistics = () =>{
 
     const fetchUserData = async () => {
       try{
+            console.log(studentId);
             const response = await axios.get(apiUrl+`get-user-data`, {
                 params: {
                     "studentId": studentId
