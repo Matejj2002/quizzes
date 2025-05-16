@@ -168,8 +168,8 @@ def quiz_statistics():
             student_answers = []
             num_correct = 0
             comments = []
-            for i in data:
 
+            for i in data:
                 if i.students_comment_id is not None:
                     comment = Comment.query.get(i.students_comment_id)
                     comments.append(["student", comment.text])
@@ -255,7 +255,7 @@ def quiz_statistics():
                                 matching_data_corr[ans["pairId"]]["incorrect"] += 1
                             matching_data_corr[ans["pairId"]]["sum"] += 1
 
-                            merged_corr_stud = correct_answer + "->" + student_answer
+                            merged_corr_stud = correct_answer + "#->#" + student_answer
 
                             changed_correct[merged_corr_stud] = changed_correct.get(merged_corr_stud, 0) + 1
                             zoz_id.append(ans["pairId"]);
@@ -263,7 +263,7 @@ def quiz_statistics():
                     changed_to_list = []
                     cnt = 0
                     for key, val in changed_correct.items():
-                        corr, incorr = key.split("->")
+                        corr, incorr = key.split("#->#")
                         changed_to_list.append([corr, incorr, val])
 
                         cnt += 1
@@ -286,6 +286,7 @@ def quiz_statistics():
                     "wrong_answers": student_answers,
                     "item_full_score": item_full_score,
                     "comments": comments,
+
                 }
             else:
                 items = QuizItem.query.filter(QuizItem.quiz_template_item_id == item["item_id"]).all()
@@ -313,6 +314,7 @@ def quiz_statistics():
                         "sum_points": item_score,
                         "question_version_id": i.question_version.question_id,
                         "number_attempts": 1,
+
                     }
 
                     if i.question_version.id not in data2:

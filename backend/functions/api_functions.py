@@ -334,7 +334,8 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
                      "questionType": "questions",
                      "title": latest_version.title,
                      "type": latest_version.type,
-                     "item_id": question_item.id
+                     "item_id": question_item.id,
+                     "text": latest_version.text
                      }
                 )
             else:
