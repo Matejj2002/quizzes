@@ -104,6 +104,10 @@ const QuizStatistics = () =>{
 
                                     }
 
+                                    <FormattedTextRenderer
+                                                text={question?.text}
+                                            />
+
                                     {question.type === "short_answer_question" && (
                                         <div className="mb-1">
                                             <span className="fw-bold">Correct Answer</span>
@@ -133,11 +137,11 @@ const QuizStatistics = () =>{
                                                                  aria-label="Segment one" aria-valuenow="0"
                                                                  aria-valuemin="0" aria-valuemax="100" style={{
                                                                 width:
-                                                                    `${Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) *100)}%`
+                                                                    `${Math.round((evals[question["item_id"]].wrong_answers[ans[0]]?.correct / evals[question["item_id"]]?.wrong_answers[ans[0]].sum) *100)}%`
                                                             }}
                                                             >
                                                                 <div
-                                                                    className="progress-bar bg-success">{Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%
+                                                                    className="progress-bar bg-success">{Math.round((evals[question["item_id"]]?.wrong_answers[ans[0]].correct / evals[question["item_id"]]?.wrong_answers[ans[0]].sum) * 100)}%
                                                                 </div>
                                                             </div>
                                                             <div className="progress" role="progressbar"
@@ -145,7 +149,7 @@ const QuizStatistics = () =>{
                                                                  aria-valuemin="0" aria-valuemax="100" style={{
                                                                 width:
 
-                                                                    `${100-Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%`
+                                                                    `${100-Math.round((evals[question["item_id"]]?.wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%`
                                                             }}
 
                                                             >
@@ -183,7 +187,7 @@ const QuizStatistics = () =>{
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                {evals[question["item_id"]].correct_answer.map((ans, ind) => (
+                                                {evals[question["item_id"]]?.correct_answer.map((ans, ind) => (
                                                     <tr key ={"match-q-"+ind.toString()}>
                                                     <td style={{
                                                                 borderRight: "1px solid black",
