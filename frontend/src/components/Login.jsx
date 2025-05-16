@@ -28,6 +28,9 @@ const Login = ({path = "/login"}) =>{
             }
 
             getAccessToken().then((response) => {});
+        }else{
+            getUserData().then(() => {
+        });
         }
     }, [])
 
@@ -44,7 +47,6 @@ const Login = ({path = "/login"}) =>{
         ).then((response) => {
             return response.json();
         }).then((data) => {
-            console.log(data);
             const lcl = {
                 "avatar_url": data["avatar_url"],
                 "login": data["login"]
@@ -55,8 +57,7 @@ const Login = ({path = "/login"}) =>{
     }
 
     useEffect(() => {
-        getUserData().then(() => {
-        });
+
     }, []);
 
 

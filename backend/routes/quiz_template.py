@@ -40,7 +40,8 @@ def get_quiz_templates():
 
         if update_at_pom is not None:
             if update_at == "":
-                print(update_at_pom)
+                #print(update_at_pom)
+                pass
 
         if template_sub is not None:
             result.append(template_sub)

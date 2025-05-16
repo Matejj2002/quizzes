@@ -59,7 +59,6 @@ def get_all_quizzes_analysis():
 @quiz_statistics_bp.route("/get-user-data", methods=["GET"])
 def get_user_data_statistics():
     student_id = request.args.get("studentId")
-    print(student_id)
     quizzes = Quiz.query.filter_by(student_id=student_id).all()
     quizzes_templates_student = set()
     for i in quizzes:

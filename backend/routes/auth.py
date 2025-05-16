@@ -34,7 +34,7 @@ def get_access_token():
 @auth_bp.route('/getUserData', methods=['GET'])
 def get_user_data():
     authorization_header = request.headers.get('Authorization')
-
+    print("USERDATACALLS")
     if not authorization_header:
         return jsonify({"error": "Authorization header missing"}), 401
 
@@ -96,5 +96,6 @@ def get_user_data_logged():
     avatar_url = request.args.get("avatarUrl")
 
     user = User.query.filter(User.github_name == user_name).first()
-
+    if user is None:
+        return {"result": {"id_user": "", "login": "", "avatar_url": "", "role": ""}}
     return {"result": {"id_user": user.id, "login": user_name, "avatar_url": avatar_url, "role": user.user_type}}

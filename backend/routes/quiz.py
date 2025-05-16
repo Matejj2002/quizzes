@@ -315,7 +315,6 @@ def get_questions_quiz(index):
     correct_answers = ""
 
     if newest_version.type == "matching_answer_question":
-        print(item)
         if item is not None:
             matching_answs = json.loads(item.answer)
             correct_answers = "\n"
