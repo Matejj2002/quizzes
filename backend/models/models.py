@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 import datetime
+
 db = SQLAlchemy()
 
 
@@ -21,7 +22,6 @@ class Category(db.Model):
     title = db.Column(db.String)
     stug = db.Column(db.String, default='')
     supercategory_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
-
 
     subcategories = db.relationship(
         'Category', backref=db.backref('subcategory', remote_side=[id]),
@@ -170,31 +170,18 @@ class User(db.Model):
     question_version = db.relationship('QuestionVersion', back_populates='author')
 
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'user',
-        'polymorphic_on': user_type
-    }
-
-
-class Teacher(User):
+class Teacher(db.Model):
     __tablename__ = "teachers"
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True, autoincrement=True)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'teacher',
-    }
 
     def __str__(self):
         return self.name
 
 
-class Student(User):
+class Student(db.Model):
     __tablename__ = "students"
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'student',
-    }
 
 # -------
 # Quizy
@@ -211,7 +198,7 @@ class QuizTemplate(db.Model):
 
     is_deleted = db.Column(db.Boolean, default=False)
 
-    version = db.Column(db.Integer, default = 0)
+    version = db.Column(db.Integer, default=0)
 
     order = db.Column(db.ARRAY(db.Integer))  # usporiadanie sekcii
 
@@ -275,8 +262,8 @@ class Quiz(db.Model):
     date_time_correction_started = db.Column(db.DateTime)
     date_time_correction_finished = db.Column(db.DateTime)
     order = db.Column(db.ARRAY(db.Integer))
-    max_points = db.Column(db.DECIMAL(10, 2), default = 0)
-    achieved_points = db.Column(db.DECIMAL(10, 2), default = 0)
+    max_points = db.Column(db.DECIMAL(10, 2), default=0)
+    achieved_points = db.Column(db.DECIMAL(10, 2), default=0)
 
     quiz_template_id = db.Column(db.Integer, db.ForeignKey('quiz_templates.id'))
     # quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
@@ -306,16 +293,15 @@ class QuizItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     answer = db.Column(db.Text)  # Text - ako json, podla typu otazky
     score = db.Column(db.DECIMAL(10, 2))  # Decimal
-    max_points = db.Column(db.DECIMAL(10, 2), default = 0)
+    max_points = db.Column(db.DECIMAL(10, 2), default=0)
 
-    #dorobit order
+    # dorobit order
     order = db.Column(db.ARRAY(db.Integer))
 
     students_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
     teachers_comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
 
     quiz_section_id = db.Column(db.Integer, db.ForeignKey('quiz_sections.id'))
-
 
     # komentar - defaultne null ku otazke - studentske komentare
     # najviac jeden komentar - odkaz na komentar
@@ -326,7 +312,7 @@ class QuizItem(db.Model):
 
     items = db.relationship("QuizSection")
 
-    quiz_template_item_id = db.Column(db.Integer, db.ForeignKey('quiz_template_items.id', ondelete='SET NULL'), nullable=True)
+    quiz_template_item_id = db.Column(db.Integer, db.ForeignKey('quiz_template_items.id', ondelete='SET NULL'),
+                                      nullable=True)
     question_version_id = db.Column(db.Integer, db.ForeignKey('question_versions.id'))
     question_version = db.relationship('QuestionVersion')
-

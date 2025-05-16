@@ -46,7 +46,7 @@ def get_quiz_templates():
         if template_sub is not None:
             result.append(template_sub)
 
-        cnt+=1
+            cnt+=1
 
     return {"result": result, "update_at": update_at}, 200
 
