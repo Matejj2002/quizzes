@@ -74,7 +74,7 @@ const QuizTemplateQuestionItem = ({ type ,indexQuestion, handleOrderChangeItem, 
                             </div>
                         </div>
 
-                        <div className="row">
+                        <div className="row" style={{maxWidth: "390px"}}>
                             <div className="col">
                                 <p className="m-0 text-truncate">{item.text}</p>
                             </div>

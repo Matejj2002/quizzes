@@ -231,7 +231,7 @@ const QuizStatistics = () =>{
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td className="text-end">{attendance[question["item_id"]]?.attendance-attendance[question["item_id"]]?.wrong_answers[ans[5]][2] + "/" +  attendance[question["item_id"]]?.attendance}</td>
+                                                            <td className="text-end">{attendance[question["item_id"]]?.attendance-attendance[question["item_id"]]?.wrong_answers[ans[2]][2] + "/" +  attendance[question["item_id"]]?.attendance}</td>
                                                         </tr>
                                                     )
                                                 )
@@ -248,8 +248,6 @@ const QuizStatistics = () =>{
 
                                     {question.type === "short_answer_question" && attendance[question["item_id"]]?.wrong_answers_show.length > 0 && (
                                         <details>
-                                            {console.log(attendance[question["item_id"]]?.wrong_answers_show)}
-                                            {console.log(evals[question["item_id"]]?.wrong_answers)}
                                             <summary>List of wrong answers</summary>
                                             <WrongAnswersTable
                                                 wrongAnswers={attendance[question["item_id"]]?.wrong_answers_show || []}
@@ -311,11 +309,11 @@ const QuizStatistics = () =>{
                                                                             className="badge text-bg-primary rounded-pill flex-shrink-0">{questionTypes[question.question_type]}</span>
                                                                     </div>
 
-                                                                    <span>Average points: {attendance[question["item_id"]]?.average}/ {attendance[question["item_id"]]?.item_max_points}</span>
-                                                                    <br/>
-                                                                    <span>{attendance[question["item_id"]]?.num_correct_answers} / {quiz.attendance} students has this question correct.</span>
                                                                     <div className="d-flex justify-content-start">
-                                                                    <span>Times in quiz: {question.number_attempts}</span>
+                                                                        <span>Average score {(question.sum_points) / (question.item_max_score * question.number_attempts)} / {question.item_max_score}</span>
+                                                                    </div>
+                                                                    <div className="d-flex justify-content-start">
+                                                                        <span>Times in quiz: {question.number_attempts}</span>
                                                                     </div>
                                                                 </li>
                                                             )

@@ -179,7 +179,11 @@ def quiz_statistics():
                     else:
                         student_incorrect[item.quiz_template_item_id].append(user)
                         template_item = QuizTemplateItem.query.filter(QuizTemplateItem.id==item.quiz_template_item_id).first()
-                        question_version = template_item.question.question_version[-1]
+
+                        try:
+                            question_version = template_item.question.question_version[-1]
+                        except:
+                            continue
 
                         answer = json.loads(item.answer)
                         if template_item.question_type == "questions":
@@ -283,24 +287,15 @@ def quiz_statistics():
 
                                     }
 
-
     for section in template["sections"]:
         for item in section["questions"]:
-            item_score = 0
-            item_max_score = 0
             data = QuizItem.query.filter(QuizItem.quiz_template_item_id == item["item_id"]).all()
             if len(data) == 0:
                 break
 
-            item_full_score = data[0].max_points
-
-            student_answers = []
-            num_correct = 0
             comments = []
 
             for i in data:
-                student_id = i.items.quiz.student_id
-
                 if i.students_comment_id is not None:
                     comment = Comment.query.get(i.students_comment_id)
                     comments.append(["student", comment.text])
@@ -309,117 +304,32 @@ def quiz_statistics():
                     comment = Comment.query.get(i.teachers_comment_id)
                     comments.append(["teacher", comment.text])
 
-                item_score += i.score
-                item_max_score += i.max_points
-
-                answer = json.loads(i.answer)
-                if i.score == 0:
-                    student_answers.append(answer["answer"])
-                else:
-                    num_correct += 1
-
-                if item["item_id"] not in quiz_items:
-                    quiz_items[item["item_id"]] = []
-
-                if item["item_id"] in quiz_items:
-                    if student_id not in quiz_items[item["item_id"]] and i.score > 0:
-                        quiz_items[item["item_id"]].append(student_id)
-
-
             if item["questionType"] == "questions":
                 if item["type"] == "short_answer_question":
                     correct_answer = data[0].question_version.short_answers[0].text
 
-                    result = {}
-                    for i in student_answers:
-                        result[i] = result.get(i, 0) + 1
-
-                    data_app = []
-                    for key, val in result.items():
-                        data_app.append([key, val])
-
-                    student_answers = data_app
-
                 elif item["type"] == "multiple_answer_question":
                     answs = []
-                    multiple_answers_stat = {}
-
                     for i in data[0].question_version.multiple_answers:
                         answs.append([i.id, i.text, i.is_correct])
-                        multiple_answers_stat[i.id] = {"correct": num_correct, "incorrect": 0, "value": i.is_correct,
-                                                       "sum": num_correct}
-
-                    for i in student_answers:
-                        for j in i:
-                            val_j = True
-                            if j[2] == "False":
-                                val_j = False
-
-                            if multiple_answers_stat[j[1]]["value"] == val_j:
-                                multiple_answers_stat[j[1]]["correct"] += 1
-                            else:
-                                multiple_answers_stat[j[1]]["incorrect"] += 1
-                            multiple_answers_stat[j[1]]["sum"] += 1
-
                     correct_answer = answs
-                    student_answers = multiple_answers_stat
+
 
                 else:
                     answs = {}
-                    pair_data = {}
-                    matching_data_corr = {}
                     for pair in data[0].question_version.matching_question:
                         answs[pair.id] = [pair.leftSide, pair.rightSide]
-                        pair_data[pair.id] = pair.rightSide
-                        matching_data_corr[pair.id] = {"correct": num_correct, "incorrect": 0, "sum": num_correct}
-
-                    changed_correct = {}
-                    zoz_id = []
-                    for i in student_answers:
-                        for ans in i:
-                            correct_answer = pair_data.get(ans["pairId"])
-                            student_answer = ans["answer"]
-                            if student_answer == []:
-                                student_answer = "No answer"
-
-                            if student_answer == correct_answer:
-                                matching_data_corr[ans["pairId"]]["correct"] += 1
-                            else:
-                                matching_data_corr[ans["pairId"]]["incorrect"] += 1
-                            matching_data_corr[ans["pairId"]]["sum"] += 1
-
-                            merged_corr_stud = correct_answer + "#->#" + student_answer
-
-                            changed_correct[merged_corr_stud] = changed_correct.get(merged_corr_stud, 0) + 1
-                            zoz_id.append(ans["pairId"]);
-
-                    changed_to_list = []
-                    cnt = 0
-                    for key, val in changed_correct.items():
-                        corr, incorr = key.split("#->#")
-                        changed_to_list.append([corr, incorr, val])
-
-                        cnt += 1
 
                     new_answs = []
                     for key, val in answs.items():
-                        dt = [val[0], val[1], matching_data_corr[key]["correct"], matching_data_corr[key]["incorrect"],
-                              matching_data_corr[key]["sum"], key]
+                        dt = [val[0], val[1], key]
                         new_answs.append(dt)
 
-                    student_answers = changed_to_list
                     correct_answer = new_answs
 
-                    # print(data[0].question_version)
                 question_analysis[item["item_id"]] = {
-                    "item_score": item_score,
-                    "item_max_score": item_max_score,
-                    "item_average_score": round(item_score / len(data), 2),
                     "correct_answer": correct_answer,
-                    "wrong_answers": student_answers,
-                    "item_full_score": item_full_score,
                     "comments": comments,
-
                 }
             else:
                 items = QuizItem.query.filter(QuizItem.quiz_template_item_id == item["item_id"]).all()
@@ -461,11 +371,12 @@ def quiz_statistics():
                     data.append(val)
 
                 question_analysis[item["item_id"]] = {
+                    "item_score": item_scores,
+                    "item_max_score": item_max_score* len(items),
+                    "item_average_score": round(item_scores / len(items), 2),
+                    "wrong_answers": [],
                     "questions": data,
                     "comments": comments,
                 }
-
-    print(attendance_question)
-    print(question_analysis)
 
     return {"result": template, "evals": question_analysis, "attendance": attendance_question}, 200

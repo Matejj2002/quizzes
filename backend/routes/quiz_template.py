@@ -58,6 +58,7 @@ def check_new_quiz_template():
     except:
         data = request.get_json()
 
+    print(data)
     questions_ids = []
     random_questions = []
     random_questions_dict = {}
@@ -81,7 +82,7 @@ def check_new_quiz_template():
     random_questions_ids = []
     for rand_question in random_questions:
         question_type = 0
-        if rand_question["questionAnswerType"] == "Any Type":
+        if rand_question["questionAnswerType"] in ["Any Type", "random"] :
             question_type = 1
         if rand_question["questionAnswerType"] == "Matching Question":
             question_type = 2
@@ -140,7 +141,7 @@ def check_new_quiz_template():
     backtrack(0, [], set(), random_questions_ids, result)
 
     if len(result) == 0:
-        return {"message": False, "error": "Quiz cannot be generated"}
+        return {"message": False, "error": "Quiz cannot be generated", "result":"", "number_of_questions":0}
     else:
         return {"message": True, "result": result,
                 "number_of_questions": len(questions_ids) + len(random_questions_ids)}
