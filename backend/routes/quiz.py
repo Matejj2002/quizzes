@@ -116,7 +116,8 @@ def new_quiz_student():
                         question_version_id=quiz_item.question_version_id,
                         quiz_section_id=new_section.id,
                         order=quiz_item.order,
-                        max_points=0
+                        max_points=0,
+                        quiz_template_item_id=quiz_item.quiz_template_item_id
                     )
 
                     db.session.add(new_item)

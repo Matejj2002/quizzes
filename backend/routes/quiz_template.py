@@ -199,7 +199,8 @@ def create_new_quiz_template():
                     question_item = QuizTemplateItem(
                         question_id=question["id"],
                         evaluate=question["evaluation"],
-                        item_section_id=section_added.id
+                        item_section_id=section_added.id,
+                        question_type= "questions"
                     )
 
                     db.session.add(question_item)
@@ -212,7 +213,7 @@ def create_new_quiz_template():
                         category_id=question["categoryId"],
                         evaluate=question["evaluation"],
                         include_sub_categories=question["includeSubCategories"],
-                        question_type=question["questionAnswerType"]
+                        question_type="random"
 
                     )
 

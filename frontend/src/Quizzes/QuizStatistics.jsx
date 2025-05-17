@@ -11,7 +11,7 @@ const QuizStatistics = () =>{
     const [userRole] = useState(location.state?.userRole || undefined)
     const [data, setData] = useState([]);
     const [evals, setEvals] = useState([]);
-    const [studentsCorrect, setStudentsCorrect] = useState([]);
+    const [attendance, setAttendance] = useState([]);
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
         const questionTypes = {"matching_answer_question": "Matching Question", "short_answer_question" : "Short Question", "multiple_answer_question": "Multiple Choice"};
@@ -27,7 +27,7 @@ const QuizStatistics = () =>{
 
             setData(response.data.result)
             setEvals(response.data.evals);
-            setStudentsCorrect(response.data.correct_students);
+            setAttendance(response.data.attendance);
 
       }catch (error){
       }
@@ -40,6 +40,19 @@ const QuizStatistics = () =>{
 
     if (userRole !=="teacher" || userRole === undefined){
         navigate("/quizzes");
+    }
+
+    function getProgressWidth(attendance, question, ans) {
+        const item = attendance?.[question["item_id"]];
+        const total = item?.attendance;
+        const wrong = item?.wrong_answers?.[ans[0]]?.[1];
+
+        if (!total || typeof total !== "number") return "0%";
+
+        const correct = (wrong != null) ? (total - wrong) : total;
+        const percentage = Math.round((correct / total) * 100);
+
+        return percentage;
     }
 
     return (
@@ -123,6 +136,7 @@ const QuizStatistics = () =>{
                                                 <div className="form-check" key={ind}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
+                                                           style={{ pointerEvents: 'none' }}
                                                            defaultChecked={ans[2] === true}
                                                     />
                                                     <div className="d-flex justify-content-between">
@@ -136,12 +150,11 @@ const QuizStatistics = () =>{
                                                             <div className="progress" role="progressbar"
                                                                  aria-label="Segment one" aria-valuenow="0"
                                                                  aria-valuemin="0" aria-valuemax="100" style={{
-                                                                width:
-                                                                    `${Math.round((evals[question["item_id"]].wrong_answers[ans[0]]?.correct / evals[question["item_id"]]?.wrong_answers[ans[0]].sum) *100)}%`
-                                                            }}
+                                                                    width:`${getProgressWidth(attendance, question, ans)}%`
+                                                                }}
                                                             >
                                                                 <div
-                                                                    className="progress-bar bg-success">{Math.round((evals[question["item_id"]]?.wrong_answers[ans[0]].correct / evals[question["item_id"]]?.wrong_answers[ans[0]].sum) * 100)}%
+                                                                    className="progress-bar bg-success">{getProgressWidth(attendance, question, ans)}%
                                                                 </div>
                                                             </div>
                                                             <div className="progress" role="progressbar"
@@ -149,12 +162,12 @@ const QuizStatistics = () =>{
                                                                  aria-valuemin="0" aria-valuemax="100" style={{
                                                                 width:
 
-                                                                    `${100-Math.round((evals[question["item_id"]]?.wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%`
+                                                                    `${100-getProgressWidth(attendance, question, ans)}%`
                                                             }}
 
                                                             >
                                                                 <div
-                                                                    className="progress-bar bg-danger">{100-Math.round((evals[question["item_id"]].wrong_answers[ans[0]].correct / evals[question["item_id"]].wrong_answers[ans[0]].sum) * 100)}%
+                                                                    className="progress-bar bg-danger">{100-getProgressWidth(attendance, question, ans)}%
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -218,7 +231,7 @@ const QuizStatistics = () =>{
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td className="text-end">{ans[2] + "/" +  ans[4]}</td>
+                                                            <td className="text-end">{attendance[question["item_id"]]?.attendance-attendance[question["item_id"]]?.wrong_answers[ans[5]][2] + "/" +  attendance[question["item_id"]]?.attendance}</td>
                                                         </tr>
                                                     )
                                                 )
@@ -229,28 +242,27 @@ const QuizStatistics = () =>{
                                     )
                                     }
 
-
-                                    <span>{evals[question["item_id"]]?.item_score}/ {evals[question["item_id"]]?.item_max_score}</span>
+                                    <span>Average points: {attendance[question["item_id"]]?.average}/ {attendance[question["item_id"]]?.item_max_points}</span>
                                     <br/>
-                                    <span>Average points: {evals[question["item_id"]]?.item_average_score}/ {evals[question["item_id"]]?.item_full_score}</span>
-                                    <br/>
-                                    <span>{studentsCorrect[question["item_id"]]?.length} / {quiz.attendance} students has this question correct.</span>
+                                    <span>{attendance[question["item_id"]]?.num_correct_answers} / {quiz.attendance} students has this question correct.</span>
 
-                                    {question.type === "short_answer_question" && evals[question["item_id"]]?.wrong_answers.length > 0 && (
+                                    {question.type === "short_answer_question" && attendance[question["item_id"]]?.wrong_answers_show.length > 0 && (
                                         <details>
+                                            {console.log(attendance[question["item_id"]]?.wrong_answers_show)}
+                                            {console.log(evals[question["item_id"]]?.wrong_answers)}
                                             <summary>List of wrong answers</summary>
                                             <WrongAnswersTable
-                                                wrongAnswers={evals[question["item_id"]]?.wrong_answers}
+                                                wrongAnswers={attendance[question["item_id"]]?.wrong_answers_show || []}
                                                 tableCols={["Answer", "Occurencies"]} colsSize={["w-75", "w-50 text-center"]}
                                                 colsType={["string", "int"]}
                                             title={"AA"}></WrongAnswersTable>
                                         </details>
                                     )}
-                                    {question.type === "matching_answer_question" && evals[question["item_id"]]?.wrong_answers.length > 0 && (
+                                    {question.type === "matching_answer_question" && attendance[question["item_id"]]?.wrong_answers_show.length > 0 && (
                                         <details>
                                             <summary>List of wrong answers</summary>
                                             <WrongAnswersTable
-                                                wrongAnswers={evals[question["item_id"]]?.wrong_answers}
+                                                wrongAnswers={attendance[question["item_id"]]?.wrong_answers_show}
                                                 tableCols={["Left Side", "Right Side", "Occurencies"]}
                                                 colsSize={["w-50", "w-50", "w-25"]}
                                                 colsType={["string", "string", "int"]}
@@ -299,14 +311,11 @@ const QuizStatistics = () =>{
                                                                             className="badge text-bg-primary rounded-pill flex-shrink-0">{questionTypes[question.question_type]}</span>
                                                                     </div>
 
+                                                                    <span>Average points: {attendance[question["item_id"]]?.average}/ {attendance[question["item_id"]]?.item_max_points}</span>
+                                                                    <br/>
+                                                                    <span>{attendance[question["item_id"]]?.num_correct_answers} / {quiz.attendance} students has this question correct.</span>
                                                                     <div className="d-flex justify-content-start">
-                                                                        <span>Item score {question.item_score} / {question.item_max_score}</span>
-                                                                    </div>
-                                                                    <div className="d-flex justify-content-start">
-                                                                        <span>Average score {(question.sum_points) / (question.item_max_score * question.number_attempts)} / {question.item_max_score}</span>
-                                                                    </div>
-                                                                    <div className="d-flex justify-content-start">
-                                                                        <span>Times in quiz: {question.number_attempts}</span>
+                                                                    <span>Times in quiz: {question.number_attempts}</span>
                                                                     </div>
                                                                 </li>
                                                             )

@@ -119,13 +119,13 @@ def get_students_results():
 
     titles = "name,"
     for i in quiz_templates[:-1]:
-        titles += i.title + ","
+        titles += i.title.replace(" ", "_") + ","
 
-    titles += quiz_templates[-1].title + "sum_points" + "\n"
+    titles += quiz_templates[-1].title.replace(" ", "_") + ",sum_points" + "\n"
 
     data = ""
-    cnt = 1
     for student in students:
+        print(student)
         data += f"{student.github_name},"
         sum_points = 0
         for qt in quiz_templates:
@@ -141,7 +141,6 @@ def get_students_results():
             else:
                 data += "0,"
 
-        cnt += 1
         data += f"{sum_points}\n"
 
     return {"result": titles + data}, 200
@@ -154,14 +153,144 @@ def quiz_statistics():
 
     question_analysis = {}
     quiz_items = {}
+
+    users = set([i.id for i in User.query.all()])
+
+
+    student_correct = {}
+    student_incorrect = {}
+    wrong_answers_quiz = {}
+    items = {}
+    for user in users:
+        qz = Quiz.query.filter(Quiz.quiz_template_id == template["id"], Quiz.student_id == user).order_by(desc(Quiz.date_time_started)).first()
+
+        if qz is not None:
+            for section in qz.quiz_sections:
+                for item in section.quiz_items:
+                    items[item.quiz_template_item_id] = item
+
+                    if item.quiz_template_item_id not in student_correct:
+                        student_correct[item.quiz_template_item_id] = []
+                        student_incorrect[item.quiz_template_item_id] = []
+
+                    if item.quiz_template_item_id in student_correct and item.score > 0:
+                        student_correct[item.quiz_template_item_id].append([user, item.score])
+
+                    else:
+                        student_incorrect[item.quiz_template_item_id].append(user)
+                        template_item = QuizTemplateItem.query.filter(QuizTemplateItem.id==item.quiz_template_item_id).first()
+                        question_version = template_item.question.question_version[-1]
+
+                        answer = json.loads(item.answer)
+                        if template_item.question_type == "questions":
+                            if question_version.type == "short_answer_question":
+
+                                if item.quiz_template_item_id not in wrong_answers_quiz:
+                                    wrong_answers_quiz[item.quiz_template_item_id] = []
+
+                                if item.quiz_template_item_id in wrong_answers_quiz:
+                                    wrong_answers_quiz[item.quiz_template_item_id].append(answer["answer"])
+
+                            elif question_version.type == "multiple_answer_question":
+                                choices = {}
+                                for choice in question_version.multiple_answers:
+                                    choices[choice.id] = choice.is_correct
+
+                                wrong_answers_question = {}
+                                for answ in answer["answer"]:
+                                    answer_user = eval(answ[2])
+                                    if choices[answ[1]] != answer_user:
+                                        if answ[1] not in wrong_answers_question:
+                                            wrong_answers_question[answ[1]] = []
+
+                                        if answ[1] in wrong_answers_question:
+                                            wrong_answers_question[answ[1]] = {"correct": answer_user, "incorrect": choices[answ[1]]}
+
+                                if item.quiz_template_item_id not in wrong_answers_quiz:
+                                    wrong_answers_quiz[item.quiz_template_item_id] = []
+
+                                if item.quiz_template_item_id in wrong_answers_quiz:
+                                    wrong_answers_quiz[item.quiz_template_item_id].append(wrong_answers_question)
+
+                            else:
+                                matchings = {}
+                                for matching in question_version.matching_question:
+                                    matchings[matching.id] = {
+                                        "left_side": matching.leftSide,
+                                        "right_side": matching.rightSide
+                                    }
+
+                                wrong_answers_question = {}
+                                for answ in answer["answer"]:
+                                    pair = matchings[answ["pairId"]]
+
+                                    if answ["pairId"] not in wrong_answers_question:
+                                        wrong_answers_question[answ["pairId"]] = []
+
+                                    if answ["pairId"] in wrong_answers_question:
+                                        wrong_answers_question[answ["pairId"]] = {"correct": pair["right_side"], "incorrect": answ["answer"]}
+
+
+                                if item.quiz_template_item_id not in wrong_answers_quiz:
+                                    wrong_answers_quiz[item.quiz_template_item_id] = []
+
+                                if item.quiz_template_item_id in wrong_answers_quiz:
+                                    wrong_answers_quiz[item.quiz_template_item_id].append(wrong_answers_question)
+
+    attendance_question = {}
+    for key in student_correct.keys():
+        attendance = len(student_correct[key]) + len(student_incorrect[key])
+
+        wrong_answs_pom = {}
+        typeQ = "eQ"
+        if key in wrong_answers_quiz:
+            for a in wrong_answers_quiz[key]:
+                if type(a) == str:
+                    typeQ="sQ"
+                    if a not in wrong_answs_pom:
+                        wrong_answs_pom[a] = 1
+                    else:
+                        wrong_answs_pom[a]+=1
+                else:
+                    typeQ = "lQ"
+                    for key1, val in a.items():
+                        if key1 not in wrong_answs_pom:
+                            wrong_answs_pom[key1] = [val["correct"], val["incorrect"], 0]
+
+                        if key1 in wrong_answs_pom:
+                            wrong_answs_pom[key1][2]+=1
+
+        wrong_answers_show=[]
+        if typeQ == "eQ":
+            wrong_answers_show = []
+
+        elif typeQ == "sQ":
+            for k, v in wrong_answs_pom.items():
+                wrong_answers_show.append([k,v])
+
+        else:
+            for k, v in wrong_answs_pom.items():
+                wrong_answers_show.append(v)
+
+        attendance_question[key] = {"attendance": attendance,
+                                    "average": sum([i[1] for i in student_correct[key]]) / attendance,
+                                    "sum_points": sum([i[1] for i in student_correct[key]]),
+                                    "item_max_points": items[key].max_points,
+                                    "num_correct_answers": len(student_correct[key]),
+                                    "num_incorrect_answers": len(student_incorrect[key]),
+                                    "wrong_answers": wrong_answs_pom,
+                                    "wrong_answers_show": wrong_answers_show,
+
+                                    }
+
+
     for section in template["sections"]:
         for item in section["questions"]:
             item_score = 0
             item_max_score = 0
             data = QuizItem.query.filter(QuizItem.quiz_template_item_id == item["item_id"]).all()
-            if len(data)==0:
+            if len(data) == 0:
                 break
-            student_id = data[0].items.quiz.student_id
 
             item_full_score = data[0].max_points
 
@@ -170,6 +299,8 @@ def quiz_statistics():
             comments = []
 
             for i in data:
+                student_id = i.items.quiz.student_id
+
                 if i.students_comment_id is not None:
                     comment = Comment.query.get(i.students_comment_id)
                     comments.append(["student", comment.text])
@@ -187,11 +318,13 @@ def quiz_statistics():
                 else:
                     num_correct += 1
 
+                if item["item_id"] not in quiz_items:
+                    quiz_items[item["item_id"]] = []
+
                 if item["item_id"] in quiz_items:
                     if student_id not in quiz_items[item["item_id"]] and i.score > 0:
                         quiz_items[item["item_id"]].append(student_id)
-                else:
-                    quiz_items[item["item_id"]] = []
+
 
             if item["questionType"] == "questions":
                 if item["type"] == "short_answer_question":
@@ -271,7 +404,7 @@ def quiz_statistics():
                     new_answs = []
                     for key, val in answs.items():
                         dt = [val[0], val[1], matching_data_corr[key]["correct"], matching_data_corr[key]["incorrect"],
-                              matching_data_corr[key]["sum"]]
+                              matching_data_corr[key]["sum"], key]
                         new_answs.append(dt)
 
                     student_answers = changed_to_list
@@ -328,13 +461,11 @@ def quiz_statistics():
                     data.append(val)
 
                 question_analysis[item["item_id"]] = {
-                    "item_score": item_scores,
-                    "item_max_score": item_max_score* len(items),
-                    "item_average_score": round(item_scores / len(items), 2),
-                    "wrong_answers": [],
-                    "item_full_score": item_full_score,
                     "questions": data,
                     "comments": comments,
                 }
 
-    return {"result": template, "evals": question_analysis, "correct_students": quiz_items}, 200
+    print(attendance_question)
+    print(question_analysis)
+
+    return {"result": template, "evals": question_analysis, "attendance": attendance_question}, 200
