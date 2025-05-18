@@ -7,6 +7,7 @@ const Quiz = () => {
     const navigate = useNavigate();
 
     const [quizzes, setQuizzes] = useState([]);
+    const [quizzesPom, setQuizzesPom] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updateAt, setUpdateAt] = useState(null);
     const [userData, setUserData] = useState([]);
@@ -23,12 +24,21 @@ const Quiz = () => {
             setQuizzes(response.data.result);
             setUpdateAt(response.data.update_at);
 
+            const response2 = await axios.get(apiUrl+`get-quizzes-analysis`, {
+                params: {
+                    "filterName": ""
+                }
+            })
+            setQuizzesPom(response2.data.result);
+
       }catch (error){
             console.error(error);
             window.location.href=quizzesUrl+"/login";
       }
        finally {}
     }
+
+    console.log(quizzesPom);
 
     async function getUserLogged(){
 
@@ -131,6 +141,14 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
         )
     }
 
+    const getQuizData = (template_id) =>{
+        for (let i = 0; i < quizzesPom.length; i++) {
+            if (quizzesPom[i].quiz_template_id === template_id){
+                return quizzesPom[i];
+            }
+        }
+    }
+
     if (localStorage.getItem("data") === null || localStorage.getItem("data")==='{}' ){
         window.location.href = quizzesUrl+"/login";
     }
@@ -148,7 +166,7 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
                             {userData["role"] !== "student" && (
                                 <button className="btn btn-primary mb-3" onClick={() => {
                                     navigate('/new-quiz', {
-                                        state:{
+                                        state: {
                                             userRole: userData["role"]
                                         }
                                     });
@@ -159,16 +177,21 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
 
                             {quizzes.map((quiz, ind) => {
                                     return (
-                                        <div className={`border p-3 mb-3 mt-3 ${quiz.actual_quiz ? 'border-success' : ''}`} key={ind}>
+                                        <div
+                                            className={`border p-3 mb-3 mt-3 ${quiz.actual_quiz ? 'border-success' : ''}`}
+                                            key={ind}>
                                             <div className="d-flex justify-content-between">
                                                 <div className="d-flex">
                                                     <h2 className="h5">
                                                         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                                        <a href="#" className="text-decoration-none me-1"
-                                                           {...(userData["role"] !== "student"
-                                                               ? {onClick: (e) => handleUpdateQuiz(e, quiz)}
-                                                               : {})}
-                                                        >{quiz.title}</a>
+                                                        {userData["role"] === "teacher" ? (
+                                                            <a href="#" className="text-decoration-none me-1"
+                                                               onClick={(e) => handleUpdateQuiz(e, quiz)}
+
+                                                            >{quiz.title}</a>
+                                                        ) : (
+                                                            <h5>{quiz.title}</h5>
+                                                        )}
                                                     </h2>
 
 
@@ -217,11 +240,12 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
 
                                             {quiz.quizzes.length > 1 && !quiz.time_limit_end && (
                                                 <details className="mb-3">
-                                                    <summary className="mb-1">Older attempts ({quiz.quizzes.length-1})
+                                                    <summary className="mb-1">Older attempts ({quiz.quizzes.length - 1})
                                                     </summary>
                                                     {quiz.quizzes.slice(1).map((qz, ind) => (
                                                             <div
-                                                                className="d-flex justify-content-between align-items-start border p-3" key={"rew-"+ind.toString()}>
+                                                                className="d-flex justify-content-between align-items-start border p-3"
+                                                                key={"rew-" + ind.toString()}>
                                                                 <div>
                                                                     <span>Attempt {ind + 1}</span>
                                                                     <p className="text-secondary mb-0">Finished
@@ -344,8 +368,39 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
                                                     )}
                                                 </div>
                                             )}
+                                            <div className="mt-3">
+                                                <button type="button" className="btn btn-outline-primary me-1"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            navigate("/quiz-all-users", {
+                                                                state: {
+                                                                    quiz: getQuizData(quiz.id),
+                                                                    userRole: userData["role"],
+                                                                }
+                                                            });
+                                                        }
+                                                        }
+                                                >
+                                                    Results
+                                                </button>
 
+                                                <button type="button" className="btn btn-outline-primary"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            navigate("/quiz-analysis-show", {
+                                                                state: {
+                                                                    quiz: getQuizData(quiz.id),
+                                                                    userRole: userData["role"],
+                                                                }
+                                                            });
+                                                        }
+                                                        }
+                                                >
+                                                    Analysis
+                                                </button>
+                                            </div>
                                         </div>
+
                                     )
                                 }
                             )

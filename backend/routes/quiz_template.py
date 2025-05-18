@@ -58,7 +58,6 @@ def check_new_quiz_template():
     except:
         data = request.get_json()
 
-    print(data)
     questions_ids = []
     random_questions = []
     random_questions_dict = {}
@@ -66,6 +65,9 @@ def check_new_quiz_template():
     for section in data:
         for question in section["questions"]:
             if question["questionType"] == "questions":
+                if question["id"] in questions_ids:
+                    return {"message": False, "error": "Quiz cannot be generated, there is same question twice", "result": "",
+                            "number_of_questions": 0}
                 questions_ids.append(question["id"])
             else:
                 random_questions.append(question)

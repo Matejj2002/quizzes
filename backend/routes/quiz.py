@@ -116,7 +116,7 @@ def new_quiz_student():
                         question_version_id=quiz_item.question_version_id,
                         quiz_section_id=new_section.id,
                         order=quiz_item.order,
-                        max_points=0,
+                        max_points=quiz_item.max_points,
                         quiz_template_item_id=quiz_item.quiz_template_item_id
                     )
 
@@ -137,22 +137,23 @@ def new_quiz_student():
 def get_quiz_student_load():
     student_id = request.args.get('student_id')
     quiz_id = request.args.get('quiz_id')
+    load_type = request.args.get("load_type")
 
-    quiz = Quiz.query.filter(
-        Quiz.student_id == int(student_id),
-        Quiz.id == int(quiz_id)
-    ).order_by(desc(Quiz.date_time_started)).first()
-
-    if quiz is None:
+    if load_type == "review":
         quiz = Quiz.query.filter(
             Quiz.student_id == int(student_id),
-            Quiz.id == Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id),
-                                         Quiz.student_id == int(student_id)).order_by(
-                desc(Quiz.date_time_started)).first().id
+            Quiz.quiz_template_id == int(quiz_id)
         ).order_by(desc(Quiz.date_time_started)).first()
 
-        quiz_id = int(
-            Quiz.query.filter(Quiz.quiz_template_id == int(quiz_id)).order_by(desc(Quiz.date_time_started)).first().id)
+        quiz_id = quiz.id
+
+    if load_type == "attempt":
+        quiz = Quiz.query.filter(
+            Quiz.student_id == int(student_id),
+            Quiz.id == int(quiz_id)
+        ).order_by(desc(Quiz.date_time_started)).first()
+
+        quiz_id = quiz.id
 
     result = {"sections": [], "start_time": quiz.date_time_started,
               "minutes_to_finish": quiz.quiz_template.time_to_finish,

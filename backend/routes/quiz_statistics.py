@@ -152,7 +152,6 @@ def quiz_statistics():
     template = get_quiz_template(0, template_id)[0]
 
     question_analysis = {}
-    quiz_items = {}
 
     users = set([i.id for i in User.query.all()])
 
@@ -386,7 +385,8 @@ def quiz_statistics():
 def get_quiz_students_results():
     quiz_template_id = request.args.get("template_id")
 
-    students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
+    # students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
+    students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.all()]
 
 
     results = []
@@ -415,6 +415,7 @@ def get_quiz_students_results():
                 if cnt == 0:
                     sum_points += quiz.achieved_points
                     max_points = quiz.max_points
+
                 quizzes.append(
                     {
                         "points": quiz.achieved_points,
@@ -431,8 +432,12 @@ def get_quiz_students_results():
         results.append(quiz_students)
 
         if max_points !=0:
-            average_points = sum_points / num_quizzes
-            average_points_perc = round((sum_points / (max_points * num_quizzes) *100), 2)
+            if num_quizzes == 0:
+                average_points = 0
+                average_points_perc = 0
+            else:
+                average_points = sum_points / num_quizzes
+                average_points_perc = round((sum_points / (max_points * num_quizzes) *100), 2)
         else:
             average_points = 0
             average_points_perc=0

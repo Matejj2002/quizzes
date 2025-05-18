@@ -51,7 +51,8 @@ const QuizReview = () =>{
                 {
                     params: {
                         student_id: userId,
-                        quiz_id: quizId
+                        quiz_id: quizId,
+                        load_type: "review"
                     }
                 }
             )
@@ -384,26 +385,26 @@ const QuizReview = () =>{
                                     )}
 
                                     {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
-                                        <p className="p-3 rounded"
+                                        <div className="p-3 rounded"
                                            style={{
                                                background: "rgba(255, 0, 0, 0.3)"
                                            }}>
                                             <FormattedTextRenderer
                                             text = {questionsData[question.id]?.feedback}
                                                 />
-                                        </p>
+                                        </div>
                                     )
                                     }
 
                                     {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
-                                        <p className="p-3 rounded"
+                                        <div className="p-3 rounded"
                                            style={{
                                                background: "rgba(155,236,137,0.15)"
                                            }}>
                                             <FormattedTextRenderer
                                             text = {questionsData[question.id]?.feedback}
                                                 />
-                                        </p>
+                                        </div>
                                     )
                                     }
 

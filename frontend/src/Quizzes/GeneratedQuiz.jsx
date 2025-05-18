@@ -20,6 +20,7 @@ const GeneratedQuiz = () => {
     const [minutesToFinish] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
     const [loadQuestions, setLoadQuestions] = useState(false);
+    const [disableButtons, setDisableButtons] = useState(false);
 
     const [feedbackQuestion, setFeedbackQuestion] = useState([]);
 
@@ -168,12 +169,14 @@ const GeneratedQuiz = () => {
             "finalSave": finalSave,
             "studentId": userId
         }
+        setDisableButtons(true);
         axios.put(apiUrl+`quiz_set_answers`, updatedData).then( () =>{
                 if (finalSave){
                     window.location.href = quizzesUrl+"/quizzes";
                 }
                 setTimeout(() => {
                 setIsSaving(false);
+                setDisableButtons(false);
 
             }, 3000);
 
@@ -182,6 +185,7 @@ const GeneratedQuiz = () => {
         ).catch( () => {
             setTimeout(() => {
                 setIsSaving(false);
+                console.log("AAAA");
             }, 3000);
         })
 
@@ -205,7 +209,8 @@ const GeneratedQuiz = () => {
                                     {
                                         params: {
                                             student_id: userId,
-                                            quiz_id: response.data["quiz_id"]
+                                            quiz_id: response.data["quiz_id"],
+                                            load_type: "attempt"
                                         }
                                     }
                                 )
@@ -246,7 +251,7 @@ const GeneratedQuiz = () => {
                                 setCount(response.data.time_to_finish *60)
                             }
 
-                            // setLoading(false);
+                            setLoading(false);
                         }
                     )
                     .catch(error => {
@@ -278,6 +283,9 @@ const GeneratedQuiz = () => {
 
         return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
+
+
+    console.log(loading)
 
     if (loading) {
         return (
@@ -568,6 +576,7 @@ const GeneratedQuiz = () => {
                         <br></br>
                         <div className="d-flex justify-content-between">
                             <button type="button" className="btn btn-outline-secondary"
+                                    disabled={disableButtons}
                                     onClick={() => {
                                         if (count !== -1) {
                                             handleSaveQuiz(false);
@@ -591,7 +600,7 @@ const GeneratedQuiz = () => {
                                 )}
                                     <button type="button" className="btn btn-success"
                                             style={{marginRight: '3px'}}
-                                            disabled={count===-1}
+                                            disabled={count===-1 || disableButtons}
                                             onClick={() => handleSaveQuiz(false)}
                                     >
                                         Save
@@ -600,7 +609,7 @@ const GeneratedQuiz = () => {
                                     {page+1 >= quiz.sections.length ? (
                                         <button type="button" className="btn btn-primary"
                                                 style={{marginRight: '3px'}}
-                                                disabled={count === -1}
+                                                disabled={count === -1 || disableButtons}
                                                 onClick={() => handleSaveQuiz(true)}
                                         >
                                             Save & Finish
