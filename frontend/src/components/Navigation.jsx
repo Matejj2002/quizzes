@@ -65,10 +65,13 @@ const Navigation = ({active}) => {
                            aria-disabled={userData["role"] !== "teacher"}
                            href={`${quizzesUrl}/quiz-analysis`}>Analysis</a>
 
+                        <a className={`nav-link ${active === "Results" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
+                           aria-disabled={userData["role"] !== "teacher"}
+                           href={`${quizzesUrl}/quiz-statistics-table`}>Results</a>
+
                         <a className={`nav-link ${active === "Users" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={userData["role"] !== "teacher"}
                            href={`${quizzesUrl}/users`}>Users</a>
-
 
                     </div>
                 </div>

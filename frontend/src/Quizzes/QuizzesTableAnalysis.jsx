@@ -3,7 +3,7 @@ import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const QuizzesTableAnalysis = () =>{
+const QuizzesTableAnalysis = ({statisticsNavigate = "/quiz-analysis-show", activeNav = "Analysis", title="Quiz Analysis"}) =>{
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -87,14 +87,14 @@ const QuizzesTableAnalysis = () =>{
 
     return (
         <div>
-            <Navigation active = {"Analysis"}></Navigation>
+            <Navigation active = {activeNav}></Navigation>
 
                 <div className="container-fluid">
                     <div className="row">
                         <div className="col-2 sidebar"></div>
 
                         <div className="col-8">
-                            <h1>Quiz Analysis</h1>
+                            <h1>{title}</h1>
 
                             <div className="mb-3">
                                 <label htmlFor="search" className="form-label">Filter by Quiz Name</label>
@@ -136,7 +136,7 @@ const QuizzesTableAnalysis = () =>{
                                                     <button type="button" className="btn btn-outline-primary"
                                                             onClick={(e) => {
                                                                 e.preventDefault();
-                                                                navigate("/quiz-statistics", {
+                                                                navigate(statisticsNavigate, {
                                                                 state: {
                                                                     quiz: quiz,
                                                                     userRole: userData["role"],

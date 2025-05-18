@@ -14,7 +14,9 @@ import QuizReview from "./Quizzes/QuizReview";
 import Users from "./Users/Users";
 import UserStatistics from "./Users/UserStatistics";
 import QuizzesTableAnalysis from "./Quizzes/QuizzesTableAnalysis";
+import QuizAnalysis from "./Quizzes/QuizAnalysis";
 import QuizStatistics from "./Quizzes/QuizStatistics";
+import QuizAllUsersEvals from "./Quizzes/QuizAllUsersEvals";
 
 
 console.log('BASENAME:', process.env.REACT_APP_BASENAME);
@@ -39,7 +41,10 @@ function App() {
                   <Route path="/quiz-analysis" element={<QuizzesTableAnalysis />} />
                   <Route path="/generated-quiz" element={<GeneratedQuiz />} />
                   <Route path="/review-quiz" element={<QuizReview/>}></Route>
-                  <Route path="/quiz-statistics" element={<QuizStatistics/>}></Route>
+                  <Route path="/quiz-analysis-show" element={<QuizAnalysis/>}></Route>
+                  <Route path="/quiz-statistics-table" element={<QuizStatistics/>}></Route>
+                  <Route path="/quiz-all-users" element={<QuizAllUsersEvals/>}></Route>
+
               </Routes>
       </div>
   );

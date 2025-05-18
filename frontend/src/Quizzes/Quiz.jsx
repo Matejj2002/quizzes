@@ -208,11 +208,11 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
 
                                             <div className="mb-3 text-truncate">
                                             <span
-                                                className="m-0 text-secondary">Time to finish (Minutes): {quiz["time_to_finish"]}</span><br/>
+                                                className="m-0">Time to finish (Minutes): {quiz["time_to_finish"]}</span><br/>
                                                 <span
-                                                    className="m-0 text-secondary">Opened from {getDate(quiz["date_time_open"])} to {getDate(quiz["date_time_close"])}</span><br/>
+                                                    className="m-0">Opened from {getDate(quiz["date_time_open"])} to {getDate(quiz["date_time_close"])}</span><br/>
                                                 <span
-                                                    className="m-0 text-secondary">Check from {getDate(quiz["datetime_check"])}</span><br/>
+                                                    className="m-0">Check from {getDate(quiz["datetime_check"])}</span><br/>
                                             </div>
 
                                             {quiz.quizzes.length > 1 && !quiz.time_limit_end && (
