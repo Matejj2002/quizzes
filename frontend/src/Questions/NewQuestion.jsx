@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {useParams, useNavigate} from 'react-router-dom';
+import { Toast, ToastContainer, Button } from 'react-bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -25,14 +26,18 @@ const NewQuestion = ({subButText="Submit"}) => {
     const apiUrl = process.env.REACT_APP_API_URL;
 
     let titleText = "";
+    let buttonText = "";
     if (subButText === "Submit"){
         titleText = "New Question";
+        buttonText = "Create Question";
     }
     if (subButText === "Copy"){
         titleText = "Copy of " + location.state["questionTitle"];
+        buttonText = "Copy Question"
     }
     if (subButText === "Update"){
         titleText = "Update Question";
+        buttonText = "Update Question"
     }
 
     const [category, setCategory] = useState([]);
@@ -68,6 +73,13 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions || false);
 
+    const [showToast, setShowToast] = useState(false);
+
+      const handleShowToast = () => {
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
+      };
+
     const saveChanges = () => {
         let answersSel = []
         if (questionType === "Matching Question"){
@@ -95,16 +107,16 @@ const NewQuestion = ({subButText="Submit"}) => {
                 axios.put(apiUrl+`questions/new-question`, updatedData)
                     .then(response => {
                         if (createMoreQuestions){
-                            setTitle("");
-                            setText("");
-                            setQuestionType("Matching Question");
-                            setSelectedCategoryId(idQ);
-                            setSelectedCategory(selectedCategory1);
-                            setCategorySelect("");
-                            setAnswers({});
-                            setQuestionFeedback("");
-                            setQuestionPositiveFeedback("");
-                            setCheckSubmit([]);
+                            // setTitle("");
+                            // setText("");
+                            // setQuestionType("Matching Question");
+                            // setSelectedCategoryId(idQ);
+                            // setSelectedCategory(selectedCategory1);
+                            // setCategorySelect("");
+                            // setAnswers({});
+                            // setQuestionFeedback("");
+                            // setQuestionPositiveFeedback("");
+                            // setCheckSubmit([]);
                             sessionStorage.setItem("scrollToTop", "true");
                             navigate(`/question/new-question`, {
                                             state: {
@@ -123,7 +135,9 @@ const NewQuestion = ({subButText="Submit"}) => {
                                                 scrollTop: true
                                             }
                                         });
-                             window.location.reload();
+                             // window.location.reload();
+                            handleShowToast();
+                            window.scrollTo(0,0);
                         }else {
                             window.location.href = quizzesUrl+'/questions';
                         }
@@ -417,7 +431,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                                 saveChanges();
                                             }
                                             }
-                                    >{subButText}
+                                    >{buttonText}
                                     </button>
                                 </div>
                             </div>
@@ -426,6 +440,15 @@ const NewQuestion = ({subButText="Submit"}) => {
                         <div className="col-2"></div>
                     </div>
                 </div>
+
+                <ToastContainer position="bottom-end" className="p-3">
+                <Toast show={showToast} onClose={() => setShowToast(false)} bg="success">
+                  <Toast.Header closeButton>
+                    <strong className="me-auto">Question {title} was created.</strong>
+                  </Toast.Header>
+                  <Toast.Body className="text-white">Created sucesfully.</Toast.Body>
+                </Toast>
+              </ToastContainer>
             </div>
         )
 }
