@@ -179,7 +179,6 @@ def quiz_statistics():
                     else:
                         student_incorrect[item.quiz_template_item_id].append(user)
                         template_item = QuizTemplateItem.query.filter(QuizTemplateItem.id==item.quiz_template_item_id).first()
-
                         try:
                             question_version = template_item.question.question_version[-1]
                         except:
@@ -203,12 +202,14 @@ def quiz_statistics():
                                 wrong_answers_question = {}
                                 for answ in answer["answer"]:
                                     answer_user = eval(answ[2])
-                                    if choices[answ[1]] != answer_user:
-                                        if answ[1] not in wrong_answers_question:
-                                            wrong_answers_question[answ[1]] = []
+                                    print(type(answ[1]), answ[1], choices)
+                                    if answ[1] in choices:
+                                        if choices[answ[1]] != answer_user:
+                                            if answ[1] not in wrong_answers_question:
+                                                wrong_answers_question[answ[1]] = []
 
-                                        if answ[1] in wrong_answers_question:
-                                            wrong_answers_question[answ[1]] = {"correct": answer_user, "incorrect": choices[answ[1]]}
+                                            if answ[1] in wrong_answers_question:
+                                                wrong_answers_question[answ[1]] = {"correct": answer_user, "incorrect": choices[answ[1]]}
 
                                 if item.quiz_template_item_id not in wrong_answers_quiz:
                                     wrong_answers_quiz[item.quiz_template_item_id] = []
