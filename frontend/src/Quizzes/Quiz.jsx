@@ -368,37 +368,41 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
                                                     )}
                                                 </div>
                                             )}
-                                            <div className="mt-3">
-                                                <button type="button" className="btn btn-outline-primary me-1"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            navigate("/quiz-all-users", {
-                                                                state: {
-                                                                    quiz: getQuizData(quiz.id),
-                                                                    userRole: userData["role"],
-                                                                }
-                                                            });
-                                                        }
-                                                        }
-                                                >
-                                                    Results
-                                                </button>
 
-                                                <button type="button" className="btn btn-outline-primary"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            navigate("/quiz-analysis-show", {
-                                                                state: {
-                                                                    quiz: getQuizData(quiz.id),
-                                                                    userRole: userData["role"],
-                                                                }
-                                                            });
-                                                        }
-                                                        }
-                                                >
-                                                    Analysis
-                                                </button>
-                                            </div>
+                                            {userData["role"] === "teacher" && (
+                                                <div className="mt-3">
+                                                    <button type="button" className="btn btn-outline-primary me-1   "
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                navigate("/quiz-all-users", {
+                                                                    state: {
+                                                                        quiz: getQuizData(quiz.id),
+                                                                        userRole: userData["role"],
+                                                                    }
+                                                                });
+                                                            }
+                                                            }
+                                                    >
+                                                        Results
+                                                    </button>
+
+                                                    <button type="button" className="btn btn-outline-primary"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                navigate("/quiz-analysis-show", {
+                                                                    state: {
+                                                                        quiz: getQuizData(quiz.id),
+                                                                        userRole: userData["role"],
+                                                                    }
+                                                                });
+                                                            }
+                                                            }
+                                                    >
+                                                        Analysis
+                                                    </button>
+                                                </div>
+                                            )}
+
                                         </div>
 
                                     )
