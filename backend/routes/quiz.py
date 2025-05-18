@@ -324,6 +324,8 @@ def get_questions_quiz(index):
             from random import shuffle
             shuffle(right_sides)
 
+            max_points = item.max_points
+
             if len(matching_answs) != 0:
                 cnt = 0
                 for matching_pair in newest_version.matching_question:
@@ -370,6 +372,7 @@ def get_questions_quiz(index):
         ord_ids = []
         if item is not None:
             multiple_answs = json.loads(item.answer)
+            max_points = item.max_points
 
             if item.order is None:
                 from random import shuffle

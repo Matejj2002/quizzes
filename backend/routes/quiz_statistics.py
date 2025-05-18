@@ -32,8 +32,8 @@ def get_all_quizzes_analysis():
 
     quiz_templates = QuizTemplate.query.filter(QuizTemplate.is_deleted == False).all()
 
-    #students = User.query.filter(User.user_type == 'student').all()
-    students = User.query.all()
+    students = User.query.filter(User.user_type == 'student').all()
+    #students = User.query.all()
 
     quiz_data = []
     for qt in quiz_templates:
@@ -380,3 +380,71 @@ def quiz_statistics():
                 }
 
     return {"result": template, "evals": question_analysis, "attendance": attendance_question}, 200
+
+
+@quiz_statistics_bp.route("/get-quiz-template-students-results", methods=["GET"])
+def get_quiz_students_results():
+    quiz_template_id = request.args.get("template_id")
+
+    students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
+
+
+    results = []
+    attended = 0
+    sum_points = 0
+    max_points = 0
+    for i in students:
+
+        quiz_students = {"student_id":i["student_id"], "github_name": i["github_name"]}
+        quizzes_student = Quiz.query.filter_by(quiz_template_id = quiz_template_id, student_id=i["student_id"]).order_by(Quiz.date_time_started.desc()).all()
+        quizzes = []
+        cnt = 0
+
+        if len(quizzes_student) == 0:
+            quizzes.append(
+                {
+                    "points": "Not attended",
+                    "max_points": 0,
+                    "number_attempt": 0
+                }
+            )
+            num_quizzes = 0
+        else:
+            attended+=1
+            for quiz in quizzes_student:
+                if cnt == 0:
+                    sum_points += quiz.achieved_points
+                    max_points = quiz.max_points
+                quizzes.append(
+                    {
+                        "points": quiz.achieved_points,
+                        "max_points": quiz.max_points,
+                        "number_attempt": cnt
+                    }
+                )
+                cnt+=1
+
+            num_quizzes = len(quizzes)
+
+        quiz_students["quizzes"] = quizzes
+        quiz_students["num_quizzes"] = num_quizzes
+        results.append(quiz_students)
+
+        if max_points !=0:
+            average_points = sum_points / num_quizzes
+            average_points_perc = round((sum_points / (max_points * num_quizzes) *100), 2)
+        else:
+            average_points = 0
+            average_points_perc=0
+
+        data = {
+            "attendance": attended,
+            "num_students": len(students),
+            "attendance_perc": round((attended / len(students)) *100,2),
+            "average_points": average_points,
+            "max_points": max_points,
+            "average_points_perc": average_points_perc
+
+        }
+
+    return {"result": {"quiz_id": quiz_template_id, "students": results, "data": data}}
