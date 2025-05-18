@@ -32,8 +32,8 @@ def get_all_quizzes_analysis():
 
     quiz_templates = QuizTemplate.query.filter(QuizTemplate.is_deleted == False).all()
 
-    students = User.query.filter(User.user_type == 'student').all()
-    #students = User.query.all()
+    #students = User.query.filter(User.user_type == 'student').all()
+    students = User.query.all()
 
     quiz_data = []
     for qt in quiz_templates:
@@ -144,6 +144,7 @@ def get_students_results():
         data += f"{sum_points}\n"
 
     return {"result": titles + data}, 200
+
 
 @quiz_statistics_bp.route("/quiz-statistics", methods=["GET"])
 def quiz_statistics():

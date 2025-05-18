@@ -86,20 +86,21 @@ if len(check_start_env) == 0:
 def shutdown_session(exception=None):
     db.session.remove()
 
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
-# def serve(path):
-#     if path.startswith(API_URL):
-#         abort(404)
-#
-#     if path.startswith("quizzes/"):
-#         path = path.replace("quizzes/", "", 1)
-#
-#
-#     if path != "" and os.path.exists(app.static_folder + '/' + path):
-#         return send_from_directory(app.static_folder, path)
-#     else:
-#         return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path.startswith(API_URL):
+        abort(404)
+
+    if path.startswith("quizzes/"):
+        path = path.replace("quizzes/", "", 1)
+
+
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 def check_database_exists():

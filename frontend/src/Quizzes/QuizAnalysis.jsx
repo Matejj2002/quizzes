@@ -231,7 +231,6 @@ const QuizAnalysis = () =>{
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            {console.log(attendance[question["item_id"]]?.wrong_answers)}
                                                         {Object.keys(attendance[question["item_id"]]?.wrong_answers || {}).length > 0 ? (
                                                             <td className="text-end">{attendance[question["item_id"]]?.attendance - attendance[question["item_id"]]?.wrong_answers[ans[2]][2] + "/" + attendance[question["item_id"]]?.attendance}</td>
                                                         ) : (
