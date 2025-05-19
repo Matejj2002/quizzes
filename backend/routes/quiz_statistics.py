@@ -202,7 +202,6 @@ def quiz_statistics():
                                 wrong_answers_question = {}
                                 for answ in answer["answer"]:
                                     answer_user = eval(answ[2])
-                                    print(type(answ[1]), answ[1], choices)
                                     if answ[1] in choices:
                                         if choices[answ[1]] != answer_user:
                                             if answ[1] not in wrong_answers_question:

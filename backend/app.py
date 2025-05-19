@@ -87,20 +87,20 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
-# def serve(path):
-#     if path.startswith(API_URL):
-#         abort(404)
-#
-#     if path.startswith("quizzes/"):
-#         path = path.replace("quizzes/", "", 1)
-#
-#
-#     if path != "" and os.path.exists(app.static_folder + '/' + path):
-#         return send_from_directory(app.static_folder, path)
-#     else:
-#         return send_from_directory(app.static_folder, 'index.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path.startswith(API_URL):
+        abort(404)
+
+    if path.startswith("quizzes/"):
+        path = path.replace("quizzes/", "", 1)
+
+
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 def check_database_exists():
@@ -136,6 +136,9 @@ def check_database_exists():
 
         try:
             if os.environ.get("IS_DOCKER") == 'true':
+                from sqlalchemy import text
+                print("Resetujem alembic tabulku...")
+                cursor.execute(sql.SQL("DELETE FROM alembic_version;"))
                 subprocess.run(["sh", 'run_migrations.sh'], check=True)
                 print("Migrácie boli úspešne aplikované.")
             else:
