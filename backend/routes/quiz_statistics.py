@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import requests
+
 try:
     from backend.functions.api_functions import *
 except:
@@ -7,6 +8,7 @@ except:
 
 API_URL = os.getenv('API_URL')
 quiz_statistics_bp = Blueprint('quiz_statistics', __name__, url_prefix=API_URL)
+
 
 @quiz_statistics_bp.route("/sort-matching-questions-statistics", methods=["POST"])
 def sort_matching_questions_statistics():
@@ -25,14 +27,13 @@ def sort_matching_questions_statistics():
     return {"result": to_sort}, 200
 
 
-
 @quiz_statistics_bp.route("/get-quizzes-analysis", methods=["GET"])
 def get_all_quizzes_analysis():
     filter = request.args.get("filterName")
 
     quiz_templates = QuizTemplate.query.filter(QuizTemplate.is_deleted == False).all()
 
-    #students = User.query.filter(User.user_type == 'student').all()
+    # students = User.query.filter(User.user_type == 'student').all()
     students = User.query.all()
 
     quiz_data = []
@@ -74,7 +75,8 @@ def get_user_data_statistics():
     all_achieved_points = 0
 
     for i in quizzes_templates_student:
-        j = Quiz.query.filter_by(quiz_template_id=i, student_id = student_id).order_by(desc(Quiz.date_time_started)).first()
+        j = Quiz.query.filter_by(quiz_template_id=i, student_id=student_id).order_by(
+            desc(Quiz.date_time_started)).first()
 
         max_points = j.max_points
         achieved_points = j.achieved_points
@@ -156,13 +158,13 @@ def quiz_statistics():
 
     users = set([i.id for i in User.query.all()])
 
-
     student_correct = {}
     student_incorrect = {}
     wrong_answers_quiz = {}
     items = {}
     for user in users:
-        qz = Quiz.query.filter(Quiz.quiz_template_id == template["id"], Quiz.student_id == user).order_by(desc(Quiz.date_time_started)).first()
+        qz = Quiz.query.filter(Quiz.quiz_template_id == template["id"], Quiz.student_id == user).order_by(
+            desc(Quiz.date_time_started)).first()
 
         if qz is not None:
             for section in qz.quiz_sections:
@@ -178,7 +180,8 @@ def quiz_statistics():
 
                     else:
                         student_incorrect[item.quiz_template_item_id].append(user)
-                        template_item = QuizTemplateItem.query.filter(QuizTemplateItem.id==item.quiz_template_item_id).first()
+                        template_item = QuizTemplateItem.query.filter(
+                            QuizTemplateItem.id == item.quiz_template_item_id).first()
                         try:
                             question_version = template_item.question.question_version[-1]
                         except:
@@ -187,28 +190,24 @@ def quiz_statistics():
                         answer = json.loads(item.answer)
                         if template_item.question_type == "questions":
                             if question_version.type == "short_answer_question":
-
                                 if item.quiz_template_item_id not in wrong_answers_quiz:
                                     wrong_answers_quiz[item.quiz_template_item_id] = []
 
                                 if item.quiz_template_item_id in wrong_answers_quiz:
-                                    wrong_answers_quiz[item.quiz_template_item_id].append(answer["answer"])
+                                    wrong_answers_quiz[item.quiz_template_item_id] = answer["answer"]
 
                             elif question_version.type == "multiple_answer_question":
-                                choices = {}
-                                for choice in question_version.multiple_answers:
-                                    choices[choice.id] = choice.is_correct
-
                                 wrong_answers_question = {}
                                 for answ in answer["answer"]:
+                                    choice_ans = Choice.query.filter(Choice.id == answ[1]).first().is_correct
                                     answer_user = eval(answ[2])
-                                    if answ[1] in choices:
-                                        if choices[answ[1]] != answer_user:
-                                            if answ[1] not in wrong_answers_question:
-                                                wrong_answers_question[answ[1]] = []
+                                    if choice_ans != answer_user:
+                                        if answ[1] not in wrong_answers_question:
+                                            wrong_answers_question[answ[1]] = []
 
-                                            if answ[1] in wrong_answers_question:
-                                                wrong_answers_question[answ[1]] = {"correct": answer_user, "incorrect": choices[answ[1]]}
+                                        if answ[1] in wrong_answers_question:
+                                            wrong_answers_question[answ[1]] = {"correct": answer_user,
+                                                                               "incorrect": choice_ans}
 
                                 if item.quiz_template_item_id not in wrong_answers_quiz:
                                     wrong_answers_quiz[item.quiz_template_item_id] = []
@@ -217,23 +216,16 @@ def quiz_statistics():
                                     wrong_answers_quiz[item.quiz_template_item_id].append(wrong_answers_question)
 
                             else:
-                                matchings = {}
-                                for matching in question_version.matching_question:
-                                    matchings[matching.id] = {
-                                        "left_side": matching.leftSide,
-                                        "right_side": matching.rightSide
-                                    }
-
                                 wrong_answers_question = {}
                                 for answ in answer["answer"]:
-                                    pair = matchings[answ["pairId"]]
+                                    pair_pom = MatchingPair.query.filter(MatchingPair.id == answ["pairId"]).first().rightSide
 
                                     if answ["pairId"] not in wrong_answers_question:
                                         wrong_answers_question[answ["pairId"]] = []
 
                                     if answ["pairId"] in wrong_answers_question:
-                                        wrong_answers_question[answ["pairId"]] = {"correct": pair["right_side"], "incorrect": answ["answer"]}
-
+                                        wrong_answers_question[answ["pairId"]] = {"correct": pair_pom,
+                                                                                  "incorrect": answ["answer"]}
 
                                 if item.quiz_template_item_id not in wrong_answers_quiz:
                                     wrong_answers_quiz[item.quiz_template_item_id] = []
@@ -248,36 +240,36 @@ def quiz_statistics():
         wrong_answs_pom = {}
         typeQ = "eQ"
         if key in wrong_answers_quiz:
-            for a in wrong_answers_quiz[key]:
-                if type(a) == str:
-                    typeQ="sQ"
-                    if a not in wrong_answs_pom:
-                        wrong_answs_pom[a] = 1
-                    else:
-                        wrong_answs_pom[a]+=1
+            if type(wrong_answers_quiz[key]) == str:
+                typeQ = "sQ"
+                if wrong_answers_quiz[key] not in wrong_answs_pom:
+                    wrong_answs_pom[wrong_answers_quiz[key]] = 1
                 else:
+                    wrong_answs_pom[wrong_answers_quiz[key]] += 1
+            else:
+                for a in wrong_answers_quiz[key]:
                     typeQ = "lQ"
                     for key1, val in a.items():
                         if key1 not in wrong_answs_pom:
                             wrong_answs_pom[key1] = [val["correct"], val["incorrect"], 0]
 
                         if key1 in wrong_answs_pom:
-                            wrong_answs_pom[key1][2]+=1
+                            wrong_answs_pom[key1][2] += 1
 
-        wrong_answers_show=[]
+        wrong_answers_show = []
         if typeQ == "eQ":
             wrong_answers_show = []
 
         elif typeQ == "sQ":
             for k, v in wrong_answs_pom.items():
-                wrong_answers_show.append([k,v])
+                wrong_answers_show.append([k, v])
 
         else:
             for k, v in wrong_answs_pom.items():
                 wrong_answers_show.append(v)
 
         attendance_question[key] = {"attendance": attendance,
-                                    "average": sum([i[1] for i in student_correct[key]]) / attendance,
+                                    "average": round(sum([i[1] for i in student_correct[key]]) / attendance, 2),
                                     "sum_points": sum([i[1] for i in student_correct[key]]),
                                     "item_max_points": items[key].max_points,
                                     "num_correct_answers": len(student_correct[key]),
@@ -345,7 +337,7 @@ def quiz_statistics():
                     question_type = i.question_version.type
                     question_title = i.question_version.title
 
-                    item_scores+=item_score
+                    item_scores += item_score
 
                     dct2 = {
                         "item_id": item_id,
@@ -372,7 +364,7 @@ def quiz_statistics():
 
                 question_analysis[item["item_id"]] = {
                     "item_score": item_scores,
-                    "item_max_score": item_max_score* len(items),
+                    "item_max_score": item_max_score * len(items),
                     "item_average_score": round(item_scores / len(items), 2),
                     "wrong_answers": [],
                     "questions": data,
@@ -387,8 +379,7 @@ def get_quiz_students_results():
     quiz_template_id = request.args.get("template_id")
 
     # students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
-    students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.all()]
-
+    students = [{"student_id": i.id, "github_name": i.github_name} for i in User.query.all()]
 
     results = []
     attended = 0
@@ -396,8 +387,9 @@ def get_quiz_students_results():
     max_points = 0
     for i in students:
 
-        quiz_students = {"student_id":i["student_id"], "github_name": i["github_name"]}
-        quizzes_student = Quiz.query.filter_by(quiz_template_id = quiz_template_id, student_id=i["student_id"]).order_by(Quiz.date_time_started.desc()).all()
+        quiz_students = {"student_id": i["student_id"], "github_name": i["github_name"]}
+        quizzes_student = Quiz.query.filter_by(quiz_template_id=quiz_template_id, student_id=i["student_id"]).order_by(
+            Quiz.date_time_started.desc()).all()
         quizzes = []
         cnt = 0
 
@@ -411,7 +403,7 @@ def get_quiz_students_results():
             )
             num_quizzes = 0
         else:
-            attended+=1
+            attended += 1
             for quiz in quizzes_student:
                 if cnt == 0:
                     sum_points += quiz.achieved_points
@@ -424,7 +416,7 @@ def get_quiz_students_results():
                         "number_attempt": cnt
                     }
                 )
-                cnt+=1
+                cnt += 1
 
             num_quizzes = len(quizzes)
 
@@ -432,25 +424,19 @@ def get_quiz_students_results():
         quiz_students["num_quizzes"] = num_quizzes
         results.append(quiz_students)
 
-        if max_points !=0:
-            if num_quizzes == 0:
-                average_points = 0
-                average_points_perc = 0
-            else:
-                average_points = sum_points / num_quizzes
-                average_points_perc = round((sum_points / (max_points * num_quizzes) *100), 2)
-        else:
-            average_points = 0
-            average_points_perc=0
+    avg_perc = 0
+    if max_points * attended != 0:
+        avg_perc = round(( sum_points / (max_points*attended) ) *100, 2)
 
-        data = {
-            "attendance": attended,
-            "num_students": len(students),
-            "attendance_perc": round((attended / len(students)) *100,2),
-            "average_points": average_points,
-            "max_points": max_points,
-            "average_points_perc": average_points_perc
+    data = {
+        "attendance": attended,
+        "num_students": len(students),
+        "attendance_perc": round((attended / len(students)) * 100, 2),
+        "average_points": sum_points / attended,
+        "max_points": max_points,
+        "average_points_perc":  avg_perc
 
-        }
+    }
 
+    print(sum_points, attended)
     return {"result": {"quiz_id": quiz_template_id, "students": results, "data": data}}
