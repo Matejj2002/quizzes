@@ -53,12 +53,23 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
             return ;
         }
         const getData = async () => {
+
+            const userString = localStorage.getItem("user");
+            const user = JSON.parse(userString);
+            const response = await axios.get(backendUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": user["login"],
+                            "avatarUrl": user["avatar_url"]
+                    }
+                }
+            )
+
             const result = await axios.get(backendUrl+"quiz-student-load",
                 {
                     params: {
-                        student_id: userId,
+                        student_id: response.data.result["id_user"],
                         quiz_id: quizId,
-                        load_type: "review"
+                        load_type: "attempt"
                     }
                 }
             )
@@ -336,7 +347,7 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                                 <div className="form-check" key={idx}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
-                                                            style={{ pointerEvents: 'none' }}
+                                                        // disabled="true"
                                                            defaultChecked={ans.answer === true}
                                                     />
                                                     <span className="d-flex w-100 form-check-label">
@@ -397,9 +408,7 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                            style={{
                                                background: "rgba(255, 0, 0, 0.3)"
                                            }}>
-                                            <FormattedTextRenderer
-                                            text = {questionsData[question.id]?.feedback}
-                                                />
+                                            {questionsData[question.id]?.feedback}
                                         </p>
                                     )
                                     }
@@ -409,9 +418,7 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                            style={{
                                                background: "rgba(155,236,137,0.15)"
                                            }}>
-                                            <FormattedTextRenderer
-                                            text = {questionsData[question.id]?.feedback}
-                                                />
+                                            {questionsData[question.id]?.feedback}
                                         </p>
                                     )
                                     }

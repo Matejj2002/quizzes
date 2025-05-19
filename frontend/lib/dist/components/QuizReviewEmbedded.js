@@ -55,11 +55,19 @@ const QuizReviewEmbedded = ({
       return;
     }
     const getData = async () => {
+      const userString = localStorage.getItem("user");
+      const user = JSON.parse(userString);
+      const response = await axios.get(backendUrl + `get-user-data_logged`, {
+        params: {
+          "userName": user["login"],
+          "avatarUrl": user["avatar_url"]
+        }
+      });
       const result = await axios.get(backendUrl + "quiz-student-load", {
         params: {
-          student_id: userId,
+          student_id: response.data.result["id_user"],
           quiz_id: quizId,
-          load_type: "review"
+          load_type: "attempt"
         }
       });
       await setData(result.data);
@@ -230,10 +238,9 @@ const QuizReviewEmbedded = ({
     key: idx
   }, /*#__PURE__*/React.createElement("input", {
     className: "form-check-input",
-    type: "checkbox",
-    style: {
-      pointerEvents: 'none'
-    },
+    type: "checkbox"
+    // disabled="true"
+    ,
     defaultChecked: ans.answer === true
   }), /*#__PURE__*/React.createElement("span", {
     className: "d-flex w-100 form-check-label"
@@ -272,16 +279,12 @@ const QuizReviewEmbedded = ({
     style: {
       background: "rgba(255, 0, 0, 0.3)"
     }
-  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
-    text: questionsData[question.id]?.feedback
-  })), questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null && /*#__PURE__*/React.createElement("p", {
+  }, questionsData[question.id]?.feedback), questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null && /*#__PURE__*/React.createElement("p", {
     className: "p-3 rounded",
     style: {
       background: "rgba(155,236,137,0.15)"
     }
-  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
-    text: questionsData[question.id]?.feedback
-  })), !questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
+  }, questionsData[question.id]?.feedback), !questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded",
     style: {
       background: "rgba(255, 165, 0, 0.3)",

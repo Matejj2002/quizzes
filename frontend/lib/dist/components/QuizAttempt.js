@@ -37,29 +37,11 @@ const QuizAttempt = ({
     onClick: () => {
       handleAttempt("attempt");
     }
-  }, "Attempt the quiz"), !quiz.first_generation && /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-outline-primary me-1",
-    disabled: quiz.can_be_checked === false,
-    onClick: () => {
-      handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), 1, "student");
-      handleAttempt("review");
-    }
-  }, quiz.quizzes.length === 0 ? /*#__PURE__*/React.createElement("span", null, "Review attempt") : /*#__PURE__*/React.createElement("span", null, "Review last attempt"))) : /*#__PURE__*/React.createElement("button", {
+  }, "Attempt the quiz")) : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-outline-primary me-1",
     onClick: () => {
       handleAttempt("continue");
     }
-    // onClick={(e) => {
-    //     e.preventDefault();
-    //     navigate("/generated-quiz", {
-    //         state: {
-    //             quiz: quiz,
-    //             userId: userData["id_user"],
-    //             userRole: userData["role"]
-    //         }
-    //     });
-    // }
-    // }
   }, "Continue current attempt")));
 };
 export default QuizAttempt;

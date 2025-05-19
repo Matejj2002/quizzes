@@ -389,7 +389,7 @@ def get_quiz_students_results():
 
         quiz_students = {"student_id": i["student_id"], "github_name": i["github_name"]}
         quizzes_student = Quiz.query.filter_by(quiz_template_id=quiz_template_id, student_id=i["student_id"]).order_by(
-            Quiz.date_time_started.desc()).all()
+            desc(Quiz.date_time_started)).all()
         quizzes = []
         cnt = 0
 
@@ -436,7 +436,7 @@ def get_quiz_students_results():
         "attendance": attended,
         "num_students": len(students),
         "attendance_perc": round((attended / len(students)) * 100, 2),
-        "average_points": average_points,
+        "average_points": round(average_points,2 ),
         "max_points": max_points,
         "average_points_perc":  avg_perc
 

@@ -483,7 +483,7 @@ const GeneratedQuiz = () => {
     style: {
       marginRight: '3px'
     },
-    disabled: count === -1 || disableButtons,
+    disabled: count === -1,
     onClick: () => handleSaveQuiz(true)
   }, "Save & Finish") : /*#__PURE__*/React.createElement("button", {
     type: "button",

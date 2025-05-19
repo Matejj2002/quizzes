@@ -42,9 +42,9 @@ export default function configure(backendUrl) {
 function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
   const [quizId, setQuizId] = useState(instance.syncedState.quizId);
   const [quiz, setQuiz] = useState(instance.syncedState.quiz);
-  const [attempt, setAttempt] = useState(instance.syncedState.attempt);
-  console.log("QAA",quizId, attempt);
-  const [reviewData, setReviewData] = useState({});
+  const [attempt, setAttempt] = useState(undefined);
+  const [reviewData, setReviewData] = useState(instance.syncedState.reviewData || {});
+  console.log("QUIZ id: ",quizId, "QUIZ: ", quiz, "REVIEW data: ", reviewData);
   const [userData, setUserData] = useState([]);
 
     const [keyGenerateQuiz, setKeyGenerateQuiz] = useState(0);
@@ -77,19 +77,26 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
   };
 
   setReviewData(RewData);
+
   }
 
   useEffect(() => {
-      console.log("QZ",quiz)
       if (quiz) {
         handleReviewData(
           quiz,
-          quiz.id,
+          quiz.quiz_id,
           quiz.feedbackTypeAfterClose,
           !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
           userData["id_user"],
           "student"
-        );
+        ).then(()=>{
+            instance.syncedState = {
+            quiz: quiz,
+            quizId: quizId,
+            reviewData: reviewData
+          }
+          onStateChange();
+        });
       }
     }, [quiz, attempt]);
 
@@ -147,17 +154,11 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
 
     useEffect(() => {
         if (attempt === "review") {
-             instance.syncedState = {
-            quizId: quiz.id,
-            quiz: quiz,
-                 attempt: "review"
-            }
-            onStateChange();
             setAttempt(undefined);
             fetchStudent().then(
                 handleReviewData(
                       quiz,
-                      quiz.id,
+                      quiz.quiz_id,
                       quiz.feedbackTypeAfterClose,
                       !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
                       userData["id_user"],
@@ -169,6 +170,17 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
 
     }, [attempt]);
 
+
+    useEffect(() => {
+        console.log("ZMENENE :", quizId);
+        instance.syncedState = {
+            quiz: quiz,
+            quizId: quizId,
+            reviewData: reviewData
+      }
+      onStateChange();
+    }, [quizId]);
+
   return (
     <>
       {quizId === undefined && (
@@ -176,7 +188,6 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
       )}
       {(quizId !== undefined && quiz!==undefined && attempt === undefined && Object.keys(reviewData).length > 0 ) && (
           <>
-            {/*<QuizAttempt userName={userDt.login} quizId={quizId} handleAttempt={handleAttempt} handleReviewData={handleReviewData} backendUrl={backendUrl}></QuizAttempt>*/}
               <QuizReviewEmbedded
                                 key={`quiz-review-${keyReviewQuiz}`}
                                 keyAtt = {keyReviewQuiz}

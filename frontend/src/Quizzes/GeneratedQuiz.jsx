@@ -610,7 +610,7 @@ const GeneratedQuiz = () => {
                                     {page+1 >= quiz.sections.length ? (
                                         <button type="button" className="btn btn-primary"
                                                 style={{marginRight: '3px'}}
-                                                disabled={count === -1 || disableButtons}
+                                                disabled={count === -1}
                                                 onClick={() => handleSaveQuiz(true)}
                                         >
                                             Save & Finish

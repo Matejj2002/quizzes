@@ -2,6 +2,7 @@ import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
+import {forEach} from "react-bootstrap/ElementChildren";
 
 const QuizAllUsersEvals = () =>{
     const location = useLocation();
@@ -11,7 +12,7 @@ const QuizAllUsersEvals = () =>{
     const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
     const [studentsData, setStudentsData] = useState([]);
     const [data, setData] = useState([]);
-
+    console.log(quiz);
     const fetchData = async () => {
         try{
             const response = await axios.get(apiUrl+`get-quiz-template-students-results`, {
@@ -30,6 +31,37 @@ const QuizAllUsersEvals = () =>{
     useEffect(() => {
         fetchData();
     }, []);
+
+    const reviewStudentQuiz = async (studentId, githubName) =>{
+        try{
+            const response = await axios.get(apiUrl+`get-user-data`, {
+                params: {
+                    "studentId": studentId
+                }
+            })
+
+
+            for(let i=0; i<response.data.result.quizzes_attended.length; i++){
+                if (response.data.result.quizzes_attended[i].title === quiz.title){
+                        navigate("/review-quiz", {
+                        state: {
+                            quiz: response.data.result.quizzes_attended[i].quizzes[0],
+                            quizId: response.data.result.quizzes_attended[i].quizzes[0].quiz_id,
+                            feedback: ['optionsFeedback', 'questionFeedback', 'pointsReview', 'correctAnswers'],
+                            correctMode: true,
+                            userId: studentId,
+                            userName: githubName,
+                            userRole: "teacher"
+
+                        }
+                    });
+                }
+            }
+      }catch (error){
+            console.log(error);
+      }
+       finally {}
+    }
 
 
     return (
@@ -56,6 +88,8 @@ const QuizAllUsersEvals = () =>{
 
                                     <th scope="col" className="w-25 text-center">Max Score</th>
 
+                                    <th scope="col" className="w-25 text-center">Review</th>
+
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -67,6 +101,18 @@ const QuizAllUsersEvals = () =>{
                                             <td className="text-center">{data.num_quizzes}</td>
                                             <td className="text-center">{data.quizzes[0]?.points}</td>
                                             <td className="text-center">{data.quizzes[0]?.max_points}</td>
+                                            <td className="w-25 text-end">
+                                                <button
+                                                    className="btn btn-outline-primary"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        reviewStudentQuiz(data["student_id"], data["github_name"]);
+                                                    }}
+                                                >
+                                                    Review
+                                                </button>
+
+                                            </td>
                                         </tr>
                                     ))
                                 }

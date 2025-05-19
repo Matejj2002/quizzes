@@ -26,6 +26,9 @@ const GenerateQuizEmbedded = ({
   const [loadQuestions, setLoadQuestions] = useState(false);
   const [feedbackQuestion, setFeedbackQuestion] = useState([]);
   const [quizGenerated, setQuizGenerated] = useState(false);
+  const [countMax, setCountMax] = useState(0);
+  const [disableButtons, setDisableButtons] = useState(false);
+
   // const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
@@ -64,7 +67,7 @@ const GenerateQuizEmbedded = ({
     return () => clearInterval(interval);
   }, [dateStart, minutesToFinish]);
   useEffect(() => {
-    if (count % 55 === 0 && count !== -1) {
+    if (count % 60 === 0 && count !== -1 && count !== countMax) {
       handleSaveQuiz(false);
       setLoadQuestions(true);
     }
@@ -172,6 +175,7 @@ const GenerateQuizEmbedded = ({
       "finalSave": finalSave,
       "studentId": userId
     };
+    setDisableButtons(true);
     axios.put(backendUrl + `quiz_set_answers`, updatedData).then(() => {
       if (finalSave) {
         handleAttempt("review");
@@ -179,10 +183,12 @@ const GenerateQuizEmbedded = ({
       }
       setTimeout(() => {
         setIsSaving(false);
+        setDisableButtons(false);
       }, 3000);
     }).catch(() => {
       setTimeout(() => {
         setIsSaving(false);
+        setDisableButtons(false);
       }, 3000);
     });
     return false;
@@ -220,12 +226,14 @@ const GenerateQuizEmbedded = ({
         if (nowDate > endTime || result.data.end_time !== null && nowDate < finishTime) {
           setCount(-1);
         } else {
+          setCountMax(differenceInSeconds);
           setCount(differenceInSeconds);
         }
         setRandomQuestions([]);
         setQuestionsData({});
         setLoading(false);
       } else {
+        setCountMax(response.data.time_to_finish * 60);
         setCount(response.data.time_to_finish * 60);
       }
 
@@ -483,6 +491,7 @@ const GenerateQuizEmbedded = ({
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn btn-outline-secondary",
+    disabled: disableButtons,
     onClick: () => {
       if (count !== -1) {
         handleSaveQuiz(false);
@@ -506,7 +515,7 @@ const GenerateQuizEmbedded = ({
     style: {
       marginRight: '3px'
     },
-    disabled: count === -1,
+    disabled: count === -1 || disableButtons,
     onClick: () => handleSaveQuiz(false)
   }, "Save"), page + 1 >= quiz.sections.length ? /*#__PURE__*/React.createElement("button", {
     type: "button",
@@ -515,7 +524,10 @@ const GenerateQuizEmbedded = ({
       marginRight: '3px'
     },
     disabled: count === -1,
-    onClick: () => handleSaveQuiz(true)
+    onClick: () => {
+      handleSaveQuiz(true);
+      handleAttempt("review");
+    }
   }, "Save & Finish") : /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn btn-primary",

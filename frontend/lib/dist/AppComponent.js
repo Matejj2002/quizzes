@@ -43,8 +43,9 @@ function AppComponent({
 }) {
   const [quizId, setQuizId] = useState(instance.syncedState.quizId);
   const [quiz, setQuiz] = useState(instance.syncedState.quiz);
-  const [attempt, setAttempt] = useState(instance.syncedState.attempt);
-  const [reviewData, setReviewData] = useState({});
+  const [attempt, setAttempt] = useState(undefined);
+  const [reviewData, setReviewData] = useState(instance.syncedState.reviewData || {});
+  console.log("QUIZ id: ", quizId, "QUIZ: ", quiz, "REVIEW data: ", reviewData);
   const [userData, setUserData] = useState([]);
   const [keyGenerateQuiz, setKeyGenerateQuiz] = useState(0);
   const [keyReviewQuiz, setKeyReviewQuiz] = useState(0);
@@ -73,9 +74,15 @@ function AppComponent({
     setReviewData(RewData);
   };
   useEffect(() => {
-    console.log("QZ", quiz);
     if (quiz) {
-      handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student");
+      handleReviewData(quiz, quiz.quiz_id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student").then(() => {
+        instance.syncedState = {
+          quiz: quiz,
+          quizId: quizId,
+          reviewData: reviewData
+        };
+        onStateChange();
+      });
     }
   }, [quiz, attempt]);
   async function getUserData() {
@@ -124,16 +131,20 @@ function AppComponent({
   };
   useEffect(() => {
     if (attempt === "review") {
-      instance.syncedState = {
-        quizId: quiz.id,
-        quiz: quiz,
-        attempt: "review"
-      };
-      onStateChange();
+      console.log("SEM");
       setAttempt(undefined);
-      fetchStudent().then(handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student"));
+      fetchStudent().then(handleReviewData(quiz, quiz.quiz_id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student"));
     }
   }, [attempt]);
+  useEffect(() => {
+    console.log("ZMENENE :", quizId);
+    instance.syncedState = {
+      quiz: quiz,
+      quizId: quizId,
+      reviewData: reviewData
+    };
+    onStateChange();
+  }, [quizId]);
   return /*#__PURE__*/React.createElement(React.Fragment, null, quizId === undefined && /*#__PURE__*/React.createElement(QuizList, {
     chooseId: handleChooseId,
     chooseQuiz: handleChooseQuiz,

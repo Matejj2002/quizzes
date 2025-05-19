@@ -45,7 +45,7 @@ const QuizReview = () => {
         params: {
           student_id: userId,
           quiz_id: quizId,
-          load_type: "review"
+          load_type: "attempt"
         }
       });
       setData(result.data);

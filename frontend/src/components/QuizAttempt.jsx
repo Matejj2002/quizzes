@@ -61,22 +61,6 @@ const QuizAttempt = ({quizEmb,handleAttempt, handleReviewData, keyAtt}) => {
                             >
                                 Attempt the quiz
                             </button>
-                            {!quiz.first_generation && (
-                                <button
-                                    className="btn btn-outline-primary me-1"
-                                    disabled={quiz.can_be_checked === false}
-                                    onClick={() => {
-
-                                        handleReviewData(quiz, quiz.id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), 1, "student");
-                                        handleAttempt("review");
-                                    }}
-
-                                >
-                                    {quiz.quizzes.length === 0 ? (
-                                        <span>Review attempt</span>) : (
-                                        <span>Review last attempt</span>)}
-                                </button>
-                            )}
 
                         </div>
                     ) : (
@@ -85,17 +69,6 @@ const QuizAttempt = ({quizEmb,handleAttempt, handleReviewData, keyAtt}) => {
                             onClick={() => {
                                 handleAttempt("continue");
                             }}
-                            // onClick={(e) => {
-                            //     e.preventDefault();
-                            //     navigate("/generated-quiz", {
-                            //         state: {
-                            //             quiz: quiz,
-                            //             userId: userData["id_user"],
-                            //             userRole: userData["role"]
-                            //         }
-                            //     });
-                            // }
-                            // }
                         >
                             Continue current attempt
                         </button>

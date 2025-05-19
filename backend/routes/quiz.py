@@ -138,6 +138,7 @@ def get_quiz_student_load():
     student_id = request.args.get('student_id')
     quiz_id = request.args.get('quiz_id')
     load_type = request.args.get("load_type")
+    print(student_id, quiz_id, load_type)
 
     if load_type == "review":
         quiz = Quiz.query.filter(
@@ -216,6 +217,7 @@ def update_quiz_answers():
     question_data = data["data"]
     final_save = data["finalSave"]
     student_id = data["studentId"]
+    print("QD",final_save, question_data)
 
     quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == student_id).order_by(
         desc(Quiz.date_time_started)).first()
