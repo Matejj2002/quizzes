@@ -1,4 +1,3 @@
-function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +5,7 @@ import Navigation from "../components/Navigation";
 const Quiz = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
+  const [quizzesPom, setQuizzesPom] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updateAt, setUpdateAt] = useState(null);
   const [userData, setUserData] = useState([]);
@@ -20,11 +20,18 @@ const Quiz = () => {
       });
       setQuizzes(response.data.result);
       setUpdateAt(response.data.update_at);
+      const response2 = await axios.get(apiUrl + `get-quizzes-analysis`, {
+        params: {
+          "filterName": ""
+        }
+      });
+      setQuizzesPom(response2.data.result);
     } catch (error) {
       console.error(error);
       window.location.href = quizzesUrl + "/login";
     } finally {}
   };
+  console.log(quizzesPom);
   async function getUserLogged() {
     const data = JSON.parse(localStorage.getItem("data"));
     try {
@@ -87,7 +94,7 @@ const Quiz = () => {
     const da = new Date(dt);
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${days[da.getDay()]} ${months[da.getMonth()]} ${da.getDate()} ${da.getFullYear()} ${da.getHours()}:${da.getMinutes().toString().padStart(2, '0')}:00`;
+    return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} ${dt.getUTCFullYear()} ${dt.getUTCHours()}:${dt.getUTCMinutes().toString().padStart(2, '0')}:00`;
   };
   const handleArchiveQuiz = (e, quiz) => {
     const updatedData = {
@@ -104,6 +111,13 @@ const Quiz = () => {
       className: "d-flex justify-content-center align-items-center"
     }, /*#__PURE__*/React.createElement("h2", null, "Loading..."));
   }
+  const getQuizData = template_id => {
+    for (let i = 0; i < quizzesPom.length; i++) {
+      if (quizzesPom[i].quiz_template_id === template_id) {
+        return quizzesPom[i];
+      }
+    }
+  };
   if (localStorage.getItem("data") === null || localStorage.getItem("data") === '{}') {
     window.location.href = quizzesUrl + "/login";
   }
@@ -136,12 +150,11 @@ const Quiz = () => {
       className: "d-flex"
     }, /*#__PURE__*/React.createElement("h2", {
       className: "h5"
-    }, /*#__PURE__*/React.createElement("a", _extends({
+    }, userData["role"] === "teacher" ? /*#__PURE__*/React.createElement("a", {
       href: "#",
-      className: "text-decoration-none me-1"
-    }, userData["role"] !== "student" ? {
+      className: "text-decoration-none me-1",
       onClick: e => handleUpdateQuiz(e, quiz)
-    } : {}), quiz.title))), userData["role"] !== "student" && /*#__PURE__*/React.createElement("button", {
+    }, quiz.title) : /*#__PURE__*/React.createElement("h5", null, quiz.title))), userData["role"] !== "student" && /*#__PURE__*/React.createElement("button", {
       className: "btn btn-outline-danger btn-xs p-0 px-1",
       style: {
         marginLeft: "25%"
@@ -156,11 +169,11 @@ const Quiz = () => {
     }))), quiz["shuffle_sections"] && /*#__PURE__*/React.createElement("p", null, "Sections will be shuffled."), !quiz["shuffle_sections"] && /*#__PURE__*/React.createElement("p", null, "Sections will ", /*#__PURE__*/React.createElement("strong", null, "not"), " be shuffled."), quiz["correction_of_attempts"] === "option1" && /*#__PURE__*/React.createElement("p", null, "Attempts are independent. "), quiz["correction_of_attempts"] === "option2" && /*#__PURE__*/React.createElement("p", null, "Attempts are corrections of previous attempt."), /*#__PURE__*/React.createElement("p", null, quiz.number_of_questions, " questions, ", quiz.sections.length, " sections"), /*#__PURE__*/React.createElement("div", {
       className: "mb-3 text-truncate"
     }, /*#__PURE__*/React.createElement("span", {
-      className: "m-0 text-secondary"
+      className: "m-0"
     }, "Time to finish (Minutes): ", quiz["time_to_finish"]), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-      className: "m-0 text-secondary"
+      className: "m-0"
     }, "Opened from ", getDate(quiz["date_time_open"]), " to ", getDate(quiz["date_time_close"])), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-      className: "m-0 text-secondary"
+      className: "m-0"
     }, "Check from ", getDate(quiz["datetime_check"])), /*#__PURE__*/React.createElement("br", null)), quiz.quizzes.length > 1 && !quiz.time_limit_end && /*#__PURE__*/React.createElement("details", {
       className: "mb-3"
     }, /*#__PURE__*/React.createElement("summary", {
@@ -243,7 +256,33 @@ const Quiz = () => {
           }
         });
       }
-    }, "Continue current attempt")));
+    }, "Continue current attempt")), userData["role"] === "teacher" && /*#__PURE__*/React.createElement("div", {
+      className: "mt-3"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "btn btn-outline-primary me-1   ",
+      onClick: e => {
+        e.preventDefault();
+        navigate("/quiz-all-users", {
+          state: {
+            quiz: getQuizData(quiz.id),
+            userRole: userData["role"]
+          }
+        });
+      }
+    }, "Results"), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "btn btn-outline-primary",
+      onClick: e => {
+        e.preventDefault();
+        navigate("/quiz-analysis-show", {
+          state: {
+            quiz: getQuizData(quiz.id),
+            userRole: userData["role"]
+          }
+        });
+      }
+    }, "Analysis")));
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-2"
   }))));

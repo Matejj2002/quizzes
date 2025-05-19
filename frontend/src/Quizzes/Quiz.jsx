@@ -149,6 +149,8 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
         }
     }
 
+    console.log(quizzes);
+
     if (localStorage.getItem("data") === null || localStorage.getItem("data")==='{}' ){
         window.location.href = quizzesUrl+"/login";
     }
@@ -287,7 +289,7 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
                                                         navigate("/review-quiz", {
                                                             state: {
                                                                 quiz: quiz,
-                                                                quizId: quiz.id,
+                                                                quizId: quiz.quizzes[0].quiz_id,
                                                                 feedback: quiz.feedbackTypeAfterClose,
                                                                 conditionToRetake: false,
                                                                 userId: userData["id_user"],
@@ -331,7 +333,7 @@ return `${days[dt.getUTCDay()]} ${months[dt.getUTCMonth()]} ${dt.getUTCDate()} $
                                                                         navigate("/review-quiz", {
                                                                             state: {
                                                                                 quiz: quiz,
-                                                                                quizId: quiz.id,
+                                                                                quizId: quiz.quizzes[0].quiz_id,
                                                                                 feedback: quiz.feedbackType,
                                                                                 conditionToRetake: !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]),
                                                                                 userId: userData["id_user"],

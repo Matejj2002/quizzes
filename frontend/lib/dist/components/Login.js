@@ -26,6 +26,8 @@ const Login = ({
         });
       }
       getAccessToken().then(response => {});
+    } else {
+      getUserData().then(() => {});
     }
   }, []);
   function loginWithGithub() {
@@ -40,7 +42,6 @@ const Login = ({
     }).then(response => {
       return response.json();
     }).then(data => {
-      console.log(data);
       const lcl = {
         "avatar_url": data["avatar_url"],
         "login": data["login"]
@@ -49,9 +50,7 @@ const Login = ({
       setUserData(data);
     });
   }
-  useEffect(() => {
-    getUserData().then(() => {});
-  }, []);
+  useEffect(() => {}, []);
   if (userData["error"] === "no error") {
     window.location.href = quizzesUrl + "/quizzes";
   }

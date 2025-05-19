@@ -86,7 +86,10 @@ const QuizTemplateQuestionItem = ({
     }, /*#__PURE__*/React.createElement("i", {
       className: "bi bi-trash"
     })))), /*#__PURE__*/React.createElement("div", {
-      className: "row"
+      className: "row",
+      style: {
+        maxWidth: "390px"
+      }
     }, /*#__PURE__*/React.createElement("div", {
       className: "col"
     }, /*#__PURE__*/React.createElement("p", {

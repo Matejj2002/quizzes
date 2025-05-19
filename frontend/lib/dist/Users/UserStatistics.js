@@ -26,6 +26,7 @@ const UserStatistics = () => {
   if (userRole !== "teacher") {
     navigate("/quizzes");
   }
+  console.log(userData);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {
     active: "Users"
   }), /*#__PURE__*/React.createElement("div", {
@@ -66,12 +67,13 @@ const UserStatistics = () => {
       e.preventDefault();
       navigate("/review-quiz", {
         state: {
-          quiz: quiz.quizzes,
+          quiz: quiz.quizzes[0],
           quizId: quiz.id,
-          feedback: quiz.quizzes.feedbackType,
+          feedback: ['optionsFeedback', 'questionFeedback', 'pointsReview', 'correctAnswers'],
           correctMode: true,
-          userId: userId,
-          userName: userData["github_name"]
+          userId: studentId,
+          userName: userData["github_name"],
+          userRole: "teacher"
         }
       });
     }

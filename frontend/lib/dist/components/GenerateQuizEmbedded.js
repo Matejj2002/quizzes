@@ -199,7 +199,8 @@ const GenerateQuizEmbedded = ({
         const result = await axios.get(backendUrl + "quiz-student-load", {
           params: {
             student_id: userId,
-            quiz_id: response.data["quiz_id"]
+            quiz_id: response.data["quiz_id"],
+            load_type: "attempt"
           }
         });
         setQuiz(prevQuiz => ({

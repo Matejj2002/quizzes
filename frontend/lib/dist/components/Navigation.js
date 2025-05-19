@@ -68,6 +68,10 @@ const Navigation = ({
     "aria-disabled": userData["role"] !== "teacher",
     href: `${quizzesUrl}/quiz-analysis`
   }, "Analysis"), /*#__PURE__*/React.createElement("a", {
+    className: `nav-link ${active === "Results" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`,
+    "aria-disabled": userData["role"] !== "teacher",
+    href: `${quizzesUrl}/quiz-statistics-table`
+  }, "Results"), /*#__PURE__*/React.createElement("a", {
     className: `nav-link ${active === "Users" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`,
     "aria-disabled": userData["role"] !== "teacher",
     href: `${quizzesUrl}/users`

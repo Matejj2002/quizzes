@@ -233,7 +233,8 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                     {
                                         params: {
                                             student_id: userId,
-                                            quiz_id: response.data["quiz_id"]
+                                            quiz_id: response.data["quiz_id"],
+                                            load_type: "attempt"
                                         }
                                     }
                                 )

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Toast, ToastContainer, Button } from 'react-bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useLocation } from 'react-router-dom';
@@ -25,14 +26,18 @@ const NewQuestion = ({
 
   const apiUrl = process.env.REACT_APP_API_URL;
   let titleText = "";
+  let buttonText = "";
   if (subButText === "Submit") {
     titleText = "New Question";
+    buttonText = "Create Question";
   }
   if (subButText === "Copy") {
     titleText = "Copy of " + location.state["questionTitle"];
+    buttonText = "Copy Question";
   }
   if (subButText === "Update") {
     titleText = "Update Question";
+    buttonText = "Update Question";
   }
   const [category, setCategory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -60,6 +65,11 @@ const NewQuestion = ({
   const [questionPositiveFeedback, setQuestionPositiveFeedback] = useState('');
   const [checkSubmit, setCheckSubmit] = useState("");
   const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions || false);
+  const [showToast, setShowToast] = useState(false);
+  const handleShowToast = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000);
+  };
   const saveChanges = () => {
     let answersSel = [];
     if (questionType === "Matching Question") {
@@ -91,16 +101,16 @@ const NewQuestion = ({
       if (title !== "" && text !== "") {
         axios.put(apiUrl + `questions/new-question`, updatedData).then(response => {
           if (createMoreQuestions) {
-            setTitle("");
-            setText("");
-            setQuestionType("Matching Question");
-            setSelectedCategoryId(idQ);
-            setSelectedCategory(selectedCategory1);
-            setCategorySelect("");
-            setAnswers({});
-            setQuestionFeedback("");
-            setQuestionPositiveFeedback("");
-            setCheckSubmit([]);
+            // setTitle("");
+            // setText("");
+            // setQuestionType("Matching Question");
+            // setSelectedCategoryId(idQ);
+            // setSelectedCategory(selectedCategory1);
+            // setCategorySelect("");
+            // setAnswers({});
+            // setQuestionFeedback("");
+            // setQuestionPositiveFeedback("");
+            // setCheckSubmit([]);
             sessionStorage.setItem("scrollToTop", "true");
             navigate(`/question/new-question`, {
               state: {
@@ -119,7 +129,9 @@ const NewQuestion = ({
                 scrollTop: true
               }
             });
-            window.location.reload();
+            // window.location.reload();
+            handleShowToast();
+            window.scrollTo(0, 0);
           } else {
             window.location.href = quizzesUrl + '/questions';
           }
@@ -359,8 +371,21 @@ const NewQuestion = ({
     onClick: () => {
       saveChanges();
     }
-  }, subButText)))), /*#__PURE__*/React.createElement("div", {
+  }, buttonText)))), /*#__PURE__*/React.createElement("div", {
     className: "col-2"
-  }))));
+  }))), /*#__PURE__*/React.createElement(ToastContainer, {
+    position: "bottom-end",
+    className: "p-3"
+  }, /*#__PURE__*/React.createElement(Toast, {
+    show: showToast,
+    onClose: () => setShowToast(false),
+    bg: "success"
+  }, /*#__PURE__*/React.createElement(Toast.Header, {
+    closeButton: true
+  }, /*#__PURE__*/React.createElement("strong", {
+    className: "me-auto"
+  }, "Question ", title, " was created.")), /*#__PURE__*/React.createElement(Toast.Body, {
+    className: "text-white"
+  }, "Created sucesfully."))));
 };
 export default NewQuestion;

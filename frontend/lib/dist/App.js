@@ -14,7 +14,9 @@ import QuizReview from "./Quizzes/QuizReview";
 import Users from "./Users/Users";
 import UserStatistics from "./Users/UserStatistics";
 import QuizzesTableAnalysis from "./Quizzes/QuizzesTableAnalysis";
+import QuizAnalysis from "./Quizzes/QuizAnalysis";
 import QuizStatistics from "./Quizzes/QuizStatistics";
+import QuizAllUsersEvals from "./Quizzes/QuizAllUsersEvals";
 console.log('BASENAME:', process.env.REACT_APP_BASENAME);
 console.log('HOST URL:', process.env.REACT_APP_HOST_URL);
 function App() {
@@ -68,8 +70,14 @@ function App() {
     path: "/review-quiz",
     element: /*#__PURE__*/React.createElement(QuizReview, null)
   }), /*#__PURE__*/React.createElement(Route, {
-    path: "/quiz-statistics",
+    path: "/quiz-analysis-show",
+    element: /*#__PURE__*/React.createElement(QuizAnalysis, null)
+  }), /*#__PURE__*/React.createElement(Route, {
+    path: "/quiz-statistics-table",
     element: /*#__PURE__*/React.createElement(QuizStatistics, null)
+  }), /*#__PURE__*/React.createElement(Route, {
+    path: "/quiz-all-users",
+    element: /*#__PURE__*/React.createElement(QuizAllUsersEvals, null)
   })));
 }
 export default App;

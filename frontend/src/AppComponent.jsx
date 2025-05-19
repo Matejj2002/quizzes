@@ -40,10 +40,10 @@ export default function configure(backendUrl) {
 }
 
 function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
-    console.log(instance);
   const [quizId, setQuizId] = useState(instance.syncedState.quizId);
   const [quiz, setQuiz] = useState(instance.syncedState.quiz);
-  const [attempt, setAttempt] = useState(undefined);
+  const [attempt, setAttempt] = useState(instance.syncedState.attempt);
+  console.log("QAA",quizId, attempt);
   const [reviewData, setReviewData] = useState({});
   const [userData, setUserData] = useState([]);
 
@@ -80,6 +80,7 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
   }
 
   useEffect(() => {
+      console.log("QZ",quiz)
       if (quiz) {
         handleReviewData(
           quiz,
@@ -146,6 +147,12 @@ function AppComponent({ instance, onStateChange, isEdited, backendUrl }) {
 
     useEffect(() => {
         if (attempt === "review") {
+             instance.syncedState = {
+            quizId: quiz.id,
+            quiz: quiz,
+                 attempt: "review"
+            }
+            onStateChange();
             setAttempt(undefined);
             fetchStudent().then(
                 handleReviewData(

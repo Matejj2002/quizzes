@@ -2,7 +2,11 @@ import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-const QuizzesTableAnalysis = () => {
+const QuizzesTableAnalysis = ({
+  statisticsNavigate = "/quiz-analysis-show",
+  activeNav = "Analysis",
+  title = "Quiz Analysis"
+}) => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +22,11 @@ const QuizzesTableAnalysis = () => {
         }
       });
       setQuizzes(response.data.result);
+    } catch (error) {} finally {}
+  };
+  const evaluateAllQuizzes = async () => {
+    try {
+      const response = await axios.get(apiUrl + `evaluate_all_quizzes`);
     } catch (error) {} finally {}
   };
   async function getUserLogged() {
@@ -44,6 +53,7 @@ const QuizzesTableAnalysis = () => {
     getUserLogged().then(() => {
       setLoading(false);
     });
+    evaluateAllQuizzes();
   }, []);
   useEffect(() => {
     if (userData && Object.keys(userData).length > 0) {
@@ -59,7 +69,7 @@ const QuizzesTableAnalysis = () => {
     }, /*#__PURE__*/React.createElement("h2", null, "Loading..."));
   }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {
-    active: "Analysis"
+    active: activeNav
   }), /*#__PURE__*/React.createElement("div", {
     className: "container-fluid"
   }, /*#__PURE__*/React.createElement("div", {
@@ -68,7 +78,7 @@ const QuizzesTableAnalysis = () => {
     className: "col-2 sidebar"
   }), /*#__PURE__*/React.createElement("div", {
     className: "col-8"
-  }, /*#__PURE__*/React.createElement("h1", null, "Quiz Analysis"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h1", null, title), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "search",
@@ -103,7 +113,7 @@ const QuizzesTableAnalysis = () => {
     className: "btn btn-outline-primary",
     onClick: e => {
       e.preventDefault();
-      navigate("/quiz-statistics", {
+      navigate(statisticsNavigate, {
         state: {
           quiz: quiz,
           userRole: userData["role"]

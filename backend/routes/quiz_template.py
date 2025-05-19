@@ -15,7 +15,7 @@ def get_quiz_template_api():
     actual_time = datetime.datetime.now()
     update_at = ""
 
-    template_sub = get_quiz_template(student_id, quiz_id, actual_time, 0, update_at)
+    template_sub = get_quiz_template(student_id, quiz_id, actual_time, 0, update_at)[0]
     return {"result": template_sub}, 200
 
 @quiz_template_bp.route("/get-quiz-templates", methods=["GET"])

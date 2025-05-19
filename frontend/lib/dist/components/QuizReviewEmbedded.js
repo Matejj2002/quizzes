@@ -58,7 +58,8 @@ const QuizReviewEmbedded = ({
       const result = await axios.get(backendUrl + "quiz-student-load", {
         params: {
           student_id: userId,
-          quiz_id: quizId
+          quiz_id: quizId,
+          load_type: "review"
         }
       });
       await setData(result.data);
@@ -229,9 +230,10 @@ const QuizReviewEmbedded = ({
     key: idx
   }, /*#__PURE__*/React.createElement("input", {
     className: "form-check-input",
-    type: "checkbox"
-    // disabled="true"
-    ,
+    type: "checkbox",
+    style: {
+      pointerEvents: 'none'
+    },
     defaultChecked: ans.answer === true
   }), /*#__PURE__*/React.createElement("span", {
     className: "d-flex w-100 form-check-label"
@@ -270,12 +272,16 @@ const QuizReviewEmbedded = ({
     style: {
       background: "rgba(255, 0, 0, 0.3)"
     }
-  }, questionsData[question.id]?.feedback), questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null && /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: questionsData[question.id]?.feedback
+  })), questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null && /*#__PURE__*/React.createElement("p", {
     className: "p-3 rounded",
     style: {
       background: "rgba(155,236,137,0.15)"
     }
-  }, questionsData[question.id]?.feedback), !questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: questionsData[question.id]?.feedback
+  })), !questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded",
     style: {
       background: "rgba(255, 165, 0, 0.3)",
