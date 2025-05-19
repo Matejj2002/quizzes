@@ -21,6 +21,7 @@ const GeneratedQuiz = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [loadQuestions, setLoadQuestions] = useState(false);
     const [disableButtons, setDisableButtons] = useState(false);
+    const [countMax, setCountMax] = useState(0);
 
     const [feedbackQuestion, setFeedbackQuestion] = useState([]);
 
@@ -57,7 +58,7 @@ const GeneratedQuiz = () => {
     }, [dateStart, minutesToFinish]);
 
     useEffect(() => {
-            if (count % 55 === 0 && count !== -1) {
+            if (count % 60 === 0 && count !== -1 && count !==countMax) {
             handleSaveQuiz(false);
             setLoadQuestions(true);
         }
@@ -137,16 +138,14 @@ const GeneratedQuiz = () => {
     }
 
     if (quiz.correction_of_attempts !== "correctionAttempts" && refreshQuiz){
-        handleSaveQuiz(false).then(()=>{
         const generateQuizWait = async () => {
         setLoading(true);
         await generateQuiz();
         setQuizGenerated(true);
-    };
+        };
 
         generateQuizWait().then(() => {
-    });
-    })
+        });
     }else{
         const generateQuizWait = async () => {
         setLoading(true);
@@ -185,13 +184,13 @@ const GeneratedQuiz = () => {
         ).catch( () => {
             setTimeout(() => {
                 setIsSaving(false);
-                console.log("AAAA");
+                setDisableButtons(false);
+
             }, 3000);
         })
 
         return false;
     }
-
 
     const generateQuiz = () => {
         const updatedData = {
@@ -238,6 +237,7 @@ const GeneratedQuiz = () => {
                                 if (nowDate > endTime || (result.data.end_time !== null && nowDate < finishTime) ){
                                     setCount(-1);
                                 }else{
+                                    setCountMax(differenceInSeconds);
                                     setCount(differenceInSeconds);
                                 }
 
@@ -248,6 +248,7 @@ const GeneratedQuiz = () => {
 
                             }else{
                                 window.location.reload();
+                                setCountMax(response.data.time_to_finish *60);
                                 setCount(response.data.time_to_finish *60)
                             }
 
