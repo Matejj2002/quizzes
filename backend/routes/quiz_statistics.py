@@ -33,8 +33,8 @@ def get_all_quizzes_analysis():
 
     quiz_templates = QuizTemplate.query.filter(QuizTemplate.is_deleted == False).all()
 
-    # students = User.query.filter(User.user_type == 'student').all()
-    students = User.query.all()
+    students = User.query.filter(User.user_type == 'student').all()
+    #students = User.query.all()
 
     quiz_data = []
     for qt in quiz_templates:
@@ -378,8 +378,8 @@ def quiz_statistics():
 def get_quiz_students_results():
     quiz_template_id = request.args.get("template_id")
 
-    # students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
-    students = [{"student_id": i.id, "github_name": i.github_name} for i in User.query.all()]
+    students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
+    #students = [{"student_id": i.id, "github_name": i.github_name} for i in User.query.all()]
 
     results = []
     attended = 0
@@ -428,15 +428,18 @@ def get_quiz_students_results():
     if max_points * attended != 0:
         avg_perc = round(( sum_points / (max_points*attended) ) *100, 2)
 
+    average_points = 0
+    if attended != 0:
+        average_points = sum_points / attended
+
     data = {
         "attendance": attended,
         "num_students": len(students),
         "attendance_perc": round((attended / len(students)) * 100, 2),
-        "average_points": sum_points / attended,
+        "average_points": average_points,
         "max_points": max_points,
         "average_points_perc":  avg_perc
 
     }
 
-    print(sum_points, attended)
     return {"result": {"quiz_id": quiz_template_id, "students": results, "data": data}}
