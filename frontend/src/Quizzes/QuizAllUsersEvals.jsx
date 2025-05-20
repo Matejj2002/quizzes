@@ -104,6 +104,7 @@ const QuizAllUsersEvals = () =>{
                                             <td className="w-25 text-end">
                                                 <button
                                                     className="btn btn-outline-primary"
+                                                    disabled={data.num_quizzes === 0}
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         reviewStudentQuiz(data["student_id"], data["github_name"]);
