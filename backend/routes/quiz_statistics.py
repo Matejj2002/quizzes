@@ -156,7 +156,7 @@ def quiz_statistics():
 
     question_analysis = {}
 
-    users = set([i.id for i in User.query.all()])
+    users = set([i.id for i in User.query.filter_by(user_type="student").all()])
 
     student_correct = {}
     student_incorrect = {}
