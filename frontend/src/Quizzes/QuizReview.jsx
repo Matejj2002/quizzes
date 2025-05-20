@@ -11,7 +11,7 @@ const QuizReview = () =>{
     const location = useLocation();
     const navigate = useNavigate();
     const [quiz] = useState(location.state?.quiz);
-    const [actualId, setActualId] = useState(location.state?.actualId || quiz.quizzes.length-1);
+    const [actualId, setActualId] = useState(location.state?.actualId ?? quiz.quizzes.length - 1);
     const [userId] = useState(location.state?.userId);
     const [quizId] = useState(location.state?.quizId);
     const [feedback] = useState(location.state?.feedback);
