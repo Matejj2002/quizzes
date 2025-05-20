@@ -392,8 +392,12 @@ def get_questions_quiz(index):
         for choice_id in ord_ids:
             choice = Choice.query.filter(Choice.id == choice_id).first()
             correct_answers += str(choice.is_correct) + "\n"
+
             try:
-                if multiple_answs["answer"][cnt][2] == "True":
+                dct = {}
+                for i in multiple_answs["answer"]:
+                    dct[i[1]] = i[2]
+                if dct[choice.id] == "True":
                     res = True
                 else:
                     res = False
