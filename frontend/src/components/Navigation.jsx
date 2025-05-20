@@ -46,7 +46,7 @@ const Navigation = ({active}) => {
     return (
         <nav className="navbar navbar-expand-sm bg-primary w-100" data-bs-theme="dark">
             <div className="container-fluid">
-                <a className="navbar-brand" href="#">Quizzes</a>
+                <a className="navbar-brand" href={`${quizzesUrl}/quizzes`}>Quizzes</a>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
                         aria-label="Toggle navigation">
@@ -54,7 +54,7 @@ const Navigation = ({active}) => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div className="navbar-nav">
-                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
+                        <a className={`nav-link ${active === "Quizzes" ? "active" : ""}`}
                            href={`${quizzesUrl}/quizzes`}>Quizzes</a>
                         <a className={`nav-link ${active === "Questions" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`}
                            aria-disabled={userData["role"] !== "teacher"}
