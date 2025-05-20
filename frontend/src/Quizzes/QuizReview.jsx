@@ -23,7 +23,7 @@ const QuizReview = () =>{
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
     const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
-
+    console.log(quiz)
     const fetchQuestion = async (questionId, itemId) => {
         try {
             const response = await axios.get(apiUrl+`questions-quiz/${questionId}`, {

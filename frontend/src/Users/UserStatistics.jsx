@@ -72,8 +72,8 @@ const UserStatistics = () =>{
                                                             e.preventDefault();
                                                             navigate("/review-quiz", {
                                                                 state: {
-                                                                    quiz: quiz.quizzes[0],
-                                                                    quizId: quiz.quizzes[0].quiz_id,
+                                                                    quiz: quiz.quizzes[quiz.quizzes.length-1],
+                                                                    quizId: quiz.quizzes[quiz.quizzes.length-1].quiz_id,
                                                                     feedback: ['optionsFeedback', 'questionFeedback', 'pointsReview', 'correctAnswers'],
                                                                     correctMode: true,
                                                                     userId: studentId,
