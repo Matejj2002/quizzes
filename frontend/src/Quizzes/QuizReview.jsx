@@ -11,6 +11,7 @@ const QuizReview = () =>{
     const location = useLocation();
     const navigate = useNavigate();
     const [quiz] = useState(location.state?.quiz);
+    const [actualId, setActualId] = useState(location.state?.actualId || quiz.quizzes.length-1);
     const [userId] = useState(location.state?.userId);
     const [quizId] = useState(location.state?.quizId);
     const [feedback] = useState(location.state?.feedback);
@@ -23,7 +24,14 @@ const QuizReview = () =>{
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
     const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
-    console.log(quiz)
+
+    useEffect(() => {
+        console.log("AI",actualId, "QZ", quiz);
+        setData([]);
+        setQuestionsData({});
+    }, [actualId])
+
+
     const fetchQuestion = async (questionId, itemId) => {
         try {
             const response = await axios.get(apiUrl+`questions-quiz/${questionId}`, {
@@ -51,7 +59,7 @@ const QuizReview = () =>{
                 {
                     params: {
                         student_id: userId,
-                        quiz_id: quizId,
+                        quiz_id: quiz.quizzes[actualId].quiz_id,
                         load_type: "attempt"
                     }
                 }
@@ -62,7 +70,7 @@ const QuizReview = () =>{
         }
         )
 
-    } , [] )
+    } , [actualId] )
 
     useEffect(() => {
         const fetchQuestions = [];
@@ -92,14 +100,17 @@ const QuizReview = () =>{
     const handleSaveEvaluation = () =>{
         const updatedData = {
             questionsData: questionsData,
-            id: quiz.quiz_id
+            id: quiz.quizzes[actualId].quiz_id
         }
         axios.put(apiUrl+`quiz_change_evaluation`, updatedData).then( () =>{
-                navigate(-1);
+                // navigate(-1);
+                window.scrollTo(0,0);
+                alert("Evaluation saved.")
 
             }
 
         ).catch( () => {
+            alert("Error during saving evaluation.")
         })
     }
 
@@ -121,6 +132,56 @@ const QuizReview = () =>{
                     <div className="col-2 sidebar"></div>
 
                     <div className="col-8">
+                        <div className="d-flex justify-content-between mt-3 mb-3">
+                            <button
+                                className="btn btn-outline-primary me-1"
+                                disabled={quiz.can_be_checked === false || actualId <= 0}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setActualId(prev => prev - 1);
+                                    navigate("/review-quiz", {
+                                        state: {
+                                            quiz: quiz,
+                                            quizId: quiz.quizzes[actualId].quiz_id,
+                                            feedback: quiz.feedbackTypeAfterClose,
+                                            conditionToRetake: false,
+                                            userId: userId,
+                                            userRole: userRole,
+                                            actualId: actualId
+                                        }
+                                    })
+                                }
+                                }
+                            >
+                                <span>Previous attempt</span>
+                            </button>
+                            <div className="d-flex align-items-center">
+                                <span className="text-center">Attempt {actualId + 1} / {quiz.quizzes.length}</span>
+                            </div>
+                            <button
+                                className="btn btn-outline-primary me-1"
+                                disabled={quiz.can_be_checked === false || actualId >= quiz.quizzes.length-1}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setActualId(prev => prev + 1);
+                                    navigate("/review-quiz", {
+                                        state: {
+                                            quiz: quiz,
+                                            quizId: quiz.quizzes[actualId].quiz_id,
+                                            feedback: quiz.feedbackTypeAfterClose,
+                                            conditionToRetake: false,
+                                            userId: userId,
+                                            userRole: userRole,
+                                            actualId: actualId
+                                        }
+                                    })
+                                }
+                                }
+                            >
+                                <span>Next attempt</span>
+                            </button>
+                        </div>
+
                         <div className="d-flex justify-content-between">
                             <h1 className="mb-3">
                                 Review {quiz.title}

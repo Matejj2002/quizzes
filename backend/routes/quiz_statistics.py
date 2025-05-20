@@ -121,7 +121,7 @@ def get_students_results():
 
     titles = "name,"
     for i in quiz_templates[:-1]:
-        titles += i.title.replace(" ", "_") + ","
+        titles += i.title.replace(",", ";") + ","
 
     titles += quiz_templates[-1].title.replace(" ", "_") + ",sum_points" + "\n"
 

@@ -138,9 +138,9 @@ const Users = () =>{
         await writable.write(response.data.result);
         await writable.close();
 
-        alert("Súbor bol uložený!");
+        alert("File saved sucesfully!");
     } catch (error) {
-        console.error("Chyba pri ukladaní:", error);
+            alert("Error during saving. Not saved !")
     }
     }
 
