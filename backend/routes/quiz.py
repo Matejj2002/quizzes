@@ -347,7 +347,8 @@ def get_questions_quiz(index):
                              "pairId": matching_pair.id,
                              "rightSide": matching_pair.rightSide if "correctAnswers" in feedback_type else None,
                              "answer": matching_answs["answer"][cnt]["answer"],
-                             "feedback": matching_pair.negative_feedback if "optionsFeedback" in feedback_type else None,
+                             "negative_feedback": matching_pair.negative_feedback if "optionsFeedback" in feedback_type else None,
+                             "positive_feedback": matching_pair.positive_feedback if "optionsFeedback" in feedback_type else None,
                              })
 
                     else:
@@ -417,10 +418,12 @@ def get_questions_quiz(index):
                         "choiceId": choice.id,
                         "text": choice.text,
                         "answer": res,
-                        "feedback": choice.negative_feedback if "optionsFeedback" in feedback_type else None,
+                        "negative_feedback": choice.negative_feedback if "optionsFeedback" in feedback_type else None,
+                        "positive_feedback": choice.positive_feedback if "optionsFeedback" in feedback_type else None,
                         "isCorrectOption": res == choice.is_correct if "correctAnswers" in feedback_type else None
                     }
                 )
+
             else:
                 answers.append(
                     {
@@ -438,7 +441,7 @@ def get_questions_quiz(index):
             if review:
                 max_points = item.max_points
                 points = item.score
-                if points != 0:
+                if points == item.max_points:
                     is_correct_res = True
                 else:
                     is_correct_res = False
@@ -462,10 +465,9 @@ def get_questions_quiz(index):
                 {"answer": ""}
             )
 
-    if not is_correct_res:
-        feedback = newest_version.questions.question_feedback
-    else:
-        feedback = newest_version.questions.question_positive_feedback
+
+    positive_feedback = newest_version.questions.question_positive_feedback
+    negative_feedback = newest_version.questions.question_feedback
 
     if review:
         return {
@@ -478,7 +480,8 @@ def get_questions_quiz(index):
             "isCorrect": is_correct_res if "correctAnswers" in feedback_type or "pointsReview" in feedback_type else None,
             "points": points if "pointsReview" in feedback_type else None,
             "max_points": max_points if "pointsReview" in feedback_type else None,
-            "feedback": feedback if "questionFeedback" in feedback_type else None,
+            "positive_feedback": positive_feedback if "questionFeedback" in feedback_type else None,
+            "negative_feedback": negative_feedback if "questionFeedback" in feedback_type else None,
             "correct_answer": correct_answers if "correctAnswers" in feedback_type else None,
             "item_id": int(item_id)
         }

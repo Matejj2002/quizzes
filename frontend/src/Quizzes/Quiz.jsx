@@ -16,9 +16,10 @@ const Quiz = () => {
 
     const fetchQuizzes = async () => {
       try{
+          console.log(userData);
             const response = await axios.get(apiUrl+`get-quiz-templates` ,
                 {
-                    params: {"studentId": userData["id_user"]}
+                    params: {"studentId": userData["id_user"], "userRole": userData["role"]}
                 }
             )
             setQuizzes(response.data.result);
@@ -37,8 +38,6 @@ const Quiz = () => {
       }
        finally {}
     }
-
-    console.log(quizzesPom);
 
     async function getUserLogged(){
 

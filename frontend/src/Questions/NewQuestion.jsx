@@ -242,7 +242,6 @@ const NewQuestion = ({subButText="Submit"}) => {
         console.error("Error during fetch:", error);
       }
     };
-    console.log(sessionStorage.getItem("scrollToTop"));
     useEffect(() => {
         if (sessionStorage.getItem("scrollToTop") === "true") {
             setTimeout(() => {

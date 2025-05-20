@@ -21,6 +21,8 @@ def get_quiz_template_api():
 @quiz_template_bp.route("/get-quiz-templates", methods=["GET"])
 def get_quiz_templates():
     student_id = request.args.get("studentId")
+    user_role = request.args.get("userRole")
+
     try:
         int(student_id)
     except:
@@ -36,7 +38,7 @@ def get_quiz_templates():
     update_at = ""
 
     for template in sorted(quiz_templates, key=lambda x: x.date_time_open, reverse=True):
-        template_sub, update_at_pom = get_quiz_template(student_id, template.id, actual_time, cnt, update_at)
+        template_sub, update_at_pom = get_quiz_template(student_id, template.id, actual_time, cnt, update_at, user_role)
 
         if update_at_pom is not None:
             if update_at == "":

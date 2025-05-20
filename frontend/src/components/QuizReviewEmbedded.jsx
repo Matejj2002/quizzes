@@ -158,30 +158,36 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
 
                         {(quiz.can_be_checked && quiz.quizzes.length!==0 && quiz.is_finished) && (
                             <div>
-                        <select className="form-select mb-3 mt-3" onChange={(e) => handleChooseId(e.target.value)}>
-                            {quiz.quizzes
-                                .slice()
-                                .reverse()
-                                .map((q, index, arr) => (
-                                    <option key={q.quiz_id} value={q.quiz_id}>
-                                        Review attempt {arr.length - index}
-                                    </option>
-                                ))}
-                        </select>
+                                <div className="d-flex align-items-center gap-2 mb-3 mt-1">
+                                    <label className="text-center" htmlFor={"quizAttempt"}
+                                    >Attempt</label>
+                                    <select className="form-select mb-3 mt-2" id="quizAttempt"
+                                            onChange={(e) => handleChooseId(e.target.value)}
+                                            value={actualId}>
+                                        {quiz.quizzes
+                                            .slice()
+                                            .reverse()
+                                            .map((q, index, arr) => (
+                                                <option key={q.quiz_id} value={quiz.quizzes.length - index - 1}>
+                                                    {q.started}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
 
-                        <ul className="nav nav-tabs mt-3" id="myTab" role="tablist">
-                            {quiz.sections.map((sect, index) => (
-                                <li className="nav-item" role="presentation" key={index}>
-                                    <button
-                                        className={`nav-link ${index === page ? 'active' : ''}`}
-                                        id={`tab-${index}`}
-                                        data-bs-toggle="tab"
-                                        data-bs-target={`#tab-pane-${index}`}
-                                        type="button"
-                                        role="tab"
-                                        aria-controls={`tab-pane-${index}`}
-                                        aria-selected={index === page}
-                                        onClick={() => {
+                                <ul className="nav nav-tabs mt-3" id="myTab" role="tablist">
+                                    {quiz.sections.map((sect, index) => (
+                                        <li className="nav-item" role="presentation" key={index}>
+                                            <button
+                                                className={`nav-link ${index === page ? 'active' : ''}`}
+                                                id={`tab-${index}`}
+                                                data-bs-toggle="tab"
+                                                data-bs-target={`#tab-pane-${index}`}
+                                                type="button"
+                                                role="tab"
+                                                aria-controls={`tab-pane-${index}`}
+                                                aria-selected={index === page}
+                                                onClick={() => {
                                             setPage(index)
                                         }}
                                     >
