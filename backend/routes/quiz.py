@@ -138,7 +138,6 @@ def get_quiz_student_load():
     student_id = request.args.get('student_id')
     quiz_id = request.args.get('quiz_id')
     load_type = request.args.get("load_type")
-    print(student_id, quiz_id, load_type)
 
     if load_type == "review":
         quiz = Quiz.query.filter(
@@ -392,6 +391,7 @@ def get_questions_quiz(index):
 
         for choice_id in ord_ids:
             choice = Choice.query.filter(Choice.id == choice_id).first()
+            print(Choice.query.filter(Choice.id == choice_id).all())
             correct_answers += str(choice.is_correct) + "\n"
 
             try:

@@ -374,7 +374,7 @@ const QuizReview = () =>{
                                                                             <span>{ans.answer}</span>
                                                                         )}
 
-                                                                        {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "") ? (
+                                                                        {ans.answer !== ans["rightSide"] && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
                                                                             <p className="border border-danger p-3 rounded"
                                                                                style={{background: "rgba(255, 0, 0, 0.3)"}}>
                                                                                 {ans?.negative_feedback}
@@ -423,7 +423,7 @@ const QuizReview = () =>{
                                                                 )}
                                                                 </span>
 
-                                                            {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "") ? (
+                                                            {!ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
                                                                 <p className="border border-danger p-3 rounded"
                                                                    style={{background: "rgba(255, 0, 0, 0.3)"}}>
                                                                     {ans?.negative_feedback}
@@ -453,11 +453,7 @@ const QuizReview = () =>{
 
                                                         className="form-control"
                                                     />
-                                                    {/*<div className="d-flex">*/}
-                                                    {/*    <FormattedTextRenderer*/}
-                                                    {/*        text={questionsData[question.id]?.answers[0]["answer"]}*/}
-                                                    {/*    />*/}
-                                                    {/*</div>*/}
+
                                                     {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
                                                         <p className="border border-danger p-3 rounded"
                                                            style={{background: "rgba(255, 0, 0, 0.3)"}}>
@@ -468,7 +464,7 @@ const QuizReview = () =>{
                                                 </div>
                                             )}
 
-                                            {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
+                                            {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.negative_feedback !== "") && (
                                                 <div className="p-3 rounded"
                                                      style={{
                                                          background: "rgba(255, 0, 0, 0.3)"
@@ -480,7 +476,7 @@ const QuizReview = () =>{
                                             )
                                             }
 
-                                            {(parseFloat(questionsData[question.id]?.points) === parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
+                                            {(parseFloat(questionsData[question.id]?.points) === parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.positive_feedback !== "") && (
                                                 <div className="p-3 rounded"
                                                      style={{
                                                          background: "rgba(155,236,137,0.15)"
