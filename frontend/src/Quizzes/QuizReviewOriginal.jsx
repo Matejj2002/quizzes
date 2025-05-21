@@ -4,7 +4,6 @@ const QuizReviewOriginal = ({quizData}) =>{
     const [quiz] = useState(quizData);
     const [page, setPage] = useState(0);
 
-    console.log(quiz);
     return (
         <div>
             <ul className="nav nav-tabs mt-3" id="myTab" role="tablist">

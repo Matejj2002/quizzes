@@ -169,7 +169,7 @@ const QuizReview = () =>{
                             <span className="text-secondary mb-3">Attended by {userName}</span>
                         )}
 
-                        <div className="d-flex align-items-center gap-2 mb-3 mt-1">
+                        <div className="mb-3 mt-1">
                         <label className="text-center" htmlFor={"quizAttempt"}
                         >Attempt</label>
                         <select className="form-select mb-3 mt-2" id="quizAttempt" onChange={(e) => handleChooseId(e.target.value)}
