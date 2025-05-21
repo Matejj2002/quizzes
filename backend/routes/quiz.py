@@ -371,8 +371,6 @@ def get_questions_quiz(index):
                                 })
 
     elif newest_version.type == "multiple_answer_question":
-        multiple_answs = []
-        ord_ids = []
         if item is not None:
             multiple_answs = json.loads(item.answer)
             max_points = item.max_points
@@ -386,54 +384,62 @@ def get_questions_quiz(index):
             else:
                 ord_ids = item.order
 
-        cnt = 0
-        correct_answers += "\n"
 
-        for choice_id in ord_ids:
-            choice = Choice.query.filter(Choice.id == choice_id).first()
-            print(Choice.query.filter(Choice.id == choice_id).all())
-            correct_answers += str(choice.is_correct) + "\n"
+            cnt = 0
+            correct_answers += "\n"
 
-            try:
-                dct = {}
-                for i in multiple_answs["answer"]:
-                    dct[i[1]] = i[2]
-                if dct[choice.id] == "True":
-                    res = True
-                else:
+            for choice_id in ord_ids:
+                choice = Choice.query.filter(Choice.id == choice_id).first()
+                correct_answers += str(choice.is_correct) + "\n"
+
+                try:
+                    dct = {}
+                    for i in multiple_answs["answer"]:
+                        dct[i[1]] = i[2]
+                    if dct[choice.id] == "True":
+                        res = True
+                    else:
+                        res = False
+                except:
                     res = False
-            except:
-                res = False
 
-            if review:
-                max_points = item.max_points
-                points = item.score
-                if points != 0:
-                    is_correct_res = True
+                if review:
+                    max_points = item.max_points
+                    points = item.score
+                    if points != 0:
+                        is_correct_res = True
+                    else:
+                        is_correct_res = False
+
+                    answers.append(
+                        {
+                            "choiceId": choice.id,
+                            "text": choice.text,
+                            "answer": res,
+                            "negative_feedback": choice.negative_feedback if "optionsFeedback" in feedback_type else None,
+                            "positive_feedback": choice.positive_feedback if "optionsFeedback" in feedback_type else None,
+                            "isCorrectOption": res == choice.is_correct if "correctAnswers" in feedback_type else None
+                        }
+                    )
+
                 else:
-                    is_correct_res = False
-
+                    answers.append(
+                        {
+                            "choiceId": choice.id,
+                            "text": choice.text,
+                            "answer": res,
+                        }
+                    )
+                cnt += 1
+        else:
+            for mult in newest_version.multiple_answers:
                 answers.append(
                     {
-                        "choiceId": choice.id,
-                        "text": choice.text,
-                        "answer": res,
-                        "negative_feedback": choice.negative_feedback if "optionsFeedback" in feedback_type else None,
-                        "positive_feedback": choice.positive_feedback if "optionsFeedback" in feedback_type else None,
-                        "isCorrectOption": res == choice.is_correct if "correctAnswers" in feedback_type else None
+                        "choiceId": mult.id,
+                        "text": mult.text,
+                        "answer": [],
                     }
                 )
-
-            else:
-                answers.append(
-                    {
-                        "choiceId": choice.id,
-                        "text": choice.text,
-                        "answer": res,
-                    }
-                )
-            cnt += 1
-
     else:
         if item is not None:
             item_answer = json.loads(item.answer)
