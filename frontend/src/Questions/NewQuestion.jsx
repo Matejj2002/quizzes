@@ -25,21 +25,6 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const apiUrl = process.env.REACT_APP_API_URL;
 
-    let titleText = "";
-    let buttonText = "";
-    if (subButText === "Submit"){
-        titleText = "New Question";
-        buttonText = "Create Question";
-    }
-    if (subButText === "Copy"){
-        titleText = "Copy of " + location.state["questionTitle"];
-        buttonText = "Copy Question"
-    }
-    if (subButText === "Update"){
-        titleText = "Update Question";
-        buttonText = "Update Question"
-    }
-
     const [category, setCategory] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -58,6 +43,8 @@ const NewQuestion = ({subButText="Submit"}) => {
     const back = location.state["back"];
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
+    const [versions, setVersions] = useState([]);
+    const [selectedVersion, setSelectedVersion] = useState(0);
 
     const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
     const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
@@ -74,6 +61,27 @@ const NewQuestion = ({subButText="Submit"}) => {
     const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions || false);
 
     const [showToast, setShowToast] = useState(false);
+
+    let titleText = "";
+    let buttonText = "";
+    if (subButText === "Submit"){
+        titleText = "New Question";
+        buttonText = "Create Question";
+    }
+    if (subButText === "Copy"){
+        titleText = "Copy of " + location.state["questionTitle"];
+        buttonText = "Copy Question"
+    }
+    if (subButText === "Update"){
+        if (selectedVersion !==0){
+            titleText = "Retrieve Question";
+            buttonText = "Retrieve Question";
+        }else {
+            titleText = "Update Question";
+            buttonText = "Update Question";
+        }
+    }
+
 
       const handleShowToast = () => {
         setShowToast(true);
@@ -196,27 +204,30 @@ const NewQuestion = ({subButText="Submit"}) => {
     const fetchData = async () => {
         try{
             const response = await axios.get(apiUrl+`question-version-choice/${id}`)
-            setSelectedCategory(response.data["category_name"]);
-            setSelectedCategoryId(response.data["category_id"]);
-            setTitle(response.data["title"]);
-            setText(response.data["text"]);
-            setQuestionFeedback(response.data["question_feedback"])
-            setQuestionPositiveFeedback(response.data["question_positive_feedback"])
 
-            if (response.data["type"] === "matching_answer_question"){
+            setVersions(response.data);
+
+            setSelectedCategory(response.data[0]["category_name"]);
+            setSelectedCategoryId(response.data[0]["category_id"]);
+            setTitle(response.data[0]["title"]);
+            setText(response.data[0]["text"]);
+            setQuestionFeedback(response.data[0]["question_feedback"])
+            setQuestionPositiveFeedback(response.data[0]["question_positive_feedback"])
+
+            if (response.data[0]["type"] === "matching_answer_question"){
                 setQuestionType("Matching Question")
             }
 
-            if (response.data["type"] === "multiple_answer_question"){
+            if (response.data[0]["type"] === "multiple_answer_question"){
                 setQuestionType("Multiple Choice Question")
             }
 
-            if (response.data["type"] === "short_answer_question"){
+            if (response.data[0]["type"] === "short_answer_question"){
                 setQuestionType("Short Question")
             }
 
-            await AnswerSetter(response.data["answers"]);
-            setAnswers(response.data["answers"]);
+            await AnswerSetter(response.data[0]["answers"]);
+            setAnswers(response.data[0]["answers"]);
 
         }catch(error){
 
@@ -254,10 +265,40 @@ const NewQuestion = ({subButText="Submit"}) => {
   }, []);
 
 
+    useEffect(() =>{
+        if (versions.length === 0){
+            return;
+        }
+        const fetchDataWait = async () => {
+            setSelectedCategory(versions[selectedVersion]["category_name"]);
+            setSelectedCategoryId(versions[selectedVersion]["category_id"]);
+            setTitle(versions[selectedVersion]["title"]);
+            setText(versions[selectedVersion]["text"]);
+            setQuestionFeedback(versions[selectedVersion]["question_feedback"])
+            setQuestionPositiveFeedback(versions[selectedVersion]["question_positive_feedback"])
+
+            if (versions[selectedVersion]["type"] === "matching_answer_question") {
+                setQuestionType("Matching Question")
+            }
+
+            if (versions[selectedVersion]["type"] === "multiple_answer_question") {
+                setQuestionType("Multiple Choice Question")
+            }
+
+            if (versions[selectedVersion]["type"] === "short_answer_question") {
+                setQuestionType("Short Question")
+            }
+
+            await AnswerSetter(versions[selectedVersion]["answers"]);
+            setAnswers(versions[selectedVersion]["answers"]);
+        }
+        fetchDataWait();
+    }, [selectedVersion])
+
+
     const AnswerSetter = async (newAnswers) => {
         setAnswers(newAnswers)
     };
-
 
     if (userRole !=="teacher"){
         navigate("/quizzes");
@@ -285,10 +326,30 @@ const NewQuestion = ({subButText="Submit"}) => {
                             }
 
                             <div>
+                                <label htmlFor="select-version">Question Version</label>
+                                <select
+                                    id="select-version"
+                                    className="form-select"
+                                    onChange={(e) => {
+                                        setSelectedVersion(Number(e.target.value))
+                                    }
+                                    }
+                                    >
+
+                                    {versions.map((version, index) => (
+                                          <option key={index} value={index}>
+                                            Version {versions.length- index}
+                                          </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            <div>
                                 <label htmlFor="select-category">Category</label>
                                 <select
                                     id="select-category"
                                     className="form-select"
+                                    disabled={selectedVersion!==0}
                                     value={selectedCategoryId}
                                     onChange={(e) => {
                                         const selectedOption = categorySelect.find(
@@ -316,6 +377,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 </label>
                                 <select
                                     id="questionType"
+                                    disabled={selectedVersion!==0}
                                     className="form-select"
                                     value={questionType}
                                     onChange={(e) => setQuestionType(e.target.value)}
@@ -335,6 +397,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                         type="text"
                                         className="form-control"
                                         id="questionTitle"
+                                        disabled={selectedVersion!==0}
                                         value={title}
                                         placeholder="Question title"
                                         onChange={(e) => setTitle(e.target.value)}
@@ -349,7 +412,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     <label htmlFor="questionText" className="form-label">
                                         Question Text
                                     </label>
-                                    <FormattedTextInput text={text} handleFunction={setText}></FormattedTextInput>
+                                    <FormattedTextInput text={text} handleFunction={setText} isDisabled={selectedVersion!==0}></FormattedTextInput>
                                     <div className="invalid-feedback">
                                         Please enter text of question
                                     </div>
@@ -360,21 +423,21 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <label htmlFor="questionFeedback" className="form-label">
                                     Question negative feedback
                                 </label>
-                                <FormattedTextInput text={questionFeedback} handleFunction={setQuestionFeedback}></FormattedTextInput>
+                                <FormattedTextInput text={questionFeedback} handleFunction={setQuestionFeedback} isDisabled={selectedVersion!==0}></FormattedTextInput>
                             </div>
 
                             <div className="mb-3">
                                 <label htmlFor="questionPositiveFeedback" className="form-label">
                                     Question positive feedback
                                 </label>
-                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback}></FormattedTextInput>
+                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback} isDisabled={selectedVersion!==0}></FormattedTextInput>
                             </div>
 
                             {questionType === "Matching Question" && (
                                 <div>
                                     <h2>{questionType}</h2>
                                     <MatchingQuestion setAnswers={AnswerSetter}
-                                                      answers={answers}></MatchingQuestion>
+                                                      answers={answers} isDisabled={selectedVersion!==0}></MatchingQuestion>
                                 </div>
                             )}
 
@@ -382,7 +445,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <div>
                                     <h2>{questionType}</h2>
                                     <ShortAnswerQuestion setAnswers={AnswerSetter}
-                                                         answers={answers} ></ShortAnswerQuestion>
+                                                         answers={answers} isDisabled={selectedVersion!==0}></ShortAnswerQuestion>
                                 </div>
 
                             )}
@@ -391,7 +454,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <div>
                                     <h2>{questionType}</h2>
                                     <MultipleChoiceQuestion setAnswers={AnswerSetter}
-                                                            answers={answers}></MultipleChoiceQuestion>
+                                                            answers={answers} isDisabled={selectedVersion!==0}></MultipleChoiceQuestion>
                                 </div>
                             )}
 

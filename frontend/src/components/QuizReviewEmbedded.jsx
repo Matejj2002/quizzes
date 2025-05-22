@@ -161,14 +161,13 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                 <div className="d-flex align-items-center gap-2 mb-3 mt-1">
                                     <label className="text-center" htmlFor={"quizAttempt"}
                                     >Attempt</label>
-                                    <select className="form-select mb-3 mt-2" id="quizAttempt"
-                                            onChange={(e) => handleChooseId(e.target.value)}
-                                            value={actualId}>
+                                    <select className="form-select mb-3 mt-3"
+                                            onChange={(e) => handleChooseId(e.target.value)}>
                                         {quiz.quizzes
                                             .slice()
                                             .reverse()
                                             .map((q, index, arr) => (
-                                                <option key={q.quiz_id} value={quiz.quizzes.length - index - 1}>
+                                                <option key={q.quiz_id} value={q.quiz_id}>
                                                     {q.started}
                                                 </option>
                                             ))}
@@ -330,13 +329,20 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                                                     <span>{ans.answer}</span>
                                                                 )}
 
-                                                                {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "" && ans.feedback !== null) && (
-                                                                    <p className="border border-danger p-3 rounded"
-                                                                       style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                                        {ans?.feedback}
-                                                                    </p>
-                                                                )
-                                                                }
+                                                                {ans.answer !== ans["rightSide"] && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
+                                                                            <p className="border border-danger p-3 rounded"
+                                                                               style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                                                {ans?.negative_feedback}
+                                                                            </p>
+                                                                        ) : (
+                                                                            ans?.positive_feedback !== "" && (
+                                                                                <p className="border border-success p-3 rounded"
+                                                                                   style={{background: "rgba(155,236,137,0.15)"}}>
+                                                                                    {ans?.positive_feedback}
+                                                                                </p>
+                                                                            )
+                                                                        )
+                                                                        }
                                                             </div>
 
                                                         </td>
@@ -353,6 +359,7 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                                 <div className="form-check" key={idx}>
                                                     <input className="form-check-input"
                                                            type="checkbox"
+                                                           style={{pointerEvents: 'none'}}
                                                         // disabled="true"
                                                            defaultChecked={ans.answer === true}
                                                     />
@@ -362,22 +369,29 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                                                     text={ans?.text}
                                                                 />
 
-                                                        {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers")) && (
-                                                            !ans.isCorrectOption
-                                                                ? <span className="ms-2 text-danger"><i
-                                                                    className="bi bi-x-circle-fill fs-5"></i></span>
-                                                                : <span className="ms-2 text-success"><i
-                                                                    className="bi bi-check-circle-fill fs-5"></i></span>
-                                                        )}
+                                                        {feedback.includes("correctAnswers") && (
+                                                                    !ans.isCorrectOption
+                                                                        ? <span className="ms-2 text-danger"><i
+                                                                            className="bi bi-x-circle-fill fs-5"></i></span>
+                                                                        : <span className="ms-2 text-success"><i
+                                                                            className="bi bi-check-circle-fill fs-5"></i></span>
+                                                                )}
                                                                 </span>
 
-                                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "") && (
-                                                        <p className="border border-danger p-3 rounded"
-                                                           style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                            {ans?.feedback}
-                                                        </p>
-                                                    )
-                                                    }
+                                                    {!ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
+                                                                <p className="border border-danger p-3 rounded"
+                                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                                    {ans?.negative_feedback}
+                                                                </p>
+                                                            ) : (
+                                                                ans?.positive_feedback !== "" && (
+                                                                    <p className="border border-success p-3 rounded"
+                                                                       style={{background: "rgba(155,236,137,0.15)"}}>
+                                                                        {ans?.positive_feedback}
+                                                                    </p>
+                                                                )
+                                                            )
+                                                            }
                                                 </div>
                                             ))}
                                         </div>
@@ -394,56 +408,55 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
 
                                                 className="form-control"
                                             />
-                                            {/*<div className="d-flex">*/}
-                                            {/*    <FormattedTextRenderer*/}
-                                            {/*        text={questionsData[question.id]?.answers[0]["answer"]}*/}
-                                            {/*    />*/}
-                                            {/*</div>*/}
-                                            {(!questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
-                                                <p className="border border-danger p-3 rounded"
-                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                    {questionsData[question.id]?.answers[0].feedback}
-                                                </p>
-                                            )
-                                            }
+                                            {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
+                                                        <p className="border border-danger p-3 rounded"
+                                                           style={{background: "rgba(255, 0, 0, 0.3)"}}>
+                                                            {questionsData[question.id]?.answers[0].feedback}
+                                                        </p>
+                                                    )
+                                                    }
                                         </div>
                                     )}
 
-                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
-                                        <p className="p-3 rounded"
-                                           style={{
-                                               background: "rgba(255, 0, 0, 0.3)"
-                                           }}>
-                                            {questionsData[question.id]?.feedback}
-                                        </p>
-                                    )
-                                    }
+                                    {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.negative_feedback !== "") && (
+                                                <div className="p-3 rounded"
+                                                     style={{
+                                                         background: "rgba(255, 0, 0, 0.3)"
+                                                     }}>
+                                                    <FormattedTextRenderer
+                                                        text={questionsData[question.id]?.negative_feedback}
+                                                    />
+                                                </div>
+                                            )
+                                            }
 
-                                    {(questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null) && (
-                                        <p className="p-3 rounded"
-                                           style={{
-                                               background: "rgba(155,236,137,0.15)"
-                                           }}>
-                                            {questionsData[question.id]?.feedback}
-                                        </p>
-                                    )
-                                    }
+                                    {(parseFloat(questionsData[question.id]?.points) === parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.positive_feedback !== "") && (
+                                                <div className="p-3 rounded"
+                                                     style={{
+                                                         background: "rgba(155,236,137,0.15)"
+                                                     }}>
+                                                    <FormattedTextRenderer
+                                                        text={questionsData[question.id]?.positive_feedback}
+                                                    />
+                                                </div>
+                                            )
+                                            }
 
 
-                                    {(!questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
-                                        <div className="p-3 rounded"
-                                             style={{
-                                                 background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
-                                             }}>
-                                            Correct answer is {
-                                            <FormattedTextRenderer
-                                                text={questionsData[question.id]?.correct_answer}
-                                            />
-                                        }
+                                    {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question") && (
+                                                <div className="p-3 rounded mt-3"
+                                                     style={{
+                                                         background: "rgba(255, 165, 0, 0.3)", whiteSpace: "pre-line"
+                                                     }}>
+                                                    Correct answer is {
+                                                    <FormattedTextRenderer
+                                                        text={questionsData[question.id]?.correct_answer}
+                                                    />
+                                                }
 
-                                        </div>
-                                    )
-                                    }
+                                                </div>
+                                            )
+                                            }
 
 
                                 </li>

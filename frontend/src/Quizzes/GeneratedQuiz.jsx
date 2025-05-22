@@ -276,6 +276,9 @@ const GeneratedQuiz = () => {
         })
     }
 
+        console.log(questionsData);
+
+
     function getTime(){
         const hours = Math.floor(count / 3600);
         const minutes = Math.floor((count % 3600) / 60);
@@ -285,8 +288,6 @@ const GeneratedQuiz = () => {
         return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
 
-
-    console.log(loading)
 
     if (loading) {
         return (
@@ -454,7 +455,7 @@ const GeneratedQuiz = () => {
                                                                                 wordWrap: "break-word"
                                                                             }}
                                                                             aria-labelledby={`dropdown-${idx}`}>
-                                                                            {questionsData[question.id].answers.map((answ, optionIdx) => (
+                                                                            {questionsData[question.id].rightSidesAnswers.map((answ, optionIdx) => (
                                                                                 <li key={optionIdx}>
                                                                                     <a
                                                                                         className="dropdown-item"
@@ -470,7 +471,7 @@ const GeneratedQuiz = () => {
                                                                                                         index === idx
                                                                                                             ? {
                                                                                                                 ...item,
-                                                                                                                answer: answ["showRightSide"],
+                                                                                                                answer: answ,
                                                                                                             }
                                                                                                             : item
                                                                                                     ),
@@ -482,7 +483,7 @@ const GeneratedQuiz = () => {
                                                                                             className="d-flex justify-content-start">
                                                                                                 <span>
                                                                                                     <FormattedTextRenderer
-                                                                        text={answ["showRightSide"]}
+                                                                        text={answ}
                                                                       />
                                                                                                 </span>
                                                                                         </div>

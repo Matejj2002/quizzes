@@ -1,4 +1,4 @@
-import {useLocation, useNavigate} from "react-router-dom";
+import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navigation from "../components/Navigation";
@@ -9,29 +9,83 @@ import FormattedTextRenderer from "../components/FormattedTextRenderer";
 import QuizReviewOriginal from "./QuizReviewOriginal";
 
 const QuizReview = () =>{
-    const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const quizTemplateId = searchParams.get("quiz_template_id") ?? 0;
+    const actualId = parseInt(searchParams.get("actualQuiz"))-1;
+    const userId = parseInt(searchParams.get("user_id"));
     const navigate = useNavigate();
-    const [quiz] = useState(location.state?.quiz);
-    const [actualId, setActualId] = useState(location.state?.actualId ?? quiz.quizzes.length - 1);
-    const [userId] = useState(location.state?.userId);
-    const [quizId] = useState(location.state?.quizId);
-    const [feedback] = useState(location.state?.feedback);
-    const [userRole] = useState(location.state?.userRole);
-    const [conditionToRetake] = useState(location.state?.conditionToRetake);
-    const [userName] = useState(location.state?.userName || "");
-    const [correctMode] = useState(location.state?.correctMode || false)
+    const [feedback, setFeedback] = useState([]);
+    const [conditionToRetake, setConditionToRetake] = useState([]);
+    const correctMode = searchParams.get("correctMode") === "true";
     const [data, setData] = useState([]);
     const [questionsData, setQuestionsData] = useState({});
     const [page, setPage] = useState(0);
     const [actualType, setActualType] = useState("SeenByStudent");
+
+    const [userData, setUserData] = useState([]);
+    const [userName, setUserName] = useState("");
+    const [quiz, setQuiz] = useState([]);
+    const [quizLoaded, setQuizLoaded] = useState(false);
+
     const apiUrl = process.env.REACT_APP_API_URL;
     const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
 
     useEffect(() => {
-        setData([]);
-        setQuestionsData({});
+        getUserLogged().then(() =>{
+            setQuiz();
+            setQuizLoaded(false);
+            setData([]);
+            setQuestionsData({});
+        })
+
     }, [actualId])
 
+    const fetchQuizzes = async (templateId) => {
+        try {
+            const response = await axios.get(apiUrl + `get-quiz-templates`,
+                {
+                    params: {"studentId": userId, "templateId": templateId}
+                }
+            )
+            setQuiz(response.data.result[0]);
+            if (response.data.result[0].is_opened){
+                setFeedback(response.data.result[0].feedbackType);
+            }else{
+                setFeedback(response.data.result[0].feedbackTypeAfterClose);
+            }
+
+            setUserName(response.data.author);
+            setConditionToRetake((response.data.result[0].number_of_corrections > response.data.result[0].quizzes.length ) && response.data.result[0].is_opened)
+            setQuizLoaded(true);
+
+
+        }catch (error){
+            console.error(error);
+      }
+       finally {}
+    }
+
+    async function getUserLogged(){
+        const data = JSON.parse(localStorage.getItem("data"));
+        try{
+            const response = await axios.get(apiUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": data["login"],
+                            "avatarUrl": data["avatar_url"]
+                    }
+                }
+            )
+            if (response.data.result["role"] !== "teacher" && (userId !== response.data.result["id_user"] || correctMode === true)){
+                navigate("quizzes");
+            }
+
+            setUserData(response.data.result);
+            fetchQuizzes(quizTemplateId);
+      }catch (error){
+            console.error(error);
+      }
+       finally {}
+    }
 
     const fetchQuestion = async (questionId, itemId) => {
         try {
@@ -54,24 +108,25 @@ const QuizReview = () =>{
     };
 
     useEffect(() => {
-
         const getData = async () => {
-            const result = await axios.get(apiUrl+"quiz-student-load",
-                {
-                    params: {
-                        student_id: userId,
-                        quiz_id: quiz.quizzes[actualId].quiz_id,
-                        load_type: "attempt"
+            if (quiz?.quizzes?.length > 0) {
+                const result = await axios.get(apiUrl + "quiz-student-load",
+                    {
+                        params: {
+                            student_id: userId,
+                            quiz_id: quiz.quizzes[actualId].quiz_id,
+                            load_type: "attempt"
+                        }
                     }
-                }
-            )
-            setData(result.data)
+                )
+                setData(result.data)
+            }
         }
         getData().then( ()=> {
         }
         )
 
-    } , [actualId] )
+    } , [quizLoaded] )
 
     useEffect(() => {
         const fetchQuestions = [];
@@ -124,24 +179,16 @@ const QuizReview = () =>{
     }
 
     const handleChooseId = (actId) => {
-        setActualId(actId);
-        navigate("/review-quiz", {
-                                        state: {
-                                            quiz: quiz,
-                                            quizId: quiz.quizzes[actId].quiz_id,
-                                            feedback: quiz.feedbackTypeAfterClose,
-                                            conditionToRetake: false,
-                                            userId: userId,
-                                            userRole: userRole,
-                                            actualId: actId
-                                        }
-                                    })
-        return 0;
+        navigate("/review-quiz?quiz_template_id="+quiz.id.toString()+"&user_id="+userId.toString()+"&actualQuiz="+(parseInt(actId)+1).toString()+"&correctMode="+correctMode)
     }
 
     const handleChangeType = (newType) =>{
         setActualType(newType);
     }
+
+    console.log(questionsData);
+    const sectionsToRender = actualType === "Original" ? data.sections_ordered : data.sections;
+
 
     return (
         <div>
@@ -155,7 +202,7 @@ const QuizReview = () =>{
                     <div className="col-8">
                         <div className="d-flex justify-content-between mt-3">
                             <h1 className="mb-3">
-                                {quiz.title}
+                                {quiz?.title}
                             </h1>
                             <div>
                                 {feedback.includes("pointsReview") && (
@@ -174,19 +221,19 @@ const QuizReview = () =>{
                         >Attempt</label>
                         <select className="form-select mb-3 mt-2" id="quizAttempt" onChange={(e) => handleChooseId(e.target.value)}
                                 value={actualId}>
-                            {quiz.quizzes
+                            {quiz?.quizzes
                                 .slice()
                                 .reverse()
                                 .map((q, index, arr) => (
-                                    <option key={q.quiz_id} value={quiz.quizzes.length - index - 1}>
-                                        {q.started}
+                                    <option key={q.quiz_id} value={quiz?.quizzes.length - index - 1}>
+                                        {q?.started}
                                     </option>
                                 ))}
                         </select>
                             </div>
 
 
-                        {userRole === "teacher" && (
+                        {userData["role"] === "teacher" && (
                             <div className="mb-3 mt-1">
                                 <label className="text-center" htmlFor={"quizType"}
                                 >Question and answer order:</label>
@@ -198,12 +245,9 @@ const QuizReview = () =>{
                             </div>
                         )}
 
-                        {actualType === "Original" ? (
-                            <QuizReviewOriginal quizData={quiz.quiz_no_shuffle}></QuizReviewOriginal>
-                        ) : (
                             <div>
                                 <ul className="nav nav-tabs mt-3" id="myTab" role="tablist">
-                                    {quiz.sections.map((sect, index) => (
+                                    {sectionsToRender.map((sect, index) => (
                                         <li className="nav-item" role="presentation" key={index}>
                                             <button
                                                 className={`nav-link ${index === page ? 'active' : ''}`}
@@ -226,7 +270,7 @@ const QuizReview = () =>{
                                 </ul>
 
                                 <ul className="list-group mb-3">
-                                    {data.sections[page]?.questions.map((question, index) => (
+                                    {sectionsToRender[page]?.questions.map((question, index) => (
                                         <li className={`list-group-item ${(parseFloat(questionsData[question.id]?.points) === 0 && feedback.includes("correctAnswers")) ? 'border-danger' : ''} 
                                 ${(parseFloat(questionsData[question.id]?.points) > 0 && parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("correctAnswers")) ? 'border-warning' : ''} 
                                     ${(parseFloat(questionsData[question.id]?.points) === parseFloat(questionsData[question.id]?.max_points) && feedback.includes("correctAnswers")) ? 'border-success' : ''}`}
@@ -260,13 +304,10 @@ const QuizReview = () =>{
                                                 >
                                                       {correctMode ? (
                                                           <input
-                                                              type="number"
-                                                              step="0.1"
-                                                              min="0"
-                                                              max={questionsData[question.id]?.max_points}
-                                                              value={Number(questionsData[question.id]?.points).toFixed(2)}
+                                                              type="text"
+                                                              value={questionsData[question.id]?.points}
                                                               onChange={(e) => handlePointsChange(question.id, e.target.value)}
-                                                              className="form-control form-control-sm d-inline bg-transparent text-white border-0 p-0 fs-5"
+                                                              className="form-control form-control-sm d-inline bg-white border-0 p-0 fs-5"
                                                               style={{width: '60px', textAlign: 'right'}}
                                                           />
                                                       ) : (
@@ -304,7 +345,7 @@ const QuizReview = () =>{
                                                         </thead>
 
                                                         <tbody>
-                                                        {questionsData[question.id].answers.map((ans, idx) => (
+                                                        {(actualType !== "Original" ? questionsData[question.id].answers : questionsData[question.id].answers_ordered).map((ans, idx) => (
                                                             <tr key={"table-" + idx.toString()}>
                                                                 <td style={{
                                                                     borderRight: "1px solid black",
@@ -371,20 +412,31 @@ const QuizReview = () =>{
                                                                                 </div>
                                                                             )
                                                                         ) : (
-                                                                            <span>{ans.answer}</span>
+                                                                            <span><FormattedTextRenderer
+                                                                                text={ans.answer}
+                                                                            /></span>
                                                                         )}
 
                                                                         {ans.answer !== ans["rightSide"] && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
-                                                                            <p className="border border-danger p-3 rounded"
-                                                                               style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                                                {ans?.negative_feedback}
-                                                                            </p>
+
+                                                                            <div className="p-3 rounded"
+                                                                            style={{
+                                                                            background: "rgba(255, 0, 0, 0.3)"
+                                                                                }}>
+                                                                                <FormattedTextRenderer
+                                                                                    text={ans?.negative_feedback}
+                                                                                />
+                                                                            </div>
                                                                         ) : (
                                                                             ans?.positive_feedback !== "" && (
-                                                                                <p className="border border-success p-3 rounded"
-                                                                                   style={{background: "rgba(155,236,137,0.15)"}}>
-                                                                                    {ans?.positive_feedback}
-                                                                                </p>
+                                                                            <div className="p-3 rounded"
+                                                                            style={{
+                                                                            background: "rgba(155,236,137,0.15)"
+                                                                                }}>
+                                                                                <FormattedTextRenderer
+                                                                                    text={ans?.positive_feedback}
+                                                                                />
+                                                                            </div>
                                                                             )
                                                                         )
                                                                         }
@@ -400,51 +452,60 @@ const QuizReview = () =>{
 
                                             {questionsData[question.id]?.type === "multiple_answer_question" && (
                                                 <div className="mb-3">
-                                                    {questionsData[question.id]?.answers.map((ans, idx) => (
-                                                        <div className="form-check" key={idx}>
-                                                            <input className="form-check-input"
-                                                                   type="checkbox"
-                                                                   style={{pointerEvents: 'none'}}
-                                                                   defaultChecked={ans.answer === true}
-                                                            />
+                                                    {(actualType !== "Original" ? questionsData[question.id].answers : questionsData[question.id].answers_ordered).map((ans, idx) => (
+                                                            <div className="form-check" key={idx}>
+                                                                <input className="form-check-input"
+                                                                       type="checkbox"
+                                                                       style={{pointerEvents: 'none'}}
+                                                                       defaultChecked={ans.answer === true}
+                                                                />
 
-                                                            <span className="d-flex w-100 form-check-label">
+                                                                <span className="d-flex w-100 form-check-label">
 
                                                                 <FormattedTextRenderer
                                                                     text={ans?.text}
                                                                 />
 
-                                                                {feedback.includes("correctAnswers") && (
-                                                                    !ans.isCorrectOption
-                                                                        ? <span className="ms-2 text-danger"><i
-                                                                            className="bi bi-x-circle-fill fs-5"></i></span>
-                                                                        : <span className="ms-2 text-success"><i
-                                                                            className="bi bi-check-circle-fill fs-5"></i></span>
-                                                                )}
+                                                                    {feedback.includes("correctAnswers") && (
+                                                                        !ans.isCorrectOption
+                                                                            ? <span className="ms-2 text-danger"><i
+                                                                                className="bi bi-x-circle-fill fs-5"></i></span>
+                                                                            : <span className="ms-2 text-success"><i
+                                                                                className="bi bi-check-circle-fill fs-5"></i></span>
+                                                                    )}
                                                                 </span>
 
-                                                            {!ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
-                                                                <p className="border border-danger p-3 rounded"
-                                                                   style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                                    {ans?.negative_feedback}
-                                                                </p>
-                                                            ) : (
-                                                                ans?.positive_feedback !== "" && (
-                                                                    <p className="border border-success p-3 rounded"
-                                                                       style={{background: "rgba(155,236,137,0.15)"}}>
-                                                                        {ans?.positive_feedback}
-                                                                    </p>
-                                                                )
-                                                            )
-                                                            }
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                                {!ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
+                                                                    <div className="p-3 rounded"
+                                                                    style={{
+                                                                    background: "rgba(255, 0, 0, 0.3)"
+                                                                        }}>
+                                                                        <FormattedTextRenderer
+                                                                            text={ans?.negative_feedback}
+                                                                        />
+                                                                    </div>
+                                                                ) : (
+                                                                    ans?.positive_feedback !== "" && (
+                                                                    <div className="p-3 rounded"
+                                                                    style={{
+                                                                    background: "rgba(77,210,44,0.15)"
+                                                                        }}>
+                                                                        <FormattedTextRenderer
+                                                                            text={ans?.positive_feedback}
+                                                                        />
+                                                                    </div>
 
-                                            {questionsData[question.id]?.type === "short_answer_question" && (
-                                                <div className="mb-3 mt-3">
-                                                    <span className="me-2 mt-3 fw-bold">Answer: </span>
+                                                        )
+                                                    )
+                                                    }
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {questionsData[question.id]?.type === "short_answer_question" && (
+                                        <div className="mb-3 mt-3">
+                                        <span className="me-2 mt-3 fw-bold">Answer: </span>
                                                     <input
                                                         type="text"
                                                         value={questionsData[question.id]?.answers[0]["answer"]}
@@ -455,18 +516,23 @@ const QuizReview = () =>{
                                                     />
 
                                                     {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "") && (
-                                                        <p className="border border-danger p-3 rounded"
-                                                           style={{background: "rgba(255, 0, 0, 0.3)"}}>
-                                                            {questionsData[question.id]?.answers[0].feedback}
-                                                        </p>
-                                                    )
-                                                    }
-                                                </div>
-                                            )}
+                                                        <div className="p-3 rounded"
+                                                        style={{
+                                                        background: "rgba(255, 0, 0, 0.3)"
+                                                            }}>
+                                                            <FormattedTextRenderer
+                                                                text={questionsData[question.id]?.answers[0].feedback}
+                                                            />
+                                                        </div>
 
-                                            {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.negative_feedback !== "") && (
-                                                <div className="p-3 rounded"
-                                                     style={{
+                                            )
+                                            }
+                                        </div>
+                                    )}
+
+                                    {(parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.negative_feedback !== "") && (
+                                        <div className="p-3 rounded"
+                                             style={{
                                                          background: "rgba(255, 0, 0, 0.3)"
                                                      }}>
                                                     <FormattedTextRenderer
@@ -533,8 +599,8 @@ const QuizReview = () =>{
                                                         state: {
                                                             quiz: quiz,
                                                             refreshQuiz: true,
-                                                            userId: userId,
-                                                            userRole: userRole
+                                                            userId: userData["id_user"],
+                                                            userRole: userData["role"]
                                                         }
                                                     });
                                                 }}
@@ -560,18 +626,18 @@ const QuizReview = () =>{
                                                     style={{marginRight: '3px'}}
                                                     onClick={() => setPage((prev) => prev - 1)}>
                                                 <i className="bi bi-caret-left"></i> Back
-                                                to {quiz.sections[page - 1].title}
+                                                to {data?.sections[page - 1]?.title}
 
                                             </button>
                                         )}
 
-                                        {page + 1 >= quiz.sections.length ? (
+                                        {page + 1 >= quiz?.sections.length ? (
                                             <div></div>
                                         ) : (
                                             <button type="button" className="btn btn-primary"
-                                                    disabled={page + 1 >= quiz.sections.length}
+                                                    disabled={page + 1 >= quiz?.sections.length}
                                                     onClick={() => setPage((prev) => prev + 1)}>
-                                                Next {quiz.sections[page + 1].title} <i
+                                                Next {data?.sections[page + 1].title} <i
                                                 className="bi bi-caret-right"></i>
                                             </button>
                                         )}
@@ -580,10 +646,6 @@ const QuizReview = () =>{
 
                                 </div>
                             </div>
-                        )
-
-                        }
-
                     </div>
 
                     <div className="col-2 sidebar"></div>

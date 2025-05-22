@@ -110,13 +110,7 @@ const Users = () =>{
     }
 
     const showStudentStatistics = (studentId) =>{
-        navigate("/user-statistics", {
-            state: {
-                studentId: studentId,
-                userRole: userData["role"],
-                userId: userData["id_user"],
-            }
-        })
+        navigate("/user-statistics?studentId="+studentId)
     }
 
     const exportData = async () =>{
@@ -196,7 +190,7 @@ const Users = () =>{
                                     <th scope="col" className="text-end w-25" onClick={() => sortUsers("user_type",filterForName)}
                                         style={{cursor: "pointer"}}>Type {sort === "user_type" ? (sortDirection === "asc" ? " 🔼" : " 🔽") : ""}</th>
 
-                                    <th scope="col" className="w-25 text-end">Statistics</th>
+                                    <th scope="col" className="w-25 text-end">Results</th>
 
                                 </tr>
                                 </thead>
@@ -224,7 +218,7 @@ const Users = () =>{
                                                             }
                                                             }
                                                     >
-                                                        Statistics
+                                                        Show
                                                     </button>
                                                 </td>
                                             </tr>

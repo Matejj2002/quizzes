@@ -15,7 +15,8 @@ const QuizzesTableAnalysis = ({statisticsNavigate = "/quiz-analysis-show", activ
       try{
             const response = await axios.get(apiUrl+`get-quizzes-analysis`, {
                 params: {
-                    "filterName": filterForName
+                    "filterName": filterForName,
+
                 }
             })
             setQuizzes(response.data.result);
@@ -114,7 +115,7 @@ const QuizzesTableAnalysis = ({statisticsNavigate = "/quiz-analysis-show", activ
 
                                     <th scope="col" className="text-end w-25"> Attendance</th>
 
-                                    <th scope="col" className="w-25 text-end">Statistics</th>
+                                    <th scope="col" className="w-25 text-end">{activeNav}</th>
 
                                 </tr>
                                 </thead>
@@ -136,16 +137,16 @@ const QuizzesTableAnalysis = ({statisticsNavigate = "/quiz-analysis-show", activ
                                                     <button type="button" className="btn btn-outline-primary"
                                                             onClick={(e) => {
                                                                 e.preventDefault();
-                                                                navigate(statisticsNavigate, {
-                                                                state: {
-                                                                    quiz: quiz,
-                                                                    userRole: userData["role"],
+                                                                if (activeNav === "Analysis") {
+                                                                    navigate("/quiz-analysis-show?quiz_template_id=" + quiz.quiz_template_id);
+                                                                }else {
+                                                                   navigate("/quiz-all-users?quiz_template_id=" + quiz.quiz_template_id);
                                                                 }
-                                                            });
-                                                            }
+
+                                                                }
                                                             }
                                                     >
-                                                        Statistics
+                                                        Show
                                                     </button>
                                                 </td>
                                             </tr>

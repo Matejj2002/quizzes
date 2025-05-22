@@ -92,40 +92,42 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
                         />
                     </div>
 
-                    <div className="mb-3">
-                        <label htmlFor="dateOpen" className="form-label">Open the quiz</label>
-                        <input
-                            type="datetime-local"
-                            className="form-control form-control-sm w-25"
-                            id="dateOpen"
-                            value={dateOpen}
-                            onChange={handleDateOpenChange}
-                        />
-                    </div>
+                    <form>
+                        <div className="mb-3">
+                            <label htmlFor="dateOpen" className="form-label">Open the quiz</label>
+                            <input
+                                type="datetime-local"
+                                className={`form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`}
+                                id="dateOpen"
+                                value={dateOpen}
+                                onChange={handleDateOpenChange}
+                            />
+                        </div>
 
-                    <div className="mb-3">
-                        <label htmlFor="dateClose" className="form-label">Close the quiz</label>
-                        <input
-                            type="datetime-local"
-                            className="form-control form-control-sm w-25"
-                            id="dateClose"
-                            value={dateClose}
-                            onChange={handleDateCloseChange}
-                        />
-                    </div>
+                        <div className="mb-3">
+                            <label htmlFor="dateClose" className="form-label">Close the quiz</label>
+                            <input
+                                type="datetime-local"
+                                className={`form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`}
+                                id="dateClose"
+                                value={dateClose}
+                                onChange={handleDateCloseChange}
+                            />
+                        </div>
 
-                    <div className="mb-3">
-                        <label htmlFor="dateCheck" className="form-label">The quiz can be
-                            reviewed
-                            from</label>
-                        <input
-                            type="datetime-local"
-                            className="form-control form-control-sm w-25"
-                            id="dateCheck"
-                            value={dateCheck}
-                            onChange={handleDateCheck}
-                        />
-                    </div>
+                        <div className="mb-3">
+                            <label htmlFor="dateCheck" className="form-label">The quiz can be
+                                reviewed
+                                from</label>
+                            <input
+                                type="datetime-local"
+                                className={`form-control form-control-sm w-25 ${dateCheck > dateOpen ? "is-valid" : "is-invalid"}`}
+                                id="dateCheck"
+                                value={dateCheck}
+                                onChange={handleDateCheck}
+                            />
+                        </div>
+                    </form>
 
                     <h2>Show in review</h2>
                     <div className="form-check mb-3">

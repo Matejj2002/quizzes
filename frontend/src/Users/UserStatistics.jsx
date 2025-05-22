@@ -2,14 +2,12 @@ import {useLocation, useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import Navigation from "../components/Navigation";
 import axios from "axios";
-
+import { useSearchParams } from "react-router-dom";
 const UserStatistics = () =>{
-    const location = useLocation();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [userData, setUserData] = useState([]);
-    const [studentId] = useState(location.state?.studentId);
-    const [userRole] = useState(location.state?.userRole);
-    const [userId] = useState(location.state?.userId);
+    const studentId = searchParams.get("studentId");
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const fetchUserData = async () => {
@@ -26,13 +24,35 @@ const UserStatistics = () =>{
     }
 
     useEffect(() => {
-        fetchUserData()
+        getUserLogged().then(() => {
+            fetchUserData()
+        })
+
     }, []);
 
-    if (userRole !=="teacher") {
-        navigate("/quizzes");
+    async function getUserLogged(){
+
+        const data = JSON.parse(localStorage.getItem("data"));
+        try{
+            const response = await axios.get(apiUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": data["login"],
+                            "avatarUrl": data["avatar_url"]
+                    }
+                }
+            )
+            setUserData(response.data.result);
+
+            if (response.data.result.role !== "teacher"){
+                navigate("/quizzes");
+            }
+
+      }catch (error){
+            console.error(error);
+      }
+       finally {}
     }
-    console.log(userData);
+
     return (
         <div>
             <Navigation active = {"Users"}></Navigation>
@@ -70,18 +90,7 @@ const UserStatistics = () =>{
                                                         className="btn btn-outline-primary"
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            navigate("/review-quiz", {
-                                                                state: {
-                                                                    quiz: quiz.quizzes[0],
-                                                                    quizId: quiz.quizzes[0].quiz_id,
-                                                                    feedback: ['optionsFeedback', 'questionFeedback', 'pointsReview', 'correctAnswers'],
-                                                                    correctMode: true,
-                                                                    userId: studentId,
-                                                                    userName: userData["github_name"],
-                                                                    userRole:"teacher"
-
-                                                                }
-                                                            });
+                                                            navigate("/review-quiz?quiz_template_id="+quiz.id.toString()+"&user_id="+studentId.toString()+"&actualQuiz="+(quiz.quizzes[0].quizzes.length).toString()+"&correctMode=true")
                                                         }}
                                                     >
                                                         Review

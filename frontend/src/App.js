@@ -34,7 +34,8 @@ function App() {
 
                   <Route path="/:questions/*" element={<Questions />} />
                   <Route path="/category/new-category" element={<NewCategory />} />
-                  <Route path="/new-quiz" element={<NewQuiz />} />
+                  <Route path="/new-quiz-template" element={<NewQuiz />} />
+                  <Route path="/update-quiz-template" element={<NewQuiz />} />
                   <Route path="/quizzes" element={<Quiz />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="/user-statistics" element={<UserStatistics />} />

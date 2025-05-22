@@ -1,27 +1,48 @@
 import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import FormattedTextRenderer from "../components/FormattedTextRenderer";
 import WrongAnswersTable from "../components/WrongAnswersTable";
 const QuizAnalysis = () =>{
-    const location = useLocation();
     const navigate = useNavigate();
-    const [quiz] = useState(location.state?.quiz);
-    const [userRole] = useState(location.state?.userRole || undefined)
+    const [searchParams] = useSearchParams();
+    const quizTemplateId = searchParams.get("quiz_template_id");
     const [data, setData] = useState([]);
     const [evals, setEvals] = useState([]);
     const [attendance, setAttendance] = useState([]);
+    const [userData, setUserData] = useState([]);
     const [page, setPage] = useState(0);
     const apiUrl = process.env.REACT_APP_API_URL;
         const questionTypes = {"matching_answer_question": "Matching Question", "short_answer_question" : "Short Question", "multiple_answer_question": "Multiple Choice"};
 
+        async function getUserLogged(){
 
+        const data = JSON.parse(localStorage.getItem("data"));
+        try{
+            const response = await axios.get(apiUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": data["login"],
+                            "avatarUrl": data["avatar_url"]
+                    }
+                }
+            )
+            setUserData(response.data.result);
+
+            if (response.data.result.role !== "teacher"){
+                navigate("/quizzes");
+            }
+
+      }catch (error){
+            console.error(error);
+      }
+       finally {}
+    }
     const fetchData = async () => {
         try{
             const response = await axios.get(apiUrl+`quiz-statistics`, {
                 params: {
-                    "template_id": quiz.quiz_template_id
+                    "template_id": quizTemplateId
                 }
             })
 
@@ -35,12 +56,12 @@ const QuizAnalysis = () =>{
     }
 
     useEffect(() => {
-        fetchData();
+        getUserLogged().then(() => {
+            fetchData();
+        })
+
     }, []);
 
-    if (userRole !=="teacher" || userRole === undefined){
-        navigate("/quizzes");
-    }
 
     function getProgressWidth(attendance, question, ans) {
         const item = attendance?.[question["item_id"]];
@@ -248,7 +269,7 @@ const QuizAnalysis = () =>{
 
                                     <span>Average points: {attendance[question["item_id"]]?.average}/ {attendance[question["item_id"]]?.item_max_points}</span>
                                     <br/>
-                                    <span>{attendance[question["item_id"]]?.num_correct_answers} / {quiz.attendance} students has this question correct.</span>
+                                    <span>{attendance[question["item_id"]]?.num_correct_answers} / {data.attendance} students has this question correct.</span>
 
                                     {question.type === "short_answer_question" && attendance[question["item_id"]]?.wrong_answers_show.length > 0 && (
                                         <details>

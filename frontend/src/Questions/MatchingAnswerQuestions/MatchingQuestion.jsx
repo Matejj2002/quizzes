@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 
-const MatchingQuestion = ({setAnswers , answers}) => {
+const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
     const [questions, setQuestions] = useState([{ left: "", right: "", positive: "", negative:"" }]);
 
     useEffect(() => {
@@ -57,9 +58,9 @@ const MatchingQuestion = ({setAnswers , answers}) => {
             {questions.map((question, index) => (
                     <div key={index}>
                     <div className="input-group mt-3" key={index}>
-                        <input type="text" className="form-control" value={question.left} placeholder="Left Side"
+                        <input type="text" className="form-control" value={question.left} placeholder="Left Side" disabled={isDisabled}
                                onChange={(e) => handleInputChange(index, 'left', e.target.value)}/>
-                        <input type="text" className="form-control me-3" value={question.right} placeholder="Right Side"
+                        <input type="text" className="form-control me-3" value={question.right} placeholder="Right Side" disabled={isDisabled}
                                onChange={(e) => handleInputChange(index, 'right', e.target.value)}/>
                     </div>
 
@@ -69,29 +70,51 @@ const MatchingQuestion = ({setAnswers , answers}) => {
                     </summary>
 
                     <form className="w-auto">
-                    <div className="d-flex align-items-center">
-                                    <label className="form-label">Positive&nbsp;&nbsp;</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={question["positive"]}
-                                        placeholder="Feedback"
-                                        onChange={(e) => handleFeedbackChange(index, e.target.value, "positive")}
-                                    />
-                                </div>
-                                <div className="d-flex align-items-center">
-                                    <label className="form-label">Negative</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={question["negative"]}
-                                        placeholder="Feedback"
-                                        onChange={(e) => handleFeedbackChange(index, e.target.value, "negative")}
-                                    />
-                                </div>
-                            </form>
-                        </details>
+                        <label className="form-label" htmlFor={`matching-option-pos-${index}`}>Positive Feedback</label>
+                        <div className="d-flex justify-content-between">
+                            <textarea
+                                id={`matching-option-pos-${index}`}
+                                className="form-control w-50 me-2"
+                                disabled={isDisabled}
+                                value={question["positive"]}
+                                onChange={(e) =>
+                                    handleFeedbackChange(index, e.target.value, "positive")
+                                }
+                                rows={4}
+                                required
+                            />
+
+                            <div className="w-50  border border-1 p-2">
+                                <FormattedTextRenderer
+                                    text={question["positive"]}
+                                />
+                            </div>
                         </div>
+
+                        <label className="form-label" htmlFor={`matching-option-neg-${index}`}>Negative Feedback</label>
+                        <div className="d-flex justify-content-between">
+                            <textarea
+                                id={`matching-option-neg-${index}`}
+                                className="form-control w-50 me-2"
+                                disabled={isDisabled}
+                                value={question["negative"]}
+                                onChange={(e) =>
+                                    handleFeedbackChange(index, e.target.value, "negative")
+                                }
+                                rows={4}
+                                required
+                            />
+
+                            <div className="w-50  border border-1 p-2">
+                                <FormattedTextRenderer
+                                    text={question["negative"]}
+                                />
+                            </div>
+                        </div>
+
+                    </form>
+                </details>
+                    </div>
                 )
             )
 

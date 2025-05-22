@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 
-const MultipleChoiceQuestion = ({setAnswers, answers}) => {
+const MultipleChoiceQuestion = ({setAnswers, answers, isDisabled}) => {
     const [questions, setQuestions] = useState([""]);
     const [isChecked, setIsChecked] = useState(false);
     const [correctAnswers, setCorrectAnswers] = useState([false]);
@@ -46,6 +47,7 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
         <div>
             <div className="form-check form-check-inline mb-3">
                 <input className="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1"
+                       disabled={isDisabled}
                        onChange={(e) =>
                            setIsChecked(e.target.checked)}
                 />
@@ -57,6 +59,7 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
                     <div className="input-group-text">
                         <input className="form-check-input mt-0" type="checkbox" checked={correctAnswers[index]}
                                key={index}
+                               disabled={isDisabled}
                                onChange={(e) =>
                                    handleCheckboxChange(index, e.target.checked)
                                }
@@ -66,6 +69,7 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
                     <input className='form-control me-3'
                            key={index}
                            type="text"
+                           disabled={isDisabled}
                            value={question}
                            onChange={(e) => handleInputChange(index, e.target.value)}
                            placeholder={`Option`}
@@ -78,30 +82,52 @@ const MultipleChoiceQuestion = ({setAnswers, answers}) => {
                     </summary>
                     <div className="p-4 w-auto">
                         <form>
-                            <div className="d-flex align-items-center">
-                                <label className="form-label">Positive&nbsp;&nbsp;&nbsp;</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={feedback[index]["positive"]}
-                                    placeholder="Feedback"
-                                    onChange={(e) => handleFeedbackChange(index, e.target.value, "positive")}
-                                />
+                            <label className="form-label" htmlFor={`multiple-option-pos-${index}`}>Positive Feedback</label>
+                            <div className="d-flex justify-content-between">
+                            <textarea
+                                id={`multiple-option-pos-${index}`}
+                                className="form-control w-50 me-2"
+                                disabled={isDisabled}
+                                value={feedback[index]["positive"]}
+                                onChange={(e) =>
+                                    handleFeedbackChange(index, e.target.value, "positive")
+                                }
+                                rows={4}
+                                required
+                            />
+
+                                <div className="w-50  border border-1 p-2">
+                                    <FormattedTextRenderer
+                                        text={feedback[index]["positive"]}
+                                    />
+                                </div>
                             </div>
-                            <div className="d-flex align-items-center">
-                                <label className="form-label">Negative</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={feedback[index]["negative"]}
-                                    placeholder="Feedback"
-                                    onChange={(e) => handleFeedbackChange(index, e.target.value, "negative")}
-                                />
+
+
+                            <label className="form-label" htmlFor={`multiple-option-neg-${index}`}>Negative Feedback</label>
+                            <div className="d-flex justify-content-between">
+                            <textarea
+                                id={`multiple-option-neg-${index}`}
+                                className="form-control w-50 me-2"
+                                disabled={isDisabled}
+                                value={feedback[index]["negative"]}
+                                onChange={(e) =>
+                                    handleFeedbackChange(index, e.target.value, "negative")
+                                }
+                                rows={4}
+                                required
+                            />
+
+                                <div className="w-50  border border-1 p-2">
+                                    <FormattedTextRenderer
+                                        text={feedback[index]["negative"]}
+                                    />
+                                </div>
                             </div>
                         </form>
                     </div>
                 </details>
-    </div>
+                </div>
             ))}
         </div>
     )

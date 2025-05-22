@@ -25,7 +25,7 @@ const QuizTemplateTabs =({setPageNum, pageCount, pageNum, sections, setPageCount
                             setPageNum(index + 2)
                         }}
                     >
-                        {sections[index].title || "Section " + (index + 1)}
+                        {sections[index]?.title || "Section " + (index + 1)}
                     </button>
                 </li>
             ))}
@@ -47,7 +47,7 @@ const QuizTemplateTabs =({setPageNum, pageCount, pageNum, sections, setPageCount
             </li>
 
             <li className="nav-item ms-auto" role="presentation">
-                <button className={`btn ${newUpdateQuiz === "Submit" ? "btn-success" : "btn-primary"}`}
+                <button className={`btn ${newUpdateQuiz === "Create new quiz" ? "btn-success" : "btn-primary"}`}
                         id="disabled-tab" data-bs-toggle="tab"
                         type="button" role="tab"
                         aria-controls="disabled-tab-pane"
