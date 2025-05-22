@@ -260,71 +260,71 @@ def add_new_question():
 def get_question_version_choice(question_id):
     question = Question.query.get_or_404(question_id)
 
-    newest_version = None
-    for i in question.question_version:
-        if newest_version is None:
-            newest_version = i
-        elif i.dateCreated > newest_version.dateCreated:
-            newest_version = i
+    versions = []
+    for i in sorted(question.question_version, key=lambda q: q.dateCreated, reverse=True):
+        newest_version = i
+        dict_ret = {
+            "question_id": question.id,
+            "category_id": question.category.id,
+            "category_name": question.category.title,
+            "title": newest_version.title,
+            "dateCreted": newest_version.dateCreated,
+            "text": newest_version.text,
+            "type": newest_version.type,
+            "question_feedback": question.question_feedback,
+            "question_positive_feedback": question.question_positive_feedback,
+            "feedback": [
 
-    dict_ret = {
-        "question_id": question.id,
-        "category_id": question.category.id,
-        "category_name": question.category.title,
-        "title": newest_version.title,
-        "dateCreted": newest_version.dateCreated,
-        "text": newest_version.text,
-        "type": newest_version.type,
-        "question_feedback": question.question_feedback,
-        "question_positive_feedback": question.question_positive_feedback,
-        "feedback": [
+            ],
+            "answers": [
 
-        ],
-        "answers": [
+            ]
 
-        ]
-
-    }
-
-    if newest_version.type == 'matching_answer_question':
-        for i in newest_version.matching_question:
-            dict_ret['answers'].append(
-                {"left": i.leftSide,
-                 "right": i.rightSide,
-                 "positive": i.positive_feedback,
-                 "negative": i.negative_feedback
-                 }
-            )
-
-    if newest_version.type == 'multiple_answer_question':
-        texts = []
-        correct_ans = []
-        feedback = []
-        for i in newest_version.multiple_answers:
-            texts.append(i.text)
-            correct_ans.append(i.is_correct)
-            feedback.append(
-                {"positive": i.positive_feedback, "negative": i.negative_feedback}
-            )
-
-        dict_ret['answers'] = {
-            "texts": texts,
-            "correct_ans": correct_ans,
-            "feedback": feedback
         }
 
-    if newest_version.type == 'short_answer_question':
-        for i in newest_version.short_answers:
-            dict_ret["answers"].append(
-                [
-                    i.text,
-                    i.is_regex,
-                    i.positive_feedback,
-                    i.negative_feedback
-                ]
-            )
+        if newest_version.type == 'matching_answer_question':
+            for i in newest_version.matching_question:
+                dict_ret['answers'].append(
+                    {"left": i.leftSide,
+                     "right": i.rightSide,
+                     "positive": i.positive_feedback,
+                     "negative": i.negative_feedback
+                     }
+                )
 
-    return jsonify(dict_ret), 200
+        if newest_version.type == 'multiple_answer_question':
+            texts = []
+            correct_ans = []
+            feedback = []
+            for i in newest_version.multiple_answers:
+                texts.append(i.text)
+                correct_ans.append(i.is_correct)
+                feedback.append(
+                    {"positive": i.positive_feedback, "negative": i.negative_feedback}
+                )
+
+            dict_ret['answers'] = {
+                "texts": texts,
+                "correct_ans": correct_ans,
+                "feedback": feedback
+            }
+
+        if newest_version.type == 'short_answer_question':
+            for i in newest_version.short_answers:
+                dict_ret["answers"].append(
+                    [
+                        i.text,
+                        i.is_regex,
+                        i.positive_feedback,
+                        i.negative_feedback
+                    ]
+                )
+
+        versions.append(dict_ret)
+
+    print(versions)
+
+    return jsonify(versions), 200
 
 @questions_bp.route('/questions/categories/get-path-to-supercategory/<int:index>', methods=['GET'])
 def get_path_to_supercategory(index):
@@ -342,8 +342,8 @@ def get_path_to_supercategory(index):
 def add_question_version(id):
     data = request.get_json()
     answers = data['answers']
-
     question = Question.query.get_or_404(id)
+    question.category_id = data["category_id"]
     question.question_feedback = data["feedback"]
     question.question_positive_feedback = data["positiveFeedback"]
     db.session.commit()

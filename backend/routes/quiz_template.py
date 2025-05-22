@@ -21,13 +21,26 @@ def get_quiz_template_api():
 @quiz_template_bp.route("/get-quiz-templates", methods=["GET"])
 def get_quiz_templates():
     student_id = request.args.get("studentId")
-    user_role = request.args.get("userRole")
+    try:
+        template_id = request.args.get("templateId")
+    except:
+        template_id = 0
 
     try:
         int(student_id)
     except:
         return {}, 404
-    quiz_templates = QuizTemplate.query.all()
+
+    student_name = ""
+    if int(student_id) !=0:
+        student_name = User.query.filter(User.id == student_id).first().github_name
+
+
+
+    if int(template_id) == 0:
+        quiz_templates = QuizTemplate.query.all()
+    else:
+        quiz_templates = QuizTemplate.query.filter(QuizTemplate.id == int(template_id)).all()
 
     result = []
 
@@ -38,7 +51,7 @@ def get_quiz_templates():
     update_at = ""
 
     for template in sorted(quiz_templates, key=lambda x: x.date_time_open, reverse=True):
-        template_sub, update_at_pom = get_quiz_template(student_id, template.id, actual_time, cnt, update_at, user_role)
+        template_sub, update_at_pom = get_quiz_template(student_id, template.id, actual_time, cnt, update_at)
 
         if update_at_pom is not None:
             if update_at == "":
@@ -50,7 +63,7 @@ def get_quiz_templates():
 
             cnt+=1
 
-    return {"result": result, "update_at": update_at}, 200
+    return {"result": result, "update_at": update_at, "author": student_name}, 200
 
 @quiz_template_bp.route("/new-quiz-template-check", methods=["POST"])
 def check_new_quiz_template():
@@ -153,7 +166,6 @@ def check_new_quiz_template():
 @quiz_template_bp.route("/new-quiz-template", methods=["PUT"])
 def create_new_quiz_template():
     data = request.get_json()
-
     if data["changeData"]:
         vers = 0
         if data["quizId"] != 0:

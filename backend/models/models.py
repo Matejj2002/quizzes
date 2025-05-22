@@ -262,6 +262,7 @@ class Quiz(db.Model):
     date_time_correction_started = db.Column(db.DateTime)
     date_time_correction_finished = db.Column(db.DateTime)
     order = db.Column(db.ARRAY(db.Integer))
+    order_template = db.Column(db.ARRAY(db.Integer))
     max_points = db.Column(db.DECIMAL(10, 2), default=0)
     achieved_points = db.Column(db.DECIMAL(10, 2), default=0)
 

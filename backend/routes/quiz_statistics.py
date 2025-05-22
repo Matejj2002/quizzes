@@ -127,7 +127,6 @@ def get_students_results():
 
     data = ""
     for student in students:
-        print(student)
         data += f"{student.github_name},"
         sum_points = 0
         for qt in quiz_templates:
@@ -162,11 +161,13 @@ def quiz_statistics():
     student_incorrect = {}
     wrong_answers_quiz = {}
     items = {}
+    attendance = 0
     for user in users:
         qz = Quiz.query.filter(Quiz.quiz_template_id == template["id"], Quiz.student_id == user).order_by(
             desc(Quiz.date_time_started)).first()
 
         if qz is not None:
+            attendance+=1
             for section in qz.quiz_sections:
                 for item in section.quiz_items:
                     items[item.quiz_template_item_id] = item
@@ -371,12 +372,16 @@ def quiz_statistics():
                     "comments": comments,
                 }
 
+    template["attendance"] = attendance
+
     return {"result": template, "evals": question_analysis, "attendance": attendance_question}, 200
 
 
 @quiz_statistics_bp.route("/get-quiz-template-students-results", methods=["GET"])
 def get_quiz_students_results():
     quiz_template_id = request.args.get("template_id")
+
+    quiz_template = QuizTemplate.query.filter(QuizTemplate.id == quiz_template_id).first()
 
     students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
     #students = [{"student_id": i.id, "github_name": i.github_name} for i in User.query.all()]
@@ -394,13 +399,6 @@ def get_quiz_students_results():
         cnt = 0
 
         if len(quizzes_student) == 0:
-            quizzes.append(
-                {
-                    "points": "Not attended",
-                    "max_points": 0,
-                    "number_attempt": 0
-                }
-            )
             num_quizzes = 0
         else:
             attended += 1
@@ -422,7 +420,9 @@ def get_quiz_students_results():
 
         quiz_students["quizzes"] = quizzes
         quiz_students["num_quizzes"] = num_quizzes
-        results.append(quiz_students)
+
+        if num_quizzes !=0:
+            results.append(quiz_students)
 
     avg_perc = 0
     if max_points * attended != 0:
@@ -438,7 +438,8 @@ def get_quiz_students_results():
         "attendance_perc": round((attended / len(students)) * 100, 2),
         "average_points": round(average_points,2 ),
         "max_points": max_points,
-        "average_points_perc":  avg_perc
+        "average_points_perc":  avg_perc,
+        "title": quiz_template.title
 
     }
 

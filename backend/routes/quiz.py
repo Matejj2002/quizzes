@@ -155,7 +155,7 @@ def get_quiz_student_load():
 
         quiz_id = quiz.id
 
-    result = {"sections": [], "start_time": quiz.date_time_started,
+    result = {"sections": [], "sections_ordered": [], "start_time": quiz.date_time_started,
               "minutes_to_finish": quiz.quiz_template.time_to_finish,
               "end_time": quiz.date_time_finished, "now_check": datetime.datetime.now()}
 
@@ -164,10 +164,69 @@ def get_quiz_student_load():
     quiz_temp = QuizTemplate.query.filter(QuizTemplate.id == int(quiz_templates_id)).first()
     section_titles = []
 
-    for i in quiz_temp.quiz_template_section:
-        section_titles.append(i.title)
+    sections_dict = {}
+    try:
+        cnt = 0
+        for i in quiz.order_template:
+            qs = QuizTemplateSection.query.filter(QuizTemplateSection.id == i).first()
+            section_titles.append(qs.title)
+            sections_dict[i] = [quiz.order[cnt], qs.title]
+            cnt += 1
+
+
+    except:
+        section_titles = []
+        for i in quiz_temp.quiz_template_section:
+            section_titles.append(i.title)
 
     cnt = 0
+
+    try:
+        ordered_sections = sorted(quiz.order_template)
+
+        for sect_ord in ordered_sections:
+            section = sections_dict[sect_ord]
+            add_section_ord = {"questions": [], "title": ""}
+            items = []
+
+            for item_id in QuizSection.query.filter(QuizSection.id == int(section[0])).first().order:
+                item = QuizItem.query.filter(QuizItem.id == int(item_id)).first()
+                items.append(item)
+
+            items.sort(key=lambda x: x.id)
+
+            for item in items:
+                type = QuestionVersion.query.filter(QuestionVersion.id == item.question_version_id).first().type
+
+                if type == "short_answer_question":
+                    json_string = item.answer
+
+                if type == "multiple_answer_question":
+                    data = sorted(json.loads(item.answer)["answer"], key=lambda x: x[1])
+                    json_string = json.dumps(data)
+
+                if type == "matching_answer_question":
+                    data = sorted(json.loads(item.answer)["answer"], key=lambda x: x["pairId"])
+                    json_string = json.dumps(data)
+
+                add_section_ord["questions"].append(
+                    {
+                        "id": item.question_version.question_id,
+                        "questionType": "questions",
+                        "answers": json_string,
+                        "item_id": item.id
+                    }
+                )
+
+                add_section_ord["title"] = section[1]
+
+            result["sections_ordered"].append(add_section_ord)
+            cnt += 1
+    except:
+        pass
+
+    cnt = 0
+
     for section in quiz.order:
         add_section = {"questions": [], "title": ""}
 
@@ -216,7 +275,6 @@ def update_quiz_answers():
     question_data = data["data"]
     final_save = data["finalSave"]
     student_id = data["studentId"]
-    print("QD",final_save, question_data)
 
     quiz = Quiz.query.filter(Quiz.quiz_template_id == quiz_data["id"], Quiz.student_id == student_id).order_by(
         desc(Quiz.date_time_started)).first()
@@ -312,11 +370,12 @@ def get_questions_quiz(index):
                 newest_version = i
 
     answers = []
+    answers_ordered = []
     is_correct_res = True
     points = 0
     max_points = 0
     correct_answers = ""
-
+    right_sides_answers = []
     if newest_version.type == "matching_answer_question":
         if item is not None:
             matching_answs = json.loads(item.answer)
@@ -330,6 +389,7 @@ def get_questions_quiz(index):
 
             if len(matching_answs) != 0:
                 cnt = 0
+
                 for matching_pair in newest_version.matching_question:
                     correct_answers += matching_pair.leftSide + " -> " + matching_pair.rightSide + "\n"
 
@@ -364,6 +424,16 @@ def get_questions_quiz(index):
                                  "showRightSide": right_sides[cnt]
                                  })
                     cnt += 1
+
+            if review:
+                answers_ordered = sorted(answers, key=lambda x: x["pairId"])
+
+            else:
+                try:
+                    right_sides_answers = [i["showRightSide"] for i in answers]
+                except:
+                    pass
+
         else:
             for matching_pair in newest_version.matching_question:
                 answers.append({"leftSide": matching_pair.leftSide, "answer": [],
@@ -431,6 +501,9 @@ def get_questions_quiz(index):
                         }
                     )
                 cnt += 1
+
+            if review:
+                answers_ordered = sorted(answers, key=lambda x: x["choiceId"])
         else:
             for mult in newest_version.multiple_answers:
                 answers.append(
@@ -440,6 +513,7 @@ def get_questions_quiz(index):
                         "answer": [],
                     }
                 )
+
     else:
         if item is not None:
             item_answer = json.loads(item.answer)
@@ -453,6 +527,13 @@ def get_questions_quiz(index):
                     is_correct_res = False
 
                 answers.append(
+                    {"answer": item_answer["answer"],
+                     "feedback": newest_version.short_answers[
+                         0].negative_feedback if "optionsFeedback" in feedback_type else None
+                     }
+                )
+
+                answers_ordered = (
                     {"answer": item_answer["answer"],
                      "feedback": newest_version.short_answers[
                          0].negative_feedback if "optionsFeedback" in feedback_type else None
@@ -483,6 +564,7 @@ def get_questions_quiz(index):
             "text": newest_version.text,
             "type": newest_version.type,
             "answers": answers,
+            "answers_ordered": answers_ordered,
             "isCorrect": is_correct_res if "correctAnswers" in feedback_type or "pointsReview" in feedback_type else None,
             "points": points if "pointsReview" in feedback_type else None,
             "max_points": max_points if "pointsReview" in feedback_type else None,
@@ -499,6 +581,7 @@ def get_questions_quiz(index):
             "text": newest_version.text,
             "type": newest_version.type,
             "answers": answers,
+            "rightSidesAnswers": right_sides_answers
         }
 
 @quiz_bp.route("/quiz_change_evaluation", methods=["PUT"])

@@ -243,7 +243,7 @@ def evaluate_quiz(quiz):
     db.session.commit()
 
 
-def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetime.now(), cnt=0, update_at="", user_role = "teacher"):
+def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetime.now(), cnt=0, update_at=""):
     template = QuizTemplate.query.filter(QuizTemplate.id == quiz_template_id).first()
     if template is None:
         return None, None
@@ -274,57 +274,6 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
     else:
         feedback_type_after_close = template.feedback_type_after_close
 
-
-    sections = []
-    if user_role == "teacher":
-        cnt = 0
-        for section in template.quiz_template_section:
-            questions_section = {}
-            for item in section.quiz_template_section_items:
-                if item.question_id is not None:
-                    latest_version = max(item.question.question_version, key=lambda v: v.dateCreated)
-
-                    questions_section[item.id] = {
-                        "question_id": item.question_id,
-                        "question_text": latest_version.text,
-                        "question_title": latest_version.title,
-                        "question_type": latest_version.type,
-                        "points": item.evaluate,
-                        "question_positive_feedback": item.question.question_positive_feedback,
-                        "question_negative_feedback": item.question.question_feedback
-                    }
-                    if latest_version.type == "short_answer_question":
-                        questions_section[item.id]["answer_text"] = latest_version.short_answers[0].text
-
-                    if latest_version.type == "matching_answer_question":
-                        sides = []
-                        for pair in latest_version.matching_question:
-                            sides.append([pair.leftSide, pair.rightSide, pair.positive_feedback, pair.negative_feedback])
-                        questions_section[item.id]["sides"] = sides
-
-                    if latest_version.type == "multiple_answer_question":
-                        choices = []
-                        for choice in latest_version.multiple_answers:
-                            choices.append([choice.text, choice.is_correct, choice.positive_feedback, choice.negative_feedback])
-                        questions_section[item.id]["choices"] = choices
-                else:
-                    questions_section[item.id] = {
-                        "type": "random",
-                        "question_type" : item.question_type,
-                        "points": item.evaluate,
-                        "question_category": Category.query.filter(Category.id== item.category_id).first().title,
-                        "include_sub_categories": item.include_sub_categories,
-                        "question_positive_feedback": "",
-                        "question_negative_feedback": "",
-                    }
-
-            sections.append({
-                "questions": questions_section,
-                "title": section.title
-            })
-            cnt+=1
-
-
     template_sub = {
         "id": template.id,
         "title": template.title,
@@ -340,8 +289,8 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
         "feedbackTypeAfterClose": feedback_type_after_close,
         "quiz_id": 0,
         "sections": [],
+        "sections_ordered": [],
         "quizzes": [],
-        "quiz_no_shuffle": sections,
         "is_opened": is_opened,
         "time_limit_end": time_limit_end,
         "can_be_checked": can_be_checked,
@@ -354,6 +303,8 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
 
     question_count = 0
     section_count = 1
+
+    #Normalne
     for num in template.order:
 
         section = QuizTemplateSection.query.filter(QuizTemplateSection.id == num).first()
@@ -404,6 +355,7 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
                     }
                 )
             question_count += 1
+
         template_sub["sections"].append(pom_section)
         template_sub["number_of_questions"] = question_count
 
@@ -472,6 +424,7 @@ def generate_quiz(quiz, questions, student_id):
 
     order_sections = []
 
+    sections_sorted = {}
     for section in quiz["sections"]:
         section_added = QuizSection(
             quiz_id=new_quiz.id
@@ -480,6 +433,8 @@ def generate_quiz(quiz, questions, student_id):
         db.session.add(section_added)
         db.session.commit()
         order_sections.append(section_added.id)
+
+        sections_sorted[section_added.id] = section["section_id"]
 
         order_questions = []
 
@@ -497,6 +452,7 @@ def generate_quiz(quiz, questions, student_id):
                 version = QuestionVersion.query.filter(
                     QuestionVersion.id == questions[str(question["id"])]["id"]).first()
 
+                order_options = []
                 if question["type"] == "short_answer_question":
                     order_options = [version.short_answers[0].id]
                 elif question["type"] == "multiple_answer_question":
@@ -517,15 +473,21 @@ def generate_quiz(quiz, questions, student_id):
 
             order_questions.append(new_item.id)
 
-        if quiz["shuffle_sections"]:
-            shuffle(order_sections)
-
         if section["shuffle"]:
             shuffle(order_questions)
 
         section_added.order = order_questions
-        new_quiz.order = order_sections
-        db.session.commit()
+
+    if quiz["shuffle_sections"]:
+        shuffle(order_sections)
+
+    sections_template = []
+    for i in order_sections:
+        sections_template.append(sections_sorted[i])
+
+    new_quiz.order = order_sections
+    new_quiz.order_template = sections_template
+    db.session.commit()
 
     return time_to_finish, new_quiz.id
 

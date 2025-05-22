@@ -49,7 +49,7 @@ def get_all_users():
                  }
             )
 
-    user_table.sort(key=lambda x: x[sort], reverse=sort_dir == "asc")
+    user_table.sort(key=lambda x: x[sort].lower(), reverse=sort_dir == "asc")
     return {"result": user_table}, 200
 
 @users_bp.route("/create-teacher", methods=["PUT"])
