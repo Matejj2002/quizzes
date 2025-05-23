@@ -118,7 +118,6 @@ const Questions = () => {
 
     }, [actualCategory]);
 
-
     async function getUserLogged(){
 
         const data = JSON.parse(localStorage.getItem("data"));
@@ -200,15 +199,6 @@ const Questions = () => {
                     });
 
             alert(text);
-    }
-    const [actualFeedbacks, setActualFeedbacks]= useState([]);
-    const showFeedbacks = (question) =>{
-      setActualFeedbacks(question);
-      setShowFeedback(true);
-    }
-
-    const closeModal = () =>{
-      setShowFeedback(false);
     }
 
     if (loading){
@@ -368,23 +358,19 @@ const Questions = () => {
                                 </div>
 
                                 <button type="button" className="btn btn-success me-1" onClick={() => {
-                                    navigate(`/question/new-question`, {
-                                        state: {
-                                            catPath: category,
-                                            id: actualCategory,
-                                            selectedCategory: actualCategoryString,
-                                            limit: limit,
-                                            offset: offset,
-                                            sort: sort,
-                                            page: page,
-                                            filterType: filterType,
-                                            authorFilter: authorFilter,
-                                            back:false,
-                                            userId: userData["id_user"],
-                                            userRole: userData["role"],
-                                            author: userData["login"],
-                                        }
-                                    });
+                                    const queryParams = new URLSearchParams({
+                                        category: category,
+                                        id: actualCategory,
+                                        selectedCategory: actualCategoryString,
+                                        limit: limit,
+                                        offset: offset,
+                                        sort: sort,
+                                        page: page,
+                                        filterType: filterType,
+                                        authorFilter: authorFilter,
+                                        back: false,
+                                    }).toString();
+                                    navigate(`/question/new-question?${queryParams}`);
                                 }
                                 }
                                 >Add question
@@ -425,32 +411,24 @@ const Questions = () => {
                                                             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                                                             <a href="" onClick={(e) => {
                                                                 e.preventDefault();
-                                                                navigate(`/question/${question.id}`, {
-                                                                    state: {
-                                                                        catPath: category,
-                                                                        id: actualCategory,
-                                                                        selectedCategory: actualCategoryString,
-                                                                        limit: limit,
-                                                                        offset: offset,
-                                                                        sort: sort,
-                                                                        page: page,
-                                                                        filterType: filterType,
-                                                                        authorFilter: authorFilter,
-                                                                        back: false,
-                                                                        userId: userData["id_user"],
-                                                                        userRole: userData["role"],
-                                                                    }
-                                                                });
+                                                                const queryParams = new URLSearchParams({
+                                                                  category: category,
+                                                                  id: actualCategory,
+                                                                  selectedCategory: actualCategoryString,
+                                                                  limit: limit,
+                                                                  offset: offset,
+                                                                  sort: sort,
+                                                                  page: page,
+                                                                  filterType: filterType,
+                                                                  authorFilter: authorFilter,
+                                                                  back: false,
+                                                                }).toString();
+                                                                navigate(`/question/${question.id}?${queryParams}`);
                                                             }
                                                             } className="text-decoration-none">
                                                                 {question.versions.title || "No title available"}
                                                             </a>
                                                         </p>
-                                                        {/*<span*/}
-                                                        {/*    className="badge text-bg-primary rounded-pill flex-shrink-0"*/}
-                                                        {/*    style={{cursor: "pointer"}}*/}
-                                                        {/*    onClick={() => showFeedbacks(question)}>{question.comments.length}*/}
-                                                        {/*</span>*/}
                                                     </div>
 
                                                     <span
@@ -526,35 +504,23 @@ const Questions = () => {
 
                                                     <button className="btn btn-outline-success btn-xs p-0 px-1 ms-1"
                                                             onClick={() => {
-                                                                navigate(`/question/copy-question/${question.id}`, {
-                                                                    state: {
-                                                                        questionTitle: question.versions.title,
-                                                                        catPath: category,
-                                                                        id: actualCategory,
-                                                                        selectedCategory: actualCategoryString,
-                                                                        limit: limit,
-                                                                        offset: offset,
-                                                                        sort: sort,
-                                                                        page: page,
-                                                                        filterType: filterType,
-                                                                        authorFilter: authorFilter,
-                                                                        back: false,
-                                                                        userId: userData["id_user"],
-                                                                        userRole: userData["role"],
-                                                                    }
-                                                                });
+                                                                const queryParams = new URLSearchParams({
+                                                                  category: category,
+                                                                  id: actualCategory,
+                                                                  selectedCategory: actualCategoryString,
+                                                                  limit: limit,
+                                                                  offset: offset,
+                                                                  sort: sort,
+                                                                  page: page,
+                                                                  filterType: filterType,
+                                                                  authorFilter: authorFilter,
+                                                                  back: false,
+                                                                }).toString();
+                                                                navigate(`/question/copy-question/${question.id}?${queryParams}`);
 
                                                             }}>
                                                         Copy
                                                     </button>
-                                                </div>
-                                                <div className="d-flex justify-content-between align-items-center w-100 mt-1">
-                                                    <div>
-                                                </div>
-                                                <button
-                                                    className="btn btn-outline-primary btn-xs p-0 px-1 ms-1"
-                                                    onClick={() => showFeedbacks(question)}>Feedbacks: {question.comments.length}
-                                                        </button>
                                                 </div>
                                             </div>
                                         </li>
@@ -587,46 +553,6 @@ const Questions = () => {
 
                             </div>
                         )}
-
-                        <div className={`modal fade ${showFeedback ? 'show' : ''}`} tabIndex="-1"
-                             aria-labelledby="feedbackModalLabel" aria-hidden="true"
-                             style={{display: showFeedback ? 'block' : 'none'}}>
-                            <div className="modal-dialog">
-                                <div className="modal-content">
-                                    <div className="modal-header">
-                                        <h5 className="modal-title" id="feedbackModalLabel">Fedbacks for {actualFeedbacks.versions?.title}</h5>
-                                        <button type="button" className="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close" onClick={closeModal}></button>
-                                    </div>
-                                    <div className="modal-body">
-                                        <table className="table table-striped table-hover table-fixed">
-                                            <thead>
-                                            <tr>
-                                                <th scope="col" className="w-50 text-start">Author</th>
-                                                <th scope="col" className="w-50 text-start">Text</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {actualFeedbacks.comments && actualFeedbacks.comments.map((feedback, ind) => (
-                                                    <tr>
-                                                        <td className="text-start">{feedback?.author}</td>
-                                                        <td className="text-start">{feedback?.text}</td>
-                                                    </tr>
-                                                )
-                                            )
-                                            }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"
-                                                onClick={closeModal}>
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div className="col-2">
 

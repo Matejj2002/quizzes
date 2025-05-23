@@ -186,7 +186,7 @@ const QuizReview = () =>{
         setActualType(newType);
     }
 
-    console.log(questionsData);
+
     const sectionsToRender = actualType === "Original" ? data.sections_ordered : data.sections;
 
 

@@ -66,8 +66,6 @@ const Quiz = () => {
             const updt = new Date(updateAt).getTime();
             if (Date.now() + 2*60 * 60000 >= updt){
                 fetchQuizzes();
-            }else{
-                console.log(updt, Date.now(), new Date().getTime());
             }
 
         }, 1000);

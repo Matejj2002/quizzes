@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {useParams, useNavigate} from 'react-router-dom';
+import {useParams, useNavigate, useSearchParams} from 'react-router-dom';
 import { Toast, ToastContainer, Button } from 'react-bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -18,36 +18,36 @@ import FormattedTextInput from "../components/FormattedTextInput";
 const NewQuestion = ({subButText="Submit"}) => {
     const {id} = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const location = useLocation();
     const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
-
-    // const subButText = location.state.subButText;
 
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const [category, setCategory] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [userData, setUserData]= useState([]);
 
-    const catPath = location.state['catPath'];
-    const page = location.state['page'];
-    const limit = location.state['limit'];
-    const offset = location.state['offset'];
-    const sort = location.state['sort'];
-    const selectedCategory1 = location.state['selectedCategory'];
-    const userId = location.state.userId;
-    const userRole = location.state.userRole;
-    const idQ = location.state['id'] === 1 ? 2 : location.state['id'];
-    const filters = location.state['filterType'];
-    const authorFilter = location.state['authorFilter'];
-    const newQuestions = location.state["newQuestions"];
-    const back = location.state["back"];
+    const catPath = searchParams.get('category');
+    const page = parseInt(searchParams.get('page'), 10) || 1;
+    const limit = parseInt(searchParams.get('limit'), 10) || 10;
+    const offset = parseInt(searchParams.get('offset'), 10) || 0;
+    const sort = searchParams.get('sort');
+    const selectedCategory1 = searchParams.get('selectedCategory');
+    const idQ = parseInt(searchParams.get('id') === '1' ? '2' : searchParams.get('id'));
+    const filters = searchParams.get('filterType');
+    const authorFilter = searchParams.get('authorFilter');
+    const newQuestions = searchParams.get('newQuestions');
+    const back = searchParams.get('back') === 'true';
+
+
     const [questionType, setQuestionType ] = useState("Matching Question");
     const [answers, setAnswers] = useState({});
     const [versions, setVersions] = useState([]);
     const [selectedVersion, setSelectedVersion] = useState(0);
+    const [teacherFeedback, setTeacherFeedback] = useState("");
 
     const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
-    const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
 
     const [categorySelect, setCategorySelect] = useState("");
 
@@ -62,6 +62,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const [showToast, setShowToast] = useState(false);
 
+
     let titleText = "";
     let buttonText = "";
     if (subButText === "Submit"){
@@ -69,7 +70,7 @@ const NewQuestion = ({subButText="Submit"}) => {
         buttonText = "Create Question";
     }
     if (subButText === "Copy"){
-        titleText = "Copy of " + location.state["questionTitle"];
+        titleText = "Copy of "+ versions[selectedVersion]?.title;
         buttonText = "Copy Question"
     }
     if (subButText === "Update"){
@@ -82,6 +83,28 @@ const NewQuestion = ({subButText="Submit"}) => {
         }
     }
 
+    async function getUserLogged(){
+
+        const data = JSON.parse(localStorage.getItem("data"));
+        try{
+            const response = await axios.get(apiUrl+`get-user-data_logged` ,
+                {
+                    params: {"userName": data["login"],
+                            "avatarUrl": data["avatar_url"]
+                    }
+                }
+            )
+            setUserData(response.data.result);
+
+            if (response.data.result.role !== "teacher"){
+                navigate("/quizzes");
+            }
+
+      }catch (error){
+            console.error(error);
+      }
+       finally {}
+    }
 
       const handleShowToast = () => {
         setShowToast(true);
@@ -106,7 +129,7 @@ const NewQuestion = ({subButText="Submit"}) => {
             category_id: selectedCategoryId,
             questionType: questionType,
             answers: answersSel,
-            author: userId,
+            author: userData["id_user"],
             feedback: questionFeedback,
             positiveFeedback: questionPositiveFeedback
         };
@@ -115,34 +138,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                 axios.put(apiUrl+`questions/new-question`, updatedData)
                     .then(response => {
                         if (createMoreQuestions){
-                            // setTitle("");
-                            // setText("");
-                            // setQuestionType("Matching Question");
-                            // setSelectedCategoryId(idQ);
-                            // setSelectedCategory(selectedCategory1);
-                            // setCategorySelect("");
-                            // setAnswers({});
-                            // setQuestionFeedback("");
-                            // setQuestionPositiveFeedback("");
-                            // setCheckSubmit([]);
                             sessionStorage.setItem("scrollToTop", "true");
-                            navigate(`/question/new-question`, {
-                                            state: {
-                                                catPath: category,
-                                                id: idQ,
-                                                selectedCategory: selectedCategory1,
-                                                limit: limit,
-                                                offset: offset,
-                                                sort: sort,
-                                                page: page,
-                                                filterType: filters,
-                                                authorFilter: authorFilter,
-                                                newQuestions: createMoreQuestions,
-                                                userRole: userRole,
-                                                userId: userId,
-                                                scrollTop: true
-                                            }
-                                        });
                              // window.location.reload();
                             handleShowToast();
                             window.scrollTo(0,0);
@@ -207,7 +203,6 @@ const NewQuestion = ({subButText="Submit"}) => {
 
             setVersions(response.data);
 
-            setSelectedCategory(response.data[0]["category_name"]);
             setSelectedCategoryId(response.data[0]["category_id"]);
             setTitle(response.data[0]["title"]);
             setText(response.data[0]["text"]);
@@ -254,13 +249,16 @@ const NewQuestion = ({subButText="Submit"}) => {
       }
     };
     useEffect(() => {
-        if (sessionStorage.getItem("scrollToTop") === "true") {
+        getUserLogged().then(() =>{
+            if (sessionStorage.getItem("scrollToTop") === "true") {
             setTimeout(() => {
               window.scrollTo(0, 0);
               sessionStorage.removeItem("scrollToTop");
             }, 50);
           }
         fetchAllData();
+        })
+
 
   }, []);
 
@@ -270,7 +268,6 @@ const NewQuestion = ({subButText="Submit"}) => {
             return;
         }
         const fetchDataWait = async () => {
-            setSelectedCategory(versions[selectedVersion]["category_name"]);
             setSelectedCategoryId(versions[selectedVersion]["category_id"]);
             setTitle(versions[selectedVersion]["title"]);
             setText(versions[selectedVersion]["text"]);
@@ -300,8 +297,30 @@ const NewQuestion = ({subButText="Submit"}) => {
         setAnswers(newAnswers)
     };
 
-    if (userRole !=="teacher"){
-        navigate("/quizzes");
+    const saveTeacherFeedback = ()=>{
+        const updatedData = {
+            "feedback": teacherFeedback,
+            "versionId": versions[selectedVersion].version_id,
+            "teacher_id": userData["id_user"],
+        }
+
+        setVersions(prevVersions => {
+        const updatedVersions = [...prevVersions];
+        const updatedVersion = { ...updatedVersions[selectedVersion] };
+        if (!Array.isArray(updatedVersion.comments[0])) {
+            updatedVersion.comments[0] = [];
+        }
+        updatedVersion.comments[0] = [...updatedVersion.comments[0], {"name":"You", "text": teacherFeedback, "role":"teacher"}];
+        updatedVersions[selectedVersion] = updatedVersion;
+        return updatedVersions;
+    });
+        axios.put(apiUrl+`save-feedback-to-version`, updatedData).then( () =>{
+
+        }
+
+        ).catch( () => {
+        })
+
     }
 
         return (
@@ -325,37 +344,39 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 )
                             }
 
-                            <div>
-                                <label htmlFor="select-version">Question Version</label>
-                                <select
-                                    id="select-version"
-                                    className="form-select"
-                                    onChange={(e) => {
-                                        setSelectedVersion(Number(e.target.value))
-                                    }
-                                    }
+                            {titleText !== "New Question" && (
+                                <div>
+                                    <label htmlFor="select-version">Question Version</label>
+                                    <select
+                                        id="select-version"
+                                        className="form-select"
+                                        onChange={(e) => {
+                                            setSelectedVersion(Number(e.target.value))
+                                        }
+                                        }
                                     >
 
-                                    {versions.map((version, index) => (
-                                          <option key={index} value={index}>
-                                            Version {versions.length- index}
-                                          </option>
+                                        {versions.map((version, index) => (
+                                            <option key={index} value={index}>
+                                                Version {versions.length - index}
+                                            </option>
                                         ))}
-                                </select>
-                            </div>
+                                    </select>
+                                </div>
+                            )}
+
 
                             <div>
                                 <label htmlFor="select-category">Category</label>
                                 <select
                                     id="select-category"
                                     className="form-select"
-                                    disabled={selectedVersion!==0}
+                                    disabled={selectedVersion !== 0}
                                     value={selectedCategoryId}
                                     onChange={(e) => {
                                         const selectedOption = categorySelect.find(
                                             (cat) => cat.id === parseInt(e.target.value)
                                         );
-                                        setSelectedCategory(selectedOption.title);
                                         setSelectedCategoryId(selectedOption.id);
                                     }}
                                 >
@@ -412,7 +433,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     <label htmlFor="questionText" className="form-label">
                                         Question Text
                                     </label>
-                                    <FormattedTextInput text={text} handleFunction={setText} isDisabled={selectedVersion!==0}></FormattedTextInput>
+                                    <FormattedTextInput text={text} handleFunction={setText} isDisabled={selectedVersion!==0} idVal={"questionText"}></FormattedTextInput>
                                     <div className="invalid-feedback">
                                         Please enter text of question
                                     </div>
@@ -420,17 +441,17 @@ const NewQuestion = ({subButText="Submit"}) => {
                             </form>
 
                             <div className="mb-3">
-                                <label htmlFor="questionFeedback" className="form-label">
+                                <label htmlFor="questionNegativeFeedback" className="form-label">
                                     Question negative feedback
                                 </label>
-                                <FormattedTextInput text={questionFeedback} handleFunction={setQuestionFeedback} isDisabled={selectedVersion!==0}></FormattedTextInput>
+                                <FormattedTextInput text={questionFeedback} handleFunction={setQuestionFeedback} isDisabled={selectedVersion!==0} idVal={"questionNegativeFeedback"}></FormattedTextInput>
                             </div>
 
                             <div className="mb-3">
                                 <label htmlFor="questionPositiveFeedback" className="form-label">
                                     Question positive feedback
                                 </label>
-                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback} isDisabled={selectedVersion!==0}></FormattedTextInput>
+                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback} isDisabled={selectedVersion!==0} idVal={"questionPositiveFeedback"}></FormattedTextInput>
                             </div>
 
                             {questionType === "Matching Question" && (
@@ -473,7 +494,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     </div>
                                 )}
 
-                                <div className="d-flex justify-content-between">
+                                <div className="d-flex justify-content-between mt-3">
                                     <button type="button" className="btn btn-outline-primary mb-3"
                                             onClick={() => {
                                                 if (back) {
@@ -498,19 +519,89 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 </div>
                             </div>
 
+                            {titleText !== "New Question" && (
+                            <div className="mt-3">
+                                <h2>Feedbacks</h2>
+                                <div className="mb-3">
+                                    <label htmlFor="teacher-feedback" className="form-label">
+                                        Teacher feedback
+                                    </label>
+                                    <FormattedTextInput text={teacherFeedback}
+                                                        handleFunction={setTeacherFeedback}
+                                                        idVal={"teacher-feedback"}></FormattedTextInput>
+
+                                    <div className="d-flex justify-content-end">
+                                        <button type="button" className="btn btn-success mb-3 mt-3 align-content-end"
+                                                onClick={() => {
+                                                    saveTeacherFeedback();
+                                                }
+                                                }
+                                        >Save Feedback
+                                        </button>
+                                    </div>
+                                    {versions[selectedVersion]?.comments[0].length > 0 && (
+                                        <div>
+                                            <h3>Teacher comments</h3>
+                                            <table className="table">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Github Name</th>
+                                                    <th scope="col">Comment</th>
+                                                </tr>
+                                                </thead>
+                                            <tbody>
+                                                    {versions[selectedVersion]?.comments[0].map((cmt, ind) => (
+                                                        <tr>
+                                                          <td>{cmt.name}</td>
+                                                          <td>{cmt.text}</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                            </table>
+                                        </div>
+                                        )}
+
+                                    {versions[selectedVersion]?.comments[1].length > 0 && (
+                                        <div>
+                                            <h3>Student comments</h3>
+                                            <table className="table">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Github Name</th>
+                                                    <th scope="col">Comment</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {versions[selectedVersion]?.comments[1].map((cmt, ind) => (
+                                                    <tr>
+                                                        <td>{cmt.name}</td>
+                                                        <td>{cmt.text}</td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+
+
+                                </div>
+
+
+                            </div>
+                                )}
                         </div>
                         <div className="col-2"></div>
                     </div>
                 </div>
 
                 <ToastContainer position="bottom-end" className="p-3">
-                <Toast show={showToast} onClose={() => setShowToast(false)} bg="success">
-                  <Toast.Header closeButton>
-                    <strong className="me-auto">Question {title} was created.</strong>
-                  </Toast.Header>
-                  <Toast.Body className="text-white">Created sucesfully.</Toast.Body>
-                </Toast>
-              </ToastContainer>
+                    <Toast show={showToast} onClose={() => setShowToast(false)} bg="success">
+                        <Toast.Header closeButton>
+                            <strong className="me-auto">Question {title} was created.</strong>
+                        </Toast.Header>
+                        <Toast.Body className="text-white">Created sucesfully.</Toast.Body>
+                    </Toast>
+                </ToastContainer>
             </div>
         )
 }

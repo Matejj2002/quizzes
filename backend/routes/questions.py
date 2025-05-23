@@ -203,7 +203,8 @@ def add_new_question():
                                      text=text,
                                      dateCreated=datetime.datetime.now(),
                                      author_id=author_id,
-                                     type=type_q
+                                     type=type_q,
+
                                      )
 
     db.session.add(question_version)
@@ -232,7 +233,6 @@ def add_new_question():
             short_answer_question_id=question_version_id,
             text=answer['text'],
             is_regex=answer['is_regex'],
-            is_correct=True,
             positive_feedback=answer["positive_feedback"],
             negative_feedback=answer["negative_feedback"],
             type='simple_answer'
@@ -260,17 +260,40 @@ def add_new_question():
 def get_question_version_choice(question_id):
     question = Question.query.get_or_404(question_id)
 
+    teachers = [i.id for i in User.query.filter(User.user_type == 'teacher').all()]
+
     versions = []
     for i in sorted(question.question_version, key=lambda q: q.dateCreated, reverse=True):
         newest_version = i
+        comments = Comment.query.filter(Comment.question_version_id == newest_version.id).all()
+
+        comments_vals_teacher = []
+        comments_vals_student = []
+        for comment in comments:
+            if comment.author_id in teachers:
+                comments_vals_teacher.append({
+                    "type": "teacher",
+                    "text": comment.text,
+                    "name": User.query.filter(User.id == comment.author_id).first().github_name
+                })
+            else:
+                comments_vals_student.append({
+                    "type": "student",
+                    "text": comment.text,
+                    "name": User.query.filter(User.id == comment.author_id).first().github_name
+                })
+
+
         dict_ret = {
             "question_id": question.id,
             "category_id": question.category.id,
             "category_name": question.category.title,
             "title": newest_version.title,
             "dateCreted": newest_version.dateCreated,
+            "version_id": newest_version.id,
             "text": newest_version.text,
             "type": newest_version.type,
+            "comments": [comments_vals_teacher, comments_vals_student],
             "question_feedback": question.question_feedback,
             "question_positive_feedback": question.question_positive_feedback,
             "feedback": [
@@ -321,8 +344,6 @@ def get_question_version_choice(question_id):
                 )
 
         versions.append(dict_ret)
-
-    print(versions)
 
     return jsonify(versions), 200
 
@@ -433,3 +454,21 @@ def get_questions_from_category(index):
     questions_versions = get_questions_from_category_helper(subcat, question_type, index)
 
     return {"questions": questions_versions}
+
+@questions_bp.route("/save-feedback-to-version", methods=["PUT"])
+def save_feedback_to_version():
+    data = request.get_json()
+    version_id = data['versionId']
+    text = data['feedback']
+    teacher_id = data['teacher_id']
+
+    comment = Comment(
+        author_id=teacher_id,
+        text=text,
+        question_version_id = version_id,
+        date_created=datetime.datetime.now()
+    )
+    db.session.add(comment)
+    db.session.commit()
+
+    return {},200

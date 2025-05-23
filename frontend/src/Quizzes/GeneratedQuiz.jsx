@@ -276,9 +276,6 @@ const GeneratedQuiz = () => {
         })
     }
 
-        console.log(questionsData);
-
-
     function getTime(){
         const hours = Math.floor(count / 3600);
         const minutes = Math.floor((count % 3600) / 60);
