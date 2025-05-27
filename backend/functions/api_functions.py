@@ -251,6 +251,9 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
     if template.is_deleted:
         return None, None
 
+    # import pytz
+    # bratislava_tz = pytz.timezone("Europe/Bratislava")
+    # actual_time = datetime.datetime.now(bratislava_tz)
     if template.date_time_open <= actual_time <= template.date_time_close:
         is_opened = True
     else:

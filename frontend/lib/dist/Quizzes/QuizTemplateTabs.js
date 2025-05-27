@@ -48,7 +48,7 @@ const QuizTemplateTabs = ({
     onClick: () => {
       setPageNum(index + 2);
     }
-  }, sections[index].title || "Section " + (index + 1)))), /*#__PURE__*/React.createElement("li", {
+  }, sections[index]?.title || "Section " + (index + 1)))), /*#__PURE__*/React.createElement("li", {
     className: "nav-item",
     role: "presentation"
   }, /*#__PURE__*/React.createElement("button", {
@@ -73,7 +73,7 @@ const QuizTemplateTabs = ({
     className: "nav-item ms-auto",
     role: "presentation"
   }, /*#__PURE__*/React.createElement("button", {
-    className: `btn ${newUpdateQuiz === "Submit" ? "btn-success" : "btn-primary"}`,
+    className: `btn ${newUpdateQuiz === "Create new quiz" ? "btn-success" : "btn-primary"}`,
     id: "disabled-tab",
     "data-bs-toggle": "tab",
     type: "button",

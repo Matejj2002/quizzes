@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Toast, ToastContainer, Button } from 'react-bootstrap';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -19,45 +19,30 @@ const NewQuestion = ({
     id
   } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const location = useLocation();
   const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
-
-  // const subButText = location.state.subButText;
-
   const apiUrl = process.env.REACT_APP_API_URL;
-  let titleText = "";
-  let buttonText = "";
-  if (subButText === "Submit") {
-    titleText = "New Question";
-    buttonText = "Create Question";
-  }
-  if (subButText === "Copy") {
-    titleText = "Copy of " + location.state["questionTitle"];
-    buttonText = "Copy Question";
-  }
-  if (subButText === "Update") {
-    titleText = "Update Question";
-    buttonText = "Update Question";
-  }
   const [category, setCategory] = useState([]);
   const [loading, setLoading] = useState(false);
-  const catPath = location.state['catPath'];
-  const page = location.state['page'];
-  const limit = location.state['limit'];
-  const offset = location.state['offset'];
-  const sort = location.state['sort'];
-  const selectedCategory1 = location.state['selectedCategory'];
-  const userId = location.state.userId;
-  const userRole = location.state.userRole;
-  const idQ = location.state['id'] === 1 ? 2 : location.state['id'];
-  const filters = location.state['filterType'];
-  const authorFilter = location.state['authorFilter'];
-  const newQuestions = location.state["newQuestions"];
-  const back = location.state["back"];
+  const [userData, setUserData] = useState([]);
+  const catPath = searchParams.get('category');
+  const page = parseInt(searchParams.get('page'), 10) || 1;
+  const limit = parseInt(searchParams.get('limit'), 10) || 10;
+  const offset = parseInt(searchParams.get('offset'), 10) || 0;
+  const sort = searchParams.get('sort');
+  const selectedCategory1 = searchParams.get('selectedCategory');
+  const idQ = parseInt(searchParams.get('id') === '1' ? '2' : searchParams.get('id'));
+  const filters = searchParams.get('filterType');
+  const authorFilter = searchParams.get('authorFilter');
+  const newQuestions = searchParams.get('newQuestions');
+  const back = searchParams.get('back') === 'true';
   const [questionType, setQuestionType] = useState("Matching Question");
   const [answers, setAnswers] = useState({});
+  const [versions, setVersions] = useState([]);
+  const [selectedVersion, setSelectedVersion] = useState(0);
+  const [teacherFeedback, setTeacherFeedback] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
-  const [selectedCategory, setSelectedCategory] = useState(selectedCategory1);
   const [categorySelect, setCategorySelect] = useState("");
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
@@ -66,6 +51,42 @@ const NewQuestion = ({
   const [checkSubmit, setCheckSubmit] = useState("");
   const [createMoreQuestions, setCreateMoreQuestions] = useState(newQuestions || false);
   const [showToast, setShowToast] = useState(false);
+  let titleText = "";
+  let buttonText = "";
+  if (subButText === "Submit") {
+    titleText = "New Question";
+    buttonText = "Create Question";
+  }
+  if (subButText === "Copy") {
+    titleText = "Copy of " + versions[selectedVersion]?.title;
+    buttonText = "Copy Question";
+  }
+  if (subButText === "Update") {
+    if (selectedVersion !== 0) {
+      titleText = "Retrieve Question";
+      buttonText = "Retrieve Question";
+    } else {
+      titleText = "Update Question";
+      buttonText = "Update Question";
+    }
+  }
+  async function getUserLogged() {
+    const data = JSON.parse(localStorage.getItem("data"));
+    try {
+      const response = await axios.get(apiUrl + `get-user-data_logged`, {
+        params: {
+          "userName": data["login"],
+          "avatarUrl": data["avatar_url"]
+        }
+      });
+      setUserData(response.data.result);
+      if (response.data.result.role !== "teacher") {
+        navigate("/quizzes");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {}
+  }
   const handleShowToast = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 5000);
@@ -93,7 +114,7 @@ const NewQuestion = ({
       category_id: selectedCategoryId,
       questionType: questionType,
       answers: answersSel,
-      author: userId,
+      author: userData["id_user"],
       feedback: questionFeedback,
       positiveFeedback: questionPositiveFeedback
     };
@@ -101,34 +122,7 @@ const NewQuestion = ({
       if (title !== "" && text !== "") {
         axios.put(apiUrl + `questions/new-question`, updatedData).then(response => {
           if (createMoreQuestions) {
-            // setTitle("");
-            // setText("");
-            // setQuestionType("Matching Question");
-            // setSelectedCategoryId(idQ);
-            // setSelectedCategory(selectedCategory1);
-            // setCategorySelect("");
-            // setAnswers({});
-            // setQuestionFeedback("");
-            // setQuestionPositiveFeedback("");
-            // setCheckSubmit([]);
             sessionStorage.setItem("scrollToTop", "true");
-            navigate(`/question/new-question`, {
-              state: {
-                catPath: category,
-                id: idQ,
-                selectedCategory: selectedCategory1,
-                limit: limit,
-                offset: offset,
-                sort: sort,
-                page: page,
-                filterType: filters,
-                authorFilter: authorFilter,
-                newQuestions: createMoreQuestions,
-                userRole: userRole,
-                userId: userId,
-                scrollTop: true
-              }
-            });
             // window.location.reload();
             handleShowToast();
             window.scrollTo(0, 0);
@@ -180,23 +174,23 @@ const NewQuestion = ({
   const fetchData = async () => {
     try {
       const response = await axios.get(apiUrl + `question-version-choice/${id}`);
-      setSelectedCategory(response.data["category_name"]);
-      setSelectedCategoryId(response.data["category_id"]);
-      setTitle(response.data["title"]);
-      setText(response.data["text"]);
-      setQuestionFeedback(response.data["question_feedback"]);
-      setQuestionPositiveFeedback(response.data["question_positive_feedback"]);
-      if (response.data["type"] === "matching_answer_question") {
+      setVersions(response.data);
+      setSelectedCategoryId(response.data[0]["category_id"]);
+      setTitle(response.data[0]["title"]);
+      setText(response.data[0]["text"]);
+      setQuestionFeedback(response.data[0]["question_feedback"]);
+      setQuestionPositiveFeedback(response.data[0]["question_positive_feedback"]);
+      if (response.data[0]["type"] === "matching_answer_question") {
         setQuestionType("Matching Question");
       }
-      if (response.data["type"] === "multiple_answer_question") {
+      if (response.data[0]["type"] === "multiple_answer_question") {
         setQuestionType("Multiple Choice Question");
       }
-      if (response.data["type"] === "short_answer_question") {
+      if (response.data[0]["type"] === "short_answer_question") {
         setQuestionType("Short Question");
       }
-      await AnswerSetter(response.data["answers"]);
-      setAnswers(response.data["answers"]);
+      await AnswerSetter(response.data[0]["answers"]);
+      setAnswers(response.data[0]["answers"]);
     } catch (error) {} finally {
       setLoading(false);
     }
@@ -215,22 +209,68 @@ const NewQuestion = ({
       console.error("Error during fetch:", error);
     }
   };
-  console.log(sessionStorage.getItem("scrollToTop"));
   useEffect(() => {
-    if (sessionStorage.getItem("scrollToTop") === "true") {
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        sessionStorage.removeItem("scrollToTop");
-      }, 50);
-    }
-    fetchAllData();
+    getUserLogged().then(() => {
+      if (sessionStorage.getItem("scrollToTop") === "true") {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          sessionStorage.removeItem("scrollToTop");
+        }, 50);
+      }
+      fetchAllData();
+    });
   }, []);
+  useEffect(() => {
+    if (versions.length === 0) {
+      return;
+    }
+    const fetchDataWait = async () => {
+      setSelectedCategoryId(versions[selectedVersion]["category_id"]);
+      setTitle(versions[selectedVersion]["title"]);
+      setText(versions[selectedVersion]["text"]);
+      setQuestionFeedback(versions[selectedVersion]["question_feedback"]);
+      setQuestionPositiveFeedback(versions[selectedVersion]["question_positive_feedback"]);
+      if (versions[selectedVersion]["type"] === "matching_answer_question") {
+        setQuestionType("Matching Question");
+      }
+      if (versions[selectedVersion]["type"] === "multiple_answer_question") {
+        setQuestionType("Multiple Choice Question");
+      }
+      if (versions[selectedVersion]["type"] === "short_answer_question") {
+        setQuestionType("Short Question");
+      }
+      await AnswerSetter(versions[selectedVersion]["answers"]);
+      setAnswers(versions[selectedVersion]["answers"]);
+    };
+    fetchDataWait();
+  }, [selectedVersion]);
   const AnswerSetter = async newAnswers => {
     setAnswers(newAnswers);
   };
-  if (userRole !== "teacher") {
-    navigate("/quizzes");
-  }
+  const saveTeacherFeedback = () => {
+    const updatedData = {
+      "feedback": teacherFeedback,
+      "versionId": versions[selectedVersion].version_id,
+      "teacher_id": userData["id_user"]
+    };
+    setVersions(prevVersions => {
+      const updatedVersions = [...prevVersions];
+      const updatedVersion = {
+        ...updatedVersions[selectedVersion]
+      };
+      if (!Array.isArray(updatedVersion.comments[0])) {
+        updatedVersion.comments[0] = [];
+      }
+      updatedVersion.comments[0] = [...updatedVersion.comments[0], {
+        "name": "You",
+        "text": teacherFeedback,
+        "role": "teacher"
+      }];
+      updatedVersions[selectedVersion] = updatedVersion;
+      return updatedVersions;
+    });
+    axios.put(apiUrl + `save-feedback-to-version`, updatedData).then(() => {}).catch(() => {});
+  };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Navigation, {
     active: "Questions"
   }), /*#__PURE__*/React.createElement("div", {
@@ -252,15 +292,26 @@ const NewQuestion = ({
   }, /*#__PURE__*/React.createElement("h1", null, titleText), checkSubmit.length !== 0 && /*#__PURE__*/React.createElement("div", {
     className: "alert alert-danger",
     role: "alert"
-  }, checkSubmit), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, checkSubmit), titleText !== "New Question" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "select-version"
+  }, "Question Version"), /*#__PURE__*/React.createElement("select", {
+    id: "select-version",
+    className: "form-select",
+    onChange: e => {
+      setSelectedVersion(Number(e.target.value));
+    }
+  }, versions.map((version, index) => /*#__PURE__*/React.createElement("option", {
+    key: index,
+    value: index
+  }, "Version ", versions.length - index)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     htmlFor: "select-category"
   }, "Category"), /*#__PURE__*/React.createElement("select", {
     id: "select-category",
     className: "form-select",
+    disabled: selectedVersion !== 0,
     value: selectedCategoryId,
     onChange: e => {
       const selectedOption = categorySelect.find(cat => cat.id === parseInt(e.target.value));
-      setSelectedCategory(selectedOption.title);
       setSelectedCategoryId(selectedOption.id);
     }
   }, /*#__PURE__*/React.createElement("option", {
@@ -276,6 +327,7 @@ const NewQuestion = ({
     className: "form-label"
   }, "Question Type"), /*#__PURE__*/React.createElement("select", {
     id: "questionType",
+    disabled: selectedVersion !== 0,
     className: "form-select",
     value: questionType,
     onChange: e => setQuestionType(e.target.value)
@@ -296,6 +348,7 @@ const NewQuestion = ({
     type: "text",
     className: "form-control",
     id: "questionTitle",
+    disabled: selectedVersion !== 0,
     value: title,
     placeholder: "Question title",
     onChange: e => setTitle(e.target.value),
@@ -309,17 +362,21 @@ const NewQuestion = ({
     className: "form-label"
   }, "Question Text"), /*#__PURE__*/React.createElement(FormattedTextInput, {
     text: text,
-    handleFunction: setText
+    handleFunction: setText,
+    isDisabled: selectedVersion !== 0,
+    idVal: "questionText"
   }), /*#__PURE__*/React.createElement("div", {
     className: "invalid-feedback"
   }, "Please enter text of question"))), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement("label", {
-    htmlFor: "questionFeedback",
+    htmlFor: "questionNegativeFeedback",
     className: "form-label"
   }, "Question negative feedback"), /*#__PURE__*/React.createElement(FormattedTextInput, {
     text: questionFeedback,
-    handleFunction: setQuestionFeedback
+    handleFunction: setQuestionFeedback,
+    isDisabled: selectedVersion !== 0,
+    idVal: "questionNegativeFeedback"
   })), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement("label", {
@@ -327,16 +384,21 @@ const NewQuestion = ({
     className: "form-label"
   }, "Question positive feedback"), /*#__PURE__*/React.createElement(FormattedTextInput, {
     text: questionPositiveFeedback,
-    handleFunction: setQuestionPositiveFeedback
+    handleFunction: setQuestionPositiveFeedback,
+    isDisabled: selectedVersion !== 0,
+    idVal: "questionPositiveFeedback"
   })), questionType === "Matching Question" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, questionType), /*#__PURE__*/React.createElement(MatchingQuestion, {
     setAnswers: AnswerSetter,
-    answers: answers
+    answers: answers,
+    isDisabled: selectedVersion !== 0
   })), questionType === "Short Question" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, questionType), /*#__PURE__*/React.createElement(ShortAnswerQuestion, {
     setAnswers: AnswerSetter,
-    answers: answers
+    answers: answers,
+    isDisabled: selectedVersion !== 0
   })), questionType === "Multiple Choice Question" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, questionType), /*#__PURE__*/React.createElement(MultipleChoiceQuestion, {
     setAnswers: AnswerSetter,
-    answers: answers
+    answers: answers,
+    isDisabled: selectedVersion !== 0
   })), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, subButText === "Submit" && /*#__PURE__*/React.createElement("div", {
@@ -353,7 +415,7 @@ const NewQuestion = ({
     className: "form-check-label",
     htmlFor: "exampleRadios2"
   }, "Create more questions")), /*#__PURE__*/React.createElement("div", {
-    className: "d-flex justify-content-between"
+    className: "d-flex justify-content-between mt-3"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn btn-outline-primary mb-3",
@@ -371,7 +433,38 @@ const NewQuestion = ({
     onClick: () => {
       saveChanges();
     }
-  }, buttonText)))), /*#__PURE__*/React.createElement("div", {
+  }, buttonText))), titleText !== "New Question" && /*#__PURE__*/React.createElement("div", {
+    className: "mt-3"
+  }, /*#__PURE__*/React.createElement("h2", null, "Feedbacks"), /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "teacher-feedback",
+    className: "form-label"
+  }, "Teacher feedback"), /*#__PURE__*/React.createElement(FormattedTextInput, {
+    text: teacherFeedback,
+    handleFunction: setTeacherFeedback,
+    idVal: "teacher-feedback"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-end"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-success mb-3 mt-3 align-content-end",
+    onClick: () => {
+      saveTeacherFeedback();
+    }
+  }, "Save Feedback")), versions[selectedVersion]?.comments[0].length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "Teacher comments"), /*#__PURE__*/React.createElement("table", {
+    className: "table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    scope: "col"
+  }, "Github Name"), /*#__PURE__*/React.createElement("th", {
+    scope: "col"
+  }, "Comment"))), /*#__PURE__*/React.createElement("tbody", null, versions[selectedVersion]?.comments[0].map((cmt, ind) => /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, cmt.name), /*#__PURE__*/React.createElement("td", null, cmt.text)))))), versions[selectedVersion]?.comments[1].length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "Student comments"), /*#__PURE__*/React.createElement("table", {
+    className: "table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    scope: "col"
+  }, "Github Name"), /*#__PURE__*/React.createElement("th", {
+    scope: "col"
+  }, "Comment"))), /*#__PURE__*/React.createElement("tbody", null, versions[selectedVersion]?.comments[1].map((cmt, ind) => /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, cmt.name), /*#__PURE__*/React.createElement("td", null, cmt.text))))))))), /*#__PURE__*/React.createElement("div", {
     className: "col-2"
   }))), /*#__PURE__*/React.createElement(ToastContainer, {
     position: "bottom-end",

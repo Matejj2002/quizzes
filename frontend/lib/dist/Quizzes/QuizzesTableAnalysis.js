@@ -100,7 +100,7 @@ const QuizzesTableAnalysis = ({
   }, " Attendance"), /*#__PURE__*/React.createElement("th", {
     scope: "col",
     className: "w-25 text-end"
-  }, "Statistics"))), /*#__PURE__*/React.createElement("tbody", null, quizzes.map((quiz, ind) => /*#__PURE__*/React.createElement("tr", {
+  }, activeNav))), /*#__PURE__*/React.createElement("tbody", null, quizzes.map((quiz, ind) => /*#__PURE__*/React.createElement("tr", {
     key: ind
   }, /*#__PURE__*/React.createElement("td", null, quiz.title), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-end align-items-center"
@@ -113,14 +113,13 @@ const QuizzesTableAnalysis = ({
     className: "btn btn-outline-primary",
     onClick: e => {
       e.preventDefault();
-      navigate(statisticsNavigate, {
-        state: {
-          quiz: quiz,
-          userRole: userData["role"]
-        }
-      });
+      if (activeNav === "Analysis") {
+        navigate("/quiz-analysis-show?quiz_template_id=" + quiz.quiz_template_id);
+      } else {
+        navigate("/quiz-all-users?quiz_template_id=" + quiz.quiz_template_id);
+      }
     }
-  }, "Statistics")))))), /*#__PURE__*/React.createElement("button", {
+  }, "Show")))))), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn btn-outline-secondary mb-3 mb-sm-0",
     onClick: () => {

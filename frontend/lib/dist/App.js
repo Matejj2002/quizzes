@@ -49,7 +49,10 @@ function App() {
     path: "/category/new-category",
     element: /*#__PURE__*/React.createElement(NewCategory, null)
   }), /*#__PURE__*/React.createElement(Route, {
-    path: "/new-quiz",
+    path: "/new-quiz-template",
+    element: /*#__PURE__*/React.createElement(NewQuiz, null)
+  }), /*#__PURE__*/React.createElement(Route, {
+    path: "/update-quiz-template",
     element: /*#__PURE__*/React.createElement(NewQuiz, null)
   }), /*#__PURE__*/React.createElement(Route, {
     path: "/quizzes",

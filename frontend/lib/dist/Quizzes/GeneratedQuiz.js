@@ -217,7 +217,6 @@ const GeneratedQuiz = () => {
     const seconds = count % 60;
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
-  console.log(loading);
   if (loading) {
     return /*#__PURE__*/React.createElement("div", {
       className: "d-flex justify-content-center align-items-center"
@@ -367,7 +366,7 @@ const GeneratedQuiz = () => {
       wordWrap: "break-word"
     },
     "aria-labelledby": `dropdown-${idx}`
-  }, questionsData[question.id].answers.map((answ, optionIdx) => /*#__PURE__*/React.createElement("li", {
+  }, questionsData[question.id].rightSidesAnswers.map((answ, optionIdx) => /*#__PURE__*/React.createElement("li", {
     key: optionIdx
   }, /*#__PURE__*/React.createElement("a", {
     className: "dropdown-item",
@@ -383,7 +382,7 @@ const GeneratedQuiz = () => {
           ...prevData[question.id],
           answers: prevData[question.id].answers.map((item, index) => index === idx ? {
             ...item,
-            answer: answ["showRightSide"]
+            answer: answ
           } : item)
         }
       }));
@@ -391,7 +390,7 @@ const GeneratedQuiz = () => {
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-start"
   }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
-    text: answ["showRightSide"]
+    text: answ
   }))))))))))))))), questionsData[question.id]?.type === "multiple_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, questionsData[question.id].answers.map((ans, idx) => /*#__PURE__*/React.createElement("div", {

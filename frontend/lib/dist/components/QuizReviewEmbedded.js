@@ -128,13 +128,18 @@ const QuizReviewEmbedded = ({
     handleAttempt: handleAttempt,
     handleReviewData: handleReviewData,
     keyAtt: keyAtt
-  }), !quiz.can_be_checked && /*#__PURE__*/React.createElement("h2", null, "Quiz can't be reviewed"), !quiz.is_finished && /*#__PURE__*/React.createElement("h2", null, "Can't review quiz. Quiz already opened."), quiz.can_be_checked && quiz.quizzes.length !== 0 && quiz.is_finished && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("select", {
+  }), !quiz.can_be_checked && /*#__PURE__*/React.createElement("h2", null, "Quiz can't be reviewed"), !quiz.is_finished && /*#__PURE__*/React.createElement("h2", null, "Can't review quiz. Quiz already opened."), quiz.can_be_checked && quiz.quizzes.length !== 0 && quiz.is_finished && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "d-flex align-items-center gap-2 mb-3 mt-1"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-center",
+    htmlFor: "quizAttempt"
+  }, "Attempt"), /*#__PURE__*/React.createElement("select", {
     className: "form-select mb-3 mt-3",
     onChange: e => handleChooseId(e.target.value)
   }, quiz.quizzes.slice().reverse().map((q, index, arr) => /*#__PURE__*/React.createElement("option", {
     key: q.quiz_id,
     value: q.quiz_id
-  }, "Review attempt ", arr.length - index))), /*#__PURE__*/React.createElement("ul", {
+  }, q.started)))), /*#__PURE__*/React.createElement("ul", {
     className: "nav nav-tabs mt-3",
     id: "myTab",
     role: "tablist"
@@ -226,19 +231,27 @@ const QuizReviewEmbedded = ({
     className: "d-flex text-success justify-content-end me-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "bi bi-check-circle-fill fs-5"
-  }))) : /*#__PURE__*/React.createElement("span", null, ans.answer), !questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "" && ans.feedback !== null && /*#__PURE__*/React.createElement("p", {
+  }))) : /*#__PURE__*/React.createElement("span", null, ans.answer), ans.answer !== ans["rightSide"] && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? /*#__PURE__*/React.createElement("p", {
     className: "border border-danger p-3 rounded",
     style: {
       background: "rgba(255, 0, 0, 0.3)"
     }
-  }, ans?.feedback)))))))), questionsData[question.id]?.type === "multiple_answer_question" && /*#__PURE__*/React.createElement("div", {
+  }, ans?.negative_feedback) : ans?.positive_feedback !== "" && /*#__PURE__*/React.createElement("p", {
+    className: "border border-success p-3 rounded",
+    style: {
+      background: "rgba(155,236,137,0.15)"
+    }
+  }, ans?.positive_feedback)))))))), questionsData[question.id]?.type === "multiple_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, questionsData[question.id]?.answers.map((ans, idx) => /*#__PURE__*/React.createElement("div", {
     className: "form-check",
     key: idx
   }, /*#__PURE__*/React.createElement("input", {
     className: "form-check-input",
-    type: "checkbox"
+    type: "checkbox",
+    style: {
+      pointerEvents: 'none'
+    }
     // disabled="true"
     ,
     defaultChecked: ans.answer === true
@@ -246,7 +259,7 @@ const QuizReviewEmbedded = ({
     className: "d-flex w-100 form-check-label"
   }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
     text: ans?.text
-  }), !questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && (!ans.isCorrectOption ? /*#__PURE__*/React.createElement("span", {
+  }), feedback.includes("correctAnswers") && (!ans.isCorrectOption ? /*#__PURE__*/React.createElement("span", {
     className: "ms-2 text-danger"
   }, /*#__PURE__*/React.createElement("i", {
     className: "bi bi-x-circle-fill fs-5"
@@ -254,12 +267,17 @@ const QuizReviewEmbedded = ({
     className: "ms-2 text-success"
   }, /*#__PURE__*/React.createElement("i", {
     className: "bi bi-check-circle-fill fs-5"
-  })))), !questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && ans?.feedback !== "" && /*#__PURE__*/React.createElement("p", {
+  })))), !ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? /*#__PURE__*/React.createElement("p", {
     className: "border border-danger p-3 rounded",
     style: {
       background: "rgba(255, 0, 0, 0.3)"
     }
-  }, ans?.feedback)))), questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
+  }, ans?.negative_feedback) : ans?.positive_feedback !== "" && /*#__PURE__*/React.createElement("p", {
+    className: "border border-success p-3 rounded",
+    style: {
+      background: "rgba(155,236,137,0.15)"
+    }
+  }, ans?.positive_feedback)))), questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "mb-3 mt-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "me-2 mt-3 fw-bold"
@@ -269,23 +287,27 @@ const QuizReviewEmbedded = ({
     disabled: true,
     required: true,
     className: "form-control"
-  }), !questionsData[question.id]?.isCorrect && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "" && /*#__PURE__*/React.createElement("p", {
+  }), parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("optionsFeedback") && questionsData[question.id]?.answers[0].feedback !== "" && /*#__PURE__*/React.createElement("p", {
     className: "border border-danger p-3 rounded",
     style: {
       background: "rgba(255, 0, 0, 0.3)"
     }
-  }, questionsData[question.id]?.answers[0].feedback)), !questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null && /*#__PURE__*/React.createElement("p", {
+  }, questionsData[question.id]?.answers[0].feedback)), parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.negative_feedback !== "" && /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded",
     style: {
       background: "rgba(255, 0, 0, 0.3)"
     }
-  }, questionsData[question.id]?.feedback), questionsData[question.id]?.isCorrect && feedback.includes("questionFeedback") && questionsData[question.id]?.feedback !== "" && questionsData[question.id]?.feedback !== null && /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: questionsData[question.id]?.negative_feedback
+  })), parseFloat(questionsData[question.id]?.points) === parseFloat(questionsData[question.id]?.max_points) && feedback.includes("questionFeedback") && questionsData[question.id]?.positive_feedback !== "" && /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded",
     style: {
       background: "rgba(155,236,137,0.15)"
     }
-  }, questionsData[question.id]?.feedback), !questionsData[question.id]?.isCorrect && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
-    className: "p-3 rounded",
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: questionsData[question.id]?.positive_feedback
+  })), parseFloat(questionsData[question.id]?.points) !== parseFloat(questionsData[question.id]?.max_points) && feedback.includes("correctAnswers") && questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded mt-3",
     style: {
       background: "rgba(255, 165, 0, 0.3)",
       whiteSpace: "pre-line"

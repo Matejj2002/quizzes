@@ -34,7 +34,6 @@ def get_access_token():
 @auth_bp.route('/getUserData', methods=['GET'])
 def get_user_data():
     authorization_header = request.headers.get('Authorization')
-    print("USERDATACALLS")
     if not authorization_header:
         return jsonify({"error": "Authorization header missing"}), 401
 

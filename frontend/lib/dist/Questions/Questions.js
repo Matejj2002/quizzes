@@ -162,14 +162,6 @@ const Questions = () => {
     });
     alert(text);
   };
-  const [actualFeedbacks, setActualFeedbacks] = useState([]);
-  const showFeedbacks = question => {
-    setActualFeedbacks(question);
-    setShowFeedback(true);
-  };
-  const closeModal = () => {
-    setShowFeedback(false);
-  };
   if (loading) {
     return /*#__PURE__*/React.createElement("div", {
       className: "d-flex justify-content-center align-items-center"
@@ -299,23 +291,19 @@ const Questions = () => {
     type: "button",
     className: "btn btn-success me-1",
     onClick: () => {
-      navigate(`/question/new-question`, {
-        state: {
-          catPath: category,
-          id: actualCategory,
-          selectedCategory: actualCategoryString,
-          limit: limit,
-          offset: offset,
-          sort: sort,
-          page: page,
-          filterType: filterType,
-          authorFilter: authorFilter,
-          back: false,
-          userId: userData["id_user"],
-          userRole: userData["role"],
-          author: userData["login"]
-        }
-      });
+      const queryParams = new URLSearchParams({
+        category: category,
+        id: actualCategory,
+        selectedCategory: actualCategoryString,
+        limit: limit,
+        offset: offset,
+        sort: sort,
+        page: page,
+        filterType: filterType,
+        authorFilter: authorFilter,
+        back: false
+      }).toString();
+      navigate(`/question/new-question?${queryParams}`);
     }
   }, "Add question"), /*#__PURE__*/React.createElement("button", {
     type: "button",
@@ -353,22 +341,19 @@ const Questions = () => {
     href: "",
     onClick: e => {
       e.preventDefault();
-      navigate(`/question/${question.id}`, {
-        state: {
-          catPath: category,
-          id: actualCategory,
-          selectedCategory: actualCategoryString,
-          limit: limit,
-          offset: offset,
-          sort: sort,
-          page: page,
-          filterType: filterType,
-          authorFilter: authorFilter,
-          back: false,
-          userId: userData["id_user"],
-          userRole: userData["role"]
-        }
-      });
+      const queryParams = new URLSearchParams({
+        category: category,
+        id: actualCategory,
+        selectedCategory: actualCategoryString,
+        limit: limit,
+        offset: offset,
+        sort: sort,
+        page: page,
+        filterType: filterType,
+        authorFilter: authorFilter,
+        back: false
+      }).toString();
+      navigate(`/question/${question.id}?${queryParams}`);
     },
     className: "text-decoration-none"
   }, question.versions.title || "No title available"))), /*#__PURE__*/React.createElement("span", {
@@ -412,30 +397,21 @@ const Questions = () => {
   }, "Last updated ", question.versions.dateCreated, " by ", question.versions.author_name), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-outline-success btn-xs p-0 px-1 ms-1",
     onClick: () => {
-      navigate(`/question/copy-question/${question.id}`, {
-        state: {
-          questionTitle: question.versions.title,
-          catPath: category,
-          id: actualCategory,
-          selectedCategory: actualCategoryString,
-          limit: limit,
-          offset: offset,
-          sort: sort,
-          page: page,
-          filterType: filterType,
-          authorFilter: authorFilter,
-          back: false,
-          userId: userData["id_user"],
-          userRole: userData["role"]
-        }
-      });
+      const queryParams = new URLSearchParams({
+        category: category,
+        id: actualCategory,
+        selectedCategory: actualCategoryString,
+        limit: limit,
+        offset: offset,
+        sort: sort,
+        page: page,
+        filterType: filterType,
+        authorFilter: authorFilter,
+        back: false
+      }).toString();
+      navigate(`/question/copy-question/${question.id}?${queryParams}`);
     }
-  }, "Copy")), /*#__PURE__*/React.createElement("div", {
-    className: "d-flex justify-content-between align-items-center w-100 mt-1"
-  }, /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-outline-primary btn-xs p-0 px-1 ms-1",
-    onClick: () => showFeedbacks(question)
-  }, "Feedbacks: ", question.comments.length)))))), showQuestionsErr()), questions.length !== 0 && /*#__PURE__*/React.createElement("div", {
+  }, "Copy")))))), showQuestionsErr()), questions.length !== 0 && /*#__PURE__*/React.createElement("div", {
     className: "col-4 mx-auto"
   }, /*#__PURE__*/React.createElement(ReactPaginate, {
     pageCount: Math.ceil(numberOfQuestionsFilter / limit),
@@ -454,51 +430,7 @@ const Questions = () => {
     breakLinkClassName: "page-link",
     previousLabel: "Previous",
     nextLabel: "Next"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: `modal fade ${showFeedback ? 'show' : ''}`,
-    tabIndex: "-1",
-    "aria-labelledby": "feedbackModalLabel",
-    "aria-hidden": "true",
-    style: {
-      display: showFeedback ? 'block' : 'none'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-dialog"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-content"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-header"
-  }, /*#__PURE__*/React.createElement("h5", {
-    className: "modal-title",
-    id: "feedbackModalLabel"
-  }, "Fedbacks for ", actualFeedbacks.versions?.title), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn-close",
-    "data-bs-dismiss": "modal",
-    "aria-label": "Close",
-    onClick: closeModal
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "modal-body"
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "table table-striped table-hover table-fixed"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    scope: "col",
-    className: "w-50 text-start"
-  }, "Author"), /*#__PURE__*/React.createElement("th", {
-    scope: "col",
-    className: "w-50 text-start"
-  }, "Text"))), /*#__PURE__*/React.createElement("tbody", null, actualFeedbacks.comments && actualFeedbacks.comments.map((feedback, ind) => /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
-    className: "text-start"
-  }, feedback?.author), /*#__PURE__*/React.createElement("td", {
-    className: "text-start"
-  }, feedback?.text)))))), /*#__PURE__*/React.createElement("div", {
-    className: "modal-footer"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn btn-secondary",
-    "data-bs-dismiss": "modal",
-    onClick: closeModal
-  }, "Close")))))), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "col-2"
   }))));
 };

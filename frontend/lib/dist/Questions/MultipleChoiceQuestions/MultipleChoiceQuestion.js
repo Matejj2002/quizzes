@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 const MultipleChoiceQuestion = ({
   setAnswers,
-  answers
+  answers,
+  isDisabled
 }) => {
   const [questions, setQuestions] = useState([""]);
   const [isChecked, setIsChecked] = useState(false);
@@ -58,6 +60,7 @@ const MultipleChoiceQuestion = ({
     type: "checkbox",
     id: "inlineCheckbox1",
     value: "option1",
+    disabled: isDisabled,
     onChange: e => setIsChecked(e.target.checked)
   }), /*#__PURE__*/React.createElement("label", {
     className: "form-check-label",
@@ -73,11 +76,13 @@ const MultipleChoiceQuestion = ({
     type: "checkbox",
     checked: correctAnswers[index],
     key: index,
+    disabled: isDisabled,
     onChange: e => handleCheckboxChange(index, e.target.checked)
   })), /*#__PURE__*/React.createElement("input", {
     className: "form-control me-3",
     key: index,
     type: "text",
+    disabled: isDisabled,
     value: question,
     onChange: e => handleInputChange(index, e.target.value),
     placeholder: `Option`
@@ -88,26 +93,40 @@ const MultipleChoiceQuestion = ({
     }
   }, /*#__PURE__*/React.createElement("summary", null, "Feedback"), /*#__PURE__*/React.createElement("div", {
     className: "p-4 w-auto"
-  }, /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex align-items-center"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "form-label"
-  }, "Positive\xA0\xA0\xA0"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "form-control",
+  }, /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: `multiple-option-pos-${index}`
+  }, "Positive Feedback"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    id: `multiple-option-pos-${index}`,
+    className: "form-control w-50 me-2",
+    disabled: isDisabled,
     value: feedback[index]["positive"],
-    placeholder: "Feedback",
-    onChange: e => handleFeedbackChange(index, e.target.value, "positive")
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "d-flex align-items-center"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "form-label"
-  }, "Negative"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "form-control",
+    onChange: e => handleFeedbackChange(index, e.target.value, "positive"),
+    rows: 4,
+    required: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-50  border border-1 p-2"
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: feedback[index]["positive"]
+  }))), /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: `multiple-option-neg-${index}`
+  }, "Negative Feedback"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    id: `multiple-option-neg-${index}`,
+    className: "form-control w-50 me-2",
+    disabled: isDisabled,
     value: feedback[index]["negative"],
-    placeholder: "Feedback",
-    onChange: e => handleFeedbackChange(index, e.target.value, "negative")
-  }))))))));
+    onChange: e => handleFeedbackChange(index, e.target.value, "negative"),
+    rows: 4,
+    required: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-50  border border-1 p-2"
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: feedback[index]["negative"]
+  })))))))));
 };
 export default MultipleChoiceQuestion;

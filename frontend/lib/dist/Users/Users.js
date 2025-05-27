@@ -86,13 +86,7 @@ const Users = () => {
     }
   };
   const showStudentStatistics = studentId => {
-    navigate("/user-statistics", {
-      state: {
-        studentId: studentId,
-        userRole: userData["role"],
-        userId: userData["id_user"]
-      }
-    });
+    navigate("/user-statistics?studentId=" + studentId);
   };
   const exportData = async () => {
     try {
@@ -109,9 +103,9 @@ const Users = () => {
       const response = await axios.get(apiUrl + `get-results-students`);
       await writable.write(response.data.result);
       await writable.close();
-      alert("Súbor bol uložený!");
+      alert("File saved sucesfully!");
     } catch (error) {
-      console.error("Chyba pri ukladaní:", error);
+      alert("Error during saving. Not saved !");
     }
   };
   const changeType = (userId, selectedType) => {
@@ -169,7 +163,7 @@ const Users = () => {
   }, "Type ", sort === "user_type" ? sortDirection === "asc" ? " 🔼" : " 🔽" : ""), /*#__PURE__*/React.createElement("th", {
     scope: "col",
     className: "w-25 text-end"
-  }, "Statistics"))), /*#__PURE__*/React.createElement("tbody", null, users.map((user, ind) => /*#__PURE__*/React.createElement("tr", {
+  }, "Results"))), /*#__PURE__*/React.createElement("tbody", null, users.map((user, ind) => /*#__PURE__*/React.createElement("tr", {
     key: ind
   }, /*#__PURE__*/React.createElement("td", null, user.github_name), /*#__PURE__*/React.createElement("td", {
     className: "text-end"
@@ -193,7 +187,7 @@ const Users = () => {
     onClick: () => {
       showStudentStatistics(user.id);
     }
-  }, "Statistics")))))), /*#__PURE__*/React.createElement("div", {
+  }, "Show")))))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-wrap justify-content-between"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",

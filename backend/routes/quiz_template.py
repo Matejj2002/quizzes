@@ -23,6 +23,8 @@ def get_quiz_templates():
     student_id = request.args.get("studentId")
     try:
         template_id = request.args.get("templateId")
+        if template_id == None:
+            template_id = 0
     except:
         template_id = 0
 
@@ -34,8 +36,6 @@ def get_quiz_templates():
     student_name = ""
     if int(student_id) !=0:
         student_name = User.query.filter(User.id == student_id).first().github_name
-
-
 
     if int(template_id) == 0:
         quiz_templates = QuizTemplate.query.all()
@@ -55,7 +55,6 @@ def get_quiz_templates():
 
         if update_at_pom is not None:
             if update_at == "":
-                #print(update_at_pom)
                 pass
 
         if template_sub is not None:

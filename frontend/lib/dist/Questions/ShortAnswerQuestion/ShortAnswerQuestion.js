@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 const ShortAnswerQuestion = ({
   setAnswers,
-  answers
+  answers,
+  isDisabled
 }) => {
   const [newAnswer, setNewAnswer] = useState({
     text: "",
@@ -46,6 +47,7 @@ const ShortAnswerQuestion = ({
     value: answers["text"],
     "aria-label": "Sizing example input",
     "aria-describedby": "inputGroup-sizing-default",
+    disabled: isDisabled,
     onChange: e => setNewAnswer({
       ...newAnswer,
       text: e.target.value
@@ -59,39 +61,54 @@ const ShortAnswerQuestion = ({
     }
   }, /*#__PURE__*/React.createElement("summary", null, "Feedback"), /*#__PURE__*/React.createElement("div", {
     className: "p-4 w-auto mb-3"
-  }, /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex align-items-center mb-3"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "form-label"
-  }, "Positive\xA0\xA0"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "form-control",
+  }, /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: "short-option-pos"
+  }, "Positive Feedback"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    id: "short-option-pos",
+    className: "form-control w-50 me-2",
+    disabled: isDisabled,
     value: answers["positive_feedback"],
-    placeholder: "Feedback",
     onChange: e => setNewAnswer({
       ...newAnswer,
       positive_feedback: e.target.value
-    })
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "d-flex align-items-center"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "form-label"
-  }, "Negative"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "form-control",
+    }),
+    rows: 4,
+    required: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-50  border border-1 p-2"
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: answers["positive_feedback"]
+  }))), /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: "short-option-neg"
+  }, "Negative Feedback"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    id: "short-option-neg",
+    className: "form-control w-50 me-2",
+    disabled: isDisabled,
     value: answers["negative_feedback"],
-    placeholder: "Feedback",
     onChange: e => setNewAnswer({
       ...newAnswer,
       negative_feedback: e.target.value
-    })
-  }))))), /*#__PURE__*/React.createElement("div", {
+    }),
+    rows: 4,
+    required: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-50  border border-1 p-2"
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: answers["negative_feedback"]
+  })))))), /*#__PURE__*/React.createElement("div", {
     className: "form-check form-check-inline mb-3"
   }, /*#__PURE__*/React.createElement("input", {
     className: "form-check-input",
     checked: answers["is_regex"],
     type: "checkbox",
     id: "inlineCheckbox1",
+    disabled: isDisabled,
     value: "option1",
     onChange: e => setNewAnswer({
       ...newAnswer,

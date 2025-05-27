@@ -112,14 +112,14 @@ const QuizTemplateSettings = ({
     max: "500",
     value: minutesToFinish,
     onChange: e => setMinutesToFinish(parseInt(e.target.value))
-  })), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "dateOpen",
     className: "form-label"
   }, "Open the quiz"), /*#__PURE__*/React.createElement("input", {
     type: "datetime-local",
-    className: "form-control form-control-sm w-25",
+    className: `form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`,
     id: "dateOpen",
     value: dateOpen,
     onChange: handleDateOpenChange
@@ -130,7 +130,7 @@ const QuizTemplateSettings = ({
     className: "form-label"
   }, "Close the quiz"), /*#__PURE__*/React.createElement("input", {
     type: "datetime-local",
-    className: "form-control form-control-sm w-25",
+    className: `form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`,
     id: "dateClose",
     value: dateClose,
     onChange: handleDateCloseChange
@@ -141,11 +141,11 @@ const QuizTemplateSettings = ({
     className: "form-label"
   }, "The quiz can be reviewed from"), /*#__PURE__*/React.createElement("input", {
     type: "datetime-local",
-    className: "form-control form-control-sm w-25",
+    className: `form-control form-control-sm w-25 ${dateCheck > dateOpen ? "is-valid" : "is-invalid"}`,
     id: "dateCheck",
     value: dateCheck,
     onChange: handleDateCheck
-  })), /*#__PURE__*/React.createElement("h2", null, "Show in review"), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("h2", null, "Show in review"), /*#__PURE__*/React.createElement("div", {
     className: "form-check mb-3"
   }, /*#__PURE__*/React.createElement("input", {
     className: "form-check-input",

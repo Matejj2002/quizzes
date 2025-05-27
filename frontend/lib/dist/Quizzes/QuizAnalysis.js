@@ -1,17 +1,17 @@
 import Navigation from "../components/Navigation";
 import axios from "axios";
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FormattedTextRenderer from "../components/FormattedTextRenderer";
 import WrongAnswersTable from "../components/WrongAnswersTable";
 const QuizAnalysis = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [quiz] = useState(location.state?.quiz);
-  const [userRole] = useState(location.state?.userRole || undefined);
+  const [searchParams] = useSearchParams();
+  const quizTemplateId = searchParams.get("quiz_template_id");
   const [data, setData] = useState([]);
   const [evals, setEvals] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [userData, setUserData] = useState([]);
   const [page, setPage] = useState(0);
   const apiUrl = process.env.REACT_APP_API_URL;
   const questionTypes = {
@@ -19,11 +19,28 @@ const QuizAnalysis = () => {
     "short_answer_question": "Short Question",
     "multiple_answer_question": "Multiple Choice"
   };
+  async function getUserLogged() {
+    const data = JSON.parse(localStorage.getItem("data"));
+    try {
+      const response = await axios.get(apiUrl + `get-user-data_logged`, {
+        params: {
+          "userName": data["login"],
+          "avatarUrl": data["avatar_url"]
+        }
+      });
+      setUserData(response.data.result);
+      if (response.data.result.role !== "teacher") {
+        navigate("/quizzes");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {}
+  }
   const fetchData = async () => {
     try {
       const response = await axios.get(apiUrl + `quiz-statistics`, {
         params: {
-          "template_id": quiz.quiz_template_id
+          "template_id": quizTemplateId
         }
       });
       setData(response.data.result);
@@ -32,11 +49,10 @@ const QuizAnalysis = () => {
     } catch (error) {} finally {}
   };
   useEffect(() => {
-    fetchData();
+    getUserLogged().then(() => {
+      fetchData();
+    });
   }, []);
-  if (userRole !== "teacher" || userRole === undefined) {
-    navigate("/quizzes");
-  }
   function getProgressWidth(attendance, question, ans) {
     const item = attendance?.[question["item_id"]];
     const total = item?.attendance;
@@ -176,7 +192,7 @@ const QuizAnalysis = () => {
     className: "text-end"
   }, attendance[question["item_id"]]?.attendance - attendance[question["item_id"]]?.wrong_answers[ans[2]][2] + "/" + attendance[question["item_id"]]?.attendance) : /*#__PURE__*/React.createElement("td", {
     className: "text-end"
-  }, attendance[question["item_id"]]?.attendance)))))), /*#__PURE__*/React.createElement("span", null, "Average points: ", attendance[question["item_id"]]?.average, "/ ", attendance[question["item_id"]]?.item_max_points), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", null, attendance[question["item_id"]]?.num_correct_answers, " / ", quiz.attendance, " students has this question correct."), question.type === "short_answer_question" && attendance[question["item_id"]]?.wrong_answers_show.length > 0 && /*#__PURE__*/React.createElement("details", null, /*#__PURE__*/React.createElement("summary", null, "List of wrong answers"), /*#__PURE__*/React.createElement(WrongAnswersTable, {
+  }, attendance[question["item_id"]]?.attendance)))))), /*#__PURE__*/React.createElement("span", null, "Average points: ", attendance[question["item_id"]]?.average, "/ ", attendance[question["item_id"]]?.item_max_points), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", null, attendance[question["item_id"]]?.num_correct_answers, " / ", data.attendance, " students has this question correct."), question.type === "short_answer_question" && attendance[question["item_id"]]?.wrong_answers_show.length > 0 && /*#__PURE__*/React.createElement("details", null, /*#__PURE__*/React.createElement("summary", null, "List of wrong answers"), /*#__PURE__*/React.createElement(WrongAnswersTable, {
     wrongAnswers: attendance[question["item_id"]]?.wrong_answers_show || [],
     tableCols: ["Answer", "Occurencies"],
     colsSize: ["w-75", "w-50 text-center"],

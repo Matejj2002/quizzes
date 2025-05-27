@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import FormattedTextRenderer from "./FormattedTextRenderer";
 const FormattedTextInput = ({
   handleFunction,
-  text
+  text,
+  isDisabled = false,
+  idVal = "questionText"
 }) => {
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
   }, /*#__PURE__*/React.createElement("textarea", {
     className: "form-control w-50 me-2",
-    id: "questionText",
+    id: idVal,
+    disabled: isDisabled,
     value: text,
-    placeholder: "Question text",
     onChange: e => handleFunction(e.target.value),
     rows: 4,
     required: true

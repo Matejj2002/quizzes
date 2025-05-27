@@ -172,7 +172,10 @@ const GeneratedQuiz = () => {
         axios.put(apiUrl+`quiz_set_answers`, updatedData).then( () =>{
                 if (finalSave){
                     window.location.href = quizzesUrl+"/quizzes";
+
+
                 }
+
                 setTimeout(() => {
                 setIsSaving(false);
                 setDisableButtons(false);
@@ -303,38 +306,39 @@ const GeneratedQuiz = () => {
                 <div className="row">
                     <div className="col-2 sidebar"></div>
                     <div className="col-8">
-                                <div className="d-flex justify-content-between">
-                                    <div><h1>{quiz.title}</h1></div>
-                                    <div className="d-flex align-items-center">
-                                        <i className="bi bi-clock text-primary" style={{fontSize: '2rem', marginRight: "2px"}}></i>
-                                        {
-                                            count < 300 ? (
-                                                    <span
-                                                        className="text-xl font-bold text-danger">{getTime()}</span>
-                                            ) : (
-                                                <span className="text-xl font-bold">{getTime()}</span>
-                                            )
-                                        }
-                                    </div>
-                                </div>
+                        <div className="d-flex justify-content-between">
+                            <div><h1>{quiz.title}</h1></div>
+                            <div className="d-flex align-items-center">
+                                <i className="bi bi-clock text-primary"
+                                   style={{fontSize: '2rem', marginRight: "2px"}}></i>
+                                {
+                                    count < 300 ? (
+                                        <span
+                                            className="text-xl font-bold text-danger">{getTime()}</span>
+                                    ) : (
+                                        <span className="text-xl font-bold">{getTime()}</span>
+                                    )
+                                }
+                            </div>
+                        </div>
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             {quiz.sections.map((sect, index) => (
                                 <li className="nav-item" role="presentation" key={index}>
-                                        <button
-                                            className={`nav-link ${index === page ? 'active' : ''}`}
-                                            id={`tab-${index}`}
-                                            data-bs-toggle="tab"
-                                            data-bs-target={`#tab-pane-${index}`}
-                                            type="button"
-                                            role="tab"
-                                            aria-controls={`tab-pane-${index}`}
-                                            aria-selected={index === page}
-                                            onClick={() => {
-                                                setPage(index)
-                                            }}
-                                        >
-                                            {sect.title || "Section " + (index + 1)}
-                                        </button>
+                                    <button
+                                        className={`nav-link ${index === page ? 'active' : ''}`}
+                                        id={`tab-${index}`}
+                                        data-bs-toggle="tab"
+                                        data-bs-target={`#tab-pane-${index}`}
+                                        type="button"
+                                        role="tab"
+                                        aria-controls={`tab-pane-${index}`}
+                                        aria-selected={index === page}
+                                        onClick={() => {
+                                            setPage(index)
+                                        }}
+                                    >
+                                        {sect.title || "Section " + (index + 1)}
+                                    </button>
                                 </li>
                             ))}
 
@@ -355,14 +359,16 @@ const GeneratedQuiz = () => {
                                     <div className="d-flex justify-content-between">
                                         <h2>{questionsData[question.id]?.title}</h2>
                                         <div className="dropdown-center">
-                                          <button className="btn  dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                             <i className={`bi ${feedbackQuestion.includes(question.item_id) ? "bi-flag-fill" : "bi-flag"}`}
-                                                style={{ color: feedbackQuestion.includes(question.item_id) ? 'red' : '' }}
+                                            <button className="btn  dropdown-toggle" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i className={`bi ${feedbackQuestion.includes(question.item_id) ? "bi-flag-fill" : "bi-flag"}`}
+                                                   style={{color: feedbackQuestion.includes(question.item_id) ? 'red' : ''}}
                                                 ></i>
-                                          </button>
+                                            </button>
                                             <div className="dropdown-menu p-3" style={{minWidth: "300px"}}>
                                                 <label htmlFor="feedback" className="form-label">Feedback</label>
-                                                <textarea id={`feedback-${question.id}`} className="form-control" rows="3"
+                                                <textarea id={`feedback-${question.id}`} className="form-control"
+                                                          rows="3"
                                                           placeholder="Why you flagged this question?"
                                                 ></textarea>
 
@@ -377,167 +383,167 @@ const GeneratedQuiz = () => {
                                                     ) : (
                                                         <span>Update feedback</span>
                                                     )}
-                                                    </button>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-                                        <div>
+                                    <div>
                                         <FormattedTextRenderer
                                             text={questionsData[question.id]?.text}
                                         />
-                                        </div>
+                                    </div>
 
-                                        {questionsData[question.id]?.type === "matching_answer_question" && (
-                                            <div className="mb-3">
-                                                <table className="table table-striped">
-                                                    <thead>
-                                                    <tr>
-                                                        <th scope="col">
-                                                            <div className="d-flex justify-content-start">Left
-                                                                Side
+                                    {questionsData[question.id]?.type === "matching_answer_question" && (
+                                        <div className="mb-3">
+                                            <table className="table table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">
+                                                        <div className="d-flex justify-content-start">Left
+                                                            Side
+                                                        </div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div className="d-flex justify-content-end">Right
+                                                            Side
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                                </thead>
+
+                                                <tbody>
+
+                                                {questionsData[question.id].answers.map((ans, idx) => (
+                                                    <tr key={"tr-" + idx.toString()}>
+                                                        <td className="w-50" style={{
+                                                            borderRight: "1px solid black",
+                                                            paddingBottom: "2px"
+                                                        }}
+                                                        >
+                                                            <div className="d-flex justify-content-start">
+                                                                <FormattedTextRenderer
+                                                                    text={ans["leftSide"]}
+                                                                />
+                                                                {/*{ans["leftSide"]}*/}
                                                             </div>
-                                                        </th>
-                                                        <th scope="col">
-                                                            <div className="d-flex justify-content-end">Right
-                                                                Side
-                                                            </div>
-                                                        </th>
-                                                    </tr>
-                                                    </thead>
-
-                                                    <tbody>
-
-                                                    {questionsData[question.id].answers.map((ans, idx) => (
-                                                        <tr key={"tr-"+idx.toString()}>
-                                                            <td className="w-50" style={{
-                                                                borderRight: "1px solid black",
-                                                                paddingBottom: "2px"
-                                                            }}
-                                                            >
-                                                                <div className="d-flex justify-content-start">
-                                                                    <FormattedTextRenderer
-                                                                        text={ans["leftSide"]}
-                                                                      />
-                                                                    {/*{ans["leftSide"]}*/}
-                                                                </div>
-                                                            </td>
-                                                            <td style={{
-                                                                borderLeft: "1px solid black",
-                                                                paddingBottom: "2px"
-                                                            }}>
-                                                                <div className="d-flex justify-content-end">
-                                                                    {ans.answer.length === 0 ? "Select Answer" :
-                                                                        <span>
+                                                        </td>
+                                                        <td style={{
+                                                            borderLeft: "1px solid black",
+                                                            paddingBottom: "2px"
+                                                        }}>
+                                                            <div className="d-flex justify-content-end">
+                                                                {ans.answer.length === 0 ? "Select Answer" :
+                                                                    <span>
                                                                             <FormattedTextRenderer
-                                                                        text={ans.answer}
-                                                                      />
+                                                                                text={ans.answer}
+                                                                            />
                                                                             </span>
-                                                                    }
+                                                                }
 
-                                                                    <div className="dropdown">
-                                                                        <button
-                                                                            className="btn"
-                                                                            type="button"
-                                                                            id={`dropdown-${idx}`}
-                                                                            data-bs-toggle="dropdown"
-                                                                            aria-expanded="false"
-                                                                        >
-                                                                            <i className="bi bi-chevron-down"
-                                                                               style={{fontSize: '24px'}}></i>
-                                                                        </button>
+                                                                <div className="dropdown">
+                                                                    <button
+                                                                        className="btn"
+                                                                        type="button"
+                                                                        id={`dropdown-${idx}`}
+                                                                        data-bs-toggle="dropdown"
+                                                                        aria-expanded="false"
+                                                                    >
+                                                                        <i className="bi bi-chevron-down"
+                                                                           style={{fontSize: '24px'}}></i>
+                                                                    </button>
 
-                                                                        <ul className="dropdown-menu"
-                                                                            style={{
-                                                                                width: "25rem",
-                                                                                wordWrap: "break-word"
-                                                                            }}
-                                                                            aria-labelledby={`dropdown-${idx}`}>
-                                                                            {questionsData[question.id].rightSidesAnswers.map((answ, optionIdx) => (
-                                                                                <li key={optionIdx}>
-                                                                                    <a
-                                                                                        className="dropdown-item"
-                                                                                        style={{whiteSpace: "normal"}}
-                                                                                        href="#"
-                                                                                        onClick={(e) => {
-                                                                                            e.preventDefault();
-                                                                                            setQuestionsData((prevData) => ({
-                                                                                                ...prevData,
-                                                                                                [question.id]: {
-                                                                                                    ...prevData[question.id],
-                                                                                                    answers: prevData[question.id].answers.map((item, index) =>
-                                                                                                        index === idx
-                                                                                                            ? {
-                                                                                                                ...item,
-                                                                                                                answer: answ,
-                                                                                                            }
-                                                                                                            : item
-                                                                                                    ),
-                                                                                                },
-                                                                                            }));
-                                                                                        }}
-                                                                                    >
-                                                                                        <div
-                                                                                            className="d-flex justify-content-start">
+                                                                    <ul className="dropdown-menu"
+                                                                        style={{
+                                                                            width: "25rem",
+                                                                            wordWrap: "break-word"
+                                                                        }}
+                                                                        aria-labelledby={`dropdown-${idx}`}>
+                                                                        {questionsData[question.id].rightSidesAnswers.map((answ, optionIdx) => (
+                                                                            <li key={optionIdx}>
+                                                                                <a
+                                                                                    className="dropdown-item"
+                                                                                    style={{whiteSpace: "normal"}}
+                                                                                    href="#"
+                                                                                    onClick={(e) => {
+                                                                                        e.preventDefault();
+                                                                                        setQuestionsData((prevData) => ({
+                                                                                            ...prevData,
+                                                                                            [question.id]: {
+                                                                                                ...prevData[question.id],
+                                                                                                answers: prevData[question.id].answers.map((item, index) =>
+                                                                                                    index === idx
+                                                                                                        ? {
+                                                                                                            ...item,
+                                                                                                            answer: answ,
+                                                                                                        }
+                                                                                                        : item
+                                                                                                ),
+                                                                                            },
+                                                                                        }));
+                                                                                    }}
+                                                                                >
+                                                                                    <div
+                                                                                        className="d-flex justify-content-start">
                                                                                                 <span>
                                                                                                     <FormattedTextRenderer
-                                                                        text={answ}
-                                                                      />
+                                                                                                        text={answ}
+                                                                                                    />
                                                                                                 </span>
-                                                                                        </div>
-                                                                                    </a>
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
-                                                                    </div>
+                                                                                    </div>
+                                                                                </a>
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
                                                                 </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
-
-                                        {questionsData[question.id]?.type === "multiple_answer_question" && (
-                                            <div className="mb-3">
-                                                {questionsData[question.id].answers.map((ans, idx) => (
-                                                    <div className="form-check" key={idx}>
-                                                        <input className="form-check-input"
-                                                               type="checkbox"
-                                                               checked={ans.answer === true}
-
-                                                               onChange={(e) => {
-                                                                   const isChecked = e.target.checked;
-
-                                                                   setQuestionsData((prevData) => ({
-                                                                       ...prevData,
-                                                                       [question.id]: {
-                                                                           ...prevData[question.id],
-                                                                           answers: prevData[question.id].answers.map((item, index) =>
-                                                                               index === idx ? {
-                                                                                   ...item,
-                                                                                   answer: isChecked
-                                                                               } : item
-                                                                           ),
-                                                                       },
-                                                                   }));
-                                                               }}
-                                                        />
-                                                        <label className="form-check-label">
-                                                        <FormattedTextRenderer
-                                                                        text={ans.text}
-                                                                      />
-                                                        </label>
-                                                    </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
                                                 ))}
-                                            </div>
-                                        )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
 
-                                        {questionsData[question.id]?.type === "short_answer_question" && (
-                                            <div className="mb-3">
-                                                <div className="container mt-3">
-                                                    <div className="row">
-                                                        <div className="col-6">
+                                    {questionsData[question.id]?.type === "multiple_answer_question" && (
+                                        <div className="mb-3">
+                                            {questionsData[question.id].answers.map((ans, idx) => (
+                                                <div className="form-check" key={idx}>
+                                                    <input className="form-check-input"
+                                                           type="checkbox"
+                                                           checked={ans.answer === true}
+
+                                                           onChange={(e) => {
+                                                               const isChecked = e.target.checked;
+
+                                                               setQuestionsData((prevData) => ({
+                                                                   ...prevData,
+                                                                   [question.id]: {
+                                                                       ...prevData[question.id],
+                                                                       answers: prevData[question.id].answers.map((item, index) =>
+                                                                           index === idx ? {
+                                                                               ...item,
+                                                                               answer: isChecked
+                                                                           } : item
+                                                                       ),
+                                                                   },
+                                                               }));
+                                                           }}
+                                                    />
+                                                    <label className="form-check-label">
+                                                        <FormattedTextRenderer
+                                                            text={ans.text}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {questionsData[question.id]?.type === "short_answer_question" && (
+                                        <div className="mb-3">
+                                            <div className="container mt-3">
+                                                <div className="row">
+                                                    <div className="col-6">
                                                       <textarea
                                                           className="form-control h-100"
                                                           placeholder="Answer"
@@ -555,21 +561,21 @@ const GeneratedQuiz = () => {
                                                               }));
                                                           }}
                                                       />
-                                                        </div>
-                                                        <div className="col-6 d-flex">
+                                                    </div>
+                                                    <div className="col-6 d-flex">
                                                     <span>
                                                         <FormattedTextRenderer
-                                                                        text={questionsData[question.id]?.answers[0]["answer"]}
-                                                                      />
+                                                            text={questionsData[question.id]?.answers[0]["answer"]}
+                                                        />
 
                                                     </span>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
                                 </li>
-                                ))}
+                            ))}
                         </ul>
 
                         <br></br>
@@ -580,7 +586,7 @@ const GeneratedQuiz = () => {
                                         if (count !== -1) {
                                             handleSaveQuiz(false);
                                         }
-                                        window.location.href = quizzesUrl+"/quizzes";
+                                        window.location.href = quizzesUrl + "/quizzes";
                                     }
                                     }
                             >
@@ -593,35 +599,35 @@ const GeneratedQuiz = () => {
                                     <button type="button" className="btn btn-primary" disabled={page === 0}
                                             style={{marginRight: '3px'}}
                                             onClick={() => setPage((prev) => prev - 1)}>
-                                    <i className="bi bi-caret-left"></i> Back to {quiz.sections[page - 1].title}
+                                        <i className="bi bi-caret-left"></i> Back to {quiz.sections[page - 1].title}
 
                                     </button>
                                 )}
-                                    <button type="button" className="btn btn-success"
-                                            style={{marginRight: '3px'}}
-                                            disabled={count===-1 || disableButtons}
-                                            onClick={() => handleSaveQuiz(false)}
-                                    >
-                                        Save
-                                    </button>
-
-                                    {page+1 >= quiz.sections.length ? (
-                                        <button type="button" className="btn btn-primary"
-                                                style={{marginRight: '3px'}}
-                                                disabled={count === -1}
-                                                onClick={() => handleSaveQuiz(true)}
-                                        >
-                                            Save & Finish
-                                        </button>
-                                    ) : (
-                                        <button type="button" className="btn btn-primary"
-                                                disabled={page + 1 >= quiz.sections.length}
-                                                onClick={() => setPage((prev) => prev + 1)}>
-                                            Next {quiz.sections[page + 1].title} <i className="bi bi-caret-right"></i>
+                                <button type="button" className="btn btn-success"
+                                        style={{marginRight: '3px'}}
+                                        disabled={count === -1 || disableButtons}
+                                        onClick={() => handleSaveQuiz(false)}
+                                >
+                                    Save
                                 </button>
-                            )}
 
-                                    </div>
+                                {page + 1 >= quiz.sections.length ? (
+                                    <button type="button" className="btn btn-primary"
+                                            style={{marginRight: '3px'}}
+                                            disabled={count === -1}
+                                            onClick={() => handleSaveQuiz(true)}
+                                    >
+                                        Save & Finish
+                                    </button>
+                                ) : (
+                                    <button type="button" className="btn btn-primary"
+                                            disabled={page + 1 >= quiz.sections.length}
+                                            onClick={() => setPage((prev) => prev + 1)}>
+                                        Next {quiz.sections[page + 1].title} <i className="bi bi-caret-right"></i>
+                                    </button>
+                                )}
+
+                            </div>
 
                         </div>
                     </div>

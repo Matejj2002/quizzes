@@ -40,7 +40,7 @@ const Navigation = ({
     className: "container-fluid"
   }, /*#__PURE__*/React.createElement("a", {
     className: "navbar-brand",
-    href: "#"
+    href: `${quizzesUrl}/quizzes`
   }, "Quizzes"), /*#__PURE__*/React.createElement("button", {
     className: "navbar-toggler",
     type: "button",
@@ -57,7 +57,7 @@ const Navigation = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "navbar-nav"
   }, /*#__PURE__*/React.createElement("a", {
-    className: `nav-link ${active === "Quizzes" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`,
+    className: `nav-link ${active === "Quizzes" ? "active" : ""}`,
     href: `${quizzesUrl}/quizzes`
   }, "Quizzes"), /*#__PURE__*/React.createElement("a", {
     className: `nav-link ${active === "Questions" ? "active" : ""} ${userData["role"] !== "teacher" ? "disabled" : ""}`,

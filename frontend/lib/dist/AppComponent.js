@@ -131,7 +131,6 @@ function AppComponent({
   };
   useEffect(() => {
     if (attempt === "review") {
-      console.log("SEM");
       setAttempt(undefined);
       fetchStudent().then(handleReviewData(quiz, quiz.quiz_id, quiz.feedbackTypeAfterClose, !(quiz.is_opened === false || quiz.quizzes.length + 1 >= quiz["number_of_corrections"]), userData["id_user"], "student"));
     }

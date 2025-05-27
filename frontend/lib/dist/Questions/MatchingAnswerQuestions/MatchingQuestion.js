@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 const MatchingQuestion = ({
   setAnswers,
-  answers
+  answers,
+  isDisabled
 }) => {
   const [questions, setQuestions] = useState([{
     left: "",
@@ -67,12 +69,14 @@ const MatchingQuestion = ({
     className: "form-control",
     value: question.left,
     placeholder: "Left Side",
+    disabled: isDisabled,
     onChange: e => handleInputChange(index, 'left', e.target.value)
   }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     className: "form-control me-3",
     value: question.right,
     placeholder: "Right Side",
+    disabled: isDisabled,
     onChange: e => handleInputChange(index, 'right', e.target.value)
   })), /*#__PURE__*/React.createElement("details", {
     className: "mt-1",
@@ -81,26 +85,40 @@ const MatchingQuestion = ({
     }
   }, /*#__PURE__*/React.createElement("summary", null, "Feedback"), /*#__PURE__*/React.createElement("form", {
     className: "w-auto"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex align-items-center"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "form-label"
-  }, "Positive\xA0\xA0"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "form-control",
+    className: "form-label",
+    htmlFor: `matching-option-pos-${index}`
+  }, "Positive Feedback"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    id: `matching-option-pos-${index}`,
+    className: "form-control w-50 me-2",
+    disabled: isDisabled,
     value: question["positive"],
-    placeholder: "Feedback",
-    onChange: e => handleFeedbackChange(index, e.target.value, "positive")
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "d-flex align-items-center"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "form-label"
-  }, "Negative"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "form-control",
+    onChange: e => handleFeedbackChange(index, e.target.value, "positive"),
+    rows: 4,
+    required: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-50  border border-1 p-2"
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: question["positive"]
+  }))), /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: `matching-option-neg-${index}`
+  }, "Negative Feedback"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    id: `matching-option-neg-${index}`,
+    className: "form-control w-50 me-2",
+    disabled: isDisabled,
     value: question["negative"],
-    placeholder: "Feedback",
-    onChange: e => handleFeedbackChange(index, e.target.value, "negative")
-  })))))));
+    onChange: e => handleFeedbackChange(index, e.target.value, "negative"),
+    rows: 4,
+    required: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-50  border border-1 p-2"
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: question["negative"]
+  }))))))));
 };
 export default MatchingQuestion;

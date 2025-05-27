@@ -4,7 +4,7 @@ const QuizStatistics = () => {
   return /*#__PURE__*/React.createElement(QuizzesTableAnalysis, {
     statisticsNavigate: "/quiz-all-users",
     activeNav: "Results",
-    title: "Quiz Statistics"
+    title: "Results"
   });
 };
 export default QuizStatistics;
