@@ -251,20 +251,23 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
     if template.is_deleted:
         return None, None
 
-    # import pytz
-    # bratislava_tz = pytz.timezone("Europe/Bratislava")
-    # actual_time = datetime.datetime.now(bratislava_tz)
-    if template.date_time_open <= actual_time <= template.date_time_close:
+    import pytz
+    bratislava_tz = pytz.timezone("Europe/Bratislava")
+    open_quiz = bratislava_tz.localize(template.date_time_open)
+    close_quiz =bratislava_tz.localize(template.date_time_close)
+    check_quiz = bratislava_tz.localize(template.datetime_check)
+    actual_time = datetime.datetime.now(bratislava_tz)
+    if open_quiz <= actual_time <= close_quiz:
         is_opened = True
     else:
         is_opened = False
 
     time_limit_end = False
-    if actual_time > template.date_time_close:
+    if actual_time > close_quiz:
         time_limit_end = True
 
     can_be_checked = False
-    if actual_time >= template.datetime_check:
+    if actual_time >= check_quiz:
         can_be_checked = True
 
     if template.feedback_type == None:
@@ -369,7 +372,7 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
 
     if student_quizzes is not None and len(student_quizzes) > 0:
         template_sub["quiz_id"] = student_quizzes[0].id
-        time_end = (student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish))
+        time_end = bratislava_tz.localize(student_quizzes[0].date_time_started + datetime.timedelta(minutes=template.time_to_finish))
 
         if actual_time < time_end and student_quizzes[0].date_time_finished is None:
             template_sub["is_finished"] = False

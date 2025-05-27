@@ -430,7 +430,7 @@ def get_questions_quiz(index):
 
             else:
                 try:
-                    right_sides_answers = [i["showRightSide"] for i in answers]
+                    right_sides_answers = list(set([i["showRightSide"] for i in answers]))
                 except:
                     pass
 
@@ -517,7 +517,11 @@ def get_questions_quiz(index):
     else:
         if item is not None:
             item_answer = json.loads(item.answer)
-            correct_answers = newest_version.short_answers[0].text
+            try:
+                correct_answers = newest_version.short_answers[0].text
+            except:
+                correct_answers = ""
+
             if review:
                 max_points = item.max_points
                 points = item.score
