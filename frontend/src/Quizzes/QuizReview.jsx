@@ -475,29 +475,21 @@ const QuizReview = () =>{
                                                                     )}
                                                                 </span>
 
-                                                                {!ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? (
-                                                                    <div className="p-3 rounded"
-                                                                    style={{
-                                                                    background: "rgba(255, 0, 0, 0.3)"
-                                                                        }}>
-                                                                        <FormattedTextRenderer
-                                                                            text={ans?.negative_feedback}
-                                                                        />
-                                                                    </div>
-                                                                ) : (
-                                                                    ans?.positive_feedback !== "" && (
-                                                                    <div className="p-3 rounded"
-                                                                    style={{
-                                                                    background: "rgba(77,210,44,0.15)"
-                                                                        }}>
-                                                                        <FormattedTextRenderer
-                                                                            text={ans?.positive_feedback}
-                                                                        />
-                                                                    </div>
-
-                                                        )
-                                                    )
-                                                    }
+                                                                {feedback.includes("optionsFeedback") && (
+                                                                    ans.isCorrectOption ? (
+                                                                        ans?.positive_feedback !== "" && (
+                                                                            <div className="p-3 rounded" style={{ background: "rgba(77,210,44,0.15)" }}>
+                                                                                <FormattedTextRenderer text={ans?.positive_feedback} />
+                                                                            </div>
+                                                                        )
+                                                                    ) : (
+                                                                        ans?.negative_feedback !== "" && (
+                                                                            <div className="p-3 rounded" style={{ background: "rgba(255, 0, 0, 0.3)" }}>
+                                                                                <FormattedTextRenderer text={ans?.negative_feedback} />
+                                                                            </div>
+                                                                        )
+                                                                    )
+                                                                )}
                                                 </div>
                                             ))}
                                         </div>

@@ -94,39 +94,55 @@ const QuizTemplateSettings =({quizTitle, setQuizTitle, shuffleSections, setShuff
 
                     <form>
                         <div className="mb-3">
+
                             <label htmlFor="dateOpen" className="form-label">Open the quiz</label>
-                            <input
-                                type="datetime-local"
-                                className={`form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`}
-                                id="dateOpen"
-                                value={dateOpen}
-                                onChange={handleDateOpenChange}
-                            />
+                            <div className="input-group has-validation w-25">
+                                <input
+                                    type="datetime-local"
+                                    className={`form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`}
+                                    id="dateOpen"
+                                    value={dateOpen}
+                                    onChange={handleDateOpenChange}
+                                />
+                                <div className="invalid-feedback">
+                                    Open date must be before Close date.
+                                </div>
+                            </div>
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="dateClose" className="form-label">Close the quiz</label>
-                            <input
-                                type="datetime-local"
-                                className={`form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`}
-                                id="dateClose"
-                                value={dateClose}
-                                onChange={handleDateCloseChange}
-                            />
+                        <label htmlFor="dateClose" className="form-label">Close the quiz</label>
+                            <div className="input-group has-validation w-25">
+                                <input
+                                    type="datetime-local"
+                                    className={`form-control form-control-sm w-25 ${dateOpen < dateClose ? "is-valid" : "is-invalid"}`}
+                                    id="dateClose"
+                                    value={dateClose}
+                                    onChange={handleDateCloseChange}
+                                />
+                                <div className="invalid-feedback">
+                                    Close date must be after open date.
+                                </div>
+                            </div>
                         </div>
 
                         <div className="mb-3">
                             <label htmlFor="dateCheck" className="form-label">The quiz can be
                                 reviewed
                                 from</label>
-                            <input
-                                type="datetime-local"
-                                className={`form-control form-control-sm w-25 ${dateCheck > dateOpen ? "is-valid" : "is-invalid"}`}
-                                id="dateCheck"
-                                value={dateCheck}
-                                onChange={handleDateCheck}
-                            />
-                        </div>
+                            <div className="input-group has-validation w-25">
+                                <input
+                                    type="datetime-local"
+                                    className={`form-control form-control-sm ${dateCheck > dateOpen ? "is-valid" : "is-invalid"}`}
+                                    id="dateCheck"
+                                    value={dateCheck}
+                                    onChange={handleDateCheck}
+                                />
+                                <div className="invalid-feedback">
+                                    Check date must be after open date.
+                                </div>
+                            </div>
+                            </div>
                     </form>
 
                     <h2>Show in review</h2>

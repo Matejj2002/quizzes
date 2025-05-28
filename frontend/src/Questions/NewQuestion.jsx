@@ -51,6 +51,8 @@ const NewQuestion = ({subButText="Submit"}) => {
 
     const [categorySelect, setCategorySelect] = useState("");
 
+    const [distractors, setDistractos] = useState([]);
+
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [questionFeedback, setQuestionFeedback] = useState('');
@@ -75,8 +77,8 @@ const NewQuestion = ({subButText="Submit"}) => {
     }
     if (subButText === "Update"){
         if (selectedVersion !==0){
-            titleText = "Retrieve Question";
-            buttonText = "Retrieve Question";
+            titleText = "Revert to this version";
+            buttonText = "Revert to this version";
         }else {
             titleText = "Update Question";
             buttonText = "Update Question";
@@ -131,7 +133,8 @@ const NewQuestion = ({subButText="Submit"}) => {
             answers: answersSel,
             author: userData["id_user"],
             feedback: questionFeedback,
-            positiveFeedback: questionPositiveFeedback
+            positiveFeedback: questionPositiveFeedback,
+            distractors: distractors
         };
         if (subButText === "Submit" || subButText === "Copy") {
             if (title !=="" && text !=="") {
@@ -206,6 +209,8 @@ const NewQuestion = ({subButText="Submit"}) => {
             setSelectedCategoryId(response.data[0]["category_id"]);
             setTitle(response.data[0]["title"]);
             setText(response.data[0]["text"]);
+            console.log(response.data[0]["distractors"]);
+            setDistractos(response.data[0]["distractors"]);
             setQuestionFeedback(response.data[0]["question_feedback"])
             setQuestionPositiveFeedback(response.data[0]["question_positive_feedback"])
 
@@ -223,6 +228,7 @@ const NewQuestion = ({subButText="Submit"}) => {
 
             await AnswerSetter(response.data[0]["answers"]);
             setAnswers(response.data[0]["answers"]);
+
 
         }catch(error){
 
@@ -297,6 +303,10 @@ const NewQuestion = ({subButText="Submit"}) => {
         setAnswers(newAnswers)
     };
 
+    const distractorSetter = async (newDist) =>{
+        setDistractos(newDist);
+    }
+
     const saveTeacherFeedback = ()=>{
         const updatedData = {
             "feedback": teacherFeedback,
@@ -307,10 +317,10 @@ const NewQuestion = ({subButText="Submit"}) => {
         setVersions(prevVersions => {
         const updatedVersions = [...prevVersions];
         const updatedVersion = { ...updatedVersions[selectedVersion] };
-        if (!Array.isArray(updatedVersion.comments[0])) {
-            updatedVersion.comments[0] = [];
+        if (!Array.isArray(updatedVersion.comments)) {
+            updatedVersion.comments = [];
         }
-        updatedVersion.comments[0] = [...updatedVersion.comments[0], {"name":"You", "text": teacherFeedback, "role":"teacher"}];
+        updatedVersion.comments = [{"name":"You", "date": "now", "text": teacherFeedback, "role":"teacher"}, ...updatedVersion.comments];
         updatedVersions[selectedVersion] = updatedVersion;
         return updatedVersions;
     });
@@ -457,7 +467,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                             {questionType === "Matching Question" && (
                                 <div>
                                     <h2>{questionType}</h2>
-                                    <MatchingQuestion setAnswers={AnswerSetter}
+                                    <MatchingQuestion setAnswers={AnswerSetter} distractors={distractors} setDistractors={distractorSetter}
                                                       answers={answers} isDisabled={selectedVersion!==0}></MatchingQuestion>
                                 </div>
                             )}
@@ -508,7 +518,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                     >Back
                                     </button>
 
-                                    <button type="button" className="btn btn-success mb-3"
+                                    <button type="button" className={`btn ${ buttonText  === 'Revert to this version' ? 'btn-warning': 'btn-success' } mb-3`}
                                             disabled={title.length === 0 || text.length === 0 || back}
                                             onClick={() => {
                                                 saveChanges();
@@ -521,10 +531,10 @@ const NewQuestion = ({subButText="Submit"}) => {
 
                             {titleText !== "New Question" && (
                             <div className="mt-3">
-                                <h2>Feedbacks</h2>
+                                <h2>Comments</h2>
                                 <div className="mb-3">
                                     <label htmlFor="teacher-feedback" className="form-label">
-                                        Teacher feedback
+                                        Add comment
                                     </label>
                                     <FormattedTextInput text={teacherFeedback}
                                                         handleFunction={setTeacherFeedback}
@@ -539,51 +549,20 @@ const NewQuestion = ({subButText="Submit"}) => {
                                         >Save Feedback
                                         </button>
                                     </div>
-                                    {versions[selectedVersion]?.comments[0].length > 0 && (
+                                    {versions[selectedVersion]?.comments.length > 0 && (
                                         <div>
-                                            <h3>Teacher comments</h3>
-                                            <table className="table">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">Github Name</th>
-                                                    <th scope="col">Comment</th>
-                                                </tr>
-                                                </thead>
-                                            <tbody>
-                                                    {versions[selectedVersion]?.comments[0].map((cmt, ind) => (
-                                                        <tr>
-                                                          <td>{cmt.name}</td>
-                                                          <td>{cmt.text}</td>
-                                                        </tr>
+                                            <h3>All comments</h3>
+                                                    {versions[selectedVersion]?.comments.map((cmt, ind) => (
+                                                        <div className="card w-100 mb-3">
+                                                            {console.log(cmt)}
+                                                            <div className="card-body">
+                                                                <h5 className="card-title">{cmt.text}</h5>
+                                                                <p className="card-text text-secondary">Commented on {cmt.date} by {cmt.name}</p>
+                                                            </div>
+                                                        </div>
                                                     ))}
-                                            </tbody>
-                                            </table>
-                                        </div>
-                                        )}
-
-                                    {versions[selectedVersion]?.comments[1].length > 0 && (
-                                        <div>
-                                            <h3>Student comments</h3>
-                                            <table className="table">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">Github Name</th>
-                                                    <th scope="col">Comment</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {versions[selectedVersion]?.comments[1].map((cmt, ind) => (
-                                                    <tr>
-                                                        <td>{cmt.name}</td>
-                                                        <td>{cmt.text}</td>
-                                                    </tr>
-                                                ))}
-                                                </tbody>
-                                            </table>
                                         </div>
                                     )}
-
-
                                 </div>
 
 

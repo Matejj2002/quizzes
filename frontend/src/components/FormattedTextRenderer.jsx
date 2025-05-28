@@ -211,6 +211,7 @@ function FormattedTextRenderer({text, katexMacros}) {
   } : undefined;
 
   return (
+      <div className="markdown">
     <ReactMarkdown
       children={text}
       remarkPlugins={[
@@ -229,6 +230,7 @@ function FormattedTextRenderer({text, katexMacros}) {
       // @ts-ignore
       // components={mdDirectives}
     />
+        </div>
   )
 }
 

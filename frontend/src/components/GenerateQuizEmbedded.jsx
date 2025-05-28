@@ -328,10 +328,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
 
     return (
         <div>
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-2 sidebar"></div>
-                    <div className="col-8">
                                 <div className="d-flex justify-content-between">
                                     <div><h1>{quiz.title}</h1></div>
                                     <div className="d-flex align-items-center">
@@ -656,11 +652,7 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                     </div>
 
                         </div>
-                    </div>
 
-                    <div className="col-2"></div>
-                </div>
-            </div>
         </div>
 
 

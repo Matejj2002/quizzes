@@ -127,11 +127,6 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
 
     return (
         <div>
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-2 sidebar"></div>
-
-                    <div className="col-8">
                         <div className="d-flex justify-content-between">
                             <h2 className="mb-3">
                                 {quiz.title}
@@ -496,13 +491,6 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
 
                             </div>
                             )}
-                    </div>
-
-                    <div className="col-2 sidebar"></div>
-                </div>
-
-            </div>
-
         </div>
     )
 }

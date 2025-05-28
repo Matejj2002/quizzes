@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 
-const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
+const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDistractors}) => {
     const [questions, setQuestions] = useState([{ left: "", right: "", positive: "", negative:"" }]);
+    const [distractorsPom, setDistractorsPom] = useState([{distractorV: ""}]);
 
     useEffect(() => {
     if (answers && answers.length > 0) {
@@ -16,6 +17,17 @@ const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
       setQuestions([...updatedQuestions, {left: "", right: "", positive: "", negative:""}]);
     }
   }, [answers]);
+
+    useEffect(() => {
+    if (distractors && distractors.length > 0) {
+      const updatedDist = distractors.map((distr) => ({
+        distractorV: distr["distractorV"],
+      }));
+        console.log(updatedDist);
+      setDistractorsPom([...updatedDist, {distractorV: ""}]);
+    }
+  }, [distractors]);
+
     const handleInputChange = (index, side, value) => {
         const updatedQuestions = [...questions];
         if (side ==="left"){
@@ -31,6 +43,18 @@ const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
             }
         }
 
+    }
+
+    const handleChangeDistractros = (index, value) => {
+        const updatedDistractors = [...distractorsPom];
+        updatedDistractors[index].distractorV = value;
+        setDistractorsPom(updatedDistractors);
+
+        if (value !== "" && index === distractorsPom.length - 1) {
+            if (distractorsPom[index] !== "") {
+                setDistractorsPom([...updatedDistractors, {distractorV: ""}]);
+            }
+            }
     }
 
     const handleFeedbackChange = (index, value, typeFeed) => {
@@ -52,11 +76,23 @@ const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
         });
     }, [questions, setAnswers]);
 
+    useEffect(() => {
+        const filteredDist = distractorsPom.filter(
+            (q) => q.distractorV.trim() !== ""
+        );
+
+        setDistractors((prevDist) => {
+             if (JSON.stringify(prevDist) !== JSON.stringify(filteredDist)) {
+                return filteredDist;
+            }
+            return prevDist;
+        })
+    }, [distractorsPom]);
 
     return (
         <div>
             {questions.map((question, index) => (
-                    <div key={index}>
+                    <div key={'qv-'+index}>
                     <div className="input-group mt-3" key={index}>
                         <input type="text" className="form-control" value={question.left} placeholder="Left Side" disabled={isDisabled}
                                onChange={(e) => handleInputChange(index, 'left', e.target.value)}/>
@@ -64,7 +100,7 @@ const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
                                onChange={(e) => handleInputChange(index, 'right', e.target.value)}/>
                     </div>
 
-                <details className="mt-1"  style={{textAlign:"left"}}>
+                <details className="mt-1 mb-3"  style={{textAlign:"left"}}>
                     <summary>
                         Feedback
                     </summary>
@@ -116,9 +152,16 @@ const MatchingQuestion = ({setAnswers , answers, isDisabled}) => {
                 </details>
                     </div>
                 )
-            )
+            )}
 
-            }
+            <h3>Right sides distractors</h3>
+            {distractorsPom.map((distractor, index) => (
+                <div key={index}>
+                    <input type="text" className="form-control mb-1" value={distractor.distractorV} placeholder="Distractor"
+                           disabled={isDisabled}
+                           onChange={(e) => handleChangeDistractros(index, e.target.value)}/>
+                </div>
+            ))}
         </div>
     )
 }
