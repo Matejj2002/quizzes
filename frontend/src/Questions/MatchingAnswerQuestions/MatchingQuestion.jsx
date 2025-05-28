@@ -6,7 +6,6 @@ const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDis
     const [distractorsPom, setDistractorsPom] = useState([{distractorV: ""}]);
 
     useEffect(() => {
-        console.log(answers, selectedVersion);
     if (versions && versions.length > 0) {
       const updatedQuestions = versions[selectedVersion]["answers"].map((answerPair) => ({
         left: answerPair["left"],
