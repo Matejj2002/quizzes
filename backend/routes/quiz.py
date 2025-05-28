@@ -430,7 +430,13 @@ def get_questions_quiz(index):
 
             else:
                 try:
-                    right_sides_answers = list(set([i["showRightSide"] for i in answers]))
+                    vals = []
+                    if newest_version.distractors is not None:
+                        for dst in newest_version.distractors:
+                            vals.append(dst)
+                    for i in answers:
+                        vals.append(i["showRightSide"])
+                    right_sides_answers = list(set(vals))
                 except:
                     pass
 
@@ -481,6 +487,7 @@ def get_questions_quiz(index):
                     else:
                         is_correct_res = False
 
+                    print(choice.is_correct, res, choice.is_correct == res)
                     answers.append(
                         {
                             "choiceId": choice.id,
@@ -488,7 +495,7 @@ def get_questions_quiz(index):
                             "answer": res,
                             "negative_feedback": choice.negative_feedback if "optionsFeedback" in feedback_type else None,
                             "positive_feedback": choice.positive_feedback if "optionsFeedback" in feedback_type else None,
-                            "isCorrectOption": res == choice.is_correct if "correctAnswers" in feedback_type else None
+                            "isCorrectOption": res == choice.is_correct if ("correctAnswers" in feedback_type or "optionsFeedback" in feedback_type) else None
                         }
                     )
 

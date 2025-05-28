@@ -61,6 +61,7 @@ class QuestionVersion(db.Model):
 class MatchingQuestion(QuestionVersion):
     __tablename__ = "matching_questions"
     id = db.Column(db.Integer, db.ForeignKey('question_versions.id'), primary_key=True)
+    distractors = db.Column(db.ARRAY(db.String))
 
     matching_question = db.relationship('MatchingPair', backref='matching_question_pair', cascade='all, delete-orphan')
 

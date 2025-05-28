@@ -180,6 +180,7 @@ def add_new_question():
     feedback = data["feedback"]
     positive_feedback = data["positiveFeedback"]
 
+
     question = Question(category_id=category_id,
                         question_feedback=feedback,
                         question_positive_feedback=positive_feedback
@@ -240,6 +241,14 @@ def add_new_question():
         db.session.add(short_answer)
 
     if type_q == 'matching_answer_question':
+        distractors = data["distractors"]
+        dist_arr = []
+        for i in distractors:
+            dist_arr.append(i['distractorV'])
+        question_version.distractors = dist_arr
+        db.session.add(question_version)
+        db.session.commit()
+
         for i in answers['MatchingQuestion']:
             matching_pair = MatchingPair(
                 matching_question_id=question_version_id,
@@ -260,28 +269,21 @@ def add_new_question():
 def get_question_version_choice(question_id):
     question = Question.query.get_or_404(question_id)
 
-    teachers = [i.id for i in User.query.filter(User.user_type == 'teacher').all()]
-
     versions = []
     for i in sorted(question.question_version, key=lambda q: q.dateCreated, reverse=True):
         newest_version = i
         comments = Comment.query.filter(Comment.question_version_id == newest_version.id).all()
 
-        comments_vals_teacher = []
-        comments_vals_student = []
-        for comment in comments:
-            if comment.author_id in teachers:
-                comments_vals_teacher.append({
+        comments_vals= []
+
+        for comment in sorted(comments, key=lambda x: x.date_created, reverse=True):
+            comments_vals.append({
                     "type": "teacher",
                     "text": comment.text,
-                    "name": User.query.filter(User.id == comment.author_id).first().github_name
+                    "name": User.query.filter(User.id == comment.author_id).first().github_name,
+                    "date": comment.date_created
                 })
-            else:
-                comments_vals_student.append({
-                    "type": "student",
-                    "text": comment.text,
-                    "name": User.query.filter(User.id == comment.author_id).first().github_name
-                })
+
 
 
         dict_ret = {
@@ -293,7 +295,7 @@ def get_question_version_choice(question_id):
             "version_id": newest_version.id,
             "text": newest_version.text,
             "type": newest_version.type,
-            "comments": [comments_vals_teacher, comments_vals_student],
+            "comments": comments_vals,
             "question_feedback": question.question_feedback,
             "question_positive_feedback": question.question_positive_feedback,
             "feedback": [
@@ -306,12 +308,19 @@ def get_question_version_choice(question_id):
         }
 
         if newest_version.type == 'matching_answer_question':
+            distractors = []
+            if newest_version.distractors is not None:
+                for dst in newest_version.distractors:
+                    distractors.append({"distractorV": dst})
+
+            dict_ret["distractors"] = distractors
+
             for i in newest_version.matching_question:
                 dict_ret['answers'].append(
                     {"left": i.leftSide,
                      "right": i.rightSide,
                      "positive": i.positive_feedback,
-                     "negative": i.negative_feedback
+                     "negative": i.negative_feedback,
                      }
                 )
 
@@ -421,6 +430,17 @@ def add_question_version(id):
         db.session.add(short_answer)
 
     if type_q == 'matching_answer_question':
+        distractors = data["distractors"]
+        dist_arr = []
+
+        for i in distractors:
+            dist_arr.append(i['distractorV'])
+
+        question_version.distractors = dist_arr
+
+        db.session.add(question_version)
+        db.session.commit()
+
         for i in answers['MatchingQuestion']:
             matching_pair = MatchingPair(
                 matching_question_id=question_version_id,
