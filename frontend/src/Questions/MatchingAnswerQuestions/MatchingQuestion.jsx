@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 
-const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDistractors}) => {
+const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDistractors, selectedVersion, versions}) => {
     const [questions, setQuestions] = useState([{ left: "", right: "", positive: "", negative:"" }]);
     const [distractorsPom, setDistractorsPom] = useState([{distractorV: ""}]);
 
     useEffect(() => {
-    if (answers && answers.length > 0) {
-      const updatedQuestions = answers.map((answerPair) => ({
+        console.log(answers, selectedVersion);
+    if (versions && versions.length > 0) {
+      const updatedQuestions = versions[selectedVersion]["answers"].map((answerPair) => ({
         left: answerPair["left"],
         right: answerPair["right"],
           positive : answerPair["positive"],
@@ -16,14 +17,13 @@ const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDis
 
       setQuestions([...updatedQuestions, {left: "", right: "", positive: "", negative:""}]);
     }
-  }, [answers]);
+  }, [selectedVersion, versions]);
 
     useEffect(() => {
     if (distractors && distractors.length > 0) {
       const updatedDist = distractors.map((distr) => ({
         distractorV: distr["distractorV"],
       }));
-        console.log(updatedDist);
       setDistractorsPom([...updatedDist, {distractorV: ""}]);
     }
   }, [distractors]);
@@ -157,7 +157,7 @@ const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDis
             <h3>Right sides distractors</h3>
             {distractorsPom.map((distractor, index) => (
                 <div key={index}>
-                    <input type="text" className="form-control mb-1" value={distractor.distractorV} placeholder="Distractor"
+                    <input type="text" className="form-control mb-1" value={distractor.distractorV} placeholder="Add Distractor"
                            disabled={isDisabled}
                            onChange={(e) => handleChangeDistractros(index, e.target.value)}/>
                 </div>

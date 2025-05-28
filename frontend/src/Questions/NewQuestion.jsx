@@ -209,7 +209,6 @@ const NewQuestion = ({subButText="Submit"}) => {
             setSelectedCategoryId(response.data[0]["category_id"]);
             setTitle(response.data[0]["title"]);
             setText(response.data[0]["text"]);
-            console.log(response.data[0]["distractors"]);
             setDistractos(response.data[0]["distractors"]);
             setQuestionFeedback(response.data[0]["question_feedback"])
             setQuestionPositiveFeedback(response.data[0]["question_positive_feedback"])
@@ -293,7 +292,9 @@ const NewQuestion = ({subButText="Submit"}) => {
             }
 
             await AnswerSetter(versions[selectedVersion]["answers"]);
+            await distractorSetter(versions[selectedVersion]["distractors"]);
             setAnswers(versions[selectedVersion]["answers"]);
+            setDistractos(versions[selectedVersion]["distractors"]);
         }
         fetchDataWait();
     }, [selectedVersion])
@@ -467,8 +468,8 @@ const NewQuestion = ({subButText="Submit"}) => {
                             {questionType === "Matching Question" && (
                                 <div>
                                     <h2>{questionType}</h2>
-                                    <MatchingQuestion setAnswers={AnswerSetter} distractors={distractors} setDistractors={distractorSetter}
-                                                      answers={answers} isDisabled={selectedVersion!==0}></MatchingQuestion>
+                                    <MatchingQuestion setAnswers={AnswerSetter} distractors={distractors} setDistractors={distractorSetter} selectedVersion={selectedVersion}
+                                                      versions = {versions} answers={answers} isDisabled={selectedVersion!==0}></MatchingQuestion>
                                 </div>
                             )}
 
@@ -554,7 +555,6 @@ const NewQuestion = ({subButText="Submit"}) => {
                                             <h3>All comments</h3>
                                                     {versions[selectedVersion]?.comments.map((cmt, ind) => (
                                                         <div className="card w-100 mb-3">
-                                                            {console.log(cmt)}
                                                             <div className="card-body">
                                                                 <h5 className="card-title">{cmt.text}</h5>
                                                                 <p className="card-text text-secondary">Commented on {cmt.date} by {cmt.name}</p>
