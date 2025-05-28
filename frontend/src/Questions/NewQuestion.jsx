@@ -462,7 +462,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                 <label htmlFor="questionPositiveFeedback" className="form-label">
                                     Question positive feedback
                                 </label>
-                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback} isDisabled={selectedVersion!==0} idVal={"questionPositiveFeedback"}></FormattedTextInput>
+                                <FormattedTextInput text={questionPositiveFeedback} handleFunction={setQuestionPositiveFeedback} isDisabled={selectedVersion!==0} idVal={"questionPositiveFeedback"} ></FormattedTextInput>
                             </div>
 
                             {questionType === "Matching Question" && (

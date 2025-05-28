@@ -7,14 +7,18 @@ const MatchingQuestion = ({setAnswers , answers, distractors, isDisabled, setDis
 
     useEffect(() => {
     if (versions && versions.length > 0) {
-      const updatedQuestions = versions[selectedVersion]["answers"].map((answerPair) => ({
-        left: answerPair["left"],
-        right: answerPair["right"],
-          positive : answerPair["positive"],
-          negative : answerPair["negative"]
-      }));
+        try {
+            const updatedQuestions = versions[selectedVersion]["answers"].map((answerPair) => ({
+                left: answerPair["left"],
+                right: answerPair["right"],
+                positive: answerPair["positive"],
+                negative: answerPair["negative"]
+            }));
 
-      setQuestions([...updatedQuestions, {left: "", right: "", positive: "", negative:""}]);
+            setQuestions([...updatedQuestions, {left: "", right: "", positive: "", negative: ""}]);
+        }catch{
+
+        }
     }
   }, [selectedVersion, versions]);
 
