@@ -44,6 +44,7 @@ const NewQuestion = ({
   const [teacherFeedback, setTeacherFeedback] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(idQ);
   const [categorySelect, setCategorySelect] = useState("");
+  const [distractors, setDistractos] = useState([]);
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [questionFeedback, setQuestionFeedback] = useState('');
@@ -63,8 +64,8 @@ const NewQuestion = ({
   }
   if (subButText === "Update") {
     if (selectedVersion !== 0) {
-      titleText = "Retrieve Question";
-      buttonText = "Retrieve Question";
+      titleText = "Revert to this version";
+      buttonText = "Revert to this version";
     } else {
       titleText = "Update Question";
       buttonText = "Update Question";
@@ -116,7 +117,8 @@ const NewQuestion = ({
       answers: answersSel,
       author: userData["id_user"],
       feedback: questionFeedback,
-      positiveFeedback: questionPositiveFeedback
+      positiveFeedback: questionPositiveFeedback,
+      distractors: distractors
     };
     if (subButText === "Submit" || subButText === "Copy") {
       if (title !== "" && text !== "") {
@@ -178,6 +180,7 @@ const NewQuestion = ({
       setSelectedCategoryId(response.data[0]["category_id"]);
       setTitle(response.data[0]["title"]);
       setText(response.data[0]["text"]);
+      setDistractos(response.data[0]["distractors"]);
       setQuestionFeedback(response.data[0]["question_feedback"]);
       setQuestionPositiveFeedback(response.data[0]["question_positive_feedback"]);
       if (response.data[0]["type"] === "matching_answer_question") {
@@ -240,12 +243,17 @@ const NewQuestion = ({
         setQuestionType("Short Question");
       }
       await AnswerSetter(versions[selectedVersion]["answers"]);
+      await distractorSetter(versions[selectedVersion]["distractors"]);
       setAnswers(versions[selectedVersion]["answers"]);
+      setDistractos(versions[selectedVersion]["distractors"]);
     };
     fetchDataWait();
   }, [selectedVersion]);
   const AnswerSetter = async newAnswers => {
     setAnswers(newAnswers);
+  };
+  const distractorSetter = async newDist => {
+    setDistractos(newDist);
   };
   const saveTeacherFeedback = () => {
     const updatedData = {
@@ -258,14 +266,15 @@ const NewQuestion = ({
       const updatedVersion = {
         ...updatedVersions[selectedVersion]
       };
-      if (!Array.isArray(updatedVersion.comments[0])) {
-        updatedVersion.comments[0] = [];
+      if (!Array.isArray(updatedVersion.comments)) {
+        updatedVersion.comments = [];
       }
-      updatedVersion.comments[0] = [...updatedVersion.comments[0], {
+      updatedVersion.comments = [{
         "name": "You",
+        "date": "now",
         "text": teacherFeedback,
         "role": "teacher"
-      }];
+      }, ...updatedVersion.comments];
       updatedVersions[selectedVersion] = updatedVersion;
       return updatedVersions;
     });
@@ -389,6 +398,10 @@ const NewQuestion = ({
     idVal: "questionPositiveFeedback"
   })), questionType === "Matching Question" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, questionType), /*#__PURE__*/React.createElement(MatchingQuestion, {
     setAnswers: AnswerSetter,
+    distractors: distractors,
+    setDistractors: distractorSetter,
+    selectedVersion: selectedVersion,
+    versions: versions,
     answers: answers,
     isDisabled: selectedVersion !== 0
   })), questionType === "Short Question" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, questionType), /*#__PURE__*/React.createElement(ShortAnswerQuestion, {
@@ -428,19 +441,19 @@ const NewQuestion = ({
     }
   }, "Back"), /*#__PURE__*/React.createElement("button", {
     type: "button",
-    className: "btn btn-success mb-3",
+    className: `btn ${buttonText === 'Revert to this version' ? 'btn-warning' : 'btn-success'} mb-3`,
     disabled: title.length === 0 || text.length === 0 || back,
     onClick: () => {
       saveChanges();
     }
   }, buttonText))), titleText !== "New Question" && /*#__PURE__*/React.createElement("div", {
     className: "mt-3"
-  }, /*#__PURE__*/React.createElement("h2", null, "Feedbacks"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h2", null, "Comments"), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "teacher-feedback",
     className: "form-label"
-  }, "Teacher feedback"), /*#__PURE__*/React.createElement(FormattedTextInput, {
+  }, "Add comment"), /*#__PURE__*/React.createElement(FormattedTextInput, {
     text: teacherFeedback,
     handleFunction: setTeacherFeedback,
     idVal: "teacher-feedback"
@@ -452,19 +465,15 @@ const NewQuestion = ({
     onClick: () => {
       saveTeacherFeedback();
     }
-  }, "Save Feedback")), versions[selectedVersion]?.comments[0].length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "Teacher comments"), /*#__PURE__*/React.createElement("table", {
-    className: "table"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    scope: "col"
-  }, "Github Name"), /*#__PURE__*/React.createElement("th", {
-    scope: "col"
-  }, "Comment"))), /*#__PURE__*/React.createElement("tbody", null, versions[selectedVersion]?.comments[0].map((cmt, ind) => /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, cmt.name), /*#__PURE__*/React.createElement("td", null, cmt.text)))))), versions[selectedVersion]?.comments[1].length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "Student comments"), /*#__PURE__*/React.createElement("table", {
-    className: "table"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    scope: "col"
-  }, "Github Name"), /*#__PURE__*/React.createElement("th", {
-    scope: "col"
-  }, "Comment"))), /*#__PURE__*/React.createElement("tbody", null, versions[selectedVersion]?.comments[1].map((cmt, ind) => /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, cmt.name), /*#__PURE__*/React.createElement("td", null, cmt.text))))))))), /*#__PURE__*/React.createElement("div", {
+  }, "Save Feedback")), versions[selectedVersion]?.comments.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "All comments"), versions[selectedVersion]?.comments.map((cmt, ind) => /*#__PURE__*/React.createElement("div", {
+    className: "card w-100 mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("h5", {
+    className: "card-title"
+  }, cmt.text), /*#__PURE__*/React.createElement("p", {
+    className: "card-text text-secondary"
+  }, "Commented on ", cmt.date, " by ", cmt.name)))))))), /*#__PURE__*/React.createElement("div", {
     className: "col-2"
   }))), /*#__PURE__*/React.createElement(ToastContainer, {
     position: "bottom-end",

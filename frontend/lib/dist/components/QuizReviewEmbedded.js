@@ -110,14 +110,6 @@ const QuizReviewEmbedded = ({
     }))));
   }
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "container-fluid"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "col-2 sidebar"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "col-8"
-  }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "mb-3"
@@ -335,8 +327,6 @@ const QuizReviewEmbedded = ({
     onClick: () => setPage(prev => prev + 1)
   }, "Next ", quiz.sections[page + 1].title, " ", /*#__PURE__*/React.createElement("i", {
     className: "bi bi-caret-right"
-  })))))), /*#__PURE__*/React.createElement("div", {
-    className: "col-2 sidebar"
-  }))));
+  }))))));
 };
 export default QuizReviewEmbedded;

@@ -3,7 +3,11 @@ import FormattedTextRenderer from "../../components/FormattedTextRenderer";
 const MatchingQuestion = ({
   setAnswers,
   answers,
-  isDisabled
+  distractors,
+  isDisabled,
+  setDistractors,
+  selectedVersion,
+  versions
 }) => {
   const [questions, setQuestions] = useState([{
     left: "",
@@ -11,22 +15,37 @@ const MatchingQuestion = ({
     positive: "",
     negative: ""
   }]);
+  const [distractorsPom, setDistractorsPom] = useState([{
+    distractorV: ""
+  }]);
   useEffect(() => {
-    if (answers && answers.length > 0) {
-      const updatedQuestions = answers.map(answerPair => ({
-        left: answerPair["left"],
-        right: answerPair["right"],
-        positive: answerPair["positive"],
-        negative: answerPair["negative"]
+    if (versions && versions.length > 0) {
+      try {
+        const updatedQuestions = versions[selectedVersion]["answers"].map(answerPair => ({
+          left: answerPair["left"],
+          right: answerPair["right"],
+          positive: answerPair["positive"],
+          negative: answerPair["negative"]
+        }));
+        setQuestions([...updatedQuestions, {
+          left: "",
+          right: "",
+          positive: "",
+          negative: ""
+        }]);
+      } catch {}
+    }
+  }, [selectedVersion, versions]);
+  useEffect(() => {
+    if (distractors && distractors.length > 0) {
+      const updatedDist = distractors.map(distr => ({
+        distractorV: distr["distractorV"]
       }));
-      setQuestions([...updatedQuestions, {
-        left: "",
-        right: "",
-        positive: "",
-        negative: ""
+      setDistractorsPom([...updatedDist, {
+        distractorV: ""
       }]);
     }
-  }, [answers]);
+  }, [distractors]);
   const handleInputChange = (index, side, value) => {
     const updatedQuestions = [...questions];
     if (side === "left") {
@@ -45,6 +64,18 @@ const MatchingQuestion = ({
       }
     }
   };
+  const handleChangeDistractros = (index, value) => {
+    const updatedDistractors = [...distractorsPom];
+    updatedDistractors[index].distractorV = value;
+    setDistractorsPom(updatedDistractors);
+    if (value !== "" && index === distractorsPom.length - 1) {
+      if (distractorsPom[index] !== "") {
+        setDistractorsPom([...updatedDistractors, {
+          distractorV: ""
+        }]);
+      }
+    }
+  };
   const handleFeedbackChange = (index, value, typeFeed) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index][typeFeed] = value;
@@ -59,8 +90,17 @@ const MatchingQuestion = ({
       return prevAnswers;
     });
   }, [questions, setAnswers]);
+  useEffect(() => {
+    const filteredDist = distractorsPom.filter(q => q.distractorV.trim() !== "");
+    setDistractors(prevDist => {
+      if (JSON.stringify(prevDist) !== JSON.stringify(filteredDist)) {
+        return filteredDist;
+      }
+      return prevDist;
+    });
+  }, [distractorsPom]);
   return /*#__PURE__*/React.createElement("div", null, questions.map((question, index) => /*#__PURE__*/React.createElement("div", {
-    key: index
+    key: 'qv-' + index
   }, /*#__PURE__*/React.createElement("div", {
     className: "input-group mt-3",
     key: index
@@ -79,7 +119,7 @@ const MatchingQuestion = ({
     disabled: isDisabled,
     onChange: e => handleInputChange(index, 'right', e.target.value)
   })), /*#__PURE__*/React.createElement("details", {
-    className: "mt-1",
+    className: "mt-1 mb-3",
     style: {
       textAlign: "left"
     }
@@ -119,6 +159,15 @@ const MatchingQuestion = ({
     className: "w-50  border border-1 p-2"
   }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
     text: question["negative"]
-  }))))))));
+  }))))))), /*#__PURE__*/React.createElement("h3", null, "Right sides distractors"), distractorsPom.map((distractor, index) => /*#__PURE__*/React.createElement("div", {
+    key: index
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "form-control mb-1",
+    value: distractor.distractorV,
+    placeholder: "Add Distractor",
+    disabled: isDisabled,
+    onChange: e => handleChangeDistractros(index, e.target.value)
+  }))));
 };
 export default MatchingQuestion;

@@ -194,7 +194,9 @@ function FormattedTextRenderer({
   const rehypeKatexOptions = katexMacroShow ? {
     macros: katexMacroShow
   } : undefined;
-  return /*#__PURE__*/React.createElement(ReactMarkdown, {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "markdown"
+  }, /*#__PURE__*/React.createElement(ReactMarkdown, {
     children: text,
     remarkPlugins: [remarkMath, remarkGfm, remarkDefinitionList, remarkDirective, remarkDirectiveRehype],
     remarkRehypeOptions: {
@@ -203,6 +205,6 @@ function FormattedTextRenderer({
     rehypePlugins: [rehypeRaw, [rehypeSanitize, rehypeSanitizeOptions], [rehypeKatex, rehypeKatexOptions]]
     // @ts-ignore
     // components={mdDirectives}
-  });
+  }));
 }
 export default /*#__PURE__*/memo(FormattedTextRenderer);

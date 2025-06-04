@@ -339,21 +339,21 @@ const QuizReview = () => {
     className: "ms-2 text-success"
   }, /*#__PURE__*/React.createElement("i", {
     className: "bi bi-check-circle-fill fs-5"
-  })))), !ans.isCorrectOption && feedback.includes("optionsFeedback") && ans?.negative_feedback !== "" ? /*#__PURE__*/React.createElement("div", {
-    className: "p-3 rounded",
-    style: {
-      background: "rgba(255, 0, 0, 0.3)"
-    }
-  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
-    text: ans?.negative_feedback
-  })) : ans?.positive_feedback !== "" && /*#__PURE__*/React.createElement("div", {
+  })))), feedback.includes("optionsFeedback") && (ans.isCorrectOption ? ans?.positive_feedback !== "" && /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded",
     style: {
       background: "rgba(77,210,44,0.15)"
     }
   }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
     text: ans?.positive_feedback
-  }))))), questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
+  })) : ans?.negative_feedback !== "" && /*#__PURE__*/React.createElement("div", {
+    className: "p-3 rounded",
+    style: {
+      background: "rgba(255, 0, 0, 0.3)"
+    }
+  }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+    text: ans?.negative_feedback
+  })))))), questionsData[question.id]?.type === "short_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "mb-3 mt-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "me-2 mt-3 fw-bold"
