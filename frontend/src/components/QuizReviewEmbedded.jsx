@@ -355,7 +355,6 @@ const QuizReviewEmbedded = ({handleAttempt,quizRew, userIdRew, quizIdRew, feedba
                                                     <input className="form-check-input"
                                                            type="checkbox"
                                                            style={{pointerEvents: 'none'}}
-                                                        // disabled="true"
                                                            defaultChecked={ans.answer === true}
                                                     />
                                                     <span className="d-flex w-100 form-check-label">

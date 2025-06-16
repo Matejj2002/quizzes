@@ -148,7 +148,7 @@ def get_questions_from_category_helper(subcat, question_type, index):
         if latest_version.type in type_sel and not i.is_deleted:
             author = User.query.get_or_404(latest_version.author_id).github_name
             version = {
-                "id": i.id,  # Question.id
+                "id": i.id,
                 "title": latest_version.title,
                 "text": latest_version.text,
                 "type": latest_version.type,
@@ -310,7 +310,6 @@ def get_quiz_template(student_id, quiz_template_id, actual_time=datetime.datetim
     question_count = 0
     section_count = 1
 
-    #Normalne
     for num in template.order:
 
         section = QuizTemplateSection.query.filter(QuizTemplateSection.id == num).first()
@@ -467,7 +466,10 @@ def generate_quiz(quiz, questions, student_id):
                     order_options = mult_opts
 
                 else:
-                    order_options = [i.id for i in version.matching_question]
+                    try:
+                        order_options = [i.id for i in version.matching_question]
+                    except:
+                        pass
 
             db.session.add(new_item)
             db.session.commit()

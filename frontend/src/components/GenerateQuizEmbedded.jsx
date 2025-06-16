@@ -21,9 +21,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
     const [countMax, setCountMax] = useState(0);
     const [disableButtons, setDisableButtons] = useState(false);
 
-    // const apiUrl = process.env.REACT_APP_API_URL;
-
-
     useEffect(() => {
         setQuiz(JSON.parse(JSON.stringify(quizEmb || {})));
         setQuestionsData({});
@@ -82,7 +79,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                 const setDateFinish = async () => {
                     axios.put(backendUrl+`quiz-finish`, updatedData).then(
                         () => {
-                            // window.location.href = "/quizzes";
                             changeKey();
                             handleAttempt("review");
 
@@ -144,16 +140,11 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                 setQuiz({ ...quiz }
                 );
             });
-
-            // if (loadQuestions){
-            //     handleSaveQuiz(false);
-            // }
         }
     }, [randomQuestions, questionsData]);
 
 
    useEffect(() => {
-       // console.log("KONTROLA",quizGenerated, questionsData, numberOfQuestions)
     if (quizGenerated || Object.keys(questionsData).length !== numberOfQuestions || numberOfQuestions === 0) {
         return;
     }
@@ -167,16 +158,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
 
         generateQuizWait().then(() => {
         });
-    //     handleSaveQuiz(false).then(()=>{
-    //     const generateQuizWait = async () => {
-    //     setLoading(true);
-    //     await generateQuiz();
-    //     setQuizGenerated(true);
-    // };
-    //
-    //     generateQuizWait().then(() => {
-    // });
-    // })
     }else{
         const generateQuizWait = async () => {
         setLoading(true);
@@ -203,7 +184,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
         axios.put(backendUrl+`quiz_set_answers`, updatedData).then( () =>{
                 if (finalSave){
                     handleAttempt("review");
-                    // window.location.href = "/quizzes";
                 }
                 setTimeout(() => {
                 setIsSaving(false);
@@ -284,7 +264,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
 
                             }
 
-                            // setLoading(false);
                         }
                     )
                     .catch(error => {
@@ -358,7 +337,7 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                                 setPage(index)
                                             }}
                                         >
-                                            {sect.title || "Section " + (index + 1)}
+                                            {sect?.title || "Section " + (index + 1)}
                                         </button>
                                 </li>
                             ))}
@@ -432,7 +411,7 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
 
                                                     <tbody>
 
-                                                    {questionsData[question.id].answers.map((ans, idx) => (
+                                                    {questionsData[question.id]?.answers.map((ans, idx) => (
                                                         <tr key={"tr-"+idx.toString()}>
                                                             <td className="w-50" style={{
                                                                 borderRight: "1px solid black",
@@ -451,11 +430,11 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                                                 paddingBottom: "2px"
                                                             }}>
                                                                 <div className="d-flex justify-content-end">
-                                                                    {ans.answer.length === 0 ? "Select Answer" :
+                                                                    {ans?.answer?.length === 0 ? "Select Answer" :
                                                                         <span>
                                                                             <FormattedTextRenderer
-                                                                        text={ans.answer}
-                                                                      />
+                                                                                text={ans.answer}
+                                                                              />
                                                                             </span>
                                                                     }
 
@@ -477,7 +456,7 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                                                                 wordWrap: "break-word"
                                                                             }}
                                                                             aria-labelledby={`dropdown-${idx}`}>
-                                                                            {questionsData[question.id].answers.map((answ, optionIdx) => (
+                                                                            {questionsData[question.id]?.rightSidesAnswers.map((answ, optionIdx) => (
                                                                                 <li key={optionIdx}>
                                                                                     <a
                                                                                         className="dropdown-item"
@@ -493,7 +472,7 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                                                                                         index === idx
                                                                                                             ? {
                                                                                                                 ...item,
-                                                                                                                answer: answ["showRightSide"],
+                                                                                                                answer: answ,
                                                                                                             }
                                                                                                             : item
                                                                                                     ),
@@ -505,8 +484,8 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                                                                             className="d-flex justify-content-start">
                                                                                                 <span>
                                                                                                     <FormattedTextRenderer
-                                                                        text={answ["showRightSide"]}
-                                                                      />
+                                                                                                        text={answ}
+                                                                                                     />
                                                                                                 </span>
                                                                                         </div>
                                                                                     </a>
@@ -606,7 +585,6 @@ const GenerateQuizEmbedded = ({handleAttempt, keyAtt, changeKey ,quizEmb, userId
                                             handleSaveQuiz(false);
                                         }
                                         handleAttempt("review");
-                                        // window.location.href = "/quizzes";
                                     }
                                     }
                             >

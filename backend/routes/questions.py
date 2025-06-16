@@ -138,13 +138,11 @@ def delete_question():
 
     return jsonify({'deleted': delete})
 
-#
 @questions_bp.route('/questions-update/<int:question_id>', methods=['GET'])
 def get_question(question_id):
     question_data = fetch_question_data(question_id)
     return jsonify(question_data)
 
-#
 @questions_bp.route('/questions/<int:question_id>/versions', methods=['GET'])
 def get_question_versions(question_id):
     question = Question.query.get_or_404(question_id)
@@ -250,12 +248,20 @@ def add_new_question():
         db.session.commit()
 
         for i in answers['MatchingQuestion']:
+
+            p_fb = ""
+            n_fb = ""
+            try:
+                p_fb = i["positive"]
+                n_fb = i["negative"]
+            except:
+                pass
             matching_pair = MatchingPair(
                 matching_question_id=question_version_id,
                 leftSide=i['left'],
                 rightSide=i['right'],
-                positive_feedback=i['positive'],
-                negative_feedback=i['negative'],
+                positive_feedback=p_fb,
+                negative_feedback=n_fb,
                 type='matching_pair'
             )
 

@@ -62,6 +62,9 @@ const NewQuiz = () => {
     const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
 
     const fetchQuizzes = async () => {
+        if (quizTemplateId === 0){
+            return ;
+        }
       try{
             const response = await axios.get(apiUrl+`get-quiz-templates` ,
                 {
@@ -86,7 +89,6 @@ const NewQuiz = () => {
 
       }catch (error){
             console.error(error);
-            // window.location.href=quizzesUrl+"/login";
       }
        finally {}
     }
@@ -471,7 +473,6 @@ const NewQuiz = () => {
                                         <ol className="list-group">
                                             <QuizTemplateQuestionItem type={"header"}></QuizTemplateQuestionItem>
                                         {
-                                            // eslint-disable-next-line array-callback-return
                                             sections[pageNum - 2].questions.map((item, indexQuestion) => {
                                                 if (item.questionType === "questions") {
                                                     return (

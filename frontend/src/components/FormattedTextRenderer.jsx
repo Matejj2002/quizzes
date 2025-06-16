@@ -24,7 +24,6 @@ function FormattedTextRenderer({text, katexMacros}) {
       'hgroup',
       'header',
       'footer',
-      // ...(Object.getOwnPropertyNames(mdDirectives))
     ],
     attributes: {
       ...defaultSchema.attributes,
@@ -191,20 +190,46 @@ function FormattedTextRenderer({text, katexMacros}) {
 
 \\newcommand{\\Tabl}{\\mathcal{T}}
 
-\\newcommand\\sign[1]{\\mathop{\\text{\\textsf{\\textbf{#1}}}}\\nolimits}`
-  const katexMacroShow = useMemo(() => {
-    let m = {};
-    try {
-      katex.renderToString(katexMacros || '', {
-        globalGroup: true,
-        macros: m,
-      });
-    } catch (err) {
-      console.log('Failed to parse global katex macros');
-      m = {};
-    }
-    return m;
-  }, [katexMacros]);
+\\newcommand{\\sign}[1]{\\mathbf{#1}}`
+//   const katexMacroShow = useMemo(() => {
+//     let m = {};
+//     try {
+//       katex.renderToString(katexMacros || '', {
+//         globalGroup: true,
+//         macros: m,
+//       });
+//     } catch (err) {
+//       console.log('Failed to parse global katex macros');
+//       m = {};
+//     }
+//     return m;
+//   }, [katexMacros]);
+
+  function parseLatexMacros(source) {
+  const macros = {};
+
+  const newCmdRegex = /\\(?:re)?newcommand\s*(?:\{\\?(\w+)\}|\\(\w+))(\[(\d+)\])?\s*\{((?:[^{}]|{[^{}]*})*)\}/g;
+
+  const declMathOpRegex = /\\DeclareMathOperator\s*\{\\(\w+)\}\s*\{((?:[^{}]|{[^{}]*})*)\}/g;
+
+  let match;
+
+  while ((match = newCmdRegex.exec(source)) !== null) {
+    const name = match[1] || match[2];
+    const body = match[5];
+    macros[`\\${name}`] = body;
+  }
+
+  while ((match = declMathOpRegex.exec(source)) !== null) {
+    const name = match[1];
+    const body = match[2];
+    macros[`\\${name}`] = `\\mathop{\\mathrm{${body}}}`;
+  }
+
+  return macros;
+}
+
+  const katexMacroShow = parseLatexMacros(katexMacros);
 
   const rehypeKatexOptions = katexMacroShow ? {
     macros: katexMacroShow
@@ -227,8 +252,6 @@ function FormattedTextRenderer({text, katexMacros}) {
         [rehypeSanitize, rehypeSanitizeOptions],
         [rehypeKatex, rehypeKatexOptions],
       ]}
-      // @ts-ignore
-      // components={mdDirectives}
     />
         </div>
   )

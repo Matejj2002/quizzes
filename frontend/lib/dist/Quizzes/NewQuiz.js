@@ -50,6 +50,9 @@ const NewQuiz = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const quizzesUrl = process.env.REACT_APP_HOST_URL + process.env.REACT_APP_BASENAME;
   const fetchQuizzes = async () => {
+    if (quizTemplateId === 0) {
+      return;
+    }
     try {
       const response = await axios.get(apiUrl + `get-quiz-templates`, {
         params: {
@@ -74,7 +77,6 @@ const NewQuiz = () => {
       setSelectedFeedbackAfterClose(data.feedbackTypeAfterClose);
     } catch (error) {
       console.error(error);
-      // window.location.href=quizzesUrl+"/login";
     } finally {}
   };
   async function getUserLogged() {
@@ -408,9 +410,7 @@ const NewQuiz = () => {
     className: "list-group"
   }, /*#__PURE__*/React.createElement(QuizTemplateQuestionItem, {
     type: "header"
-  }),
-  // eslint-disable-next-line array-callback-return
-  sections[pageNum - 2].questions.map((item, indexQuestion) => {
+  }), sections[pageNum - 2].questions.map((item, indexQuestion) => {
     if (item.questionType === "questions") {
       return /*#__PURE__*/React.createElement(QuizTemplateQuestionItem, {
         type: "question",

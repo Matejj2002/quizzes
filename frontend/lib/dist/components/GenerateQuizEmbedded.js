@@ -28,9 +28,6 @@ const GenerateQuizEmbedded = ({
   const [quizGenerated, setQuizGenerated] = useState(false);
   const [countMax, setCountMax] = useState(0);
   const [disableButtons, setDisableButtons] = useState(false);
-
-  // const apiUrl = process.env.REACT_APP_API_URL;
-
   useEffect(() => {
     setQuiz(JSON.parse(JSON.stringify(quizEmb || {})));
     setQuestionsData({});
@@ -78,7 +75,6 @@ const GenerateQuizEmbedded = ({
       };
       const setDateFinish = async () => {
         axios.put(backendUrl + `quiz-finish`, updatedData).then(() => {
-          // window.location.href = "/quizzes";
           changeKey();
           handleAttempt("review");
         });
@@ -130,14 +126,9 @@ const GenerateQuizEmbedded = ({
           ...quiz
         });
       });
-
-      // if (loadQuestions){
-      //     handleSaveQuiz(false);
-      // }
     }
   }, [randomQuestions, questionsData]);
   useEffect(() => {
-    // console.log("KONTROLA",quizGenerated, questionsData, numberOfQuestions)
     if (quizGenerated || Object.keys(questionsData).length !== numberOfQuestions || numberOfQuestions === 0) {
       return;
     }
@@ -148,16 +139,6 @@ const GenerateQuizEmbedded = ({
         setQuizGenerated(true);
       };
       generateQuizWait().then(() => {});
-      //     handleSaveQuiz(false).then(()=>{
-      //     const generateQuizWait = async () => {
-      //     setLoading(true);
-      //     await generateQuiz();
-      //     setQuizGenerated(true);
-      // };
-      //
-      //     generateQuizWait().then(() => {
-      // });
-      // })
     } else {
       const generateQuizWait = async () => {
         setLoading(true);
@@ -179,7 +160,6 @@ const GenerateQuizEmbedded = ({
     axios.put(backendUrl + `quiz_set_answers`, updatedData).then(() => {
       if (finalSave) {
         handleAttempt("review");
-        // window.location.href = "/quizzes";
       }
       setTimeout(() => {
         setIsSaving(false);
@@ -236,8 +216,6 @@ const GenerateQuizEmbedded = ({
         setCountMax(response.data.time_to_finish * 60);
         setCount(response.data.time_to_finish * 60);
       }
-
-      // setLoading(false);
     }).catch(error => {
       console.error('Error saving changes:', error);
     });
@@ -298,7 +276,7 @@ const GenerateQuizEmbedded = ({
     onClick: () => {
       setPage(index);
     }
-  }, sect.title || "Section " + (index + 1)))), /*#__PURE__*/React.createElement("li", {
+  }, sect?.title || "Section " + (index + 1)))), /*#__PURE__*/React.createElement("li", {
     className: "nav-item ms-auto",
     role: "presentation"
   }, isSaving && /*#__PURE__*/React.createElement("span", {
@@ -357,7 +335,7 @@ const GenerateQuizEmbedded = ({
     scope: "col"
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-end"
-  }, "Right Side")))), /*#__PURE__*/React.createElement("tbody", null, questionsData[question.id].answers.map((ans, idx) => /*#__PURE__*/React.createElement("tr", {
+  }, "Right Side")))), /*#__PURE__*/React.createElement("tbody", null, questionsData[question.id]?.answers.map((ans, idx) => /*#__PURE__*/React.createElement("tr", {
     key: "tr-" + idx.toString()
   }, /*#__PURE__*/React.createElement("td", {
     className: "w-50",
@@ -376,7 +354,7 @@ const GenerateQuizEmbedded = ({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-end"
-  }, ans.answer.length === 0 ? "Select Answer" : /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
+  }, ans?.answer?.length === 0 ? "Select Answer" : /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
     text: ans.answer
   })), /*#__PURE__*/React.createElement("div", {
     className: "dropdown"
@@ -398,7 +376,7 @@ const GenerateQuizEmbedded = ({
       wordWrap: "break-word"
     },
     "aria-labelledby": `dropdown-${idx}`
-  }, questionsData[question.id].answers.map((answ, optionIdx) => /*#__PURE__*/React.createElement("li", {
+  }, questionsData[question.id]?.rightSidesAnswers.map((answ, optionIdx) => /*#__PURE__*/React.createElement("li", {
     key: optionIdx
   }, /*#__PURE__*/React.createElement("a", {
     className: "dropdown-item",
@@ -414,7 +392,7 @@ const GenerateQuizEmbedded = ({
           ...prevData[question.id],
           answers: prevData[question.id].answers.map((item, index) => index === idx ? {
             ...item,
-            answer: answ["showRightSide"]
+            answer: answ
           } : item)
         }
       }));
@@ -422,7 +400,7 @@ const GenerateQuizEmbedded = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-start"
   }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
-    text: answ["showRightSide"]
+    text: answ
   }))))))))))))))), questionsData[question.id]?.type === "multiple_answer_question" && /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, questionsData[question.id].answers.map((ans, idx) => /*#__PURE__*/React.createElement("div", {
@@ -489,7 +467,6 @@ const GenerateQuizEmbedded = ({
         handleSaveQuiz(false);
       }
       handleAttempt("review");
-      // window.location.href = "/quizzes";
     }
   }, "Back to Quizzes"), /*#__PURE__*/React.createElement("div", null, page === 0 ? /*#__PURE__*/React.createElement("div", null) : /*#__PURE__*/React.createElement("button", {
     type: "button",

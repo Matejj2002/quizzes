@@ -142,7 +142,6 @@ const NewQuestion = ({subButText="Submit"}) => {
                     .then(response => {
                         if (createMoreQuestions){
                             sessionStorage.setItem("scrollToTop", "true");
-                             // window.location.reload();
                             handleShowToast();
                             window.scrollTo(0,0);
                         }else {
@@ -547,7 +546,7 @@ const NewQuestion = ({subButText="Submit"}) => {
                                                     saveTeacherFeedback();
                                                 }
                                                 }
-                                        >Save Feedback
+                                        >Save Comment
                                         </button>
                                     </div>
                                     {versions[selectedVersion]?.comments.length > 0 && (

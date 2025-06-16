@@ -131,7 +131,6 @@ const QuizReview = () => {
       id: quiz.quizzes[actualId].quiz_id
     };
     axios.put(apiUrl + `quiz_change_evaluation`, updatedData).then(() => {
-      // navigate(-1);
       window.scrollTo(0, 0);
       alert("Evaluation saved.");
     }).catch(() => {
@@ -308,7 +307,7 @@ const QuizReview = () => {
     }
   }, /*#__PURE__*/React.createElement(FormattedTextRenderer, {
     text: ans?.negative_feedback
-  })) : ans?.positive_feedback !== "" && /*#__PURE__*/React.createElement("div", {
+  })) : feedback.includes("optionsFeedback") && ans?.positive_feedback !== "" && /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded",
     style: {
       background: "rgba(155,236,137,0.15)"
@@ -441,7 +440,7 @@ const QuizReview = () => {
     className: "btn btn-primary",
     disabled: page + 1 >= quiz?.sections.length,
     onClick: () => setPage(prev => prev + 1)
-  }, "Next ", data?.sections[page + 1].title, " ", /*#__PURE__*/React.createElement("i", {
+  }, "Next ", data?.sections[page + 1]?.title, " ", /*#__PURE__*/React.createElement("i", {
     className: "bi bi-caret-right"
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "col-2 sidebar"

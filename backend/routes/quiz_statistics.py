@@ -34,7 +34,6 @@ def get_all_quizzes_analysis():
     quiz_templates = QuizTemplate.query.filter(QuizTemplate.is_deleted == False).all()
 
     students = User.query.filter(User.user_type == 'student').all()
-    #students = User.query.all()
 
     quiz_data = []
     for qt in quiz_templates:
@@ -384,7 +383,6 @@ def get_quiz_students_results():
     quiz_template = QuizTemplate.query.filter(QuizTemplate.id == quiz_template_id).first()
 
     students = [{"student_id":i.id, "github_name": i.github_name} for i in User.query.filter_by(user_type="student").all()]
-    #students = [{"student_id": i.id, "github_name": i.github_name} for i in User.query.all()]
 
     results = []
     attended = 0

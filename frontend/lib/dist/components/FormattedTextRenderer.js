@@ -16,9 +16,7 @@ function FormattedTextRenderer({
 }) {
   const rehypeSanitizeOptions = {
     ...defaultSchema,
-    tagNames: [...(defaultSchema.tagNames ?? []), 'article', 'aside', 'nav', 'section', 'hgroup', 'header', 'footer'
-    // ...(Object.getOwnPropertyNames(mdDirectives))
-    ],
+    tagNames: [...(defaultSchema.tagNames ?? []), 'article', 'aside', 'nav', 'section', 'hgroup', 'header', 'footer'],
     attributes: {
       ...defaultSchema.attributes,
       '*': [...(defaultSchema.attributes !== undefined ? defaultSchema.attributes['*'] ?? [] : []), 'className', 'style']
@@ -177,20 +175,39 @@ function FormattedTextRenderer({
 
 \\newcommand{\\Tabl}{\\mathcal{T}}
 
-\\newcommand\\sign[1]{\\mathop{\\text{\\textsf{\\textbf{#1}}}}\\nolimits}`;
-  const katexMacroShow = useMemo(() => {
-    let m = {};
-    try {
-      katex.renderToString(katexMacros || '', {
-        globalGroup: true,
-        macros: m
-      });
-    } catch (err) {
-      console.log('Failed to parse global katex macros');
-      m = {};
+\\newcommand{\\sign}[1]{\\mathbf{#1}}`;
+  //   const katexMacroShow = useMemo(() => {
+  //     let m = {};
+  //     try {
+  //       katex.renderToString(katexMacros || '', {
+  //         globalGroup: true,
+  //         macros: m,
+  //       });
+  //     } catch (err) {
+  //       console.log('Failed to parse global katex macros');
+  //       m = {};
+  //     }
+  //     return m;
+  //   }, [katexMacros]);
+
+  function parseLatexMacros(source) {
+    const macros = {};
+    const newCmdRegex = /\\(?:re)?newcommand\s*(?:\{\\?(\w+)\}|\\(\w+))(\[(\d+)\])?\s*\{((?:[^{}]|{[^{}]*})*)\}/g;
+    const declMathOpRegex = /\\DeclareMathOperator\s*\{\\(\w+)\}\s*\{((?:[^{}]|{[^{}]*})*)\}/g;
+    let match;
+    while ((match = newCmdRegex.exec(source)) !== null) {
+      const name = match[1] || match[2];
+      const body = match[5];
+      macros[`\\${name}`] = body;
     }
-    return m;
-  }, [katexMacros]);
+    while ((match = declMathOpRegex.exec(source)) !== null) {
+      const name = match[1];
+      const body = match[2];
+      macros[`\\${name}`] = `\\mathop{\\mathrm{${body}}}`;
+    }
+    return macros;
+  }
+  const katexMacroShow = parseLatexMacros(katexMacros);
   const rehypeKatexOptions = katexMacroShow ? {
     macros: katexMacroShow
   } : undefined;
@@ -203,8 +220,6 @@ function FormattedTextRenderer({
       handlers: defListHastHandlers
     },
     rehypePlugins: [rehypeRaw, [rehypeSanitize, rehypeSanitizeOptions], [rehypeKatex, rehypeKatexOptions]]
-    // @ts-ignore
-    // components={mdDirectives}
   }));
 }
 export default /*#__PURE__*/memo(FormattedTextRenderer);

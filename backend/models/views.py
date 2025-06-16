@@ -87,7 +87,6 @@ class CategoryView(ModelView):
 
 
 class QuestionView(ModelView):
-    # nema title
     form_columns = ['category']
     column_list = ['id', 'category']
 

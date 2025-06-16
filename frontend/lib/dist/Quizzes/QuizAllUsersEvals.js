@@ -38,19 +38,6 @@ const QuizAllUsersEvals = () => {
           console.log(studentId);
           console.log(response.data.result.quizzes_attended[i].quizzes[0].quizzes.length);
           navigate("/review-quiz?quiz_template_id=" + response.data.result.quizzes_attended[i].quizzes[0].id.toString() + "&user_id=" + studentId.toString() + "&actualQuiz=" + response.data.result.quizzes_attended[i].quizzes[0].quizzes.length.toString() + "&correctMode=true");
-
-          //     navigate("/review-quiz", {
-          //     state: {
-          //         quiz: response.data.result.quizzes_attended[i].quizzes[0],
-          //         quizId: response.data.result.quizzes_attended[i].quizzes[0].quiz_id,
-          //         feedback: ['optionsFeedback', 'questionFeedback', 'pointsReview', 'correctAnswers'],
-          //         correctMode: true,
-          //         userId: studentId,
-          //         userName: githubName,
-          //         userRole: "teacher"
-          //
-          //     }
-          // });
         }
       }
     } catch (error) {

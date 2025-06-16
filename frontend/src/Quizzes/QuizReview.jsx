@@ -159,7 +159,6 @@ const QuizReview = () =>{
             id: quiz.quizzes[actualId].quiz_id
         }
         axios.put(apiUrl+`quiz_change_evaluation`, updatedData).then( () =>{
-                // navigate(-1);
                 window.scrollTo(0,0);
                 alert("Evaluation saved.")
 
@@ -428,7 +427,7 @@ const QuizReview = () =>{
                                                                                 />
                                                                             </div>
                                                                         ) : (
-                                                                            ans?.positive_feedback !== "" && (
+                                                                            feedback.includes("optionsFeedback") && ans?.positive_feedback !== "" && (
                                                                             <div className="p-3 rounded"
                                                                             style={{
                                                                             background: "rgba(155,236,137,0.15)"
@@ -629,7 +628,7 @@ const QuizReview = () =>{
                                             <button type="button" className="btn btn-primary"
                                                     disabled={page + 1 >= quiz?.sections.length}
                                                     onClick={() => setPage((prev) => prev + 1)}>
-                                                Next {data?.sections[page + 1].title} <i
+                                                Next {data?.sections[page + 1]?.title} <i
                                                 className="bi bi-caret-right"></i>
                                             </button>
                                         )}

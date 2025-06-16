@@ -243,9 +243,7 @@ const QuizReviewEmbedded = ({
     type: "checkbox",
     style: {
       pointerEvents: 'none'
-    }
-    // disabled="true"
-    ,
+    },
     defaultChecked: ans.answer === true
   }), /*#__PURE__*/React.createElement("span", {
     className: "d-flex w-100 form-check-label"

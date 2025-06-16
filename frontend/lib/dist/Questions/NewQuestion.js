@@ -125,7 +125,6 @@ const NewQuestion = ({
         axios.put(apiUrl + `questions/new-question`, updatedData).then(response => {
           if (createMoreQuestions) {
             sessionStorage.setItem("scrollToTop", "true");
-            // window.location.reload();
             handleShowToast();
             window.scrollTo(0, 0);
           } else {
@@ -465,7 +464,7 @@ const NewQuestion = ({
     onClick: () => {
       saveTeacherFeedback();
     }
-  }, "Save Feedback")), versions[selectedVersion]?.comments.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "All comments"), versions[selectedVersion]?.comments.map((cmt, ind) => /*#__PURE__*/React.createElement("div", {
+  }, "Save Comment")), versions[selectedVersion]?.comments.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, "All comments"), versions[selectedVersion]?.comments.map((cmt, ind) => /*#__PURE__*/React.createElement("div", {
     className: "card w-100 mb-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-body"
